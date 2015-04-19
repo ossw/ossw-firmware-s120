@@ -684,11 +684,44 @@ static void power_manage(void)
 
 static uint8_t splashscreen_draw_func(uint8_t x, uint8_t y)
 {
-    uint32_t d = (72-x)*(72-x) + (84-y)*(84-y);
-    if(d>2800 && d < 4100){
-        return 1;
-    }
-    return 0;
+	  x = 144 - x;
+	 if(x>5 && x<69 && y>87 && y < 163) {
+				if(x>12 && x < 62 && y > 94 && y < 156){
+						return 0;
+				}
+				return 1;
+		}
+		
+		if(x>75 && x<139 && y>87 && y < 163) {
+				if(x>82 && y > 128 && y < 156){
+						return 0;
+				}
+				if( x < 132 && y > 94 && y < 122){
+						return 0;
+				}
+				return 1;
+		}
+		
+		if(x>5 && x<69 && y>5 && y < 81) {
+				if(x>12 && y > 46 && y < 74){
+						return 0;
+				}
+				if( x < 62 && y > 12 && y < 40){
+						return 0;
+				}
+				return 1;
+		}
+		
+		if(x>75 && x<139 && y>5 && y < 81) {
+				if(x>103 && x < 110 && y > 12 && y < 45){
+						return 1;
+				}
+				if(x>82 && x < 132 && y > 12 && y < 81){
+						return 0;
+				}
+				return 1;
+		}
+		return 0;
 }
 
 static void init_lcd_with_splash_screen() {
