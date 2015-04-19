@@ -21,7 +21,7 @@
 #include "dfu_app_handler.h"
 #endif // BLE_DFU_APP_SUPPORT
 #include "ble_conn_params.h"
-#include "boards.h"
+#include "bsp/boards.h"
 #include "sensorsim.h"
 #include "softdevice_handler.h"
 #include "app_timer.h"
@@ -29,8 +29,10 @@
 #include "pstorage.h"
 #include "app_trace.h"
 #include "app_gpiote.h"
-#include "bsp.h"
+#include "bsp/bsp.h"
 #include "nrf_delay.h"
+#include "spi.h"
+#include "mlcd.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -100,6 +102,9 @@ static sensorsim_state_t                 m_battery_sim_state;                   
 static app_timer_id_t                    m_battery_timer_id;                        /**< Battery timer. */
 
 static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by device manager */
+
+uint32_t * p_spi0_base_address;
+uint32_t * p_spi1_base_address;
 
 static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_HEART_RATE_SERVICE,         BLE_UUID_TYPE_BLE},
                                    {BLE_UUID_BATTERY_SERVICE,            BLE_UUID_TYPE_BLE},
@@ -677,11 +682,42 @@ static void power_manage(void)
 }
 
 
+static uint8_t splashscreen_draw_func(uint8_t x, uint8_t y)
+{
+    uint32_t d = (72-x)*(72-x) + (84-y)*(84-y);
+    if(d>2800 && d < 4100){
+        return 1;
+    }
+    return 0;
+}
+
+static void init_lcd_with_splash_screen() {
+    mlcd_init();
+    mlcd_power_on();
+	  
+		// make seure lcd is working
+		nrf_delay_ms(10);
+	
+    mlcd_set_screen_with_func(splashscreen_draw_func);
+  
+    mlcd_display_on();
+    mlcd_backlight_on();
+}
+
+static void spi_init(void)
+{
+    p_spi0_base_address = spi_master_init(SPI0, SPI_MODE0, false);
+    p_spi1_base_address = spi_master_init(SPI1, SPI_MODE0, false);
+}
+
 /**@brief Function for application main entry.
  */
 int main(void)
 {
     uint32_t err_code;
+	
+	  spi_init();
+	  init_lcd_with_splash_screen();
 
     // Initialize.
     ble_stack_init();
