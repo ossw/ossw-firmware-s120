@@ -101,19 +101,19 @@ uint32_t* spi_master_init(SPIModuleNumber module_number, SPIMode mode, bool lsb_
  * @retval true if transmit/reveive of transfer_size were completed.
  * @retval false if transmit/reveive of transfer_size were not complete and tx_data/rx_data points to invalid data.
  */
- /*
+
 bool spi_master_tx_rx(uint32_t *spi_base_address, uint32_t device, uint16_t transfer_size, const uint8_t *tx_data, uint8_t *rx_data);
 
 bool spi_master_tx(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size);
 
 bool spi_master_tx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, const uint8_t* tx_data, uint32_t tx_data_size);
-*/
+
 bool spi_master_tx_data_no_cs(NRF_SPI_Type *spi_base, const uint8_t* tx_data, uint32_t tx_data_size);
-/*
+
 bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size);
 
 bool spi_master_rx_data_no_cs(NRF_SPI_Type *spi_base, uint8_t* rx_data, uint32_t rx_data_size);
-*/
+
 /**
  *@}
  **/
