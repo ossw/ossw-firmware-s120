@@ -36,8 +36,8 @@
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
-#define WAKEUP_BUTTON_ID                 0                                          /**< Button used to wake up the application. */
-#define BOND_DELETE_ALL_BUTTON_ID        1                                          /**< Button used for deleting all bonded centrals during startup. */
+#define WAKEUP_BUTTON_ID                 BUTTON_SELECT                              /**< Button used to wake up the application. */
+#define BOND_DELETE_ALL_BUTTON_ID        BUTTON_BACK                                /**< Button used for deleting all bonded centrals during startup. */
 
 #define DEVICE_NAME                      "OSSW"                                     /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                "OpenSource"                               /**< Manufacturer. Will be passed to Device Information Service. */
@@ -52,18 +52,6 @@
 #define MIN_BATTERY_LEVEL                81                                         /**< Minimum simulated battery level. */
 #define MAX_BATTERY_LEVEL                100                                        /**< Maximum simulated battery level. */
 #define BATTERY_LEVEL_INCREMENT          1                                          /**< Increment between each simulated battery level measurement. */
-
-#define HEART_RATE_MEAS_INTERVAL         APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER) /**< Heart rate measurement interval (ticks). */
-#define MIN_HEART_RATE                   140                                        /**< Minimum heart rate as returned by the simulated measurement function. */
-#define MAX_HEART_RATE                   300                                        /**< Maximum heart rate as returned by the simulated measurement function. */
-#define HEART_RATE_INCREMENT             10                                         /**< Value by which the heart rate is incremented/decremented for each call to the simulated measurement function. */
-
-#define RR_INTERVAL_INTERVAL             APP_TIMER_TICKS(300, APP_TIMER_PRESCALER)  /**< RR interval interval (ticks). */
-#define MIN_RR_INTERVAL                  100                                        /**< Minimum RR interval as returned by the simulated measurement function. */
-#define MAX_RR_INTERVAL                  500                                        /**< Maximum RR interval as returned by the simulated measurement function. */
-#define RR_INTERVAL_INCREMENT            1                                          /**< Value by which the RR interval is incremented/decremented for each call to the simulated measurement function. */
-
-#define SENSOR_CONTACT_DETECTED_INTERVAL APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER) /**< Sensor Contact Detected toggle interval (ticks). */
 
 #define MIN_CONN_INTERVAL                MSEC_TO_UNITS(400, UNIT_1_25_MS)           /**< Minimum acceptable connection interval (0.4 seconds). */
 #define MAX_CONN_INTERVAL                MSEC_TO_UNITS(650, UNIT_1_25_MS)           /**< Maximum acceptable connection interval (0.65 second). */
@@ -734,7 +722,7 @@ static void init_lcd_with_splash_screen() {
     mlcd_set_screen_with_func(splashscreen_draw_func);
   
     mlcd_display_on();
-    mlcd_backlight_on();
+    mlcd_backlight_off();
 }
 
 static void spi_init(void)
