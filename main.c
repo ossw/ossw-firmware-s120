@@ -35,6 +35,7 @@
 #include "nrf_delay.h"
 #include "spi.h"
 #include "mlcd.h"
+#include "mlcd_draw.h"
 #include "ext_ram.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
@@ -55,6 +56,8 @@
 #define MIN_BATTERY_LEVEL                81                                         /**< Minimum simulated battery level. */
 #define MAX_BATTERY_LEVEL                100                                        /**< Maximum simulated battery level. */
 #define BATTERY_LEVEL_INCREMENT          1                                          /**< Increment between each simulated battery level measurement. */
+
+#define REDRAW_INTERVAL                  APP_TIMER_TICKS(500, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
 
 #define MIN_CONN_INTERVAL                MSEC_TO_UNITS(400, UNIT_1_25_MS)           /**< Minimum acceptable connection interval (0.4 seconds). */
 #define MAX_CONN_INTERVAL                MSEC_TO_UNITS(650, UNIT_1_25_MS)           /**< Maximum acceptable connection interval (0.65 second). */
@@ -99,6 +102,7 @@ static sensorsim_cfg_t                   m_battery_sim_cfg;                     
 static sensorsim_state_t                 m_battery_sim_state;                       /**< Battery Level sensor simulator state. */
 
 static app_timer_id_t                    m_battery_timer_id;                        /**< Battery timer. */
+static app_timer_id_t                    m_redraw_timer_id;
 
 static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by device manager */
 
@@ -165,6 +169,15 @@ static void battery_level_meas_timeout_handler(void * p_context)
     battery_level_update();
 }
 
+static uint8_t testDigit = 0;
+
+static void redraw_timeout_handler(void * p_context) {
+    UNUSED_PARAMETER(p_context);
+	  
+	  mlcd_draw_digit((testDigit++)%10, 5, 5, 64, 76, 6);
+	  mlcd_fb_flush();
+}
+
 /**@brief Function for handling the Current Time Service errors.
  *
  * @param[in]  nrf_error  Error code containing information about what went wrong.
@@ -217,6 +230,13 @@ static void timers_init(void)
                                 APP_TIMER_MODE_REPEATED,
                                 battery_level_meas_timeout_handler);
     APP_ERROR_CHECK(err_code);
+	
+    // redraw timer.
+    err_code = app_timer_create(&m_redraw_timer_id,
+                                APP_TIMER_MODE_REPEATED,
+                                redraw_timeout_handler);
+    APP_ERROR_CHECK(err_code);
+	
 	
     // Create security request timer.
     err_code = app_timer_create(&m_sec_req_timer_id,
@@ -478,6 +498,11 @@ static void application_timers_start(void)
     // Start application timers.
     err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
     APP_ERROR_CHECK(err_code);
+	
+    // Start application timers.
+    err_code = app_timer_start(m_redraw_timer_id, REDRAW_INTERVAL, NULL);
+    APP_ERROR_CHECK(err_code);
+	
 }
 
 
@@ -841,21 +866,17 @@ static void init_lcd_with_splash_screen() {
 	
   //  mlcd_set_screen_with_func(splashscreen_draw_func);
   
-	//  mlcd_fb_clear();
+	  mlcd_fb_clear();
 	//  nrf_delay_ms(1000);
 	  mlcd_fb_draw_with_func(splashscreen_draw_func, 0, 0, 144, 168);
 	
-	
 	  mlcd_fb_flush();
-	
     mlcd_display_on();
+	
     //mlcd_backlight_on();
 	
-	  nrf_delay_ms(1000);
+//	 
 	
-	
-	  
-
 }
 
 static void spi_init(void)

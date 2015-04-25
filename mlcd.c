@@ -164,7 +164,7 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
 	  if (first_byte_max_bit > 8) {
 			  first_byte_max_bit = 8;
 		}
-	  uint8_t line_size = (width + 7) >> 3;
+	  uint8_t line_size = (start_bit_off + width + 7) >> 3;
 	  uint8_t tmp_buff[line_size];
 	  uint16_t ext_ram_address = (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
 	  for (uint8_t y = 0; y < height; y++) {
@@ -202,15 +202,16 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
                     val |= ((*f)(x, y) << (7-bit));
 			  	          x++;
                 }
+					      width_left = 0;
 				    } else {
 					      val = 0;
 					    	for(uint_fast8_t bit=0; bit<8; bit++){
                     val |= ((*f)(x, y) << (7-bit));
 			  	          x++;
                 }
+								width_left -= 8;
 						}
 				    tmp_buff[byte_no++] = val;
-					  width_left -= 8;
 				}
 				ext_ram_write_data(ext_ram_address, tmp_buff, line_size);
 				ext_ram_address += MLCD_LINE_BYTES;

@@ -40,7 +40,7 @@
 #define BSP_BUTTON_2_MASK (1<<BSP_BUTTON_2)
 #define BSP_BUTTON_3_MASK (1<<BSP_BUTTON_3)
 
-#define SPI_OPERATING_FREQUENCY (0x02000000uL << (uint32_t)Freq_4Mbps)  /**< Slave clock frequency. */
+#define SPI_OPERATING_FREQUENCY (0x02000000uL << (uint32_t)Freq_8Mbps)  /**< Slave clock frequency. */
 
 // SPI0. 
 #define SPI0_SCK     11u                                     /**< SPI clock GPIO pin number. */
@@ -50,8 +50,8 @@
 #define SPI0_SS1     23u                                     /**< SPI Slave Select GPIO pin number for device 1 */
 
 // SPI1. 
-#define SPI1_SCK    /* 31u   //  */    15u //dev board 
-#define SPI1_MOSI   /* 28u   //  */    16u //dev board 
+#define SPI1_SCK     31u   //      15u //dev board 
+#define SPI1_MOSI    28u   //      16u //dev board 
 #define SPI1_MISO    4u                                      
 #define SPI1_SS0     30u   
 

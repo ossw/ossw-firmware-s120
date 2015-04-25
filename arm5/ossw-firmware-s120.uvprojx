@@ -458,6 +458,16 @@
               <FileType>5</FileType>
               <FilePath>..\ext_ram.h</FilePath>
             </File>
+            <File>
+              <FileName>mlcd_draw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mlcd_draw.c</FilePath>
+            </File>
+            <File>
+              <FileName>mlcd_draw.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\mlcd_draw.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
