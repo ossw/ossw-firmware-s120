@@ -50,8 +50,8 @@
 #define SPI0_SS1     23u                                     /**< SPI Slave Select GPIO pin number for device 1 */
 
 // SPI1. 
-#define SPI1_SCK     31u   //      15u //dev board 
-#define SPI1_MOSI    28u   //      16u //dev board 
+#define SPI1_SCK    /* 31u   //  */    15u //dev board 
+#define SPI1_MOSI   /* 28u   //  */    16u //dev board 
 #define SPI1_MISO    4u                                      
 #define SPI1_SS0     30u   
 
@@ -59,13 +59,18 @@
 #define LCD_ENABLE       6u
 #define LCD_BACKLIGHT    7u
 
-
-#define EXT_FLASH_SPI_SS        SPI0_SS0
-
 #define TIMEOUT_COUNTER         0x3000uL                     /**< Timeout for SPI transaction in units of loop iterations. */
 
 extern uint32_t * p_spi0_base_address;
 extern uint32_t * p_spi1_base_address;
+
+#define EXT_FLASH_SPI p_spi0_base_address
+#define EXT_FLASH_SPI_SS        SPI0_SS0
+#define EXT_RAM_SPI p_spi0_base_address
+#define EXT_RAM_SPI_SS          SPI0_SS1
+
+#define MLCD_SPI p_spi1_base_address
+#define MLCD_SPI_SS SPI1_SS0
 
 //#define BUTTONS_MASK   0x001E0000
 /*

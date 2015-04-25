@@ -448,6 +448,16 @@
               <FileType>5</FileType>
               <FilePath>..\spi.h</FilePath>
             </File>
+            <File>
+              <FileName>ext_ram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ext_ram.c</FilePath>
+            </File>
+            <File>
+              <FileName>ext_ram.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\ext_ram.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -584,6 +594,18 @@
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </component>
+      <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_date_time" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_date_time">
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_db_discovery" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_db_discovery">
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_service_common" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_service_common">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
         <targetInfos>
@@ -600,6 +622,12 @@
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_cts_c" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_cts_c">
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_dfu" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_dfu">
@@ -853,6 +881,30 @@
       <file attr="config" category="header" name="common\ble_conn_params.h" version="2.0.0">
         <instance index="0">RTE\nRF_BLE\nRF51822_xxAA\ble_conn_params.h</instance>
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_conn_params" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_conn_params"/>
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="common\ble_date_time.h" version="2.0.0">
+        <instance index="0">RTE\nRF_BLE\nRF51822_xxAA\ble_date_time.h</instance>
+        <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_date_time" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_date_time"/>
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="source" name="ble_db_discovery\ble_db_discovery.c" version="2.0.0">
+        <instance index="0">RTE\nRF_BLE\nRF51822_xxAA\ble_db_discovery.c</instance>
+        <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_db_discovery" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_db_discovery"/>
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="ble_db_discovery\ble_db_discovery.h" version="2.0.0">
+        <instance index="0">RTE\nRF_BLE\nRF51822_xxAA\ble_db_discovery.h</instance>
+        <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_db_discovery" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_db_discovery"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>

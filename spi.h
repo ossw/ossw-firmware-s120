@@ -1,15 +1,3 @@
- /* Copyright (c) 2009 Nordic Semiconductor. All Rights Reserved.
- *
- * The information contained herein is property of Nordic Semiconductor ASA.
- * Terms and conditions of usage are described in detail in NORDIC
- * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
- *
- * Licensees are granted free, non-transferable use of the information. NO
- * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
- * the file.
- *
- */
-
 #ifndef SPI_H
 #define SPI_H
 
@@ -108,11 +96,13 @@ bool spi_master_tx(uint32_t *spi_base_address, uint32_t device, const uint8_t* c
 
 bool spi_master_tx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, const uint8_t* tx_data, uint32_t tx_data_size);
 
-bool spi_master_tx_data_no_cs(NRF_SPI_Type *spi_base, const uint8_t* tx_data, uint32_t tx_data_size);
+bool spi_master_tx_data_no_cs(uint32_t *spi_base, const uint8_t* tx_data, uint32_t tx_data_size);
 
 bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size);
 
-bool spi_master_rx_data_no_cs(NRF_SPI_Type *spi_base, uint8_t* rx_data, uint32_t rx_data_size);
+bool spi_master_rx_data_no_cs(uint32_t *spi_base, uint8_t* rx_data, uint32_t rx_data_size);
+
+bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base, uint32_t *dest_spi_base, uint32_t data_size);
 
 /**
  *@}

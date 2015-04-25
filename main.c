@@ -16,6 +16,8 @@
 #include "ble_advertising.h"
 #include "ble_bas.h"
 #include "ble_dis.h"
+#include "ble_db_discovery.h"
+#include "ble_cts_c.h"
 #ifdef BLE_DFU_APP_SUPPORT
 #include "ble_dfu.h"
 #include "dfu_app_handler.h"
@@ -33,6 +35,7 @@
 #include "nrf_delay.h"
 #include "spi.h"
 #include "mlcd.h"
+#include "ext_ram.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -56,7 +59,7 @@
 #define MIN_CONN_INTERVAL                MSEC_TO_UNITS(400, UNIT_1_25_MS)           /**< Minimum acceptable connection interval (0.4 seconds). */
 #define MAX_CONN_INTERVAL                MSEC_TO_UNITS(650, UNIT_1_25_MS)           /**< Maximum acceptable connection interval (0.65 second). */
 #define SLAVE_LATENCY                    0                                          /**< Slave latency. */
-#define CONN_SUP_TIMEOUT                 MSEC_TO_UNITS(4000, UNIT_10_MS)            /**< Connection supervisory timeout (4 seconds). */
+#define CONN_SUP_TIMEOUT                 MSEC_TO_UNITS(6000, UNIT_10_MS)            /**< Connection supervisory timeout (4 seconds). */
 
 #define FIRST_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER) /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
 #define NEXT_CONN_PARAMS_UPDATE_DELAY    APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER)/**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
@@ -68,6 +71,8 @@
 #define SEC_PARAM_OOB                    0                                          /**< Out Of Band data not available. */
 #define SEC_PARAM_MIN_KEY_SIZE           7                                          /**< Minimum encryption key size. */
 #define SEC_PARAM_MAX_KEY_SIZE           16                                         /**< Maximum encryption key size. */
+
+#define SECURITY_REQUEST_DELAY           APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /**< Delay after connection until security request is sent, if necessary (ticks). */
 
 #define DEAD_BEEF                        0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 #ifdef BLE_DFU_APP_SUPPORT
@@ -83,6 +88,12 @@ STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                 
 
 static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;   /**< Handle of the current connection. */
 static ble_bas_t                         m_bas;                                     /**< Structure used to identify the battery service. */
+
+static ble_db_discovery_t                m_ble_db_discovery;                        /**< Structure used to identify the DB Discovery module. */
+static ble_cts_c_t                       m_cts;                                     /**< Structure to store the data of the current time service. */
+static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by the Device Manager. */
+static dm_handle_t                       m_peer_handle;                             /**< The peer that is currently connected. */
+static app_timer_id_t                    m_sec_req_timer_id;                        /**< Security request timer. */
 
 static sensorsim_cfg_t                   m_battery_sim_cfg;                         /**< Battery Level sensor simulator configuration. */
 static sensorsim_state_t                 m_battery_sim_state;                       /**< Battery Level sensor simulator state. */
@@ -154,6 +165,42 @@ static void battery_level_meas_timeout_handler(void * p_context)
     battery_level_update();
 }
 
+/**@brief Function for handling the Current Time Service errors.
+ *
+ * @param[in]  nrf_error  Error code containing information about what went wrong.
+ */
+static void current_time_error_handler(uint32_t nrf_error)
+{
+    APP_ERROR_HANDLER(nrf_error);
+}
+
+
+/**@brief Function for handling the security request timer time-out.
+ *
+ * @details This function will be called each time the security request timer expires.
+ *
+ * @param[in] p_context  Pointer used for passing some arbitrary information (context) from the
+ *                       app_start_timer() call to the time-out handler.
+ */
+static void sec_req_timeout_handler(void * p_context)
+{
+    uint32_t             err_code;
+    dm_security_status_t status;
+
+    if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
+    {
+        err_code = dm_security_status_req(&m_peer_handle, &status);
+        APP_ERROR_CHECK(err_code);
+
+        // If the link is still not secured by the peer, initiate security procedure.
+        if (status == NOT_ENCRYPTED)
+        {
+            err_code = dm_security_setup_req(&m_peer_handle);
+            APP_ERROR_CHECK(err_code);
+        }
+    }
+}
+
 /**@brief Function for the Timer initialization.
  *
  * @details Initializes the timer module. This creates and starts application timers.
@@ -170,8 +217,45 @@ static void timers_init(void)
                                 APP_TIMER_MODE_REPEATED,
                                 battery_level_meas_timeout_handler);
     APP_ERROR_CHECK(err_code);
+	
+    // Create security request timer.
+    err_code = app_timer_create(&m_sec_req_timer_id,
+                                APP_TIMER_MODE_SINGLE_SHOT,
+                                sec_req_timeout_handler);
+    APP_ERROR_CHECK(err_code);
 }
 
+/**@brief Function for handling the Current Time Service client events.
+ *
+ * @details This function will be called for all events in the Current Time Service client that
+ *          are passed to the application.
+ *
+ * @param[in] p_evt Event received from the Current Time Service client.
+ */
+static void on_cts_c_evt(ble_cts_c_t * p_cts, ble_cts_c_evt_t * p_evt)
+{
+						mlcd_backlight_on();
+    switch (p_evt->evt_type)
+    {
+        case BLE_CTS_C_EVT_DISCOVERY_COMPLETE:
+            break;
+
+        case BLE_CTS_C_EVT_SERVICE_NOT_FOUND:
+            break;
+
+        case BLE_CTS_C_EVT_DISCONN_COMPLETE:
+            break;
+
+        case BLE_CTS_C_EVT_CURRENT_TIME:
+            break;
+
+        case BLE_CTS_C_EVT_INVALID_TIME:
+            break;
+
+        default:
+            break;
+    }
+}
 
 /**@brief Function for the GAP initialization.
  *
@@ -304,7 +388,6 @@ static void reset_prepare(void)
 /** @snippet [DFU BLE Reset prepare] */
 #endif // BLE_DFU_APP_SUPPORT
 
-
 /**@brief Function for initializing services that will be used by the application.
  *
  * @details Initialize the Heart Rate, Battery and Device Information services.
@@ -314,6 +397,13 @@ static void services_init(void)
     uint32_t       err_code;
     ble_bas_init_t bas_init;
     ble_dis_init_t dis_init;
+    ble_cts_c_init_t cts_init;
+	
+	  // Initialize CTS client
+	  cts_init.evt_handler   = on_cts_c_evt;
+    cts_init.error_handler = current_time_error_handler;
+    err_code               = ble_cts_c_init(&m_cts, &cts_init);
+    APP_ERROR_CHECK(err_code);
 
     // Initialize Battery Service.
     memset(&bas_init, 0, sizeof(bas_init));
@@ -517,6 +607,8 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
     dm_ble_evt_handler(p_ble_evt);
+    ble_db_discovery_on_ble_evt(&m_ble_db_discovery, p_ble_evt);
+    ble_cts_c_on_ble_evt(&m_cts, p_ble_evt);
     ble_bas_on_ble_evt(&m_bas, p_ble_evt);
     ble_conn_params_on_ble_evt(p_ble_evt);
 #ifdef BLE_DFU_APP_SUPPORT
@@ -581,14 +673,31 @@ static uint32_t device_manager_evt_handler(dm_handle_t const * p_handle,
                                            dm_event_t const  * p_event,
                                            ret_code_t        event_result)
 {
+    uint32_t err_code;
     APP_ERROR_CHECK(event_result);
 
-#ifdef BLE_DFU_APP_SUPPORT
-    if (p_event->event_id == DM_EVT_LINK_SECURED)
+	  switch (p_event->event_id)
     {
-        app_context_load(p_handle);
+        case DM_EVT_CONNECTION:
+            m_peer_handle = (*p_handle);
+            err_code      = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
+            APP_ERROR_CHECK(err_code);
+            break;
+
+        case DM_EVT_LINK_SECURED:
+					
+			      app_context_load(p_handle);
+				
+            err_code = ble_db_discovery_start(&m_ble_db_discovery,
+                                              p_event->event_param.p_gap_param->conn_handle);
+            APP_ERROR_CHECK(err_code);
+            break;
+
+        default:
+            // No implementation needed.
+            break;
+
     }
-#endif // BLE_DFU_APP_SUPPORT
 
     return NRF_SUCCESS;
 }
@@ -661,6 +770,17 @@ static void advertising_init(void)
 }
 
 
+/**
+ * @brief Database discovery collector initialization.
+ */
+static void db_discovery_init(void)
+{
+    uint32_t err_code = ble_db_discovery_init();
+
+    APP_ERROR_CHECK(err_code);
+}
+
+
 /**@brief Function for the Power manager.
  */
 static void power_manage(void)
@@ -670,7 +790,7 @@ static void power_manage(void)
 }
 
 
-static uint8_t splashscreen_draw_func(uint8_t x, uint8_t y)
+static uint_fast8_t splashscreen_draw_func(uint_fast8_t x, uint_fast8_t y)
 {
 	  x = 144 - x;
 	 if(x>5 && x<69 && y>87 && y < 163) {
@@ -719,10 +839,16 @@ static void init_lcd_with_splash_screen() {
 		// make seure lcd is working
 		nrf_delay_ms(10);
 	
-    mlcd_set_screen_with_func(splashscreen_draw_func);
+  //  mlcd_set_screen_with_func(splashscreen_draw_func);
   
     mlcd_display_on();
-    mlcd_backlight_off();
+    mlcd_backlight_on();
+	
+	//  mlcd_fb_clear();
+	  nrf_delay_ms(1000);
+	  mlcd_fb_draw_with_func(splashscreen_draw_func, 0, 0, 144, 168);
+
+	  mlcd_fb_flush();
 }
 
 static void spi_init(void)
@@ -738,6 +864,7 @@ int main(void)
     uint32_t err_code;
 	
 	  spi_init();
+	  ext_ram_init();
 	  init_lcd_with_splash_screen();
 
     // Initialize.
@@ -751,6 +878,7 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     device_manager_init();
+    db_discovery_init();
     gap_params_init();
     advertising_init();
     services_init();

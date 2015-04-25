@@ -1,15 +1,3 @@
-/* Copyright (c) 2009 Nordic Semiconductor. All Rights Reserved.
- *
- * The information contained herein is property of Nordic Semiconductor ASA.
- * Terms and conditions of usage are described in detail in NORDIC
- * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
- *
- * Licensees are granted free, non-transferable use of the information. NO
- * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
- * the file.
- *
- */
-
 #include "spi.h"
 #include "nrf_delay.h"
 #include "nrf_gpio.h"
@@ -29,12 +17,14 @@ uint32_t* spi_master_init(SPIModuleNumber module_number, SPIMode mode, bool lsb_
         nrf_gpio_cfg_output(SPI0_MOSI);
         nrf_gpio_cfg_input(SPI0_MISO, NRF_GPIO_PIN_NOPULL);
         nrf_gpio_cfg_output(SPI0_SS0);
+        nrf_gpio_cfg_output(SPI0_SS1);
 
         /* Configure pins, frequency and mode */
         spi_base_address->PSELSCK  = SPI0_SCK;
         spi_base_address->PSELMOSI = SPI0_MOSI;
         spi_base_address->PSELMISO = SPI0_MISO;
         nrf_gpio_pin_set(SPI0_SS0); /* disable Set slave select (inactive high) */
+        nrf_gpio_pin_set(SPI0_SS1); /* disable Set slave select (inactive high) */
     }
     else
     {
@@ -104,7 +94,6 @@ bool spi_master_tx_rx(uint32_t *spi_base_address, uint32_t device, uint16_t tran
     uint32_t counter = 0;
     uint16_t number_of_txd_bytes = 0;
     uint32_t SEL_SS_PINOUT = device;
-    /*lint -e{826} //Are too small pointer conversion */
     NRF_SPI_Type *spi_base = (NRF_SPI_Type *)spi_base_address;
 
     /* enable slave (slave select active low) */
@@ -142,8 +131,9 @@ bool spi_master_tx_rx(uint32_t *spi_base_address, uint32_t device, uint16_t tran
     return true;
 }
 
-bool spi_master_tx_data_no_cs(NRF_SPI_Type *spi_base, const uint8_t* tx_data, uint32_t tx_data_size) {
-    uint32_t number_of_txd_bytes = 0;
+bool spi_master_tx_data_no_cs(uint32_t *spi_base_address, const uint8_t* tx_data, uint32_t tx_data_size) {
+    NRF_SPI_Type *spi_base = (NRF_SPI_Type *)spi_base_address;
+	  uint32_t number_of_txd_bytes = 0;
     uint32_t counter = 0;
     while(number_of_txd_bytes < tx_data_size)
     {
@@ -172,8 +162,88 @@ bool spi_master_tx_data_no_cs(NRF_SPI_Type *spi_base, const uint8_t* tx_data, ui
     return true;
 }
 
-bool spi_master_rx_data_no_cs(NRF_SPI_Type *spi_base, uint8_t* rx_data, uint32_t rx_data_size) {
-    uint32_t number_of_rxd_bytes = 0;
+bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base_address, uint32_t *dest_spi_base_address, uint32_t data_size) {
+    NRF_SPI_Type *src_spi_base = (NRF_SPI_Type *)src_spi_base_address;
+    NRF_SPI_Type *dest_spi_base = (NRF_SPI_Type *)dest_spi_base_address;
+	  uint32_t number_of_rxd_bytes = 0;
+    uint32_t counter = 0;
+	
+		src_spi_base->TXD = 0;
+		counter = 0;
+
+		/* Wait for the transaction complete or timeout (about 10ms - 20 ms) */
+		while ((src_spi_base->EVENTS_READY == 0U) && (counter < TIMEOUT_COUNTER))
+		{
+				counter++;
+		}
+
+		if (counter == TIMEOUT_COUNTER)
+		{
+				/* timed out, disable slave (slave select active low) and return with error */
+				return false;
+		}
+		else
+		{   /* clear the event to be ready to receive next messages */
+				src_spi_base->EVENTS_READY = 0U;
+		}
+		
+		number_of_rxd_bytes++;
+	
+    while(number_of_rxd_bytes < data_size)
+    {
+			
+        dest_spi_base->TXD = src_spi_base->RXD;
+			  src_spi_base->TXD = 0;
+			
+        counter = 0;
+
+        /* Wait for the transaction complete or timeout (about 10ms - 20 ms) */
+        while ((dest_spi_base->EVENTS_READY == 0U) && (src_spi_base->EVENTS_READY == 0U)  && (counter < TIMEOUT_COUNTER))
+        {
+            counter++;
+        }
+
+        if (counter == TIMEOUT_COUNTER)
+        {
+            /* timed out, disable slave (slave select active low) and return with error */
+            return false;
+        }
+        else
+        {   /* clear the event to be ready to receive next messages */
+            dest_spi_base->EVENTS_READY = 0U;
+            src_spi_base->EVENTS_READY = 0U;
+        }
+
+        dest_spi_base->RXD;
+				number_of_rxd_bytes++;
+    };
+		dest_spi_base->TXD = src_spi_base->RXD;
+
+		counter = 0;
+
+		/* Wait for the transaction complete or timeout (about 10ms - 20 ms) */
+		while ((dest_spi_base->EVENTS_READY == 0U) && (counter < TIMEOUT_COUNTER))
+		{
+				counter++;
+		}
+
+		if (counter == TIMEOUT_COUNTER)
+		{
+				/* timed out, disable slave (slave select active low) and return with error */
+				return false;
+		}
+		else
+		{   /* clear the event to be ready to receive next messages */
+				dest_spi_base->EVENTS_READY = 0U;
+		}
+
+		dest_spi_base->RXD;
+    return true;
+}
+
+bool spi_master_rx_data_no_cs(uint32_t *spi_base_address, uint8_t* rx_data, uint32_t rx_data_size) {
+    NRF_SPI_Type *spi_base = (NRF_SPI_Type *)spi_base_address;
+	  uint32_t number_of_rxd_bytes = 0;
     uint32_t counter = 0;
     while(number_of_rxd_bytes < rx_data_size)
     {
@@ -205,16 +275,14 @@ bool spi_master_rx_data_no_cs(NRF_SPI_Type *spi_base, uint8_t* rx_data, uint32_t
 bool spi_master_tx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, const uint8_t* tx_data, uint32_t tx_data_size)
 {
     bool success;
-    /*lint -e{826} //Are too small pointer conversion */
-    NRF_SPI_Type *spi_base = (NRF_SPI_Type *)spi_base_address;
 
     /* enable slave (slave select active low) */
     nrf_gpio_pin_clear(device);
   
-    success = spi_master_tx_data_no_cs(spi_base, command, command_size);
+    success = spi_master_tx_data_no_cs(spi_base_address, command, command_size);
   
     if (success) {
-        success = spi_master_tx_data_no_cs(spi_base, tx_data, tx_data_size);
+        success = spi_master_tx_data_no_cs(spi_base_address, tx_data, tx_data_size);
     }
 
     /* disable slave (slave select active low) */
@@ -226,13 +294,11 @@ bool spi_master_tx_data(uint32_t *spi_base_address, uint32_t device, const uint8
 bool spi_master_tx(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size)
 {
     bool success;
-    /*lint -e{826} //Are too small pointer conversion */
-    NRF_SPI_Type *spi_base = (NRF_SPI_Type *)spi_base_address;
 
     /* enable slave (slave select active low) */
     nrf_gpio_pin_clear(device);
   
-    success = spi_master_tx_data_no_cs(spi_base, command, command_size);
+    success = spi_master_tx_data_no_cs(spi_base_address, command, command_size);
 
     /* disable slave (slave select active low) */
     nrf_gpio_pin_set(device);
@@ -243,16 +309,14 @@ bool spi_master_tx(uint32_t *spi_base_address, uint32_t device, const uint8_t* c
 bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size)
 {
     bool success;
-    /*lint -e{826} //Are too small pointer conversion */
-    NRF_SPI_Type *spi_base = (NRF_SPI_Type *)spi_base_address;
 
     /* enable slave (slave select active low) */
     nrf_gpio_pin_clear(device);
   
-    success = spi_master_tx_data_no_cs(spi_base, command, command_size);
+    success = spi_master_tx_data_no_cs(spi_base_address, command, command_size);
   
     if (success) {
-        success = spi_master_rx_data_no_cs(spi_base, rx_data, rx_data_size);
+        success = spi_master_rx_data_no_cs(spi_base_address, rx_data, rx_data_size);
     }
 
     /* disable slave (slave select active low) */
