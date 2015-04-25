@@ -174,7 +174,11 @@ static uint8_t testDigit = 0;
 static void redraw_timeout_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
 	  
-	  mlcd_draw_digit((testDigit++)%10, 5, 5, 64, 76, 6);
+	
+	  mlcd_draw_digit((testDigit)%10, 5, 87, 64, 76, 8);
+	  mlcd_draw_digit((testDigit+1)%10, 75, 5, 64, 76, 6);
+	  mlcd_draw_digit((testDigit+2)%10, 75, 87, 64, 76, 8);
+	  mlcd_draw_digit((testDigit++ + 3)%10, 5, 5, 64, 76, 6);
 	  mlcd_fb_flush();
 }
 
@@ -705,8 +709,8 @@ static uint32_t device_manager_evt_handler(dm_handle_t const * p_handle,
     {
         case DM_EVT_CONNECTION:
             m_peer_handle = (*p_handle);
-            err_code      = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
-            APP_ERROR_CHECK(err_code);
+         //   err_code      = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
+         //   APP_ERROR_CHECK(err_code);
             break;
 
         case DM_EVT_LINK_SECURED:
@@ -866,16 +870,13 @@ static void init_lcd_with_splash_screen() {
 	
   //  mlcd_set_screen_with_func(splashscreen_draw_func);
   
-	  mlcd_fb_clear();
+	 // mlcd_fb_clear();
 	//  nrf_delay_ms(1000);
-	  mlcd_fb_draw_with_func(splashscreen_draw_func, 0, 0, 144, 168);
+	  mlcd_fb_draw_with_func(splashscreen_draw_func, 0, 0, MLCD_XRES, MLCD_YRES);
 	
 	  mlcd_fb_flush();
     mlcd_display_on();
-	
-    //mlcd_backlight_on();
-	
-//	 
+	 
 	
 }
 
