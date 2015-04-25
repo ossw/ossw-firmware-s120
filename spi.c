@@ -198,7 +198,7 @@ bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base_address, uint32_t *dest_sp
         counter = 0;
 
         /* Wait for the transaction complete or timeout (about 10ms - 20 ms) */
-        while ((dest_spi_base->EVENTS_READY == 0U || src_spi_base->EVENTS_READY == 0U)  && (counter < TIMEOUT_COUNTER))
+        while ((dest_spi_base->EVENTS_READY == 0U || src_spi_base->EVENTS_READY == 0U) && (counter < TIMEOUT_COUNTER))
         {
             counter++;
         }

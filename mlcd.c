@@ -135,12 +135,14 @@ void mlcd_fb_flush () {
             spi_master_tx_data_no_cs(MLCD_SPI, &line_address, 1);
 					
 						/* enable ext ram */
-						nrf_gpio_pin_clear(EXT_RAM_SPI_SS);
 	          uint8_t command[] = {EXT_RAM_READ_COMMAND, 0xFF, 0xFF};
             command[1] = ext_ram_line_address >> 8 & 0xFF;
             command[2] = ext_ram_line_address & 0xFF;
-						spi_master_tx_data_no_cs(EXT_RAM_SPI, command, 3);
-					  /* send response from ram to mlcd */
+						
+						nrf_gpio_pin_clear(EXT_RAM_SPI_SS);
+  					spi_master_tx_data_no_cs(EXT_RAM_SPI, command, 3);
+					  
+						/* send response from ram to mlcd */
 					  spi_master_rx_to_tx_no_cs(EXT_RAM_SPI, MLCD_SPI, MLCD_LINE_BYTES);
 						/* disable ext ram */
 				    nrf_gpio_pin_set(EXT_RAM_SPI_SS);
