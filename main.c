@@ -841,14 +841,21 @@ static void init_lcd_with_splash_screen() {
 	
   //  mlcd_set_screen_with_func(splashscreen_draw_func);
   
-    mlcd_display_on();
-    mlcd_backlight_on();
-	
 	//  mlcd_fb_clear();
-	  nrf_delay_ms(1000);
+	//  nrf_delay_ms(1000);
 	  mlcd_fb_draw_with_func(splashscreen_draw_func, 0, 0, 144, 168);
-
+	
+	
 	  mlcd_fb_flush();
+	
+    mlcd_display_on();
+    //mlcd_backlight_on();
+	
+	  nrf_delay_ms(1000);
+	
+	
+	  
+
 }
 
 static void spi_init(void)

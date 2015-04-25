@@ -23,4 +23,6 @@ bool ext_ram_read_data(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data_
 
 bool ext_ram_write_data(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data_size);
 
+bool ext_ram_fill(uint16_t ext_ram_address, uint8_t value, uint32_t data_size);
+
 #endif /* EXT_RAM_H */

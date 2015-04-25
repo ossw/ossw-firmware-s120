@@ -19,5 +19,11 @@ bool ext_ram_write_data(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data
     command[1] = ext_ram_address >> 8 & 0xFF;
     command[2] = ext_ram_address & 0xFF;
     return spi_master_tx_data(EXT_RAM_SPI, EXT_RAM_SPI_SS, command, 3, buffer, data_size);
- 
+}
+
+bool ext_ram_fill(uint16_t ext_ram_address, uint8_t value, uint32_t data_size){
+	  uint8_t command[] = {EXT_RAM_WRITE_COMMAND, 0xFF, 0xFF};
+    command[1] = ext_ram_address >> 8 & 0xFF;
+    command[2] = ext_ram_address & 0xFF;
+		return spi_master_tx_value(EXT_RAM_SPI, EXT_RAM_SPI_SS, command, 3, value, data_size);
 }

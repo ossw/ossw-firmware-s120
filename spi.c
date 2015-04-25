@@ -291,6 +291,28 @@ bool spi_master_tx_data(uint32_t *spi_base_address, uint32_t device, const uint8
     return success;
 }
 
+bool spi_master_tx_value(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t value, uint32_t tx_data_size)
+{
+    bool success;
+
+    /* enable slave (slave select active low) */
+    nrf_gpio_pin_clear(device);
+  
+    success = spi_master_tx_data_no_cs(spi_base_address, command, command_size);
+  
+	  for(int i=0; i < tx_data_size; i++){
+					
+        if (success) {
+						success = spi_master_tx_data_no_cs(spi_base_address, &value, 1);
+				}
+    }
+
+    /* disable slave (slave select active low) */
+    nrf_gpio_pin_set(device);
+
+    return success;
+}
+
 bool spi_master_tx(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size)
 {
     bool success;

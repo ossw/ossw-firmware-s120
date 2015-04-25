@@ -97,12 +97,10 @@ void mlcd_set_screen_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t)) {
 }
 
 void mlcd_fb_clear() {
-	/*  for( int i=0; i<MLCD_LINE_BYTES * MLCD_YRES; i++) {
-			  fb[i] = 0;
+	  ext_ram_fill(0, 0x0, MLCD_LINE_BYTES * MLCD_YRES);
+	  for (int line_no=0; line_no< MLCD_YRES; line_no++ ){
+				fb_line_changes[line_no] = true;
 		}
-	  for( int i=0; i<MLCD_YRES; i++) {
-				fb_line_changes[i] = true;
-		}*/
 }
 
 void mlcd_fb_flush () {
@@ -148,6 +146,8 @@ void mlcd_fb_flush () {
 				    nrf_gpio_pin_set(EXT_RAM_SPI_SS);
 					
             spi_master_tx_data_no_cs(MLCD_SPI, &dummy, 1);
+						
+						fb_line_changes[line_no] = false;
 				}
 			
 				ext_ram_line_address += MLCD_LINE_BYTES;
