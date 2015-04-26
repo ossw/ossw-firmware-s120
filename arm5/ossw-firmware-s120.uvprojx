@@ -528,6 +528,16 @@
               <FileType>5</FileType>
               <FilePath>..\rtc.h</FilePath>
             </File>
+            <File>
+              <FileName>buttons.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\buttons.c</FilePath>
+            </File>
+            <File>
+              <FileName>buttons.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\buttons.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
