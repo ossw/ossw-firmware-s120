@@ -15,7 +15,7 @@ static void rtc_timeout_handler(void * p_context) {
 void rtc_timer_init(void) {
     uint32_t err_code;
 	  // temporary for tests
-	  current_time = 1430049466;
+	  current_time = 1430063060;
 	
     err_code = app_timer_create(&m_rtc_timer_id,
                                 APP_TIMER_MODE_REPEATED,

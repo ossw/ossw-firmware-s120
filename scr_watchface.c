@@ -12,10 +12,11 @@ static void scr_watchface_redraw_time(uint32_t current_time) {
 	
 	//  last_time = current_time;
 	
-	  mlcd_draw_digit(minutes/10, 75, 87, 64, 76, 8);
-	  mlcd_draw_digit(minutes%10, 5, 87, 64, 76, 8);
-	  mlcd_draw_digit(seconds/10, 75, 5, 64, 76, 6);
-	  mlcd_draw_digit(seconds%10, 5, 5, 64, 76, 6);
+	  mlcd_draw_digit(hour/10, 75, 87, 64, 76, 8);
+	  mlcd_draw_digit(hour%10, 5, 87, 64, 76, 8);
+	  mlcd_draw_digit(minutes/10, 75, 5, 64, 76, 6);
+	  mlcd_draw_digit(minutes%10, 5, 5, 64, 76, 6);
+	  mlcd_draw_simple_progress(seconds, 60, 0, 0, MLCD_XRES, 2);
 	  mlcd_fb_flush();
 }
 
