@@ -56,40 +56,8 @@ typedef enum
     SPI_MODE3               /*!< Sample data at rising edge of clock and shift serial data at falling edge */
 } SPIMode;
 
-
-/**
- * @brief Function for initializing given SPI master with given configuration.
- *
- * After initializing the given SPI master with given configuration, this function also test if the
- * SPI slave is responding with the configurations by transmitting few test bytes. If the slave did not
- * respond then error is returned and contents of the rx_data are invalid.
- *
- * @param module_number SPI master number (SPIModuleNumber) to initialize.
- * @param mode SPI master mode (mode 0, 1, 2 or 3 from SPIMode)
- * @param lsb_first true if lsb is first bit to shift in/out as serial data on MISO/MOSI pins.
- * @return
- * @retval pointer to direct physical address of the requested SPI module if init was successful
- * @retval 0, if either init failed or slave did not respond to the test transfer
- */
-uint32_t* spi_master_init(SPIModuleNumber module_number, SPIMode mode, bool lsb_first);
-
-/**
- * @brief Function for transferring/receiving data over SPI bus.
- *
- * If TWI master detects even one NACK from the slave or timeout occurs, STOP condition is issued
- * and the function returns false.
- *
- * @note Make sure at least transfer_size number of bytes is allocated in tx_data/rx_data.
- *
- * @param spi_base_address  register base address of the selected SPI master module
- * @param transfer_size  number of bytes to transmit/receive over SPI master
- * @param tx_data pointer to the data that needs to be transmitted
- * @param rx_data pointer to the data that needs to be received
- * @return
- * @retval true if transmit/reveive of transfer_size were completed.
- * @retval false if transmit/reveive of transfer_size were not complete and tx_data/rx_data points to invalid data.
- */
-
+void spi_init(void);
+	
 bool spi_master_tx_rx(uint32_t *spi_base_address, uint32_t device, uint16_t transfer_size, const uint8_t *tx_data, uint8_t *rx_data);
 
 bool spi_master_tx(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size);

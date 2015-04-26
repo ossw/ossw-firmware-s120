@@ -416,6 +416,41 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>Screens</GroupName>
+          <Files>
+            <File>
+              <FileName>scr_changedate.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\scr_changedate.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_changedate.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\scr_changedate.h</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\scr_watchface.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchface.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\scr_watchface.h</FilePath>
+            </File>
+            <File>
+              <FileName>scr_changetime.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\scr_changetime.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_changetime.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\scr_changetime.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>Libraries</GroupName>
           <Files>
             <File>
@@ -468,10 +503,27 @@
               <FileType>5</FileType>
               <FilePath>..\mlcd_draw.h</FilePath>
             </File>
+            <File>
+              <FileName>scr_mngr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\scr_mngr.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_mngr.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\scr_mngr.h</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\rtc.h</FilePath>
+            </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>Documentation</GroupName>
         </Group>
         <Group>
           <GroupName>SDK modifications</GroupName>

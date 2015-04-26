@@ -4,7 +4,24 @@
 #include "common.h"
 #include "bsp/boards.h"
 
-uint32_t* spi_master_init(SPIModuleNumber module_number, SPIMode mode, bool lsb_first)
+uint32_t * p_spi0_base_address;
+uint32_t * p_spi1_base_address;
+
+/**
+ * @brief Function for initializing given SPI master with given configuration.
+ *
+ * After initializing the given SPI master with given configuration, this function also test if the
+ * SPI slave is responding with the configurations by transmitting few test bytes. If the slave did not
+ * respond then error is returned and contents of the rx_data are invalid.
+ *
+ * @param module_number SPI master number (SPIModuleNumber) to initialize.
+ * @param mode SPI master mode (mode 0, 1, 2 or 3 from SPIMode)
+ * @param lsb_first true if lsb is first bit to shift in/out as serial data on MISO/MOSI pins.
+ * @return
+ * @retval pointer to direct physical address of the requested SPI module if init was successful
+ * @retval 0, if either init failed or slave did not respond to the test transfer
+ */
+static uint32_t* spi_master_init(SPIModuleNumber module_number, SPIMode mode, bool lsb_first)
 {
     uint32_t config_mode;
 
@@ -87,6 +104,12 @@ uint32_t* spi_master_init(SPIModuleNumber module_number, SPIMode mode, bool lsb_
     spi_base_address->ENABLE = (SPI_ENABLE_ENABLE_Enabled << SPI_ENABLE_ENABLE_Pos);
 
     return (uint32_t *)spi_base_address;
+}
+
+void spi_init(void)
+{
+    p_spi0_base_address = spi_master_init(SPI0, SPI_MODE0, false);
+    p_spi1_base_address = spi_master_init(SPI1, SPI_MODE0, false);
 }
 
 bool spi_master_tx_rx(uint32_t *spi_base_address, uint32_t device, uint16_t transfer_size, const uint8_t *tx_data, uint8_t *rx_data)

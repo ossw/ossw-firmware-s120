@@ -37,6 +37,8 @@
 #include "mlcd.h"
 #include "mlcd_draw.h"
 #include "ext_ram.h"
+#include "rtc.h"
+#include "scr_mngr.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -46,7 +48,7 @@
 #define DEVICE_NAME                      "OSSW"                                     /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                "OpenSource"                               /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                 300                                        /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
-#define APP_ADV_TIMEOUT_IN_SECONDS       180                                        /**< The advertising timeout in units of seconds. */
+#define APP_ADV_TIMEOUT_IN_SECONDS       0xFFFF//180                                        /**< The advertising timeout in units of seconds. */
 
 #define APP_TIMER_PRESCALER              0                                          /**< Value of the RTC1 PRESCALER register. */
 #define APP_TIMER_MAX_TIMERS             (6+BSP_APP_TIMERS_NUMBER)                  /**< Maximum number of simultaneously created timers. */
@@ -56,8 +58,6 @@
 #define MIN_BATTERY_LEVEL                81                                         /**< Minimum simulated battery level. */
 #define MAX_BATTERY_LEVEL                100                                        /**< Maximum simulated battery level. */
 #define BATTERY_LEVEL_INCREMENT          1                                          /**< Increment between each simulated battery level measurement. */
-
-#define REDRAW_INTERVAL                  APP_TIMER_TICKS(500, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
 
 #define MIN_CONN_INTERVAL                MSEC_TO_UNITS(400, UNIT_1_25_MS)           /**< Minimum acceptable connection interval (0.4 seconds). */
 #define MAX_CONN_INTERVAL                MSEC_TO_UNITS(650, UNIT_1_25_MS)           /**< Maximum acceptable connection interval (0.65 second). */
@@ -95,19 +95,16 @@ static ble_bas_t                         m_bas;                                 
 static ble_db_discovery_t                m_ble_db_discovery;                        /**< Structure used to identify the DB Discovery module. */
 static ble_cts_c_t                       m_cts;                                     /**< Structure to store the data of the current time service. */
 static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by the Device Manager. */
-static dm_handle_t                       m_peer_handle;                             /**< The peer that is currently connected. */
-static app_timer_id_t                    m_sec_req_timer_id;                        /**< Security request timer. */
+//static dm_handle_t                       m_peer_handle;                             /**< The peer that is currently connected. */
+//static app_timer_id_t                    m_sec_req_timer_id;                        /**< Security request timer. */
 
 static sensorsim_cfg_t                   m_battery_sim_cfg;                         /**< Battery Level sensor simulator configuration. */
 static sensorsim_state_t                 m_battery_sim_state;                       /**< Battery Level sensor simulator state. */
 
 static app_timer_id_t                    m_battery_timer_id;                        /**< Battery timer. */
-static app_timer_id_t                    m_redraw_timer_id;
 
 static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by device manager */
 
-uint32_t * p_spi0_base_address;
-uint32_t * p_spi1_base_address;
 
 static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_HEART_RATE_SERVICE,         BLE_UUID_TYPE_BLE},
                                    {BLE_UUID_BATTERY_SERVICE,            BLE_UUID_TYPE_BLE},
@@ -169,19 +166,6 @@ static void battery_level_meas_timeout_handler(void * p_context)
     battery_level_update();
 }
 
-static uint8_t testDigit = 0;
-
-static void redraw_timeout_handler(void * p_context) {
-    UNUSED_PARAMETER(p_context);
-	  
-	
-	  mlcd_draw_digit((testDigit)%10, 5, 87, 64, 76, 8);
-	  mlcd_draw_digit((testDigit+1)%10, 75, 5, 64, 76, 6);
-	  mlcd_draw_digit((testDigit+2)%10, 75, 87, 64, 76, 8);
-	  mlcd_draw_digit((testDigit++ + 3)%10, 5, 5, 64, 76, 6);
-	  mlcd_fb_flush();
-}
-
 /**@brief Function for handling the Current Time Service errors.
  *
  * @param[in]  nrf_error  Error code containing information about what went wrong.
@@ -199,7 +183,7 @@ static void current_time_error_handler(uint32_t nrf_error)
  * @param[in] p_context  Pointer used for passing some arbitrary information (context) from the
  *                       app_start_timer() call to the time-out handler.
  */
-static void sec_req_timeout_handler(void * p_context)
+/*static void sec_req_timeout_handler(void * p_context)
 {
     uint32_t             err_code;
     dm_security_status_t status;
@@ -216,7 +200,7 @@ static void sec_req_timeout_handler(void * p_context)
             APP_ERROR_CHECK(err_code);
         }
     }
-}
+}*/
 
 /**@brief Function for the Timer initialization.
  *
@@ -235,17 +219,11 @@ static void timers_init(void)
                                 battery_level_meas_timeout_handler);
     APP_ERROR_CHECK(err_code);
 	
-    // redraw timer.
-    err_code = app_timer_create(&m_redraw_timer_id,
-                                APP_TIMER_MODE_REPEATED,
-                                redraw_timeout_handler);
-    APP_ERROR_CHECK(err_code);
-	
-	
     // Create security request timer.
-    err_code = app_timer_create(&m_sec_req_timer_id,
+    /*err_code = app_timer_create(&m_sec_req_timer_id,
                                 APP_TIMER_MODE_SINGLE_SHOT,
                                 sec_req_timeout_handler);
+	*/
     APP_ERROR_CHECK(err_code);
 }
 
@@ -502,11 +480,6 @@ static void application_timers_start(void)
     // Start application timers.
     err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
     APP_ERROR_CHECK(err_code);
-	
-    // Start application timers.
-    err_code = app_timer_start(m_redraw_timer_id, REDRAW_INTERVAL, NULL);
-    APP_ERROR_CHECK(err_code);
-	
 }
 
 
@@ -590,8 +563,8 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
             APP_ERROR_CHECK(err_code);
 
             // Go to system-off mode. This function will not return; wakeup will cause a reset.
-            err_code = sd_power_system_off();
-            APP_ERROR_CHECK(err_code);
+            //err_code = sd_power_system_off();
+            //APP_ERROR_CHECK(err_code);
             break;
         default:
             break;
@@ -708,7 +681,7 @@ static uint32_t device_manager_evt_handler(dm_handle_t const * p_handle,
 	  switch (p_event->event_id)
     {
         case DM_EVT_CONNECTION:
-            m_peer_handle = (*p_handle);
+         //   m_peer_handle = (*p_handle);
          //   err_code      = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
          //   APP_ERROR_CHECK(err_code);
             break;
@@ -876,14 +849,6 @@ static void init_lcd_with_splash_screen() {
 	
 	  mlcd_fb_flush();
     mlcd_display_on();
-	 
-	
-}
-
-static void spi_init(void)
-{
-    p_spi0_base_address = spi_master_init(SPI0, SPI_MODE0, false);
-    p_spi1_base_address = spi_master_init(SPI1, SPI_MODE0, false);
 }
 
 /**@brief Function for application main entry.
@@ -899,6 +864,7 @@ int main(void)
     // Initialize.
     ble_stack_init();
     timers_init();
+	  rtc_timer_init();
     APP_GPIOTE_INIT(1);
 
     err_code = bsp_init(BSP_INIT_LED | BSP_INIT_BUTTONS,
@@ -917,6 +883,8 @@ int main(void)
     // Start execution.
     application_timers_start();
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
+		
+		scr_mngr_init();
 
     // Enter main loop.
     for (;;)
