@@ -11,14 +11,15 @@
  */
 #ifndef WATCH_BOARD_H
 #define WATCH_BOARD_H
-
+/*
 #define LEDS_NUMBER    0
 
 #define LEDS_LIST { }
 
 #define LEDS_MASK      0
-/* all LEDs are lit when GPIO is low */
+
 #define LEDS_INV_MASK  LEDS_MASK
+*/
 
 #define BUTTONS_NUMBER 4
 
@@ -27,7 +28,7 @@
 #define BUTTON_DOWN    19
 #define BUTTON_BACK    17
 #define BUTTON_PULL    NRF_GPIO_PIN_PULLUP
-
+/*
 #define BUTTONS_LIST { BUTTON_UP, BUTTON_SELECT, BUTTON_DOWN, BUTTON_BACK }
 
 #define BSP_BUTTON_0   BUTTON_UP
@@ -39,7 +40,7 @@
 #define BSP_BUTTON_1_MASK (1<<BSP_BUTTON_1)
 #define BSP_BUTTON_2_MASK (1<<BSP_BUTTON_2)
 #define BSP_BUTTON_3_MASK (1<<BSP_BUTTON_3)
-
+*/
 #define SPI_OPERATING_FREQUENCY (0x02000000uL << (uint32_t)Freq_8Mbps)  /**< Slave clock frequency. */
 
 // SPI0. 
@@ -50,8 +51,8 @@
 #define SPI0_SS1     23u                                     /**< SPI Slave Select GPIO pin number for device 1 */
 
 // SPI1. 
-#define SPI1_SCK     31u   //      15u //dev board 
-#define SPI1_MOSI    28u   //      16u //dev board 
+#define SPI1_SCK    /* 31u   // */     15u //dev board 
+#define SPI1_MOSI   /* 28u   // */     16u //dev board 
 #define SPI1_MISO    4u                                      
 #define SPI1_SS0     30u   
 

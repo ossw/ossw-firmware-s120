@@ -413,6 +413,11 @@
               <FileType>1</FileType>
               <FilePath>..\main.c</FilePath>
             </File>
+            <File>
+              <FileName>board.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\board.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -522,31 +527,6 @@
               <FileName>rtc.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\rtc.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>SDK modifications</GroupName>
-          <Files>
-            <File>
-              <FileName>boards.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\bsp\boards.h</FilePath>
-            </File>
-            <File>
-              <FileName>bsp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\bsp\bsp.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\bsp\bsp.h</FilePath>
-            </File>
-            <File>
-              <FileName>custom_board.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\bsp\custom_board.h</FilePath>
             </File>
           </Files>
         </Group>

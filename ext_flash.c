@@ -1,7 +1,7 @@
 #include "ext_flash.h"
 #include "spi.h"
 #include "nrf_delay.h"
-#include "bsp/boards.h"
+#include "board.h"
 
 uint8_t ext_flash_read_status(uint8_t *status) {
     uint8_t command[] = {0x05};

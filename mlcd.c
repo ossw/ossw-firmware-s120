@@ -3,6 +3,7 @@
 #include "ext_ram.h"
 #include "nrf_gpio.h"
 #include "common.h"
+#include "board.h"
 #include <inttypes.h>
 
 //static uint8_t fb[MLCD_LINE_BYTES * MLCD_YRES];

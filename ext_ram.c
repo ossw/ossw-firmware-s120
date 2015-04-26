@@ -1,6 +1,6 @@
 #include "ext_ram.h"
 #include "spi.h"
-#include "bsp/boards.h"
+#include "board.h"
 
 bool ext_ram_init(void) {
     uint8_t command[] = {EXT_RAM_WRITE_STATUS_COMMAND, EXT_RAM_STATUS_SEQUENCE | EXT_RAM_HOLD_DISABLE};

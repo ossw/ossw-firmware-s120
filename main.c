@@ -8,6 +8,7 @@
 #include "nordic_common.h"
 #include "nrf.h"
 #include "app_error.h"
+#include "app_button.h"
 #include "nrf51_bitfields.h"
 #include "ble.h"
 #include "ble_hci.h"
@@ -23,7 +24,7 @@
 #include "dfu_app_handler.h"
 #endif // BLE_DFU_APP_SUPPORT
 #include "ble_conn_params.h"
-#include "bsp/boards.h"
+#include "board.h"
 #include "sensorsim.h"
 #include "softdevice_handler.h"
 #include "app_timer.h"
@@ -31,7 +32,6 @@
 #include "pstorage.h"
 #include "app_trace.h"
 #include "app_gpiote.h"
-#include "bsp/bsp.h"
 #include "nrf_delay.h"
 #include "spi.h"
 #include "mlcd.h"
@@ -51,7 +51,7 @@
 #define APP_ADV_TIMEOUT_IN_SECONDS       0xFFFF//180                                        /**< The advertising timeout in units of seconds. */
 
 #define APP_TIMER_PRESCALER              0                                          /**< Value of the RTC1 PRESCALER register. */
-#define APP_TIMER_MAX_TIMERS             (6+BSP_APP_TIMERS_NUMBER)                  /**< Maximum number of simultaneously created timers. */
+#define APP_TIMER_MAX_TIMERS             8												                  /**< Maximum number of simultaneously created timers. */
 #define APP_TIMER_OP_QUEUE_SIZE          4                                          /**< Size of timer operation queues. */
 
 #define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(2000, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
@@ -301,9 +301,6 @@ static void advertising_stop(void)
 
     err_code = sd_ble_gap_adv_stop();
     APP_ERROR_CHECK(err_code);
-
-    err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-    APP_ERROR_CHECK(err_code);
 }
 
 
@@ -372,8 +369,6 @@ static void reset_prepare(void)
     {
         // Disconnect from peer.
         err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-        APP_ERROR_CHECK(err_code);
-        err_code = bsp_indication_set(BSP_INDICATE_IDLE);
         APP_ERROR_CHECK(err_code);
     }
     else
@@ -545,22 +540,12 @@ static void conn_params_init(void)
  */
 static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 {
-    uint32_t err_code;
-
     switch (ble_adv_evt)
     {
         case BLE_ADV_EVT_FAST:
-            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
-            APP_ERROR_CHECK(err_code);
             break;
         case BLE_ADV_EVT_IDLE:
-            err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-            APP_ERROR_CHECK(err_code);
-
             // enable buttons to wake-up from power off
-            err_code = bsp_buttons_enable( (1 << WAKEUP_BUTTON_ID)
-                                         | (1 << BOND_DELETE_ALL_BUTTON_ID));
-            APP_ERROR_CHECK(err_code);
 
             // Go to system-off mode. This function will not return; wakeup will cause a reset.
             //err_code = sd_power_system_off();
@@ -578,13 +563,9 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
  */
 static void on_ble_evt(ble_evt_t * p_ble_evt)
 {
-    uint32_t err_code;
-
     switch (p_ble_evt->header.evt_id)
     {
         case BLE_GAP_EVT_CONNECTED:
-            err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
-            APP_ERROR_CHECK(err_code);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             break;
 
@@ -718,8 +699,8 @@ static void device_manager_init(void)
     APP_ERROR_CHECK(err_code);
 
     // Clear all bonded centrals if the Bonds Delete button is pushed.
-    err_code = bsp_button_is_pressed(BOND_DELETE_ALL_BUTTON_ID,&(init_data.clear_persistent_data));
-    APP_ERROR_CHECK(err_code);
+//    err_code = bsp_button_is_pressed(BOND_DELETE_ALL_BUTTON_ID,&(init_data.clear_persistent_data));
+//    APP_ERROR_CHECK(err_code);
 
     err_code = dm_init(&init_data);
     APP_ERROR_CHECK(err_code);
@@ -867,11 +848,6 @@ int main(void)
 	  rtc_timer_init();
     APP_GPIOTE_INIT(1);
 
-    err_code = bsp_init(BSP_INIT_LED | BSP_INIT_BUTTONS,
-                        APP_TIMER_TICKS(100, APP_TIMER_PRESCALER),
-                        NULL);
-    APP_ERROR_CHECK(err_code);
-
     device_manager_init();
     db_discovery_init();
     gap_params_init();
@@ -883,6 +859,7 @@ int main(void)
     // Start execution.
     application_timers_start();
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
+    APP_ERROR_CHECK(err_code);
 		
 		scr_mngr_init();
 

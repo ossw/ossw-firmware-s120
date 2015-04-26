@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "bsp/boards.h"
 
 // Commands
 #define MLCD_WR 0x80 //MLCD write line command

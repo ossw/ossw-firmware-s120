@@ -2,7 +2,7 @@
 #include "nrf_delay.h"
 #include "nrf_gpio.h"
 #include "common.h"
-#include "bsp/boards.h"
+#include "board.h"
 
 uint32_t * p_spi0_base_address;
 uint32_t * p_spi1_base_address;
