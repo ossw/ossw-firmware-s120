@@ -39,11 +39,9 @@
 #include "ext_ram.h"
 #include "rtc.h"
 #include "scr_mngr.h"
+#include "buttons.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
-
-#define WAKEUP_BUTTON_ID                 BUTTON_SELECT                              /**< Button used to wake up the application. */
-#define BOND_DELETE_ALL_BUTTON_ID        BUTTON_BACK                                /**< Button used for deleting all bonded centrals during startup. */
 
 #define DEVICE_NAME                      "OSSW"                                     /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                "OpenSource"                               /**< Manufacturer. Will be passed to Device Information Service. */
@@ -51,7 +49,7 @@
 #define APP_ADV_TIMEOUT_IN_SECONDS       0xFFFF//180                                        /**< The advertising timeout in units of seconds. */
 
 #define APP_TIMER_PRESCALER              0                                          /**< Value of the RTC1 PRESCALER register. */
-#define APP_TIMER_MAX_TIMERS             8												                  /**< Maximum number of simultaneously created timers. */
+#define APP_TIMER_MAX_TIMERS             8+2												                  /**< Maximum number of simultaneously created timers. */
 #define APP_TIMER_OP_QUEUE_SIZE          4                                          /**< Size of timer operation queues. */
 
 #define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(2000, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
@@ -88,7 +86,6 @@
 STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                     /** When having DFU Service support in application the Service Changed Characteristic should always be present. */
 #endif // BLE_DFU_APP_SUPPORT
 
-
 static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;   /**< Handle of the current connection. */
 static ble_bas_t                         m_bas;                                     /**< Structure used to identify the battery service. */
 
@@ -105,15 +102,13 @@ static app_timer_id_t                    m_battery_timer_id;                    
 
 static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by device manager */
 
-
 static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_HEART_RATE_SERVICE,         BLE_UUID_TYPE_BLE},
                                    {BLE_UUID_BATTERY_SERVICE,            BLE_UUID_TYPE_BLE},
                                    {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}}; /**< Universally unique service identifiers. */
 #ifdef BLE_DFU_APP_SUPPORT    
 static ble_dfu_t m_dfus; /**< Structure used to identify the DFU service. */
-#endif // BLE_DFU_APP_SUPPORT    
-
-
+#endif // BLE_DFU_APP_SUPPORT  
+			
 /**@brief Callback function for asserts in the SoftDevice.
  *
  * @details This function will be called in case of an assert in the SoftDevice.
@@ -862,6 +857,7 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 		
 		scr_mngr_init();
+		buttons_init();
 
     // Enter main loop.
     for (;;)
