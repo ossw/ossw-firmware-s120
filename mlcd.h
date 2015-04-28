@@ -31,6 +31,8 @@ void mlcd_backlight_on(void);
 
 void mlcd_backlight_off(void);
 
+void mlcd_switch_vcom(void);
+
 void mlcd_set_screen_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t));
 
 void mlcd_set_lines_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_fast8_t first_line, uint_fast8_t line_number);

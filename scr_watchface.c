@@ -27,10 +27,8 @@ static void scr_watchface_redraw_time(uint32_t current_time) {
 
 static void scr_watchface_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
-			  case SCR_EVENT_PARAM_BUTTON_BACK:
-				 		mlcd_backlight_on();
-						nrf_delay_ms(50);
-						mlcd_backlight_off();
+			  case SCR_EVENT_PARAM_BUTTON_SELECT:
+				 		scr_mngr_show_screen(SCR_CHANGE_TIME);
 				    break;
 		}
 }
@@ -54,6 +52,7 @@ static void scr_watchface_init() {
 //	  last_time = 0;
 	  scr_watchface_redraw_time(rtc_current_time());
 }
+
 void scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:

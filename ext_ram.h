@@ -17,6 +17,9 @@
 
 #define EXT_RAM_PAGE_SIZE 0x20
 
+#define EXT_RAM_DATA_FB              0x0
+#define EXT_RAM_DATA_RTC             0xBD0
+
 bool ext_ram_init(void);
 
 bool ext_ram_read_data(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data_size);

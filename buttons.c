@@ -46,9 +46,9 @@ static void button_long_press_timeout_handler(void * p_context) {
 						}
 							
 						if (pushed) {
-								scr_mngr_handle_event(SCR_EVENT_BUTTON_LONG_PRESSED, i);
+								scr_mngr_handle_event(SCR_EVENT_BUTTON_LONG_PRESSED, 1<<i);
 						} else {
-								scr_mngr_handle_event(SCR_EVENT_BUTTON_PRESSED, i);
+								scr_mngr_handle_event(SCR_EVENT_BUTTON_PRESSED, 1<<i);
 						}
 				}
 	  }

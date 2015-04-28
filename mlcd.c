@@ -8,6 +8,7 @@
 
 //static uint8_t fb[MLCD_LINE_BYTES * MLCD_YRES];
 static bool fb_line_changes[MLCD_YRES];
+static uint8_t vcom;
 
 static uint8_t bit_reverse(uint8_t byte) {
     #if (__CORTEX_M >= 0x03)
@@ -31,6 +32,7 @@ void mlcd_init(void)
     nrf_gpio_pin_clear(LCD_ENABLE);
     nrf_gpio_pin_clear(LCD_BACKLIGHT);
     nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
+	  vcom = VCOM_LO;
 }
 
 void mlcd_display_off(void)
@@ -63,8 +65,16 @@ void mlcd_backlight_on(void)
   nrf_gpio_pin_set(LCD_BACKLIGHT);
 }
 
+void mlcd_switch_vcom() {
+	  if (vcom == VCOM_LO) {
+			  vcom = VCOM_HI;
+		} else {
+			  vcom = VCOM_LO;
+		}
+}
+
 void mlcd_set_lines_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_fast8_t first_line, uint_fast8_t line_number) {
-    uint8_t command = MLCD_WR;
+    uint8_t command = MLCD_WR | vcom;
     uint8_t dummy = 0;
     uint8_t line_buffer[MLCD_LINE_BYTES+2];
     uint_fast8_t max_line = first_line + line_number;
@@ -98,14 +108,14 @@ void mlcd_set_screen_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t)) {
 }
 
 void mlcd_fb_clear() {
-	  ext_ram_fill(0, 0x0, MLCD_LINE_BYTES * MLCD_YRES);
+	  ext_ram_fill(0 | vcom, 0x0, MLCD_LINE_BYTES * MLCD_YRES);
 	  for (int line_no=0; line_no< MLCD_YRES; line_no++ ){
 				fb_line_changes[line_no] = true;
 		}
 }
 
 void mlcd_fb_flush () {
-    uint8_t command = MLCD_WR;
+    uint8_t command = MLCD_WR | vcom;
     uint8_t dummy = 0;
 	  uint8_t line_address;
 	  uint16_t ext_ram_line_address = 0;

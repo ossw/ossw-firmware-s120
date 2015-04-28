@@ -2,20 +2,30 @@
 #include "scr_watchface.h"
 #include "scr_changetime.h"
 #include "scr_changedate.h"
+#include "mlcd.h"
 
 static uint32_t current_screen;
 
 bool initialized = false;
 
 void scr_mngr_init(void) {
-	  scr_mngr_show_screen(SCR_WATCHFACE);
 	  initialized = true;
+	  scr_mngr_show_screen(SCR_WATCHFACE);
+}
+
+void scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
+	  switch(event_type) {
+			  case SCR_EVENT_RTC_TIME_CHANGED:
+				    mlcd_switch_vcom();
+				    break;
+		}
 }
 
 void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 	  if(!initialized) {
 			  return;
 		}
+		scr_mngr_default_handle_event(event_type, event_param);
 	  switch(current_screen) {
 			  case SCR_WATCHFACE:
 				    scr_watchface_handle_event(event_type, event_param);
