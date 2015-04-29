@@ -1,3 +1,4 @@
 arm5/_build
-arm5/RTE
+arm5/RTE/*
+!arm5/RTE/Device
 ossw-firmware-s120.uvguix.*
