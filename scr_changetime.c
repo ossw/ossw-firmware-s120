@@ -13,29 +13,32 @@ static int8_t minutes;
 static uint8_t change_mode;
 
 static void scr_changetime_draw_hour() {
-	  mlcd_draw_digit(hour/10, 112, TIME_Y_POS, 28, 38, 5);
-	  mlcd_draw_digit(hour%10, 80, TIME_Y_POS, 28, 38, 5);
+	  mlcd_draw_digit(hour/10, 112, TIME_Y_POS, 28, 38, 4);
+	  mlcd_draw_digit(hour%10, 80, TIME_Y_POS, 28, 38, 4);
 }
 
 static void scr_changetime_draw_minutes() {
-	  mlcd_draw_digit(minutes/10, 36, TIME_Y_POS, 28, 38, 5);
-	  mlcd_draw_digit(minutes%10, 4, TIME_Y_POS, 28, 38, 5);
+	  mlcd_draw_digit(minutes/10, 36, TIME_Y_POS, 28, 38, 4);
+	  mlcd_draw_digit(minutes%10, 4, TIME_Y_POS, 28, 38, 4);
 }
 
 static void scr_changetime_draw_all() {
 	  mlcd_fb_clear();
 	  mlcd_draw_rect(69, TIME_Y_POS + 22, 5, 5);
 	  mlcd_draw_rect(69, TIME_Y_POS + 10, 5, 5);
+	
+	  if (change_mode == MODE_HOUR) {
+			  mlcd_draw_rect_border(77, TIME_Y_POS - 3, 66, 44, 1);
+			  mlcd_draw_arrow_up(90, TIME_Y_POS + 48, 40, 20, 6);
+			  mlcd_draw_arrow_down(90, TIME_Y_POS - 30, 40, 20, 6);
+		} else if (change_mode == MODE_MINUTES) {
+			  mlcd_draw_rect_border(1, TIME_Y_POS - 3, 66, 44, 1);
+			  mlcd_draw_arrow_up(14, TIME_Y_POS + 48, 40, 20, 6);
+			  mlcd_draw_arrow_down(14, TIME_Y_POS - 30, 40, 20, 6);
+		}
+		
 	  scr_changetime_draw_hour();
 	  scr_changetime_draw_minutes();
-
-	  if (change_mode == MODE_HOUR) {
-			  mlcd_draw_arrow_up(94, 108, 30, 15);
-			  mlcd_draw_arrow_down(94, 34, 30, 15);
-		} else if (change_mode == MODE_MINUTES) {
-			  mlcd_draw_arrow_up(16, 108, 30, 15);
-			  mlcd_draw_arrow_down(16, 34, 30, 15);
-		}
 }
 
 static void scr_changetime_handle_button_up(void) {
