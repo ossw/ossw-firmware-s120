@@ -17,8 +17,11 @@
 
 #define EXT_RAM_PAGE_SIZE 0x20
 
-#define EXT_RAM_DATA_FB              0x0
-#define EXT_RAM_DATA_RTC             0xBD0
+#define EXT_RAM_DATA_FB              0x0 // 0x0000 - 0x0BCF
+#define EXT_RAM_DATA_RTC             0xBD0 // 0x0BD0 - 0x0BD3
+
+// last address 0x2000
+
 
 bool ext_ram_init(void);
 
