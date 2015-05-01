@@ -30,6 +30,9 @@ static void scr_watchface_handle_button_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
 				 		scr_mngr_show_screen(SCR_CHANGE_TIME);
 				    break;
+			  case SCR_EVENT_PARAM_BUTTON_DOWN:
+				 		scr_mngr_show_screen(SCR_CHANGE_DATE);
+				    break;
 		}
 }
 

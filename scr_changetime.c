@@ -2,6 +2,7 @@
 #include "scr_mngr.h"
 #include "mlcd_draw.h"
 #include "rtc.h"
+#include "time.h"
 
 static int8_t hour;
 static int8_t minutes;
@@ -79,8 +80,14 @@ static void scr_changetime_handle_button_select(void) {
 			  scr_changetime_draw_all();
 	      mlcd_fb_flush();
 		} else if (change_mode == MODE_MINUTES) {
-			  uint32_t time = (rtc_current_time()/86400 ) * 86400 + hour * 3600 + minutes * 60;
-			  rtc_set_current_time(time);
+				time_t t;
+				time(&t);
+				struct tm* time_struct = localtime(&t);
+
+				time_struct->tm_hour = hour;
+				time_struct->tm_min = minutes;
+				time_struct->tm_sec = 0;
+			  rtc_set_current_time(mktime(time_struct));
 			  scr_mngr_show_screen(SCR_WATCHFACE);
 		}
 }
@@ -115,9 +122,12 @@ static void scr_changetime_handle_button_pressed(uint32_t button_id) {
 }
 
 static void scr_changetime_init() {
-	  uint32_t current_time = rtc_current_time();
-	  hour = (current_time / 3600) % 24;
-	  minutes = (current_time / 60) % 60;
+	  time_t t;
+	  time(&t);
+	  struct tm* time_struct = localtime(&t);
+	
+	  hour = time_struct->tm_hour;
+	  minutes = time_struct->tm_min;
 	
 	  change_mode = MODE_HOUR;
 	  scr_changetime_draw_all();

@@ -1,6 +1,7 @@
 #include "rtc.h"
 #include "scr_mngr.h"
 #include "nordic_common.h"
+#include "time.h"
 
 static app_timer_id_t      m_rtc_timer_id;
 static uint32_t current_time;
@@ -14,7 +15,7 @@ static void rtc_timeout_handler(void * p_context) {
 
 void rtc_timer_init(void) {
     uint32_t err_code;
-	  // temporary for tests
+	  // temporary for tests, should read from ext ram
 	  current_time = 1430141820;
 	
     err_code = app_timer_create(&m_rtc_timer_id,
@@ -32,4 +33,12 @@ uint32_t rtc_current_time(void) {
 
 void rtc_set_current_time(uint32_t time) {
 	  current_time = time;
+}
+
+_ARMABI time_t time(time_t * tp) {
+	  if( tp != 0 )
+    {
+        *tp = current_time; 
+    }
+    return current_time ; 
 }
