@@ -177,9 +177,11 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
 	  if (first_byte_max_bit > 8) {
 			  first_byte_max_bit = 8;
 		}
-	  uint8_t line_size = (start_bit_off + width + 7) >> 3;
-	  uint8_t tmp_buff[line_size];
-	  uint16_t ext_ram_address = (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
+    uint8_t line_size = (start_bit_off + width + 7) >> 3;
+    uint8_t tmp_buff[line_size];
+    uint16_t ext_ram_address = (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
+		
+    uint8_t old_val = 0;
 	  for (uint8_t y = 0; y < height; y++) {
 			  uint8_t x = 0;
 			  uint_fast8_t width_left = width;
@@ -187,23 +189,24 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
 			
 			  fb_line_changes[y_pos+y] = true;
 			
-			  if ( start_bit_off > 0 ){
-					  ext_ram_read_data(ext_ram_address, &val, 1);
-					  val &= (0xFF << 8 - start_bit_off);
-				}
-				
-				if ( width_left < 8 - start_bit_off) {
-					  uint8_t tmp; 
-					  ext_ram_read_data(ext_ram_address, &tmp, 1);
-					  val |= tmp & (0xFF >> width_left + start_bit_off);
-				}
+			  if (start_bit_off > 0 || width_left < 8 - start_bit_off) {
+					  ext_ram_read_data(ext_ram_address, &old_val, 1);
+							
+						if ( start_bit_off > 0 ){
+								val = old_val & (0xFF << 8 - start_bit_off);
+						}
+						
+						if ( width_left < 8 - start_bit_off) {
+								val |= old_val & (0xFF >> width_left + start_bit_off);
+						}
+			  }
 					  
 				for(uint_fast8_t bit=start_bit_off; bit<first_byte_max_bit; bit++){
             val |= ((*f)(x, y) << (7-bit));
 			  	  x++;
         }
 				tmp_buff[0] = val;
-				width_left -= 8 - start_bit_off;
+				width_left -= first_byte_max_bit - start_bit_off;
 			  uint_fast8_t byte_no = 1;
 				
 				while(width_left > 0) {
