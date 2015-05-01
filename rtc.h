@@ -10,6 +10,7 @@
 void rtc_timer_init(void);
 
 uint32_t rtc_current_time(void);
+uint32_t rtc_load_time(void);
 
 void rtc_set_current_time(uint32_t time);
 

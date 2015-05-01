@@ -179,7 +179,7 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
 		}
     uint8_t line_size = (start_bit_off + width + 7) >> 3;
     uint8_t tmp_buff[line_size];
-    uint16_t ext_ram_address = (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
+    uint16_t ext_ram_address = EXT_RAM_DATA_FB + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
 		
     uint8_t old_val = 0;
 	  for (uint8_t y = 0; y < height; y++) {
