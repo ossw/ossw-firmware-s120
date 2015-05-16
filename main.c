@@ -40,6 +40,7 @@
 #include "rtc.h"
 #include "scr_mngr.h"
 #include "buttons.h"
+#include "pawn/amxutil.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -814,18 +815,16 @@ static void init_lcd_with_splash_screen() {
     mlcd_init();
     mlcd_power_on();
 	  
-		// make seure lcd is working
+		// make sure lcd is working
 		nrf_delay_ms(10);
-	
-  //  mlcd_set_screen_with_func(splashscreen_draw_func);
-  
-	 // mlcd_fb_clear();
-	//  nrf_delay_ms(1000);
+
 	  mlcd_fb_draw_with_func(splashscreen_draw_func, 0, 0, MLCD_XRES, MLCD_YRES);
 	
 	  mlcd_fb_flush();
     mlcd_display_on();
 }
+
+bool runTestScript = false;
 
 /**@brief Function for application main entry.
  */
@@ -858,12 +857,15 @@ int main(void)
 		
 		scr_mngr_init();
 		buttons_init();
-
+	
     // Enter main loop.
     for (;;)
     {
         power_manage();
+			
+			  if (runTestScript) {
+					  runTestScript = false;
+				 		amxutil_runTestScript();
+				}
     }
 }
-
-

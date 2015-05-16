@@ -363,7 +363,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls>--c99</MiscControls>
-              <Define>BLE_DFU_APP_SUPPORT BLE_STACK_SUPPORT_REQD S110 BOARD_CUSTOM SOFTDEVICE_PRESENT NRF51</Define>
+              <Define>BLE_DFU_APP_SUPPORT BLE_STACK_SUPPORT_REQD S110 AMX_ANSIONLY BOARD_CUSTOM SOFTDEVICE_PRESENT NRF51</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -424,16 +424,6 @@
           <GroupName>Screens</GroupName>
           <Files>
             <File>
-              <FileName>scr_changedate.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\scr_changedate.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_changedate.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\scr_changedate.h</FilePath>
-            </File>
-            <File>
               <FileName>scr_watchface.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\scr_watchface.c</FilePath>
@@ -444,14 +434,24 @@
               <FilePath>..\scr_watchface.h</FilePath>
             </File>
             <File>
+              <FileName>scr_changetime.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\scr_changetime.h</FilePath>
+            </File>
+            <File>
               <FileName>scr_changetime.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\scr_changetime.c</FilePath>
             </File>
             <File>
-              <FileName>scr_changetime.h</FileName>
+              <FileName>scr_changedate.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\scr_changetime.h</FilePath>
+              <FilePath>..\scr_changedate.h</FilePath>
+            </File>
+            <File>
+              <FileName>scr_changedate.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\scr_changedate.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -509,16 +509,6 @@
               <FilePath>..\mlcd_draw.h</FilePath>
             </File>
             <File>
-              <FileName>scr_mngr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\scr_mngr.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_mngr.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\scr_mngr.h</FilePath>
-            </File>
-            <File>
               <FileName>rtc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\rtc.c</FilePath>
@@ -537,6 +527,56 @@
               <FileName>buttons.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\buttons.h</FilePath>
+            </File>
+            <File>
+              <FileName>scr_mngr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\scr_mngr.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_mngr.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\scr_mngr.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>pawn</GroupName>
+          <Files>
+            <File>
+              <FileName>osdefs.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\pawn\osdefs.h</FilePath>
+            </File>
+            <File>
+              <FileName>amx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pawn\amx.c</FilePath>
+            </File>
+            <File>
+              <FileName>amx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\pawn\amx.h</FilePath>
+            </File>
+            <File>
+              <FileName>amxext.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pawn\amxext.c</FilePath>
+            </File>
+            <File>
+              <FileName>amxext.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\pawn\amxext.h</FilePath>
+            </File>
+            <File>
+              <FileName>amxutil.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pawn\amxutil.c</FilePath>
+            </File>
+            <File>
+              <FileName>amxutil.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\pawn\amxutil.h</FilePath>
             </File>
           </Files>
         </Group>

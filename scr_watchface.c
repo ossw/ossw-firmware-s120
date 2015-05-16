@@ -1,9 +1,11 @@
+#include <string.h>
 #include "scr_watchface.h"
 #include "scr_mngr.h"
 #include "mlcd_draw.h"
 #include "rtc.h"
 #include "nrf_delay.h"
 #include "mlcd.h"
+#include "pawn/amxutil.h"
 
 //static uint32_t last_time;
 
@@ -24,6 +26,7 @@ static void scr_watchface_redraw_time(uint32_t current_time) {
 	  mlcd_fb_flush();
 }
 
+extern bool runTestScript;
 
 static void scr_watchface_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
@@ -32,6 +35,9 @@ static void scr_watchface_handle_button_pressed(uint32_t button_id) {
 				    break;
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 				 		scr_mngr_show_screen(SCR_CHANGE_DATE);
+				    break;
+			  case SCR_EVENT_PARAM_BUTTON_UP:
+						runTestScript = true;
 				    break;
 		}
 }
