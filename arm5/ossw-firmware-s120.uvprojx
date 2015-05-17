@@ -549,21 +549,6 @@
               <FilePath>..\scr_mngr.h</FilePath>
             </File>
             <File>
-              <FileName>default_font.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\default_font.h</FilePath>
-            </File>
-            <File>
-              <FileName>mlcd_text.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\mlcd_text.c</FilePath>
-            </File>
-            <File>
-              <FileName>mlcd_text.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\mlcd_text.h</FilePath>
-            </File>
-            <File>
               <FileName>utf8.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\utf8.c</FilePath>
@@ -612,6 +597,26 @@
               <FileName>amxutil.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\pawn\amxutil.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Fonts</GroupName>
+          <Files>
+            <File>
+              <FileName>small_bold.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\fonts\small_bold.h</FilePath>
+            </File>
+            <File>
+              <FileName>small_regular.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\fonts\small_regular.h</FilePath>
+            </File>
+            <File>
+              <FileName>font.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\fonts\font.h</FilePath>
             </File>
           </Files>
         </Group>

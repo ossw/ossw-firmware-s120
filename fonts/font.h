@@ -1,5 +1,5 @@
-#ifndef MLCD_TEXT_H
-#define MLCD_TEXT_H
+#ifndef FONT_H
+#define FONT_H
 
 #include <stdint.h>
 
@@ -30,11 +30,8 @@ typedef struct
 	const uint8_t			  charDist;	// distance between characters
 	const uint8_t			  spaceWidth;	// number of pixels that a space character takes up
 	const FONT_CHAR_INFO_LOOKUP* charInfoLookup; // character info lookup table
+	const uint8_t       lookupTableSize;
 	const uint8_t*			data;			// pointer to generated array of character visual representation
 } FONT_INFO;
 
-uint_fast8_t mlcd_draw_char(uint32_t c, uint_fast8_t x, uint_fast8_t y, uint_fast8_t size);
-
-uint_fast8_t mlcd_draw_text(char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t size);
-
-#endif /* MLCD_TEXT_H */
+#endif /* FONT_H */

@@ -1,5 +1,9 @@
 #include "mlcd_draw.h"
 #include "mlcd.h"
+#include "utf8.h"
+#include "fonts/font.h"
+#include "fonts/small_bold.h"
+#include "fonts/small_regular.h"
 
 static uint8_t digits[] = {0x3F, 0x6, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x7, 0x7F, 0x6F};
 
@@ -121,4 +125,56 @@ void mlcd_draw_arrow_down(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t w
 	  mlcd_fb_draw_with_func(draw_arrow_down_func, x_pos, y_pos, width, height);
 }
 
+static uint_fast8_t mlcd_draw_char(uint32_t c, uint_fast8_t x, uint_fast8_t y, const FONT_INFO* font){
+
+	 if (c == ' ') {
+		   return font->spaceWidth;
+	 }
+	
+   if ((c < font->startChar) || (c > font->endChar)) 
+      return 0; 
+
+	 const FONT_CHAR_INFO_LOOKUP *matchingTable = 0;
+	 for (int t = 0; t < font->lookupTableSize; t++) {
+	    const FONT_CHAR_INFO_LOOKUP *table = &(font->charInfoLookup[t]);
+		  if (c >= table->startChar && c <= table->endChar) {
+				  matchingTable = table;
+			}
+	 }
+	 if (!matchingTable) {
+		   return 0;
+	 }
+	 
+   uint32_t charIndex = c - matchingTable->startChar;  //Character index 
+   const FONT_CHAR_INFO *charInfo = matchingTable->charInfo;          //Point to start of descriptors 
+   charInfo += charIndex;              //Point to current char info 
+
+   const uint8_t *bitmapPointer = font->data;                   //Point to start of bitmaps 
+   bitmapPointer += charInfo->offset;            //Point to start of c bitmap 
+
+	 mlcd_fb_draw_bitmap(bitmapPointer, x, y, charInfo->width, font->height);
+   
+   return charInfo->width; 
+}
+
+static const FONT_INFO* mlcd_resolve_font(uint_fast8_t font_type) {
+	 switch (font_type) {
+		 case FONT_SMALL_REGULAR:
+			 return &smallRegularFontInfo;
+		 case FONT_SMALL_BOLD:
+			 return &smallBoldFontInfo;
+	 }
+	 return &smallRegularFontInfo;
+}
+
+uint_fast8_t mlcd_draw_text(char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t font_type) {
+	  int ptr = 0;
+	  uint32_t c;
+	  const FONT_INFO* font = mlcd_resolve_font(font_type);
+	  while ((c = u8_nextchar(text, &ptr)) > 0) {
+			  x += mlcd_draw_char(c, x, y, font);
+			  x += font->charDist;
+		}
+		return 0;
+}
 

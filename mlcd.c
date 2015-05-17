@@ -202,7 +202,13 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
 }
 
 void mlcd_fb_draw_bitmap(const uint8_t *bitmap, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {
-	  x_pos = MLCD_XRES - x_pos - width;
+	  if (x_pos + width > MLCD_XRES) {
+			  if (x_pos >= MLCD_XRES) {
+					  return;
+				}
+			  width = MLCD_XRES - x_pos;
+		}
+		x_pos = MLCD_XRES - x_pos - width;
 	  uint_fast8_t start_bit_off = x_pos & 0x7;
 	  uint_fast8_t first_byte_max_bit = width + start_bit_off;
 	  if (first_byte_max_bit > 8) {

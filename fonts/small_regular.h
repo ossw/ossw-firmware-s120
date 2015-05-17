@@ -1,14 +1,9 @@
-#ifndef DEFAULT_FONT_H
-#define DEFAULT_FONT_H
+#ifndef SMALL_REGULAR_FONT_H
+#define SMALL_REGULAR_FONT_H
 
 #include <stdint.h>
 
-/* 
-**  Font data for Trebuchet MS 12pt
-*/
-
-/* Character bitmaps for Trebuchet MS 12pt */
-const uint8_t trebuchetMS_12ptBitmaps[] = 
+const uint8_t smallRegularFontBitmaps[] = 
 {
 	/* @0 '!' (1 pixels wide) */
 	0x00, //  
@@ -30,7 +25,7 @@ const uint8_t trebuchetMS_12ptBitmaps[] =
 	0x00, //  
 	0x00, //  
 
-		/* @18 '"' (3 pixels wide) */
+	/* @18 '"' (3 pixels wide) */
 	0x00, //    
 	0x00, //    
 	0x00, //    
@@ -2251,9 +2246,7 @@ const uint8_t trebuchetMS_12ptBitmaps[] =
 	0x00, //        
 };
 
-/* Character descriptors for Trebuchet MS 12pt(block #0) */
-/* { [Char width in bits], [Offset into trebuchetMS_12ptCharBitmaps in bytes] } */
-const FONT_CHAR_INFO trebuchetMS_12ptDescriptorsBlock0[] = 
+const FONT_CHAR_INFO smallRegularFontDescriptorsBlock0[] = 
 {
 	{1, 0}, 		/* ! */ 
 	{3, 18}, 		/* " */ 
@@ -2351,9 +2344,7 @@ const FONT_CHAR_INFO trebuchetMS_12ptDescriptorsBlock0[] =
 	{6, 1944}, 		/* ~ */ 
 };
 
-/* Character descriptors for Trebuchet MS 12pt(block #1) */
-/* { [Char width in bits], [Offset into trebuchetMS_12ptCharBitmaps in bytes] } */
-const FONT_CHAR_INFO trebuchetMS_12ptDescriptorsBlock1[] = 
+const FONT_CHAR_INFO smallRegularFontDescriptorsBlock1[] = 
 {
 	{9, 1962}, 		/* Ó */ 
 	{0, 0}, 		/* Ô */ 
@@ -2428,9 +2419,7 @@ const FONT_CHAR_INFO trebuchetMS_12ptDescriptorsBlock1[] =
 	{7, 2124}, 		/* e */ 
 };
 
-/* Character descriptors for Trebuchet MS 12pt(block #2) */
-/* { [Char width in bits], [Offset into trebuchetMS_12ptCharBitmaps in bytes] } */
-const FONT_CHAR_INFO trebuchetMS_12ptDescriptorsBlock2[] = 
+const FONT_CHAR_INFO smallRegularFontDescriptorsBlock2[] = 
 {
 	{7, 2142}, 		/* L */ 
 	{3, 2160}, 		/* l */ 
@@ -2494,28 +2483,23 @@ const FONT_CHAR_INFO trebuchetMS_12ptDescriptorsBlock2[] =
 	{7, 2304}, 		/* z */ 
 };
 
-/* Block lookup array for Trebuchet MS 12pt  */
-/* { start character, end character, ptr to descriptor block array } */
-const FONT_CHAR_INFO_LOOKUP trebuchetMS_12ptBlockLookup[] = 
+const FONT_CHAR_INFO_LOOKUP smallRegularFontBlockLookup[] = 
 {
-	{'!', '~', trebuchetMS_12ptDescriptorsBlock0},
-	{'Ó', 281, trebuchetMS_12ptDescriptorsBlock1},
-	{321, 380, trebuchetMS_12ptDescriptorsBlock2},
+	{'!', '~', smallRegularFontDescriptorsBlock0},
+	{'Ó', 281, smallRegularFontDescriptorsBlock1},
+	{321, 380, smallRegularFontDescriptorsBlock2},
 };
 
-/* Font information for Trebuchet MS 12pt */
-const FONT_INFO trebuchetMS_12ptFontInfo =
+const FONT_INFO smallRegularFontInfo =
 {
-	18, /*  Character height */
-	'!', /*  Start character */
-	380, /*  End character */
-	2,  /*  Distance between characters */
-	4, /*  Width, in pixels, of space character */
-	trebuchetMS_12ptBlockLookup, /*  Character block lookup */
-	trebuchetMS_12ptBitmaps, /*  Character bitmap array */
+	18,
+	'!',
+	380,
+	2,
+	4,
+	smallRegularFontBlockLookup,
+	3,
+	smallRegularFontBitmaps,
 };
 
-#define DEFAULT_FONT trebuchetMS_12ptFontInfo
-#define DEFAULT_FONT_LOOKUP_TABLES_NO 3
-
-#endif /* DEFAULT_FONT_H */
+#endif /* SMALL_REGULAR_FONT_H */

@@ -2,10 +2,10 @@
 #include "scr_test.h"
 #include "scr_mngr.h"
 #include "mlcd_draw.h"
-#include "mlcd_text.h"
 #include "rtc.h"
 #include "nrf_delay.h"
 #include "mlcd.h"
+#include "utf8.h"
 #include "pawn/amxutil.h"
 
 static void scr_test_handle_button_back(void) {
@@ -23,8 +23,8 @@ static void scr_test_handle_button_pressed(uint32_t button_id) {
 static void scr_test_init() {
 	  mlcd_fb_clear();
 	  
-	  mlcd_draw_text("123 test {}%!", 20, 40, 12);
-	  mlcd_draw_text("abmwzABMWZ", 20, 80, 12);
+	  mlcd_draw_text("123 reg test {}%!", 15, 40, FONT_SMALL_REGULAR);
+	  mlcd_draw_text("123 bold test {}%!", 5, 70, FONT_SMALL_BOLD);
 	
 	  mlcd_fb_flush();
 }
