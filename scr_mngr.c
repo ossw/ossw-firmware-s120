@@ -2,6 +2,7 @@
 #include "scr_watchface.h"
 #include "scr_changetime.h"
 #include "scr_changedate.h"
+#include "scr_test.h"
 #include "mlcd.h"
 
 static uint32_t current_screen;
@@ -35,6 +36,9 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 				    break;
 			  case SCR_CHANGE_TIME:
 				    scr_changetime_handle_event(event_type, event_param);
+				    break;
+			  case SCR_TEST:
+				    scr_test_handle_event(event_type, event_param);
 				    break;
 		}
 }

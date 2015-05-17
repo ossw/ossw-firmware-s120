@@ -2255,7 +2255,7 @@ const uint8_t trebuchetMS_12ptBitmaps[] =
 /* { [Char width in bits], [Offset into trebuchetMS_12ptCharBitmaps in bytes] } */
 const FONT_CHAR_INFO trebuchetMS_12ptDescriptorsBlock0[] = 
 {
-	{2, 0}, 		/* ! */ 
+	{1, 0}, 		/* ! */ 
 	{3, 18}, 		/* " */ 
 	{9, 36}, 		/* # */ 
 	{6, 72}, 		/* $ */ 

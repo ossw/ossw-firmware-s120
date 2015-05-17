@@ -19,41 +19,41 @@ static int16_t year;
 static uint8_t change_mode;
 
 static void scr_changedate_draw_day() {
-	  mlcd_draw_digit(day/10, 128, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
-	  mlcd_draw_digit(day%10, 113, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
+	  mlcd_draw_digit(day/10, 3, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
+	  mlcd_draw_digit(day%10, 18, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
 }
 
 static void scr_changedate_draw_month() {
-	  mlcd_draw_digit(month/10, 88, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
-	  mlcd_draw_digit(month%10, 73, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
+	  mlcd_draw_digit(month/10, 43, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
+	  mlcd_draw_digit(month%10, 58, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
 }
 
 static void scr_changedate_draw_year() {
-	  mlcd_draw_digit(year/1000, 48, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
-	  mlcd_draw_digit(year%1000/100, 33, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
-	  mlcd_draw_digit(year%100/10, 18, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
-	  mlcd_draw_digit(year%10, 3, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
+	  mlcd_draw_digit(year/1000, 83, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
+	  mlcd_draw_digit(year%1000/100, 98, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
+	  mlcd_draw_digit(year%100/10, 113, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
+	  mlcd_draw_digit(year%10, 128, DATE_Y_POS, DATE_DIGIT_WIDTH, DATE_HEIGHT, DATE_DIGIT_THICKNESS);
 }
 
 static void scr_changedate_draw_all() {
 	  mlcd_fb_clear();
-	  mlcd_draw_rect(65, DATE_Y_POS, 4, 4);
-	  mlcd_draw_rect(105, DATE_Y_POS, 4, 4);
+	  mlcd_draw_rect(65, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4);
+	  mlcd_draw_rect(105, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4);
 	
 	  if (change_mode == MODE_DAY) {
-			  mlcd_draw_rect_border(110, DATE_Y_POS - 3, 34, DATE_HEIGHT+6, 1);
-			  mlcd_draw_arrow_up(110, DATE_Y_POS + 32, 34, 16, 6);
-			  mlcd_draw_arrow_down(110, DATE_Y_POS - 24, 34, 16, 6);
-		} else if (change_mode == MODE_MONTH) {
-			  mlcd_draw_rect_border(70, DATE_Y_POS - 3, 34, DATE_HEIGHT+6, 1);
-			  mlcd_draw_arrow_up(70, DATE_Y_POS + 32, 34, 16, 6);
-			  mlcd_draw_arrow_down(70, DATE_Y_POS - 24, 34, 16, 6);
-		} else if (change_mode == MODE_YEAR) {
-			  mlcd_draw_rect_border(0, DATE_Y_POS - 3, 64, DATE_HEIGHT+6, 1);
-			  mlcd_draw_arrow_up(15, DATE_Y_POS + 32, 34, 16, 6);
-			  mlcd_draw_arrow_down(15, DATE_Y_POS - 24, 34, 16, 6);
-		}
-		
+        mlcd_draw_rect_border(0, DATE_Y_POS - 3, 34, DATE_HEIGHT+6, 1);
+        mlcd_draw_arrow_up(0, DATE_Y_POS + 32, 34, 16, 6);
+        mlcd_draw_arrow_down(0, DATE_Y_POS - 24, 34, 16, 6);
+    } else if (change_mode == MODE_MONTH) {
+        mlcd_draw_rect_border(40, DATE_Y_POS - 3, 34, DATE_HEIGHT+6, 1);
+        mlcd_draw_arrow_up(40, DATE_Y_POS + 32, 34, 16, 6);
+        mlcd_draw_arrow_down(40, DATE_Y_POS - 24, 34, 16, 6);
+    } else if (change_mode == MODE_YEAR) {
+        mlcd_draw_rect_border(80, DATE_Y_POS - 3, 64, DATE_HEIGHT+6, 1);
+        mlcd_draw_arrow_up(95, DATE_Y_POS + 32, 34, 16, 6);
+        mlcd_draw_arrow_down(95, DATE_Y_POS - 24, 34, 16, 6);
+    }
+    
 	  scr_changedate_draw_day();
 	  scr_changedate_draw_month();
 	  scr_changedate_draw_year();

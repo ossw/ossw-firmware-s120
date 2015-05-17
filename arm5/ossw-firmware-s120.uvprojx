@@ -453,6 +453,16 @@
               <FileType>1</FileType>
               <FilePath>..\scr_changedate.c</FilePath>
             </File>
+            <File>
+              <FileName>scr_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\scr_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_test.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\scr_test.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -552,6 +562,16 @@
               <FileName>mlcd_text.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\mlcd_text.h</FilePath>
+            </File>
+            <File>
+              <FileName>utf8.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\utf8.c</FilePath>
+            </File>
+            <File>
+              <FileName>utf8.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\utf8.h</FilePath>
             </File>
           </Files>
         </Group>

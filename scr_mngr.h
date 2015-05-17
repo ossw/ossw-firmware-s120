@@ -7,6 +7,7 @@
 #define SCR_WATCHFACE                  0x01
 #define SCR_CHANGE_DATE                0x02
 #define SCR_CHANGE_TIME                0x03
+#define SCR_TEST                       0xFF
 
 #define SCR_EVENT_INIT_SCREEN          0x01
 #define SCR_EVENT_RTC_TIME_CHANGED     0x10

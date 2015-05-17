@@ -40,7 +40,6 @@
 #include "rtc.h"
 #include "scr_mngr.h"
 #include "buttons.h"
-#include "pawn/amxutil.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -771,7 +770,7 @@ static void power_manage(void)
 
 static uint_fast8_t splashscreen_draw_func(uint_fast8_t x, uint_fast8_t y)
 {
-	  x = 144 - x;
+	 y = MLCD_YRES - y - 1;
 	 if(x>5 && x<69 && y>87 && y < 163) {
 				if(x>12 && x < 62 && y > 94 && y < 156){
 						return 0;
@@ -824,8 +823,6 @@ static void init_lcd_with_splash_screen() {
     mlcd_display_on();
 }
 
-bool runTestScript = false;
-
 /**@brief Function for application main entry.
  */
 int main(void)
@@ -837,11 +834,11 @@ int main(void)
 	  init_lcd_with_splash_screen();
 
     // Initialize.
-    ble_stack_init();
     timers_init();
 	  rtc_timer_init();
     APP_GPIOTE_INIT(1);
 
+    ble_stack_init();
     device_manager_init();
     db_discovery_init();
     gap_params_init();
@@ -851,9 +848,10 @@ int main(void)
     conn_params_init();
 
     // Start execution.
-    application_timers_start();
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
+		
+    application_timers_start();
 		
 		scr_mngr_init();
 		buttons_init();
@@ -862,10 +860,8 @@ int main(void)
     for (;;)
     {
         power_manage();
-			
-			  if (runTestScript) {
-					  runTestScript = false;
-				 		amxutil_runTestScript();
-				}
     }
+}
+
+void __aeabi_assert(const char * a, const char * b, int c){
 }

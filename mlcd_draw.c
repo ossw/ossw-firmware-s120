@@ -11,33 +11,32 @@ static uint8_t draw_param;
 static uint_fast8_t draw_digit_func(uint_fast8_t x, uint_fast8_t y) {
 		uint8_t mask = digits[draw_param];
 		
-		if(mask & 0x8) {
-				if(y < draw_thickness) {
+		if(mask & 0x1) {
+				if (y < draw_thickness) {
 						return 1;
-				}
-				
+				}	
 		}
-		if(mask & 0x10) {
+		if(mask & 0x2) {
 				if(x >= draw_width-draw_thickness && y < draw_height/2) {
 						return 1;
 				}
 		}
-		if(mask & 0x20) {
+		if(mask & 0x4) {
 				if(x >= draw_width-draw_thickness && y >= draw_height/2) {
 						return 1;
 				}
 		}
-		if(mask & 0x1) {
+		if(mask & 0x8) {
 				if(y >= draw_height - draw_thickness) {
 						return 1;
 				}
 		}
-		if(mask & 0x2) {
+		if(mask & 0x10) {
 				if(x < draw_thickness && y >= draw_height/2) {
 						return 1;
 				}
 		}
-		if(mask & 0x4) {
+		if(mask & 0x20) {
 				if(x < draw_thickness && y < draw_height/2) {
 						return 1;
 				}
@@ -51,7 +50,7 @@ static uint_fast8_t draw_digit_func(uint_fast8_t x, uint_fast8_t y) {
 }
 
 static uint_fast8_t draw_horizontal_progress_func(uint_fast8_t x, uint_fast8_t y) {
-	  return x > draw_param ? 1 : 0;
+	  return x < draw_param ? 1 : 0;
 }
 
 static uint_fast8_t draw_rect_func(uint_fast8_t x, uint_fast8_t y) {
@@ -92,7 +91,7 @@ void mlcd_draw_digit(uint_fast8_t digit, uint_fast8_t x_pos, uint_fast8_t y_pos,
 void mlcd_draw_simple_progress(uint_fast8_t value, uint_fast8_t max, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {
 		draw_width = width;
 	  draw_height = height;
-	  draw_param = width - value*width/max;
+	  draw_param = value*width/max;
 	  mlcd_fb_draw_with_func(draw_horizontal_progress_func, x_pos, y_pos, width, height);
 }
 
