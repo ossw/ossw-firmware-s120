@@ -3802,4 +3802,5 @@ int AMXAPI amx_UTF8Len(const cell *cstr, int *length)
   } /* while */
   return err;
 }
+
 #endif /* AMX_UTF8XXX */

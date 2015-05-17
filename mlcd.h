@@ -39,6 +39,8 @@ void mlcd_set_lines_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uin
 
 void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height);
 
+void mlcd_fb_draw_bitmap(const uint8_t *bitmap, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height);
+
 void mlcd_fb_flush(void);
 
 void mlcd_fb_clear(void);
