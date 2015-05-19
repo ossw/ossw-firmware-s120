@@ -17,8 +17,8 @@
 #include "ble_advertising.h"
 #include "ble_bas.h"
 #include "ble_dis.h"
-#include "ble_db_discovery.h"
-#include "ble_cts_c.h"
+//#include "ble_db_discovery.h"
+//#include "ble_cts_c.h"
 #ifdef BLE_DFU_APP_SUPPORT
 #include "ble_dfu.h"
 #include "dfu_app_handler.h"
@@ -89,8 +89,8 @@ STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                 
 static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;   /**< Handle of the current connection. */
 static ble_bas_t                         m_bas;                                     /**< Structure used to identify the battery service. */
 
-static ble_db_discovery_t                m_ble_db_discovery;                        /**< Structure used to identify the DB Discovery module. */
-static ble_cts_c_t                       m_cts;                                     /**< Structure to store the data of the current time service. */
+//static ble_db_discovery_t                m_ble_db_discovery;                        /**< Structure used to identify the DB Discovery module. */
+//static ble_cts_c_t                       m_cts;                                     /**< Structure to store the data of the current time service. */
 static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by the Device Manager. */
 //static dm_handle_t                       m_peer_handle;                             /**< The peer that is currently connected. */
 //static app_timer_id_t                    m_sec_req_timer_id;                        /**< Security request timer. */
@@ -165,10 +165,10 @@ static void battery_level_meas_timeout_handler(void * p_context)
  *
  * @param[in]  nrf_error  Error code containing information about what went wrong.
  */
-static void current_time_error_handler(uint32_t nrf_error)
+/*static void current_time_error_handler(uint32_t nrf_error)
 {
     APP_ERROR_HANDLER(nrf_error);
-}
+}*/
 
 
 /**@brief Function for handling the security request timer time-out.
@@ -229,7 +229,7 @@ static void timers_init(void)
  *
  * @param[in] p_evt Event received from the Current Time Service client.
  */
-static void on_cts_c_evt(ble_cts_c_t * p_cts, ble_cts_c_evt_t * p_evt)
+/*static void on_cts_c_evt(ble_cts_c_t * p_cts, ble_cts_c_evt_t * p_evt)
 {
 						mlcd_backlight_on();
     switch (p_evt->evt_type)
@@ -252,7 +252,7 @@ static void on_cts_c_evt(ble_cts_c_t * p_cts, ble_cts_c_evt_t * p_evt)
         default:
             break;
     }
-}
+}*/
 
 /**@brief Function for the GAP initialization.
  *
@@ -308,7 +308,7 @@ static void advertising_stop(void)
  * @param[in] p_handle The Device Manager handle that identifies the connection for which the context 
  *                     should be loaded.
  */
-static void app_context_load(dm_handle_t const * p_handle)
+/*static void app_context_load(dm_handle_t const * p_handle)
 {
     uint32_t                 err_code;
     static uint32_t          context_data;
@@ -346,7 +346,7 @@ static void app_context_load(dm_handle_t const * p_handle)
     {
         APP_ERROR_HANDLER(err_code);
     }
-}
+}*/
 
 
 /** @snippet [DFU BLE Reset prepare] */
@@ -389,13 +389,13 @@ static void services_init(void)
     uint32_t       err_code;
     ble_bas_init_t bas_init;
     ble_dis_init_t dis_init;
-    ble_cts_c_init_t cts_init;
+//    ble_cts_c_init_t cts_init;
 	
 	  // Initialize CTS client
-	  cts_init.evt_handler   = on_cts_c_evt;
+/*	  cts_init.evt_handler   = on_cts_c_evt;
     cts_init.error_handler = current_time_error_handler;
     err_code               = ble_cts_c_init(&m_cts, &cts_init);
-    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(err_code);*/
 
     // Initialize Battery Service.
     memset(&bas_init, 0, sizeof(bas_init));
@@ -585,8 +585,8 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
     dm_ble_evt_handler(p_ble_evt);
-    ble_db_discovery_on_ble_evt(&m_ble_db_discovery, p_ble_evt);
-    ble_cts_c_on_ble_evt(&m_cts, p_ble_evt);
+//    ble_db_discovery_on_ble_evt(&m_ble_db_discovery, p_ble_evt);
+//    ble_cts_c_on_ble_evt(&m_cts, p_ble_evt);
     ble_bas_on_ble_evt(&m_bas, p_ble_evt);
     ble_conn_params_on_ble_evt(p_ble_evt);
 #ifdef BLE_DFU_APP_SUPPORT
@@ -651,7 +651,7 @@ static uint32_t device_manager_evt_handler(dm_handle_t const * p_handle,
                                            dm_event_t const  * p_event,
                                            ret_code_t        event_result)
 {
-    uint32_t err_code;
+//    uint32_t err_code;
     APP_ERROR_CHECK(event_result);
 
 	  switch (p_event->event_id)
@@ -662,7 +662,7 @@ static uint32_t device_manager_evt_handler(dm_handle_t const * p_handle,
          //   APP_ERROR_CHECK(err_code);
             break;
 
-        case DM_EVT_LINK_SECURED:
+ /*       case DM_EVT_LINK_SECURED:
 					
 			      app_context_load(p_handle);
 				
@@ -670,7 +670,7 @@ static uint32_t device_manager_evt_handler(dm_handle_t const * p_handle,
                                               p_event->event_param.p_gap_param->conn_handle);
             APP_ERROR_CHECK(err_code);
             break;
-
+*/
         default:
             // No implementation needed.
             break;
@@ -751,12 +751,12 @@ static void advertising_init(void)
 /**
  * @brief Database discovery collector initialization.
  */
-static void db_discovery_init(void)
+/*static void db_discovery_init(void)
 {
     uint32_t err_code = ble_db_discovery_init();
 
     APP_ERROR_CHECK(err_code);
-}
+}*/
 
 
 /**@brief Function for the Power manager.
@@ -840,7 +840,7 @@ int main(void)
 
     ble_stack_init();
     device_manager_init();
-    db_discovery_init();
+//    db_discovery_init();
     gap_params_init();
     advertising_init();
     services_init();
@@ -855,7 +855,7 @@ int main(void)
 		
 		scr_mngr_init();
 		buttons_init();
-	
+
     // Enter main loop.
     for (;;)
     {

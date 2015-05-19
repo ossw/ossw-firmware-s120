@@ -7,6 +7,7 @@
 
 #define FONT_SMALL_REGULAR    0
 #define FONT_SMALL_BOLD       1
+#define FONT_SELECT_REGULAR   7
 
 void mlcd_draw_digit(uint_fast8_t digit, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness);
 

@@ -14,7 +14,7 @@
         <TargetCommonOption>
           <Device>nRF51822_xxAA</Device>
           <Vendor>Nordic Semiconductor</Vendor>
-          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.7.1.0</PackID>
+          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.7.2.1</PackID>
           <PackURL>http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/</PackURL>
           <Cpu>IROM(0x00000000,0x40000) IRAM(0x20000000,0x4000) CPUTYPE("Cortex-M0") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -618,6 +618,11 @@
               <FileType>5</FileType>
               <FilePath>..\fonts\font.h</FilePath>
             </File>
+            <File>
+              <FileName>select_regular.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\fonts\select_regular.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -649,35 +654,30 @@
       </filter>
       <package name="CMSIS" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="ARM" version="4.2.0">
         <targetInfos>
-          <targetInfo name="nrf51822_xxaa_s120"/>
+          <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
-      <package name="nRF_BLE" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE" vendor="NordicSemiconductor" version="2.0.0">
+      <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0">
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
-      <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="7.1.0">
-        <targetInfos>
-          <targetInfo name="nrf51822_xxaa_s120"/>
-        </targetInfos>
-      </package>
-      <package name="nRF_Drivers" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers" vendor="NordicSemiconductor" version="2.0.0">
+      <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="7.2.1">
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
-      <package name="nRF_Examples" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Examples" vendor="NordicSemiconductor" version="8.0.0">
+      <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="2.0.0">
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
-      <package name="nRF_Libraries" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries" vendor="NordicSemiconductor" version="2.0.0">
+      <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="2.0.0">
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
-      <package name="nRF_SoftDevice_Common" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_Common" vendor="NordicSemiconductor" version="1.1.2">
+      <package name="nRF_SoftDevice_Common" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_Common/" vendor="NordicSemiconductor" version="1.1.2">
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
@@ -696,8 +696,8 @@
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
       </component>
-      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="7.1.0" condition="nRF51 Series CMSIS Device">
-        <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="7.1.0"/>
+      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="7.2.1" condition="nRF51 Series CMSIS Device">
+        <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="7.2.1"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>

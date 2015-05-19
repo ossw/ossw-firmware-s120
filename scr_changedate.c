@@ -8,7 +8,7 @@ static int8_t day;
 static int8_t month;
 static int16_t year;
 
-#define DATE_Y_POS              60
+#define DATE_Y_POS              96
 #define DATE_HEIGHT             24
 #define DATE_DIGIT_WIDTH        13
 #define DATE_DIGIT_THICKNESS     3
@@ -37,8 +37,12 @@ static void scr_changedate_draw_year() {
 
 static void scr_changedate_draw_all() {
 	  mlcd_fb_clear();
-	  mlcd_draw_rect(65, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4);
-	  mlcd_draw_rect(105, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4);
+	
+	  mlcd_draw_text("Set date", 20, 13, FONT_SELECT_REGULAR);
+	  mlcd_draw_rect(0, 50, MLCD_XRES, 2);
+	
+	  mlcd_draw_rect(35, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4);
+	  mlcd_draw_rect(75, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4);
 	
 	  if (change_mode == MODE_DAY) {
         mlcd_draw_rect_border(0, DATE_Y_POS - 3, 34, DATE_HEIGHT+6, 1);

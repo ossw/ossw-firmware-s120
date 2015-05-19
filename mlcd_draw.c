@@ -4,6 +4,7 @@
 #include "fonts/font.h"
 #include "fonts/small_bold.h"
 #include "fonts/small_regular.h"
+#include "fonts/select_regular.h"
 
 static uint8_t digits[] = {0x3F, 0x6, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x7, 0x7F, 0x6F};
 
@@ -163,6 +164,8 @@ static const FONT_INFO* mlcd_resolve_font(uint_fast8_t font_type) {
 			 return &smallRegularFontInfo;
 		 case FONT_SMALL_BOLD:
 			 return &smallBoldFontInfo;
+		 case FONT_SELECT_REGULAR:
+			 return &selectRegularFontInfo;
 	 }
 	 return &smallRegularFontInfo;
 }

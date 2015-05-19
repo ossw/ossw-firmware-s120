@@ -7,7 +7,7 @@
 static int8_t hour;
 static int8_t minutes;
 
-#define TIME_Y_POS     60
+#define TIME_Y_POS     90
 #define MODE_HOUR      0x01
 #define MODE_MINUTES   0x02
 
@@ -25,6 +25,10 @@ static void scr_changetime_draw_minutes() {
 
 static void scr_changetime_draw_all() {
 	  mlcd_fb_clear();
+	
+	  mlcd_draw_text("Set time", 19, 13, FONT_SELECT_REGULAR);
+	  mlcd_draw_rect(0, 50, MLCD_XRES, 2);
+	
 	  mlcd_draw_rect(69, TIME_Y_POS + 22, 5, 5);
 	  mlcd_draw_rect(69, TIME_Y_POS + 10, 5, 5);
 	
