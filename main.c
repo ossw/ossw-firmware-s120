@@ -17,7 +17,7 @@
 #include "ble_advertising.h"
 #include "ble_bas.h"
 #include "ble_dis.h"
-#include "ble_nus.h"
+#include "ble/ble_ossw.h"
 //#include "ble_db_discovery.h"
 //#include "ble_cts_c.h"
 #ifdef BLE_DFU_APP_SUPPORT
@@ -47,7 +47,7 @@
 #define DEVICE_NAME                      "OSSW"                                     /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                "OpenSource"                               /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                 300                                        /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
-#define APP_ADV_TIMEOUT_IN_SECONDS       180                                        /**< The advertising timeout in units of seconds. */
+#define APP_ADV_TIMEOUT_IN_SECONDS       0xFFFF                                     /**< The advertising timeout in units of seconds. */
 
 #define APP_TIMER_PRESCALER              0                                          /**< Value of the RTC1 PRESCALER register. */
 #define APP_TIMER_MAX_TIMERS             8+2												                  /**< Maximum number of simultaneously created timers. */
@@ -58,12 +58,12 @@
 #define MAX_BATTERY_LEVEL                100                                        /**< Maximum simulated battery level. */
 #define BATTERY_LEVEL_INCREMENT          1                                          /**< Increment between each simulated battery level measurement. */
 
-#define MIN_CONN_INTERVAL                MSEC_TO_UNITS(400, UNIT_1_25_MS)           /**< Minimum acceptable connection interval (0.4 seconds). */
-#define MAX_CONN_INTERVAL                MSEC_TO_UNITS(650, UNIT_1_25_MS)           /**< Maximum acceptable connection interval (0.65 second). */
-#define SLAVE_LATENCY                    0                                          /**< Slave latency. */
+#define MIN_CONN_INTERVAL                MSEC_TO_UNITS(50, UNIT_1_25_MS)           /**< Minimum acceptable connection interval. */
+#define MAX_CONN_INTERVAL                MSEC_TO_UNITS(75, UNIT_1_25_MS)           /**< Maximum acceptable connection interval. */
+#define SLAVE_LATENCY                    10                                          /**< Slave latency. */
 #define CONN_SUP_TIMEOUT                 MSEC_TO_UNITS(6000, UNIT_10_MS)            /**< Connection supervisory timeout (4 seconds). */
 
-#define FIRST_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER) /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
+#define FIRST_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(10000, APP_TIMER_PRESCALER) /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
 #define NEXT_CONN_PARAMS_UPDATE_DELAY    APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER)/**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT     3                                          /**< Number of attempts before giving up the connection parameter negotiation. */
 
@@ -84,14 +84,12 @@
 #define APP_SERVICE_HANDLE_START         0x000C                                     /**< Handle of first application specific service when when service changed characteristic is present. */
 #define BLE_HANDLE_MAX                   0xFFFF                                     /**< Max handle value in BLE. */
 
-#define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
-
 STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                     /** When having DFU Service support in application the Service Changed Characteristic should always be present. */
 #endif // BLE_DFU_APP_SUPPORT
 
 static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;   /**< Handle of the current connection. */
 static ble_bas_t                         m_bas;                                     /**< Structure used to identify the battery service. */
-static ble_nus_t                        m_nus;   
+static ble_ossw_t                        m_ossw;   
 
 //static ble_db_discovery_t                m_ble_db_discovery;                        /**< Structure used to identify the DB Discovery module. */
 //static ble_cts_c_t                       m_cts;                                     /**< Structure to store the data of the current time service. */
@@ -111,6 +109,7 @@ static ble_dfu_t m_dfus; /**< Structure used to identify the DFU service. */
 #endif // BLE_DFU_APP_SUPPORT  
 			
 uint8_t testValue = 0;
+//uint8_t testValue2 = 0;
 			
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -128,19 +127,21 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-/**@brief Function for handling the data from the Nordic UART Service.
+/**@brief Function for handling the data from the OSSW.
  *
- * @details This function will process the data received from the Nordic UART BLE Service and send
- *          it to the UART module.
- *
- * @param[in] p_nus    Nordic UART Service structure.
+ * @param[in] p_ossw   OSSW Service structure.
  * @param[in] p_data   Data to be send to UART module.
  * @param[in] length   Length of the data.
  */
 /**@snippet [Handling the data received over BLE] */
-static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t length)
+static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t length)
 {
-	 testValue = p_data[0];
+	 if(p_data[0] == 1) {
+			testValue = p_data[1];
+	 } else if(p_data[0] == 2) {
+		//	testValue2 = p_data[1];
+	 }
+		 
    // for (uint32_t i = 0; i < length; i++)
    // {
        // while(app_uart_put(p_data[i]) != NRF_SUCCESS);
@@ -414,7 +415,7 @@ static void services_init(void)
     uint32_t       err_code;
     ble_bas_init_t bas_init;
     ble_dis_init_t dis_init;
-	  ble_nus_init_t nus_init;
+	  ble_ossw_init_t ossw_init;
 //    ble_cts_c_init_t cts_init;
 	
 	  // Initialize CTS client
@@ -423,9 +424,9 @@ static void services_init(void)
     err_code               = ble_cts_c_init(&m_cts, &cts_init);
     APP_ERROR_CHECK(err_code);*/
 	
-    memset(&nus_init, 0, sizeof(nus_init));
-    nus_init.data_handler = nus_data_handler;
-    err_code = ble_nus_init(&m_nus, &nus_init);
+    memset(&ossw_init, 0, sizeof(ossw_init));
+    ossw_init.data_handler = ossw_data_handler;
+    err_code = ble_ossw_init(&m_ossw, &ossw_init);
     APP_ERROR_CHECK(err_code);
 
     // Initialize Battery Service.
@@ -614,7 +615,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
     dm_ble_evt_handler(p_ble_evt);
-    ble_nus_on_ble_evt(&m_nus, p_ble_evt);
+    ble_ossw_on_ble_evt(&m_ossw, p_ble_evt);
 //    ble_db_discovery_on_ble_evt(&m_ble_db_discovery, p_ble_evt);
 //    ble_cts_c_on_ble_evt(&m_cts, p_ble_evt);
     ble_bas_on_ble_evt(&m_bas, p_ble_evt);
@@ -757,10 +758,10 @@ static void advertising_init(void)
     ble_advdata_t advdata;
     ble_advdata_t scanrsp;
 	
-	  ble_uuid_t adv_uuids[] = {//{BLE_UUID_HEART_RATE_SERVICE,         BLE_UUID_TYPE_BLE},
+	//  ble_uuid_t adv_uuids[] = {//{BLE_UUID_HEART_RATE_SERVICE,         BLE_UUID_TYPE_BLE},
 			//{BLE_UUID_NUS_SERVICE, m_nus.uuid_type},
-                                   {BLE_UUID_BATTERY_SERVICE,            BLE_UUID_TYPE_BLE},
-                                   {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}}; /**< Universally unique service identifiers. */
+   //                                {BLE_UUID_BATTERY_SERVICE,            BLE_UUID_TYPE_BLE},
+   //                                {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}}; /**< Universally unique service identifiers. */
 
 
     // Build advertising data struct to pass into @ref ble_advertising_init.
@@ -769,10 +770,12 @@ static void advertising_init(void)
     advdata.name_type               = BLE_ADVDATA_FULL_NAME;
     advdata.include_appearance      = true;
     advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-    advdata.uuids_complete.uuid_cnt = sizeof(adv_uuids) / sizeof(adv_uuids[0]);
-    advdata.uuids_complete.p_uuids  = adv_uuids;
+ //   advdata.uuids_complete.uuid_cnt = sizeof(adv_uuids) / sizeof(adv_uuids[0]);
+ //   advdata.uuids_complete.p_uuids  = adv_uuids;
 
-		ble_uuid_t scan_uuids[] = {{BLE_UUID_NUS_SERVICE, m_nus.uuid_type}}; /**< Universally unique service identifiers. */
+		ble_uuid_t scan_uuids[] =     {{BLE_UUID_BATTERY_SERVICE,            BLE_UUID_TYPE_BLE},
+                                   {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE},
+																	{BLE_UUID_OSSW_SERVICE, m_ossw.uuid_type}}; /**< Universally unique service identifiers. */
 
 
     memset(&scanrsp, 0, sizeof(scanrsp));

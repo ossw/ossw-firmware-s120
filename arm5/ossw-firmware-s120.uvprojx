@@ -561,7 +561,7 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>pawn</GroupName>
+          <GroupName>PAWN</GroupName>
           <Files>
             <File>
               <FileName>osdefs.h</FileName>
@@ -622,6 +622,21 @@
               <FileName>select_regular.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\fonts\select_regular.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>BLE</GroupName>
+          <Files>
+            <File>
+              <FileName>ble_ossw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ble\ble_ossw.c</FilePath>
+            </File>
+            <File>
+              <FileName>ble_ossw.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\ble\ble_ossw.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -760,12 +775,6 @@
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
-        </targetInfos>
-      </component>
-      <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_nus" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_nus">
-        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
-        <targetInfos>
-          <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="app_uart" Cvariant="Fifo" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="app_uart_Fifo">
