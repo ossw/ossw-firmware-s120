@@ -9,6 +9,7 @@
 //static uint8_t fb[MLCD_LINE_BYTES * MLCD_YRES];
 static bool fb_line_changes[MLCD_YRES];
 static uint8_t vcom;
+static bool backlight_on = false;
 
 static uint8_t bit_reverse(uint8_t byte) {
     #if (__CORTEX_M >= 0x03)
@@ -57,12 +58,24 @@ void mlcd_power_on(void)
 
 void mlcd_backlight_off(void)
 {
+	backlight_on = false;
   nrf_gpio_pin_clear(LCD_BACKLIGHT);
 }
 
 void mlcd_backlight_on(void)
 {
+	backlight_on = true;
   nrf_gpio_pin_set(LCD_BACKLIGHT);
+}
+
+void mlcd_backlight_toggle(void)
+{
+	backlight_on = !backlight_on;
+	if (backlight_on) {
+		  nrf_gpio_pin_set(LCD_BACKLIGHT);
+	} else {
+		  nrf_gpio_pin_clear(LCD_BACKLIGHT);
+	}
 }
 
 void mlcd_switch_vcom() {

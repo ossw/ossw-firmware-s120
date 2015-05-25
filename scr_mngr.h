@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define SCR_CHOOSE_MODE                0x00
 #define SCR_WATCHFACE                  0x01
 #define SCR_CHANGE_DATE                0x02
 #define SCR_CHANGE_TIME                0x03

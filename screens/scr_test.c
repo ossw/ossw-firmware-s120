@@ -1,12 +1,12 @@
 #include <string.h>
 #include "scr_test.h"
-#include "scr_mngr.h"
-#include "mlcd_draw.h"
-#include "rtc.h"
 #include "nrf_delay.h"
-#include "mlcd.h"
-#include "utf8.h"
-#include "pawn/amxutil.h"
+#include "../scr_mngr.h"
+#include "../mlcd_draw.h"
+#include "../rtc.h"
+#include "../mlcd.h"
+#include "../utf8.h"
+#include "../pawn/amxutil.h"
 
 #define DIGITS_Y_POS 80
 

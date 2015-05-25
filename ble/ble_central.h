@@ -1,5 +1,5 @@
-#ifndef BLE_CENTRAL_H__
-#define BLE_CENTRAL_H__
+#ifndef BLE_CENTRAL_H
+#define BLE_CENTRAL_H
 
 void ble_central_mode_init(void);
 	

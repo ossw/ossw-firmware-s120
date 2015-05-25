@@ -1,12 +1,10 @@
 #include <string.h>
 #include "scr_watchface.h"
-#include "scr_mngr.h"
-#include "mlcd_draw.h"
-#include "rtc.h"
+#include "../scr_mngr.h"
+#include "../mlcd_draw.h"
+#include "../rtc.h"
+#include "../mlcd.h"
 #include "nrf_delay.h"
-#include "mlcd.h"
-
-static bool backlight_on = false;
 
 static uint32_t lastTime = 0;
 
@@ -53,26 +51,16 @@ static void scr_watchface_refresh_time() {
 static void scr_watchface_handle_button_pressed(uint32_t button_id) {
     switch (button_id) {
         case SCR_EVENT_PARAM_BUTTON_SELECT:
-             scr_mngr_show_screen(SCR_CHANGE_TIME);
+            scr_mngr_show_screen(SCR_CHANGE_TIME);
             break;
         case SCR_EVENT_PARAM_BUTTON_DOWN:
-             scr_mngr_show_screen(SCR_CHANGE_DATE);
+            scr_mngr_show_screen(SCR_CHANGE_DATE);
             break;
         case SCR_EVENT_PARAM_BUTTON_UP:
             scr_mngr_show_screen(SCR_TEST);
             break;
-    }
-}
-
-static void scr_watchface_handle_button_long_pressed(uint32_t button_id) {
-    switch (button_id) {
         case SCR_EVENT_PARAM_BUTTON_BACK:
-            backlight_on = !backlight_on;
-            if (backlight_on) {
-                mlcd_backlight_on();
-            } else {
-                mlcd_backlight_off();
-            }
+            NVIC_SystemReset();
             break;
     }
 }
@@ -99,9 +87,6 @@ void scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
    //         break;
         case SCR_EVENT_BUTTON_PRESSED:
             scr_watchface_handle_button_pressed(event_param);
-            break;
-        case SCR_EVENT_BUTTON_LONG_PRESSED:
-            scr_watchface_handle_button_long_pressed(event_param);
             break;
     }
 }

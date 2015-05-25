@@ -347,7 +347,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>4</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -424,44 +424,54 @@
           <GroupName>Screens</GroupName>
           <Files>
             <File>
-              <FileName>scr_watchface.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\scr_watchface.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_watchface.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\scr_watchface.h</FilePath>
-            </File>
-            <File>
-              <FileName>scr_changetime.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\scr_changetime.h</FilePath>
-            </File>
-            <File>
-              <FileName>scr_changetime.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\scr_changetime.c</FilePath>
-            </File>
-            <File>
               <FileName>scr_changedate.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\scr_changedate.h</FilePath>
+              <FilePath>..\screens\scr_changedate.h</FilePath>
             </File>
             <File>
               <FileName>scr_changedate.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\scr_changedate.c</FilePath>
+              <FilePath>..\screens\scr_changedate.c</FilePath>
             </File>
             <File>
-              <FileName>scr_test.c</FileName>
+              <FileName>scr_changetime.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\screens\scr_changetime.h</FilePath>
+            </File>
+            <File>
+              <FileName>scr_changetime.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\scr_test.c</FilePath>
+              <FilePath>..\screens\scr_changetime.c</FilePath>
             </File>
             <File>
               <FileName>scr_test.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\scr_test.h</FilePath>
+              <FilePath>..\screens\scr_test.h</FilePath>
+            </File>
+            <File>
+              <FileName>scr_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchface.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\screens\scr_watchface.h</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_watchface.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_choosemode.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\screens\scr_choosemode.h</FilePath>
+            </File>
+            <File>
+              <FileName>scr_choosemode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_choosemode.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -782,6 +792,12 @@
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
       </component>
+      <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_db_discovery" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_db_discovery">
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_service_common" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_service_common">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
         <targetInfos>
@@ -794,6 +810,12 @@
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </component>
+      <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_bas_c" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_bas_c">
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_dfu" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_dfu">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
         <targetInfos>
@@ -804,6 +826,12 @@
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_hrs_c" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_hrs_c">
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="app_uart" Cvariant="Fifo" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="app_uart_Fifo">
@@ -1053,16 +1081,20 @@
         </targetInfos>
       </file>
       <file attr="config" category="source" name="ble_db_discovery\ble_db_discovery.c" version="2.0.0">
-        <instance index="0" removed="1">RTE\nRF_BLE\nRF51822_xxAA\ble_db_discovery.c</instance>
+        <instance index="0">RTE\nRF_BLE\nRF51822_xxAA\ble_db_discovery.c</instance>
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_db_discovery" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_db_discovery"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
-        <targetInfos/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
       </file>
       <file attr="config" category="header" name="ble_db_discovery\ble_db_discovery.h" version="2.0.0">
-        <instance index="0" removed="1">RTE\nRF_BLE\nRF51822_xxAA\ble_db_discovery.h</instance>
+        <instance index="0">RTE\nRF_BLE\nRF51822_xxAA\ble_db_discovery.h</instance>
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_db_discovery" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="ble_db_discovery"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="2.0.0"/>
-        <targetInfos/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
       </file>
       <file attr="config" category="header" name="device_manager\config\device_manager_cnfg.h" version="2.0.0">
         <instance index="0" removed="1">RTE\nRF_BLE\nRF51822_xxAA\device_manager_cnfg.h</instance>

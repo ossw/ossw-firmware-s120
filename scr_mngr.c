@@ -1,8 +1,9 @@
 #include "scr_mngr.h"
-#include "scr_watchface.h"
-#include "scr_changetime.h"
-#include "scr_changedate.h"
-#include "scr_test.h"
+#include "screens/scr_choosemode.h"
+#include "screens/scr_watchface.h"
+#include "screens/scr_changetime.h"
+#include "screens/scr_changedate.h"
+#include "screens/scr_test.h"
 #include "mlcd.h"
 
 static uint32_t current_screen;
@@ -11,7 +12,15 @@ bool initialized = false;
 
 void scr_mngr_init(void) {
 	  initialized = true;
-	  scr_mngr_show_screen(SCR_WATCHFACE);
+	  scr_mngr_show_screen(SCR_CHOOSE_MODE);
+}
+
+static void scr_mngr_default_handle_button_long_pressed(uint32_t button_id) {
+    switch (button_id) {
+        case SCR_EVENT_PARAM_BUTTON_BACK:
+            mlcd_backlight_toggle();
+            break;
+    }
 }
 
 void scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
@@ -19,6 +28,9 @@ void scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
 			  case SCR_EVENT_RTC_TIME_CHANGED:
 				    mlcd_switch_vcom();
 				    break;
+        case SCR_EVENT_BUTTON_LONG_PRESSED:
+            scr_mngr_default_handle_button_long_pressed(event_param);
+            break;
 		}
 }
 
@@ -28,6 +40,9 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 		}
 		scr_mngr_default_handle_event(event_type, event_param);
 	  switch(current_screen) {
+			  case SCR_CHOOSE_MODE:
+				    scr_choosemode_handle_event(event_type, event_param);
+				    break;
 			  case SCR_WATCHFACE:
 				    scr_watchface_handle_event(event_type, event_param);
 				    break;

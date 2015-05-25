@@ -1,7 +1,7 @@
 #include "scr_changedate.h"
-#include "scr_mngr.h"
-#include "mlcd_draw.h"
-#include "rtc.h"
+#include "../scr_mngr.h"
+#include "../mlcd_draw.h"
+#include "../rtc.h"
 #include <time.h>
 
 static int8_t day;

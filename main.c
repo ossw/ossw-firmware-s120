@@ -24,9 +24,6 @@
 #include "buttons.h"
 #include "softdevice_handler.h"
 
-#include "ble/ble_central.h"
-#include "ble/ble_peripheral.h"
-
 #define DEAD_BEEF                        0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 //uint8_t testValue2 = 0;
@@ -133,9 +130,6 @@ int main(void)
 	
     // Initialize the SoftDevice handler module.
     SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
-
-  	ble_peripheral_mode_init();
-	  //ble_central_mode_init();
 		
 		scr_mngr_init();
 		buttons_init();
