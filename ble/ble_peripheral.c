@@ -16,6 +16,7 @@
 #include "sensorsim.h"
 #include "pstorage.h"
 #include "softdevice_handler.h"
+#include "nrf_delay.h"
 #include "../board.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
