@@ -88,7 +88,7 @@ static app_timer_id_t                    m_battery_timer_id;                    
 static ble_dfu_t m_dfus; /**< Structure used to identify the DFU service. */
 #endif // BLE_DFU_APP_SUPPORT  
 			
-uint8_t testValue = 0;
+extern uint8_t testValue;
 
 /**@brief Function for handling the data from the OSSW.
  *

@@ -13,6 +13,8 @@
 static uint32_t lastValue = 0;
 //static uint32_t lastValue2 = 0;
 
+uint8_t testValue;
+
 static void scr_test_handle_button_back(void) {
 	  scr_mngr_show_screen(SCR_WATCHFACE);
 }
@@ -24,8 +26,6 @@ static void scr_test_handle_button_pressed(uint32_t button_id) {
 				    break;
 		}
 }
-
-extern uint8_t testValue;
 
 static void scr_test_refresh_value1() {
 	  if(testValue == lastValue) {
