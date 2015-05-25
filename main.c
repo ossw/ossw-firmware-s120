@@ -133,7 +133,7 @@ int main(void)
     // Initialize the SoftDevice handler module.
     SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
 
-  	// ble_peripheral_mode_init();
+  	ble_peripheral_mode_init();
 		
 		scr_mngr_init();
 		buttons_init();
