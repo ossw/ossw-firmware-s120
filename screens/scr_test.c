@@ -11,7 +11,6 @@
 #define DIGITS_Y_POS 80
 
 static uint32_t lastValue = 0;
-//static uint32_t lastValue2 = 0;
 
 uint8_t testValue;
 
@@ -42,7 +41,7 @@ static void scr_test_refresh_value1() {
     lastValue = testValue;
 }
 
-static void scr_watchface_refresh_screen() {
+static void scr_test_refresh_screen() {
 	  scr_test_refresh_value1();
 	  mlcd_fb_flush();
 }
@@ -50,12 +49,13 @@ static void scr_watchface_refresh_screen() {
 static void scr_test_init() {
 	  mlcd_fb_clear();
 	                 
-	  mlcd_draw_text("Heart rate", 5, 13, FONT_SELECT_REGULAR);
+	  mlcd_draw_text("Heart rate", 5, 13, NULL, NULL, FONT_OPTION_BIG);
 	  mlcd_draw_rect(0, 50, MLCD_XRES, 2);
+	
 //	  mlcd_draw_text("123 reg test {}%!", 15, 40, FONT_SMALL_REGULAR);
 //	  mlcd_draw_text("123 bold test {}%!", 5, 70, FONT_SMALL_BOLD);
 	
-    scr_watchface_refresh_screen();
+    scr_test_refresh_screen();
 }
 
 void scr_test_handle_event(uint32_t event_type, uint32_t event_param) {
@@ -64,7 +64,7 @@ void scr_test_handle_event(uint32_t event_type, uint32_t event_param) {
 				    scr_test_init();
 				    break;
         case SCR_EVENT_REFRESH_SCREEN:
-            scr_watchface_refresh_screen();
+            scr_test_refresh_screen();
             break;
 			  case SCR_EVENT_BUTTON_PRESSED:
 				    scr_test_handle_button_pressed(event_param);

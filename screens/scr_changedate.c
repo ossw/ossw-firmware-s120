@@ -38,7 +38,7 @@ static void scr_changedate_draw_year() {
 static void scr_changedate_draw_all() {
 	  mlcd_fb_clear();
 	
-	  mlcd_draw_text("Set date", 20, 13, FONT_SELECT_REGULAR);
+	  mlcd_draw_text("Set date", 20, 13, NULL, NULL, FONT_OPTION_BIG);
 	  mlcd_draw_rect(0, 50, MLCD_XRES, 2);
 	
 	  mlcd_draw_rect(35, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4);

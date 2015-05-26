@@ -12,7 +12,8 @@ static void rtc_timeout_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
 
 		current_time++;
-		rtc_set_current_time(current_time);
+	// temporarly disable because this may break the screen redraw function
+	// rtc_set_current_time(current_time);
 		scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
 
 }

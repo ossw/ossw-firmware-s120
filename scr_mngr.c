@@ -3,8 +3,11 @@
 #include "screens/scr_watchface.h"
 #include "screens/scr_changetime.h"
 #include "screens/scr_changedate.h"
+#include "screens/scr_settings.h"
 #include "screens/scr_test.h"
 #include "mlcd.h"
+
+bool initScreen = false;
 
 static uint32_t current_screen;
 
@@ -52,6 +55,9 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 			  case SCR_CHANGE_TIME:
 				    scr_changetime_handle_event(event_type, event_param);
 				    break;
+			  case SCR_SETTINGS:
+				    scr_settings_handle_event(event_type, event_param);
+				    break;
 			  case SCR_TEST:
 				    scr_test_handle_event(event_type, event_param);
 				    break;
@@ -60,5 +66,5 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 
 void scr_mngr_show_screen(uint32_t screen_id) {
 	  current_screen = screen_id;
-	  scr_mngr_handle_event(SCR_EVENT_INIT_SCREEN, 0);
+	  initScreen = true;
 }

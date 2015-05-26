@@ -473,6 +473,16 @@
               <FileType>1</FileType>
               <FilePath>..\screens\scr_choosemode.c</FilePath>
             </File>
+            <File>
+              <FileName>scr_settings.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_settings.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_settings.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\screens\scr_settings.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -629,9 +639,14 @@
               <FilePath>..\fonts\font.h</FilePath>
             </File>
             <File>
-              <FileName>select_regular.h</FileName>
+              <FileName>option_normal.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\fonts\select_regular.h</FilePath>
+              <FilePath>..\fonts\option_normal.h</FilePath>
+            </File>
+            <File>
+              <FileName>option_big.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\fonts\option_big.h</FilePath>
             </File>
           </Files>
         </Group>

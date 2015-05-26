@@ -65,6 +65,14 @@ static void scr_watchface_handle_button_pressed(uint32_t button_id) {
     }
 }
 
+static void scr_watchface_handle_button_long_pressed(uint32_t button_id) {
+    switch (button_id) {
+        case SCR_EVENT_PARAM_BUTTON_SELECT:
+            scr_mngr_show_screen(SCR_SETTINGS);
+            break;
+    }
+}
+
 static void scr_watchface_init() {
     mlcd_fb_clear();
 	
@@ -87,6 +95,9 @@ void scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
    //         break;
         case SCR_EVENT_BUTTON_PRESSED:
             scr_watchface_handle_button_pressed(event_param);
+            break;
+        case SCR_EVENT_BUTTON_LONG_PRESSED:
+            scr_watchface_handle_button_long_pressed(event_param);
             break;
     }
 }

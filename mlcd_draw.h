@@ -7,7 +7,12 @@
 
 #define FONT_SMALL_REGULAR    0
 #define FONT_SMALL_BOLD       1
-#define FONT_SELECT_REGULAR   7
+#define FONT_OPTION_NORMAL    0x10
+#define FONT_OPTION_BIG       0x11
+
+#define ALIGN_LEFT  					0x0
+#define ALIGN_CENTER					0x40
+#define ALIGN_RIGHT						0x80
 
 void mlcd_draw_digit(uint_fast8_t digit, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness);
 
@@ -23,6 +28,6 @@ void mlcd_draw_arrow_down(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t w
 
 void mlcd_draw_rect_border(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness);
 
-uint_fast8_t mlcd_draw_text(char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t font_type);
+uint_fast8_t mlcd_draw_text(char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type);
 
 #endif /* MLCD_DRAW_H */

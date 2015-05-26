@@ -1,14 +1,14 @@
-#ifndef SELECT_REGULAR_FONT_H
-#define SELECT_REGULAR_FONT_H
+#ifndef OPTION_BIG_FONT_H
+#define OPTION_BIG_FONT_H
 
 #include <stdint.h>
 
-const uint8_t selectRegularFontBitmaps[] = 
+const uint8_t optionBigFontBitmaps[] = 
 {
 	// @0 '!' (3 pixels wide)
 	0x00, //    
-	0x00, //    
-	0x00, //    
+	0xE0, // ###
+	0xE0, // ###
 	0xE0, // ###
 	0xE0, // ###
 	0xE0, // ###
@@ -371,11 +371,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @572 '0' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
@@ -399,11 +399,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @624 '1' (6 pixels wide)
 	0x00, //       
-	0x00, //       
-	0x00, //       
 	0xFC, // ######
 	0xFC, // ######
 	0xFC, // ######
+	0x1C, //    ###
+	0x1C, //    ###
 	0x1C, //    ###
 	0x1C, //    ###
 	0x1C, //    ###
@@ -427,11 +427,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @650 '2' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0x00, 0x70, //          ###
+	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0xFF, 0xF0, // ############
@@ -455,11 +455,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @702 '3' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0x00, 0x70, //          ###
+	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0x1F, 0xF0, //    #########
@@ -483,8 +483,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @754 '4' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
@@ -511,11 +511,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @806 '5' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x00, // ###         
+	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xFF, 0xF0, // ############
@@ -539,11 +539,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @858 '6' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x00, // ###         
+	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xFF, 0xF0, // ############
@@ -567,11 +567,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @910 '7' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0x00, 0x70, //          ###
+	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
@@ -595,11 +595,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @962 '8' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xFF, 0xF0, // ############
@@ -623,11 +623,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1014 '9' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xFF, 0xF0, // ############
@@ -791,11 +791,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1274 '?' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0x00, 0x70, //          ###
+	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0x1F, 0xF0, //    #########
@@ -846,12 +846,12 @@ const uint8_t selectRegularFontBitmaps[] =
 	0x00, 0x00, 0x00, //                     
 
 	// @1404 'A' (12 pixels wide)
-	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
+	0x00, 0x00, //            
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xFF, 0xF0, // ############
@@ -875,11 +875,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1456 'B' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0x80, // #########   
 	0xFF, 0x80, // #########   
-	0xFF, 0x80, // #########   
+	0xFF, 0x80, // #########    
+	0xE3, 0x80, // ###   ###   
+	0xE3, 0x80, // ###   ###  
 	0xE3, 0x80, // ###   ###   
 	0xE3, 0x80, // ###   ###   
 	0xFF, 0xF0, // ############
@@ -903,13 +903,13 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1508 'C' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
+	0xE0, 0x00, // ###         
+	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
@@ -931,8 +931,6 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1560 'D' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0x80, // #########   
 	0xFF, 0x80, // #########   
 	0xFF, 0xF0, // ############
@@ -947,7 +945,9 @@ const uint8_t selectRegularFontBitmaps[] =
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
-	0xFF, 0x80, // #########   
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
+	0xFF, 0xF0, // ############
 	0xFF, 0x80, // #########   
 	0xFF, 0x80, // #########   
 	0x00, 0x00, //             
@@ -959,11 +959,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1612 'E' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x00, // ###         
+	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xFF, 0x80, // #########   
@@ -987,11 +987,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1664 'F' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x00, // ###         
+	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xFF, 0x80, // #########   
@@ -1015,11 +1015,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1716 'G' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x00, // ###         
+	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE3, 0xF0, // ###   ######
@@ -1042,9 +1042,9 @@ const uint8_t selectRegularFontBitmaps[] =
 	0x00, 0x00, //             
 
 	// @1768 'H' (12 pixels wide)
-	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
+	0x00, 0x00, //            
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
@@ -1071,8 +1071,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1820 'I' (3 pixels wide)
 	0x00, //    
-	0x00, //    
-	0x00, //    
+	0xE0, // ###
+	0xE0, // ###
 	0xE0, // ###
 	0xE0, // ###
 	0xE0, // ###
@@ -1099,8 +1099,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1846 'J' (9 pixels wide)
 	0x00, 0x00, //          
-	0x00, 0x00, //          
-	0x00, 0x00, //          
+	0x03, 0x80, //       ###
+	0x03, 0x80, //       ###
 	0x03, 0x80, //       ###
 	0x03, 0x80, //       ###
 	0x03, 0x80, //       ###
@@ -1127,8 +1127,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1898 'K' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
@@ -1155,8 +1155,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @1950 'L' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
+	0xE0, 0x00, // ###         
+	0xE0, 0x00, // ###        
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
@@ -1182,12 +1182,12 @@ const uint8_t selectRegularFontBitmaps[] =
 	0x00, 0x00, //             
 
 	// @2002 'M' (20 pixels wide)
-	0x00, 0x00, 0x00, //                     
-	0x00, 0x00, 0x00, //                     
-	0x00, 0x00, 0x00, //                     
+	0x00, 0x00, 0x00, //                    
 	0xFF, 0xFF, 0xF0, // ####################
 	0xFF, 0xFF, 0xF0, // ####################
 	0xFF, 0xFF, 0xF0, // ####################
+	0xE0, 0x70, 0x70, // ###      ###     ###
+	0xE0, 0x70, 0x70, // ###      ###     ###
 	0xE0, 0x70, 0x70, // ###      ###     ###
 	0xE0, 0x70, 0x70, // ###      ###     ###
 	0xE0, 0x70, 0x70, // ###      ###     ###
@@ -1211,11 +1211,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2080 'N' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
@@ -1239,11 +1239,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2132 'O' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
@@ -1266,12 +1266,12 @@ const uint8_t selectRegularFontBitmaps[] =
 	0x00, 0x00, //             
 
 	// @2184 'P' (12 pixels wide)
-	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
+	0x00, 0x00, //            
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xFF, 0xF0, // ############
@@ -1295,11 +1295,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2236 'Q' (15 pixels wide)
 	0x00, 0x00, //                
-	0x00, 0x00, //                
-	0x00, 0x00, //                
 	0xFF, 0xFE, // ###############
 	0xFF, 0xFE, // ###############
 	0xFF, 0xFE, // ###############
+	0xE0, 0x0E, // ###         ###
+	0xE0, 0x0E, // ###         ###
 	0xE0, 0x0E, // ###         ###
 	0xE0, 0x0E, // ###         ###
 	0xE0, 0x0E, // ###         ###
@@ -1323,11 +1323,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2288 'R' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xFF, 0x80, // #########   
@@ -1351,11 +1351,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2340 'S' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0xE0, 0x00, // ###         
+	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xE0, 0x00, // ###         
 	0xFF, 0xF0, // ############
@@ -1379,11 +1379,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2392 'T' (15 pixels wide)
 	0x00, 0x00, //                
-	0x00, 0x00, //                
-	0x00, 0x00, //                
 	0xFF, 0xFE, // ###############
 	0xFF, 0xFE, // ###############
 	0xFF, 0xFE, // ###############
+	0x03, 0x80, //       ###      
+	0x03, 0x80, //       ###      
 	0x03, 0x80, //       ###      
 	0x03, 0x80, //       ###      
 	0x03, 0x80, //       ###      
@@ -1407,8 +1407,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2444 'U' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
@@ -1435,8 +1435,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2496 'V' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
@@ -1463,8 +1463,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2548 'W' (20 pixels wide)
 	0x00, 0x00, 0x00, //                     
-	0x00, 0x00, 0x00, //                     
-	0x00, 0x00, 0x00, //                     
+	0xE0, 0x70, 0x70, // ###      ###     ###
+	0xE0, 0x70, 0x70, // ###      ###     ###
 	0xE0, 0x70, 0x70, // ###      ###     ###
 	0xE0, 0x70, 0x70, // ###      ###     ###
 	0xE0, 0x70, 0x70, // ###      ###     ###
@@ -1491,8 +1491,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2626 'X' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
+	0xE0, 0x70, // ###      ###
+	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
 	0xE0, 0x70, // ###      ###
@@ -1519,8 +1519,8 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2678 'Y' (15 pixels wide)
 	0x00, 0x00, //                
-	0x00, 0x00, //                
-	0x00, 0x00, //                
+	0xE0, 0x0E, // ###         ###
+	0xE0, 0x0E, // ###         ###
 	0xE0, 0x0E, // ###         ###
 	0xE0, 0x0E, // ###         ###
 	0xE0, 0x0E, // ###         ###
@@ -1547,11 +1547,11 @@ const uint8_t selectRegularFontBitmaps[] =
 
 	// @2730 'Z' (12 pixels wide)
 	0x00, 0x00, //             
-	0x00, 0x00, //             
-	0x00, 0x00, //             
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
 	0xFF, 0xF0, // ############
+	0x00, 0x70, //          ###
+	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0x00, 0x70, //          ###
 	0x1F, 0x80, //    ######   
@@ -2498,7 +2498,7 @@ const uint8_t selectRegularFontBitmaps[] =
 	0x00, //    
 };
 
-const FONT_CHAR_INFO selectRegularFontDescriptors[] = 
+const FONT_CHAR_INFO optionBigFontDescriptors[] = 
 {
 	{3, 0}, 		// ! 
 	{9, 26}, 		// " 
@@ -2594,21 +2594,21 @@ const FONT_CHAR_INFO selectRegularFontDescriptors[] =
 	{3, 4342}, 		// | 
 };
 
-const FONT_CHAR_INFO_LOOKUP selectRegularFontBlockLookup[] = 
+const FONT_CHAR_INFO_LOOKUP optionBigFontBlockLookup[] = 
 {
-	{'!', '|', selectRegularFontDescriptors}
+	{'!', '|', optionBigFontDescriptors}
 };
 
-const FONT_INFO selectRegularFontInfo =
+const FONT_INFO optionBigFontInfo =
 {
 	26,
 	'!',
 	'|',
 	3,
 	6,
-	selectRegularFontBlockLookup,
+	optionBigFontBlockLookup,
 	1,
-	selectRegularFontBitmaps,
+	optionBigFontBitmaps,
 };
 
-#endif /* SELECT_REGULAR_FONT_H */
+#endif /* OPTION_BIG_FONT_H */

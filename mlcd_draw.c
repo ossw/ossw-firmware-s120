@@ -4,7 +4,8 @@
 #include "fonts/font.h"
 #include "fonts/small_bold.h"
 #include "fonts/small_regular.h"
-#include "fonts/select_regular.h"
+#include "fonts/option_normal.h"
+#include "fonts/option_big.h"
 
 static uint8_t digits[] = {0x3F, 0x6, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x7, 0x7F, 0x6F};
 
@@ -137,12 +138,7 @@ void mlcd_draw_arrow_down(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t w
 	  mlcd_fb_draw_with_func(draw_arrow_down_func, x_pos, y_pos, width, height);
 }
 
-static uint_fast8_t mlcd_draw_char(uint32_t c, uint_fast8_t x, uint_fast8_t y, const FONT_INFO* font){
-
-	 if (c == ' ') {
-		   return font->spaceWidth;
-	 }
-	
+static const FONT_CHAR_INFO* resolve_char_info(uint32_t c, const FONT_INFO* font) {
    if ((c < font->startChar) || (c > font->endChar)) 
       return 0; 
 
@@ -156,10 +152,18 @@ static uint_fast8_t mlcd_draw_char(uint32_t c, uint_fast8_t x, uint_fast8_t y, c
 	 if (!matchingTable) {
 		   return 0;
 	 }
-	 
    uint32_t charIndex = c - matchingTable->startChar;  //Character index 
    const FONT_CHAR_INFO *charInfo = matchingTable->charInfo;          //Point to start of descriptors 
    charInfo += charIndex;              //Point to current char info 
+	 return charInfo;
+}
+
+static uint_fast8_t mlcd_draw_char(uint32_t c, uint_fast8_t x, uint_fast8_t y, const FONT_INFO* font){
+	 if (c == ' ') {
+	     return font->spaceWidth;
+	 }
+	
+	 const FONT_CHAR_INFO *charInfo = resolve_char_info(c, font);
 
    const uint8_t *bitmapPointer = font->data;                   //Point to start of bitmaps 
    bitmapPointer += charInfo->offset;            //Point to start of c bitmap 
@@ -170,21 +174,62 @@ static uint_fast8_t mlcd_draw_char(uint32_t c, uint_fast8_t x, uint_fast8_t y, c
 }
 
 static const FONT_INFO* mlcd_resolve_font(uint_fast8_t font_type) {
-	 switch (font_type) {
+	 switch (font_type & 0x1F) {
 		 case FONT_SMALL_REGULAR:
 			 return &smallRegularFontInfo;
 		 case FONT_SMALL_BOLD:
 			 return &smallBoldFontInfo;
-		 case FONT_SELECT_REGULAR:
-			 return &selectRegularFontInfo;
+		 case FONT_OPTION_NORMAL:
+			 return &optionNormalFontInfo;
+		 case FONT_OPTION_BIG:
+			 return &optionBigFontInfo;
 	 }
 	 return &smallRegularFontInfo;
 }
 
-uint_fast8_t mlcd_draw_text(char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t font_type) {
+static uint_fast8_t calc_text_width(char *text, uint_fast8_t font_type) {
 	  int ptr = 0;
 	  uint32_t c;
 	  const FONT_INFO* font = mlcd_resolve_font(font_type);
+	  uint_fast16_t width = 0;
+	  while (width <= MLCD_XRES && (c = u8_nextchar(text, &ptr)) > 0) {
+			  
+	      if (c == ' ') {
+	    	    width += font->spaceWidth;
+					  continue;
+	      }
+	 
+	      const FONT_CHAR_INFO *charInfo = resolve_char_info(c, font);
+			 
+			  if (charInfo == NULL) {
+					  continue;
+				}
+			 
+				if (width > 0) {
+			      width += font->charDist;
+				}
+				
+				width += charInfo->width;
+			
+		}
+		if (width > MLCD_XRES) {
+			  width = MLCD_XRES;
+		}
+		return width;
+}
+
+uint_fast8_t mlcd_draw_text(char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type) {
+	  int ptr = 0;
+	  uint32_t c;
+	
+	  const FONT_INFO* font = mlcd_resolve_font(font_type);
+	
+	  if (font_type & ALIGN_CENTER) {
+			  x += (width - calc_text_width(text, font_type))/2;
+		} else if (font_type & ALIGN_RIGHT) {
+			  x += (width - calc_text_width(text, font_type));
+		}
+	
 	  while ((c = u8_nextchar(text, &ptr)) > 0) {
 			  x += mlcd_draw_char(c, x, y, font);
 			  x += font->charDist;
