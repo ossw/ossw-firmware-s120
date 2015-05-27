@@ -12,23 +12,22 @@ static uint8_t lastMinutes = 0xFF;
 static uint8_t lastHour = 0xFF;
 static uint8_t lastSeconds = 0xFF;
 
-
 static void scr_watchface_draw_time(uint32_t current_time) {
     uint32_t hour = (current_time / 3600) % 24;
     uint32_t minutes = (current_time / 60) % 60;
     uint32_t seconds = current_time % 60;
   
 	  if(lastHour == 0xFF || hour/10 != lastHour/10) {
-				mlcd_draw_digit(hour/10, 5, 5, 64, 76, 8);
+				mlcd_draw_digit(hour/10, 5, 4, 64, 76, 8);
 		}
 		if(lastHour == 0xFF || hour%10 != lastHour%10) {
-				mlcd_draw_digit(hour%10, 75, 5, 64, 76, 8);
+				mlcd_draw_digit(hour%10, 75, 4, 64, 76, 8);
 		}
 	  if(lastMinutes == 0xFF || minutes/10 != lastMinutes/10) {
-				mlcd_draw_digit(minutes/10, 5, 87, 64, 76, 6);
+				mlcd_draw_digit(minutes/10, 5, 86, 64, 76, 6);
     }
 	  if(lastMinutes == 0xFF || minutes%10 != lastMinutes%10) {
-			  mlcd_draw_digit(minutes%10, 75, 87, 64, 76, 6);
+			  mlcd_draw_digit(minutes%10, 75, 86, 64, 76, 6);
 		}
 	  if(lastSeconds == 0xFF || seconds != lastSeconds) {
 			  mlcd_draw_simple_progress(seconds, 60, 0, MLCD_YRES - 3, MLCD_XRES, 2);
@@ -90,9 +89,6 @@ void scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
         case SCR_EVENT_REFRESH_SCREEN:
             scr_watchface_refresh_time();
             break;
-   //     case SCR_EVENT_RTC_TIME_CHANGED:
-   //         scr_watchface_redraw_time(event_param);
-   //         break;
         case SCR_EVENT_BUTTON_PRESSED:
             scr_watchface_handle_button_pressed(event_param);
             break;

@@ -33,6 +33,8 @@ void mlcd_backlight_off(void);
 
 void mlcd_backlight_toggle(void);
 
+void mlcd_colors_toggle(void);
+
 void mlcd_switch_vcom(void);
 
 void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height);

@@ -5,11 +5,13 @@
 #include "common.h"
 #include "board.h"
 #include <inttypes.h>
+#include <string.h>
 
 //static uint8_t fb[MLCD_LINE_BYTES * MLCD_YRES];
 static bool fb_line_changes[MLCD_YRES];
 static uint8_t vcom;
 static bool backlight_on = false;
+static bool colors_inverted = false;
 
 static uint8_t bit_reverse(uint8_t byte) {
     #if (__CORTEX_M >= 0x03)
@@ -86,11 +88,13 @@ void mlcd_switch_vcom() {
 		}
 }
 
+void mlcd_fb_invalidate_all() {
+    memset(fb_line_changes, true, MLCD_YRES);
+}
+
 void mlcd_fb_clear() {
-	  ext_ram_fill(0 | vcom, 0x0, MLCD_LINE_BYTES * MLCD_YRES);
-	  for (int line_no=0; line_no< MLCD_YRES; line_no++ ){
-				fb_line_changes[line_no] = true;
-		}
+	  ext_ram_fill(0, 0x0, MLCD_LINE_BYTES * MLCD_YRES);
+	  mlcd_fb_invalidate_all();
 }
 
 void mlcd_fb_flush () {
@@ -133,7 +137,7 @@ void mlcd_fb_flush () {
   					spi_master_tx_data_no_cs(EXT_RAM_SPI, command, 3);
 					  
 						/* send response from ram to mlcd */
-					  spi_master_rx_to_tx_no_cs(EXT_RAM_SPI, MLCD_SPI, MLCD_LINE_BYTES);
+					  spi_master_rx_to_tx_no_cs(EXT_RAM_SPI, MLCD_SPI, MLCD_LINE_BYTES, colors_inverted);
 						/* disable ext ram */
 				    nrf_gpio_pin_set(EXT_RAM_SPI_SS);
 					
@@ -148,6 +152,12 @@ void mlcd_fb_flush () {
 
     /* disable slave (slave select active HIGH) */
     nrf_gpio_pin_clear(MLCD_SPI_SS);
+}
+
+void mlcd_colors_toggle(void) {
+	  colors_inverted = !colors_inverted;
+	  mlcd_fb_invalidate_all();
+	  mlcd_fb_flush();
 }
 
 void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {

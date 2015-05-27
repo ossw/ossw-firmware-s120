@@ -70,7 +70,7 @@ bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8
 
 bool spi_master_rx_data_no_cs(uint32_t *spi_base, uint8_t* rx_data, uint32_t rx_data_size);
 
-bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base, uint32_t *dest_spi_base, uint32_t data_size);
+bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base, uint32_t *dest_spi_base, uint32_t data_size, bool revert);
 
 bool spi_master_tx_value(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t value, uint32_t tx_data_size);
 

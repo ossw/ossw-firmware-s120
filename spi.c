@@ -185,7 +185,7 @@ bool spi_master_tx_data_no_cs(uint32_t *spi_base_address, const uint8_t* tx_data
     return true;
 }
 
-bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base_address, uint32_t *dest_spi_base_address, uint32_t data_size) {
+bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base_address, uint32_t *dest_spi_base_address, uint32_t data_size, bool revert) {
     NRF_SPI_Type *src_spi_base = (NRF_SPI_Type *)src_spi_base_address;
     NRF_SPI_Type *dest_spi_base = (NRF_SPI_Type *)dest_spi_base_address;
 	  uint32_t number_of_rxd_bytes = 0;
@@ -214,8 +214,11 @@ bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base_address, uint32_t *dest_sp
 	
     while(number_of_rxd_bytes < data_size)
     {
-			
-        dest_spi_base->TXD = src_spi_base->RXD;
+			  if (revert) {
+						dest_spi_base->TXD = ~src_spi_base->RXD;
+				} else {
+					  dest_spi_base->TXD = src_spi_base->RXD;
+				}
 			  src_spi_base->TXD = 0;
 			
         counter = 0;
@@ -240,8 +243,11 @@ bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base_address, uint32_t *dest_sp
         dest_spi_base->RXD;
 				number_of_rxd_bytes++;
     };
-		dest_spi_base->TXD = src_spi_base->RXD;
-
+		if (revert) {
+			  dest_spi_base->TXD = ~src_spi_base->RXD;
+		} else {
+			  dest_spi_base->TXD = src_spi_base->RXD;
+		}
 		counter = 0;
 
 		/* Wait for the transaction complete or timeout (about 10ms - 20 ms) */
