@@ -187,7 +187,7 @@ static const FONT_INFO* mlcd_resolve_font(uint_fast8_t font_type) {
 	 return &smallRegularFontInfo;
 }
 
-static uint_fast8_t calc_text_width(char *text, uint_fast8_t font_type) {
+static uint_fast8_t calc_text_width(const char *text, uint_fast8_t font_type) {
 	  int ptr = 0;
 	  uint32_t c;
 	  const FONT_INFO* font = mlcd_resolve_font(font_type);
@@ -209,8 +209,7 @@ static uint_fast8_t calc_text_width(char *text, uint_fast8_t font_type) {
 			      width += font->charDist;
 				}
 				
-				width += charInfo->width;
-			
+				width += charInfo->width;		
 		}
 		if (width > MLCD_XRES) {
 			  width = MLCD_XRES;
@@ -218,7 +217,7 @@ static uint_fast8_t calc_text_width(char *text, uint_fast8_t font_type) {
 		return width;
 }
 
-uint_fast8_t mlcd_draw_text(char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type) {
+uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type) {
 	  int ptr = 0;
 	  uint32_t c;
 	

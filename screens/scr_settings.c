@@ -3,8 +3,16 @@
 #include "../scr_mngr.h"
 #include "../mlcd_draw.h"
 #include "../mlcd.h"
+#include "../i18n/i18n.h"
 
 static int8_t selectedOption = 0;
+
+typedef struct
+{
+	  const char* label;
+	  const uint16_t offset;
+} MENU_OPTION;	
+
 
 static void scr_settings_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
@@ -33,7 +41,7 @@ static void scr_settings_refresh_screen() {
 	  mlcd_fb_flush();
 }
 
-static void draw_option(char *text, uint_fast8_t *yPos) {
+static void draw_option(const char *text, uint_fast8_t *yPos) {
   	mlcd_draw_text(text, 0, *yPos, MLCD_XRES, NULL, FONT_OPTION_NORMAL | ALIGN_CENTER);
 	  *yPos += 23;
 }
@@ -45,18 +53,18 @@ static void scr_settings_init() {
 	  mlcd_draw_text(":", 23, 1, NULL, NULL, FONT_OPTION_NORMAL);
 	  mlcd_draw_text("47", 27, 1, 20, NULL, FONT_OPTION_NORMAL | ALIGN_LEFT);
 	
-	  mlcd_draw_rect_border(117, 2, 25, 12, 1);
-	  mlcd_draw_rect(119, 4, 17, 8);
+	  mlcd_draw_rect_border(119, 3, 23, 11, 1);
+	  mlcd_draw_simple_progress(200, 255, 121, 5, 19, 7);
 	
-	  mlcd_draw_rect(0, 16, MLCD_XRES, 1);
+	  mlcd_draw_rect(0, 17, MLCD_XRES, 1);
 	
 	  uint_fast8_t yPos = 25;  
 	
-  	draw_option("Date", &yPos);
-  	draw_option("Time", &yPos);
-  	draw_option("Display", &yPos);
-  	draw_option("Sensors", &yPos);
-  	draw_option("Restart", &yPos);
+  	draw_option(I18N_TRANSLATE(MESSAGE_DATE), &yPos);
+  	draw_option(I18N_TRANSLATE(MESSAGE_TIME), &yPos);
+  	draw_option(I18N_TRANSLATE(MESSAGE_DISPLAY), &yPos);
+  	draw_option(I18N_TRANSLATE(MESSAGE_SENSORS), &yPos);
+  	draw_option(I18N_TRANSLATE(MESSAGE_RESTART), &yPos);
 	
     scr_settings_refresh_screen();
 }

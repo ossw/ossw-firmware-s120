@@ -266,9 +266,9 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //       
 
 	// @324 '0' (8 pixels wide)
+	0x00, //         
 	0xFF, // ########
 	0xFF, // ########
-	0xC3, // ##    ##
 	0xC3, // ##    ##
 	0xC3, // ##    ##
 	0xC3, // ##    ##
@@ -286,9 +286,9 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //         
 
 	// @342 '1' (4 pixels wide)
+	0x00, //         
 	0xF0, // ####
 	0xF0, // ####
-	0x30, //   ##
 	0x30, //   ##
 	0x30, //   ##
 	0x30, //   ##
@@ -306,9 +306,9 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //     
 
 	// @360 '2' (8 pixels wide)
+	0x00, //         
 	0xFF, // ########
 	0xFF, // ########
-	0x03, //       ##
 	0x03, //       ##
 	0x03, //       ##
 	0x03, //       ##
@@ -326,9 +326,9 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //         
 
 	// @378 '3' (8 pixels wide)
+	0x00, //         
 	0xFF, // ########
 	0xFF, // ########
-	0x03, //       ##
 	0x03, //       ##
 	0x03, //       ##
 	0x03, //       ##
@@ -346,7 +346,7 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //         
 
 	// @396 '4' (8 pixels wide)
-	0xC3, // ##    ##
+	0x00, //         
 	0xC3, // ##    ##
 	0xC3, // ##    ##
 	0xC3, // ##    ##
@@ -366,9 +366,9 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //         
 
 	// @414 '5' (8 pixels wide)
+	0x00, //        
 	0xFF, // ########
 	0xFF, // ########
-	0xC0, // ##      
 	0xC0, // ##      
 	0xC0, // ##      
 	0xC0, // ##      
@@ -386,11 +386,11 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //         
 
 	// @432 '6' (8 pixels wide)
+	0x00, //         
 	0xFF, // ########
 	0xFF, // ########
 	0xC0, // ##      
 	0xC0, // ##     
-	0xC0, // ##      
 	0xC0, // ##      
 	0xFF, // ########
 	0xFF, // ########
@@ -406,9 +406,9 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //         
 
 	// @450 '7' (8 pixels wide)
+	0x00, //         
 	0xFF, // ########
 	0xFF, // ########
-	0x03, //       ##
 	0x03, //       ##
 	0x03, //       ##
 	0x03, //       ##
@@ -426,9 +426,9 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //         
 
 	// @468 '8' (8 pixels wide)
+	0x00, //         
 	0xFF, // ########
 	0xFF, // ########
-	0xC3, // ##    ##
 	0xC3, // ##    ##
 	0xC3, // ##    ##
 	0xC3, // ##    ##
@@ -446,9 +446,9 @@ const uint8_t optionNormalFontBitmaps[] =
 	0x00, //         
 
 	// @486 '9' (8 pixels wide)
+	0x00, //         
 	0xFF, // ########
 	0xFF, // ########
-	0xC3, // ##    ##
 	0xC3, // ##    ##
 	0xC3, // ##    ##
 	0xC3, // ##    ##

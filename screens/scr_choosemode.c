@@ -6,6 +6,7 @@
 #include "../rtc.h"
 #include "../mlcd.h"
 #include "../utf8.h"
+#include "../i18n/i18n.h"
 
 #include "../ble/ble_central.h"
 #include "../ble/ble_peripheral.h"
@@ -29,8 +30,8 @@ static void scr_choosemode_handle_button_pressed(uint32_t button_id) {
 static void scr_choosemode_init() {
 	  mlcd_fb_clear();
 	                 
-	  mlcd_draw_text("Peripheral", 7, OPT1_POS, NULL, NULL, FONT_OPTION_BIG);
-	  mlcd_draw_text("Central", 30, OPT2_POS, NULL, NULL, FONT_OPTION_BIG);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_PERIPHERAL), 7, OPT1_POS, NULL, NULL, FONT_OPTION_BIG);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_CENTRAL), 30, OPT2_POS, NULL, NULL, FONT_OPTION_BIG);
 	  mlcd_draw_rect(0, 83, MLCD_XRES, 2);
 	
 	  mlcd_fb_flush();

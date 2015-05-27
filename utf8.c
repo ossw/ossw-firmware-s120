@@ -190,7 +190,7 @@ int u8_strlen(char *s)
 }
 
 /* reads the next utf-8 sequence out of a string, updating an index */
-uint32_t u8_nextchar(char *s, int *i)
+uint32_t u8_nextchar(const char *s, int *i)
 {
     uint32_t ch = 0;
     int sz = 0;

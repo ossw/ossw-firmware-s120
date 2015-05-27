@@ -701,6 +701,26 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>i18n</GroupName>
+          <Files>
+            <File>
+              <FileName>i18n.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\i18n\i18n.c</FilePath>
+            </File>
+            <File>
+              <FileName>i18n.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\i18n\i18n.h</FilePath>
+            </File>
+            <File>
+              <FileName>messages_en.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\i18n\messages_en.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
         <Group>

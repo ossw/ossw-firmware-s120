@@ -7,6 +7,7 @@
 #include "../mlcd.h"
 #include "../utf8.h"
 #include "../pawn/amxutil.h"
+#include "../i18n/i18n.h"
 
 #define DIGITS_Y_POS 80
 
@@ -49,7 +50,7 @@ static void scr_test_refresh_screen() {
 static void scr_test_init() {
 	  mlcd_fb_clear();
 	                 
-	  mlcd_draw_text("Heart rate", 5, 13, NULL, NULL, FONT_OPTION_BIG);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_HEART_RATE), 5, 13, NULL, NULL, FONT_OPTION_BIG);
 	  mlcd_draw_rect(0, 50, MLCD_XRES, 2);
 	
 //	  mlcd_draw_text("123 reg test {}%!", 15, 40, FONT_SMALL_REGULAR);
