@@ -124,7 +124,7 @@ static void scr_changedate_handle_button_select(void) {
 				time_struct->tm_mon = month - 1;
 				time_struct->tm_year = year - 1900;
 			  rtc_set_current_time(mktime(time_struct));
-			  scr_mngr_show_screen(SCR_WATCHFACE);
+			  scr_mngr_show_screen(SCR_SETTINGS);
 		}
 }
 
@@ -132,7 +132,7 @@ static void scr_changedate_handle_button_select(void) {
 static void scr_changedate_handle_button_back(void) {
 	  
 	  if (change_mode == MODE_DAY) {
-		    scr_mngr_show_screen(SCR_WATCHFACE);
+		    scr_mngr_show_screen(SCR_SETTINGS);
 		} else if (change_mode == MODE_MONTH) {
 			  change_mode = MODE_DAY;
 			  scr_changedate_draw_all();

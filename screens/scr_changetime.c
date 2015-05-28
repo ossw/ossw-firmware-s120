@@ -93,7 +93,7 @@ static void scr_changetime_handle_button_select(void) {
 				time_struct->tm_min = minutes;
 				time_struct->tm_sec = 0;
 			  rtc_set_current_time(mktime(time_struct));
-			  scr_mngr_show_screen(SCR_WATCHFACE);
+			  scr_mngr_show_screen(SCR_SETTINGS);
 		}
 }
 
@@ -101,7 +101,7 @@ static void scr_changetime_handle_button_select(void) {
 static void scr_changetime_handle_button_back(void) {
 	  
 	  if (change_mode == MODE_HOUR) {
-		    scr_mngr_show_screen(SCR_WATCHFACE);
+		    scr_mngr_show_screen(SCR_SETTINGS);
 		} else if (change_mode == MODE_MINUTES) {
 			  change_mode = MODE_HOUR;
 			  scr_changetime_draw_all();
