@@ -11,7 +11,7 @@ bool initScreen = false;
 
 static uint32_t current_screen;
 
-bool initialized = false;
+static bool initialized = false;
 
 void scr_mngr_init(void) {
 	  initialized = true;
