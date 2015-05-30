@@ -49,6 +49,7 @@ typedef struct
 	  const uint8_t width;
 	  const uint8_t height;
 	  const uint8_t max;
+	  const uint8_t border;
 	  uint32_t (* const data_handle)();
 	  CONTROL_DATA* data;
 } SCR_CONTROL_PROGRESS_BAR_CONFIG;	

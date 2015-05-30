@@ -1,6 +1,7 @@
 #include "scr_mngr.h"
 #include "scr_controls.h"
 #include "rtc.h"
+#include "battery.h"
 #include "screens/scr_choosemode.h"
 #include "screens/scr_watchface.h"
 #include "screens/scr_changetime.h"
@@ -32,7 +33,7 @@ static CONTROL_DATA minutes_ctrl_data;
 
 static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
 		NUMBER_FORMAT_0_99 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
-	  25,
+	  24,
 	  1,
 	  20,
 	  15,
@@ -48,10 +49,40 @@ static const SCR_CONTROL_STATIC_RECT_CONFIG vert_separator_config = {
 	  1
 };
 
+static const SCR_CONTROL_STATIC_RECT_CONFIG hour_sep_dot_1_config = {
+	  21,
+	  4,
+	  2,
+	  2
+};
+
+static const SCR_CONTROL_STATIC_RECT_CONFIG hour_sep_dot_2_config = {
+	  21,
+	  11,
+	  2,
+	  2
+};
+
+static CONTROL_DATA battery_level_ctrl_data;
+
+static const SCR_CONTROL_PROGRESS_BAR_CONFIG battery_level_config = {
+	  119,
+	  3,
+	  23,
+	  11,
+	  255,
+		1,
+	  battery_get_level,
+    &battery_level_ctrl_data
+};
+
 static const SCR_CONTROL_DEFINITION notification_bar_controls[] = {
 	  {SCR_CONTROL_NUMBER, (void*)&hour_config},
 		{SCR_CONTROL_NUMBER, (void*)&minutes_config},
-		{SCR_CONTROL_STATIC_RECT, (void*)&vert_separator_config}
+		{SCR_CONTROL_HORIZONTAL_PROGRESS_BAR, (void*)&battery_level_config},
+		{SCR_CONTROL_STATIC_RECT, (void*)&vert_separator_config},
+		{SCR_CONTROL_STATIC_RECT, (void*)&hour_sep_dot_1_config},
+		{SCR_CONTROL_STATIC_RECT, (void*)&hour_sep_dot_2_config}
 };
 
 static const SCR_CONTROLS_DEFINITION notification_bar_controls_definition = {

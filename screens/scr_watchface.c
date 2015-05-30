@@ -40,6 +40,7 @@ static const SCR_CONTROL_PROGRESS_BAR_CONFIG seconds_config = {
 	  MLCD_XRES,
 	  2,
 	  60,
+		0,
 	  rtc_get_current_seconds,
     &seconds_ctrl_data
 };

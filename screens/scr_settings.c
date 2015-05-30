@@ -94,20 +94,7 @@ static void scr_settings_init() {
 	
 	  mlcd_fb_clear();
 	
-		//char str[3];
-		//sprintf(str, "%d", hour);
-	  //mlcd_draw_text(str, 1, 1, 20, NULL, FONT_OPTION_NORMAL | ALIGN_RIGHT);
-	  //mlcd_draw_text(":", 23, 1, NULL, NULL, FONT_OPTION_NORMAL);
-		//sprintf(str, "%d", minutes);
-	  //mlcd_draw_text(str, 27, 1, 20, NULL, FONT_OPTION_NORMAL | ALIGN_LEFT);
-	
 	  scr_mngr_draw_notification_bar();
-	
-	  mlcd_draw_rect_border(119, 3, 23, 11, 1);
-	  uint8_t battery_level = data_source_get_value(DATA_SOURCE_BATTERY_LEVEL);
-	  mlcd_draw_simple_progress(battery_level, 255, 121, 5, 19, 7);
-	
-	  //mlcd_draw_rect(0, 17, MLCD_XRES, 1);
 	
     scr_settings_refresh_screen();
 }

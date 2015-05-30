@@ -33,7 +33,15 @@ static void scr_controls_draw_horizontal_progress_bar_control(SCR_CONTROL_PROGRE
 	  uint32_t value = cfg->data_handle();
 	
 	  if (force || cfg->data->last_value != value) {
-			  mlcd_draw_simple_progress(value, cfg->max, cfg->x, cfg->y, cfg->width, cfg->height);
+				if (cfg->border > 0) {
+						uint8_t delta = cfg->border + 1;
+					  if (force) {
+								mlcd_draw_rect_border(cfg->x, cfg->y, cfg->width, cfg->height, cfg->border);
+					  }
+						mlcd_draw_simple_progress(value, cfg->max, cfg->x + delta, cfg->y + delta, cfg->width - 2 * delta, cfg->height - 2 * delta);
+				} else {
+				    mlcd_draw_simple_progress(value, cfg->max, cfg->x, cfg->y, cfg->width, cfg->height);
+				}
 		}
 		
 		cfg->data->last_value = value;
