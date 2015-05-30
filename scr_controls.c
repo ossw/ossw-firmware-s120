@@ -32,11 +32,17 @@ static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, boo
 static void scr_controls_draw_horizontal_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force) {
 	  uint32_t value = cfg->data_handle();
 	
-	  if(force || cfg->data->last_value != value) {
+	  if (force || cfg->data->last_value != value) {
 			  mlcd_draw_simple_progress(value, cfg->max, cfg->x, cfg->y, cfg->width, cfg->height);
 		}
 		
 		cfg->data->last_value = value;
+}
+
+static void scr_controls_draw_static_rect(SCR_CONTROL_STATIC_RECT_CONFIG* cfg, bool force) {
+		if (force) {
+				mlcd_draw_rect(cfg->x, cfg->y, cfg->width, cfg->height);
+		}
 }
 
 static void scr_controls_draw_internal(const SCR_CONTROLS_DEFINITION* ctrls_def, bool force) {
@@ -49,6 +55,9 @@ static void scr_controls_draw_internal(const SCR_CONTROLS_DEFINITION* ctrls_def,
 					      break;
 					  case SCR_CONTROL_HORIZONTAL_PROGRESS_BAR:
 						    scr_controls_draw_horizontal_progress_bar_control((SCR_CONTROL_PROGRESS_BAR_CONFIG*)ctrl_def->config, force);
+					      break;
+						case SCR_CONTROL_STATIC_RECT:
+							  scr_controls_draw_static_rect((SCR_CONTROL_STATIC_RECT_CONFIG*)ctrl_def->config, force);
 					      break;
 				}
 		}

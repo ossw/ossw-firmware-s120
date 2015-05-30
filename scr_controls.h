@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define SCR_CONTROL_STATIC_RECT              0
 #define SCR_CONTROL_NUMBER                   1
 #define SCR_CONTROL_HORIZONTAL_PROGRESS_BAR  2
 //#define SCR_CONTROL_VERTICAL_PROGRESS_BAR    3
@@ -32,6 +33,14 @@ typedef struct
 	  uint32_t (* const data_handle)();
 	  CONTROL_DATA* data;
 } SCR_CONTROL_NUMBER_CONFIG;	
+
+typedef struct
+{
+	  const uint8_t x;
+	  const uint8_t y;
+	  const uint8_t width;
+	  const uint8_t height;
+} SCR_CONTROL_STATIC_RECT_CONFIG;	
 
 typedef struct
 {

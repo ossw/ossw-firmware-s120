@@ -51,7 +51,7 @@ static const SCR_CONTROL_DEFINITION controls[] = {
 };
 
 static const SCR_CONTROLS_DEFINITION controls_definition = {
-	  3,
+	  sizeof(controls)/sizeof(SCR_CONTROL_DEFINITION),
 	  controls
 };
 

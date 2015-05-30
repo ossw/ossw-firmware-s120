@@ -69,24 +69,22 @@ static void draw_selected_option(const char *text, uint_fast8_t *yPos) {
 }
 
 static void scr_settings_refresh_screen() {
+	  scr_mngr_redraw_notification_bar();
 	
-	  if (lastSelectedOption == selectedOption) {
-			  return;
-		}
-	
-	  uint_fast8_t yPos = 25;  
-		
-		mlcd_clear_rect(0, 18, MLCD_XRES, MLCD_YRES-18);
-	
-	  int menu_size = sizeof(settings_menu)/sizeof(MENU_OPTION);
-	  for (int i=0; i<menu_size; i++) {
-			  if (i==selectedOption){
-						draw_selected_option(I18N_TRANSLATE(settings_menu[i].message_key), &yPos);
-				} else {
-						draw_option(I18N_TRANSLATE(settings_menu[i].message_key), &yPos);
+	  if (lastSelectedOption != selectedOption) {
+				uint_fast8_t yPos = 25;  
+				
+				mlcd_clear_rect(0, 18, MLCD_XRES, MLCD_YRES-18);
+			
+				int menu_size = sizeof(settings_menu)/sizeof(MENU_OPTION);
+				for (int i=0; i<menu_size; i++) {
+						if (i==selectedOption){
+								draw_selected_option(I18N_TRANSLATE(settings_menu[i].message_key), &yPos);
+						} else {
+								draw_option(I18N_TRANSLATE(settings_menu[i].message_key), &yPos);
+						}
 				}
-		}
-	
+	  }
 	  mlcd_fb_flush();
 		lastSelectedOption = selectedOption;
 }
@@ -96,23 +94,20 @@ static void scr_settings_init() {
 	
 	  mlcd_fb_clear();
 	
-	  uint8_t hour = data_source_get_value(DATA_SOURCE_TIME_HOUR);
-	  uint8_t minutes = data_source_get_value(DATA_SOURCE_TIME_MINUTES);
+		//char str[3];
+		//sprintf(str, "%d", hour);
+	  //mlcd_draw_text(str, 1, 1, 20, NULL, FONT_OPTION_NORMAL | ALIGN_RIGHT);
+	  //mlcd_draw_text(":", 23, 1, NULL, NULL, FONT_OPTION_NORMAL);
+		//sprintf(str, "%d", minutes);
+	  //mlcd_draw_text(str, 27, 1, 20, NULL, FONT_OPTION_NORMAL | ALIGN_LEFT);
 	
-	
-		char str[3];
-		sprintf(str, "%d", hour);
-	  mlcd_draw_text(str, 1, 1, 20, NULL, FONT_OPTION_NORMAL | ALIGN_RIGHT);
-	  mlcd_draw_text(":", 23, 1, NULL, NULL, FONT_OPTION_NORMAL);
-		sprintf(str, "%d", minutes);
-	  mlcd_draw_text(str, 27, 1, 20, NULL, FONT_OPTION_NORMAL | ALIGN_LEFT);
+	  scr_mngr_draw_notification_bar();
 	
 	  mlcd_draw_rect_border(119, 3, 23, 11, 1);
-	
 	  uint8_t battery_level = data_source_get_value(DATA_SOURCE_BATTERY_LEVEL);
 	  mlcd_draw_simple_progress(battery_level, 255, 121, 5, 19, 7);
 	
-	  mlcd_draw_rect(0, 17, MLCD_XRES, 1);
+	  //mlcd_draw_rect(0, 17, MLCD_XRES, 1);
 	
     scr_settings_refresh_screen();
 }
