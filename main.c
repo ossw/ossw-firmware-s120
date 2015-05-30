@@ -22,6 +22,7 @@
 #include "rtc.h"
 #include "scr_mngr.h"
 #include "buttons.h"
+#include "battery.h"
 #include "softdevice_handler.h"
 
 #define DEAD_BEEF                        0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
@@ -136,6 +137,7 @@ int main(void)
 	
 		scr_mngr_init();
 		buttons_init();
+	  battery_init();
 
     // Enter main loop.
     for (;;)

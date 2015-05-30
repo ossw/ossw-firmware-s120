@@ -1,5 +1,6 @@
 #include <string.h>
 #include "scr_settings.h"
+#include "../battery.h"
 #include "../scr_mngr.h"
 #include "../mlcd_draw.h"
 #include "../mlcd.h"
@@ -99,7 +100,8 @@ static void scr_settings_init() {
 	  mlcd_draw_text("47", 27, 1, 20, NULL, FONT_OPTION_NORMAL | ALIGN_LEFT);
 	
 	  mlcd_draw_rect_border(119, 3, 23, 11, 1);
-	  mlcd_draw_simple_progress(200, 255, 121, 5, 19, 7);
+	  uint8_t battery_level = battery_get_level();
+	  mlcd_draw_simple_progress(battery_level, 255, 121, 5, 19, 7);
 	
 	  mlcd_draw_rect(0, 17, MLCD_XRES, 1);
 	
