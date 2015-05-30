@@ -13,6 +13,6 @@ void battery_init(void) {
     nrf_adc_configure( (nrf_adc_config_t *)&nrf_adc_config);
 }
 
-uint8_t battery_get_level(void) {
-	  return (uint8_t)nrf_adc_convert_single(NRF_ADC_CONFIG_INPUT_6);
+uint32_t battery_get_level(void) {
+	  return nrf_adc_convert_single(NRF_ADC_CONFIG_INPUT_6);
 }

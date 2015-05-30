@@ -4,47 +4,45 @@
 #include "../mlcd_draw.h"
 #include "../rtc.h"
 #include "../mlcd.h"
+#include "../data_source.h"
 #include "nrf_delay.h"
-
-static uint32_t lastTime = 0;
 
 static uint8_t lastMinutes = 0xFF;
 static uint8_t lastHour = 0xFF;
 static uint8_t lastSeconds = 0xFF;
 
-static void scr_watchface_draw_time(uint32_t current_time) {
-    uint32_t hour = (current_time / 3600) % 24;
-    uint32_t minutes = (current_time / 60) % 60;
-    uint32_t seconds = current_time % 60;
+static void scr_watchface_draw_time() {
+		uint8_t hour = data_source_get_value(DATA_SOURCE_TIME_HOUR);
+	  uint8_t minutes = data_source_get_value(DATA_SOURCE_TIME_MINUTES);
+	  uint8_t seconds = data_source_get_value(DATA_SOURCE_TIME_SECONDS);
   
-	  if(lastHour == 0xFF || hour/10 != lastHour/10) {
-				mlcd_draw_digit(hour/10, 5, 4, 64, 76, 8);
+	  if(hour != lastHour) {
+				if(lastHour == 0xFF || hour/10 != lastHour/10) {
+						mlcd_draw_digit(hour/10, 5, 4, 64, 76, 8);
+				}
+				if(lastHour == 0xFF || hour%10 != lastHour%10) {
+						mlcd_draw_digit(hour%10, 75, 4, 64, 76, 8);
+				}
 		}
-		if(lastHour == 0xFF || hour%10 != lastHour%10) {
-				mlcd_draw_digit(hour%10, 75, 4, 64, 76, 8);
-		}
-	  if(lastMinutes == 0xFF || minutes/10 != lastMinutes/10) {
-				mlcd_draw_digit(minutes/10, 5, 86, 64, 76, 6);
-    }
-	  if(lastMinutes == 0xFF || minutes%10 != lastMinutes%10) {
-			  mlcd_draw_digit(minutes%10, 75, 86, 64, 76, 6);
+		if (minutes != lastMinutes) {
+				if(lastMinutes == 0xFF || minutes/10 != lastMinutes/10) {
+						mlcd_draw_digit(minutes/10, 5, 86, 64, 76, 6);
+				}
+				if(lastMinutes == 0xFF || minutes%10 != lastMinutes%10) {
+						mlcd_draw_digit(minutes%10, 75, 86, 64, 76, 6);
+				}
 		}
 	  if(lastSeconds == 0xFF || seconds != lastSeconds) {
 			  mlcd_draw_simple_progress(seconds, 60, 0, MLCD_YRES - 3, MLCD_XRES, 2);
 		}
     mlcd_fb_flush();
-		lastTime = current_time;
 		lastHour = hour;
 		lastMinutes = minutes;
 		lastSeconds = seconds;
 }
 
 static void scr_watchface_refresh_time() {
-	  uint32_t currentTime = rtc_current_time();
-    if( lastTime == currentTime) {
-			  return;
-		}
-		scr_watchface_draw_time(currentTime);
+		scr_watchface_draw_time();
 }
 
 static void scr_watchface_handle_button_pressed(uint32_t button_id) {
@@ -69,7 +67,7 @@ static void scr_watchface_init() {
     lastMinutes = 0xFF;
     lastHour = 0xFF;
     lastSeconds = 0xFF;
-    scr_watchface_draw_time(rtc_current_time());
+    scr_watchface_draw_time();
 }
 
 void scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {

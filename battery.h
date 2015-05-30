@@ -6,6 +6,6 @@
 
 void battery_init(void);
 
-uint8_t battery_get_level(void);
+uint32_t battery_get_level(void);
 
 #endif /* BATTERY_H */

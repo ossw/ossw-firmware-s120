@@ -588,6 +588,16 @@
               <FileType>5</FileType>
               <FilePath>..\battery.h</FilePath>
             </File>
+            <File>
+              <FileName>data_source.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\data_source.c</FilePath>
+            </File>
+            <File>
+              <FileName>data_source.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\data_source.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
