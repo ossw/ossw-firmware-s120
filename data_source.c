@@ -3,7 +3,7 @@
 #include "rtc.h"
 #include "battery.h"
 
-static uint32_t (* const data_source_handlers[])(void) = {
+static uint32_t (* const data_source_handles[])(void) = {
 		/* 0 */ rtc_get_current_hour,
 		/* 1 */ rtc_get_current_minutes,
 		/* 2 */ rtc_get_current_seconds,
@@ -13,11 +13,11 @@ static uint32_t (* const data_source_handlers[])(void) = {
 		/* 6 */ battery_get_level
 };
 
-void data_source_init(void) {
-}
-
 uint16_t data_source_get_value(uint16_t data_source_id) {
-	  return data_source_handlers[data_source_id]();
+	  return data_source_handles[data_source_id]();
 }
 
+uint32_t (*(data_source_get_handle)(uint16_t data_source_id))(void) {
+	  return data_source_handles[data_source_id];
+}
 

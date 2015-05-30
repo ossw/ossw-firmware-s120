@@ -16,8 +16,8 @@
 #define DATA_SOURCE_SENSOR_CYCLING_SPEED 0x11
 #define DATA_SOURCE_SENSOR_CYCLING_CADENCE 0x12
 
-void data_source_init(void);
-
 uint16_t data_source_get_value(uint16_t data_source_id);
+
+uint32_t (*(data_source_get_handle)(uint16_t data_source_id))(void);
 
 #endif /* DATA_SOURCE_H */

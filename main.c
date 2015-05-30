@@ -23,7 +23,6 @@
 #include "scr_mngr.h"
 #include "buttons.h"
 #include "battery.h"
-#include "data_source.h"
 #include "softdevice_handler.h"
 
 #define DEAD_BEEF                        0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
@@ -124,8 +123,6 @@ int main(void)
 	  spi_init();
 	  ext_ram_init();
 	  init_lcd_with_splash_screen();
-	
-	  data_source_init();
 
     // Initialize.
     timers_init();

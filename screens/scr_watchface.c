@@ -1,48 +1,63 @@
 #include <string.h>
 #include "scr_watchface.h"
 #include "../scr_mngr.h"
-#include "../mlcd_draw.h"
 #include "../rtc.h"
 #include "../mlcd.h"
-#include "../data_source.h"
+#include "../scr_controls.h"
 #include "nrf_delay.h"
+		
+static CONTROL_DATA hour_ctrl_data;
+		
+static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
+		NUMBER_FORMAT_0_99 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
+	  5,
+	  4,
+	  135,
+	  76,
+	  8,
+	  rtc_get_current_hour,
+    &hour_ctrl_data
+};
 
-static uint8_t lastMinutes = 0xFF;
-static uint8_t lastHour = 0xFF;
-static uint8_t lastSeconds = 0xFF;
+static CONTROL_DATA minutes_ctrl_data;
 
-static void scr_watchface_draw_time() {
-		uint8_t hour = data_source_get_value(DATA_SOURCE_TIME_HOUR);
-	  uint8_t minutes = data_source_get_value(DATA_SOURCE_TIME_MINUTES);
-	  uint8_t seconds = data_source_get_value(DATA_SOURCE_TIME_SECONDS);
-  
-	  if(hour != lastHour) {
-				if(lastHour == 0xFF || hour/10 != lastHour/10) {
-						mlcd_draw_digit(hour/10, 5, 4, 64, 76, 8);
-				}
-				if(lastHour == 0xFF || hour%10 != lastHour%10) {
-						mlcd_draw_digit(hour%10, 75, 4, 64, 76, 8);
-				}
-		}
-		if (minutes != lastMinutes) {
-				if(lastMinutes == 0xFF || minutes/10 != lastMinutes/10) {
-						mlcd_draw_digit(minutes/10, 5, 86, 64, 76, 6);
-				}
-				if(lastMinutes == 0xFF || minutes%10 != lastMinutes%10) {
-						mlcd_draw_digit(minutes%10, 75, 86, 64, 76, 6);
-				}
-		}
-	  if(lastSeconds == 0xFF || seconds != lastSeconds) {
-			  mlcd_draw_simple_progress(seconds, 60, 0, MLCD_YRES - 3, MLCD_XRES, 2);
-		}
-    mlcd_fb_flush();
-		lastHour = hour;
-		lastMinutes = minutes;
-		lastSeconds = seconds;
-}
+static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
+		NUMBER_FORMAT_0_99 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
+	  5,
+	  85,
+	  135,
+	  76,
+	  6,
+	  rtc_get_current_minutes,
+    &minutes_ctrl_data
+};
+
+static CONTROL_DATA seconds_ctrl_data;
+
+static const SCR_CONTROL_PROGRESS_BAR_CONFIG seconds_config = {
+	  0,
+	  MLCD_YRES - 3,
+	  MLCD_XRES,
+	  2,
+	  60,
+	  rtc_get_current_seconds,
+    &seconds_ctrl_data
+};
+
+static const SCR_CONTROL_DEFINITION controls[] = {
+	  {SCR_CONTROL_NUMBER, (void*)&hour_config},
+		{SCR_CONTROL_NUMBER, (void*)&minutes_config},
+		{SCR_CONTROL_HORIZONTAL_PROGRESS_BAR, (void*)&seconds_config}
+};
+
+static const SCR_CONTROLS_DEFINITION controls_definition = {
+	  3,
+	  controls
+};
 
 static void scr_watchface_refresh_time() {
-		scr_watchface_draw_time();
+	  scr_controls_redraw(&controls_definition);
+    mlcd_fb_flush();
 }
 
 static void scr_watchface_handle_button_pressed(uint32_t button_id) {
@@ -63,11 +78,8 @@ static void scr_watchface_handle_button_long_pressed(uint32_t button_id) {
 
 static void scr_watchface_init() {
     mlcd_fb_clear();
-	
-    lastMinutes = 0xFF;
-    lastHour = 0xFF;
-    lastSeconds = 0xFF;
-    scr_watchface_draw_time();
+	  scr_controls_draw(&controls_definition);
+    mlcd_fb_flush();
 }
 
 void scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {

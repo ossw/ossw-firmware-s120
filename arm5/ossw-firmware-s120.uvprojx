@@ -489,6 +489,16 @@
           <GroupName>Libraries</GroupName>
           <Files>
             <File>
+              <FileName>scr_controls.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\scr_controls.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_controls.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\scr_controls.h</FilePath>
+            </File>
+            <File>
               <FileName>ext_flash.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ext_flash.c</FilePath>
