@@ -33,7 +33,7 @@ static CONTROL_DATA minutes_ctrl_data;
 
 static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
 		NUMBER_FORMAT_0_99 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
-	  24,
+	  26,
 	  1,
 	  20,
 	  15,
@@ -50,14 +50,14 @@ static const SCR_CONTROL_STATIC_RECT_CONFIG vert_separator_config = {
 };
 
 static const SCR_CONTROL_STATIC_RECT_CONFIG hour_sep_dot_1_config = {
-	  21,
+	  22,
 	  4,
 	  2,
 	  2
 };
 
 static const SCR_CONTROL_STATIC_RECT_CONFIG hour_sep_dot_2_config = {
-	  21,
+	  22,
 	  11,
 	  2,
 	  2
@@ -70,7 +70,7 @@ static const SCR_CONTROL_PROGRESS_BAR_CONFIG battery_level_config = {
 	  3,
 	  23,
 	  11,
-	  255,
+	  100,
 		1,
 	  battery_get_level,
     &battery_level_ctrl_data

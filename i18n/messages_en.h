@@ -12,7 +12,8 @@ static const I18N_MESSAGE messages_en[] = {
   /*   7 */{"Set time"},
   /*   8 */{"Heart rate"},
   /*   9 */{"Peripheral"},
-  /*   10 */{"Central"}
+  /*   10 */{"Central"},
+  /*   11 */{"Airplane"}
 };
 
 #endif

@@ -31,7 +31,7 @@ static const MENU_OPTION settings_menu[] = {
 	  {MESSAGE_DATE, opt_handler_change_date},
 		{MESSAGE_TIME, opt_handler_change_time},
 		{MESSAGE_DISPLAY, mlcd_colors_toggle},
-		{MESSAGE_SENSORS, opt_handler_do_nothing},
+	//	{MESSAGE_SENSORS, opt_handler_do_nothing},
 		{MESSAGE_RESTART, NVIC_SystemReset}
 };
 

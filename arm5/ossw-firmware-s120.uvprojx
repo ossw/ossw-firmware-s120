@@ -608,6 +608,16 @@
               <FileType>5</FileType>
               <FilePath>..\data_source.h</FilePath>
             </File>
+            <File>
+              <FileName>watchset_functions.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\watchset_functions.c</FilePath>
+            </File>
+            <File>
+              <FileName>watchset_functions.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\watchset_functions.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
