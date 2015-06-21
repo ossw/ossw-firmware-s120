@@ -12,7 +12,7 @@
 
 bool initScreen = false;
 
-static uint32_t current_screen;
+static uint32_t current_screen = 0xFFFFFFFF;
 
 static bool initialized = false;
 		
@@ -115,11 +115,12 @@ void scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
 }
 
 void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
-	  if(!initialized) {
+	  if (!initialized) {
 			  return;
 		}
-		scr_mngr_default_handle_event(event_type, event_param);
-	  switch(current_screen) {
+		bool allowDefaultHandler = true;
+		
+	  switch (current_screen) {
 			  case SCR_CHOOSE_MODE:
 				    scr_choosemode_handle_event(event_type, event_param);
 				    break;
@@ -136,12 +137,19 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 				    scr_settings_handle_event(event_type, event_param);
 				    break;
 			  case SCR_TEST:
+					  allowDefaultHandler = false;
 				    scr_test_handle_event(event_type, event_param);
 				    break;
+		}
+		if (allowDefaultHandler) {
+			  scr_mngr_default_handle_event(event_type, event_param);
 		}
 }
 
 void scr_mngr_show_screen(uint32_t screen_id) {
+	  if (current_screen != 0xFFFFFFFF) {
+			  scr_mngr_handle_event(SCR_EVENT_DESTROY_SCREEN, 0);
+		}
 	  current_screen = screen_id;
 	  initScreen = true;
 }
