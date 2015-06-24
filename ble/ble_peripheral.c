@@ -18,8 +18,9 @@
 #include "../board.h"
 #include "../mlcd.h"
 #include "../ext_ram.h"
-//#include "../ext_flash.h"
+#include "../ext_flash.h"
 #include "../scr_mngr.h"
+#include "../ble/ble_peripheral.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -80,18 +81,23 @@ extern uint8_t testValue;
 static uint32_t upload_data_ptr;
 
 static void init_data_upload(uint8_t type, uint32_t size) {
-		upload_data_ptr = 0x1000;
-		mlcd_backlight_toggle();
+		upload_data_ptr = 0x1C00;
+	//	mlcd_backlight_toggle();
+	/*  int page_no = (size/0x100) + 1;
+	  for (int i=0; i < page_no; i++) {
+			  ext_flash_erase_page(i*0x100);
+		}*/
 }
 
 static void handle_data_upload_part(uint8_t *data, uint32_t size) {
+	  //ext_flash_write_data_block(upload_data_ptr, data, size);
 	  ext_ram_write_data(upload_data_ptr, data, size);
 	  upload_data_ptr += size;
 }
 
 static void handle_data_upload_done() {
-	  mlcd_backlight_toggle();
-		scr_mngr_show_screen(SCR_TEST);
+	//  mlcd_backlight_toggle();
+		scr_mngr_show_screen(SCR_WATCH_SET);
 }
 
 /**@brief Function for handling the data from the OSSW.
@@ -130,6 +136,12 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 	
 	//send
 	// err_code = ble_nus_string_send(&m_nus, data_array, index);
+}
+
+void ble_peripheral_invoke_external_function(uint8_t function_id) {
+    uint32_t err_code;
+	  uint8_t data[] = {0x10, function_id};
+	  err_code = ble_ossw_string_send(&m_ossw, data, sizeof(data));
 }
 
 /**@brief Function for performing battery measurement and updating the Battery Level characteristic

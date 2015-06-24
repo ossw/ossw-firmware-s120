@@ -1,5 +1,4 @@
 #include <string.h>
-#include "scr_test.h"
 #include "nrf_delay.h"
 #include "../scr_mngr.h"
 #include "../mlcd_draw.h"

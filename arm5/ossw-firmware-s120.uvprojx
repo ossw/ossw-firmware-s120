@@ -347,7 +347,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -444,16 +444,6 @@
               <FilePath>..\screens\scr_changetime.c</FilePath>
             </File>
             <File>
-              <FileName>scr_test.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\screens\scr_test.h</FilePath>
-            </File>
-            <File>
-              <FileName>scr_test.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\screens\scr_test.c</FilePath>
-            </File>
-            <File>
               <FileName>scr_watchface.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\screens\scr_watchface.h</FilePath>
@@ -482,6 +472,16 @@
               <FileName>scr_settings.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\screens\scr_settings.h</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchset.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_watchset.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchset.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\screens\scr_watchset.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -597,26 +597,6 @@
               <FileName>battery.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\battery.h</FilePath>
-            </File>
-            <File>
-              <FileName>data_source.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\data_source.c</FilePath>
-            </File>
-            <File>
-              <FileName>data_source.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\data_source.h</FilePath>
-            </File>
-            <File>
-              <FileName>watchset_functions.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\watchset_functions.c</FilePath>
-            </File>
-            <File>
-              <FileName>watchset_functions.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\watchset_functions.h</FilePath>
             </File>
           </Files>
         </Group>

@@ -24,13 +24,13 @@ typedef struct
 
 typedef struct
 {
-	  const uint8_t format;
-	  const uint8_t x;
-	  const uint8_t y;
-	  const uint8_t width;
-	  const uint8_t height;
-	  const uint8_t thickness;
-	  uint32_t (* const data_handle)();
+	  uint8_t format;
+	  uint8_t x;
+	  uint8_t y;
+	  uint8_t width;
+	  uint8_t height;
+	  uint8_t thickness;
+	  uint32_t (* data_handle)();
 	  CONTROL_DATA* data;
 } SCR_CONTROL_NUMBER_CONFIG;	
 
@@ -56,14 +56,14 @@ typedef struct
 
 typedef struct
 {
-	  const uint8_t type;
-	  const void* config;
+	  uint8_t type;
+	  void* config;
 } SCR_CONTROL_DEFINITION;
 
 typedef struct
 {
-	  const uint8_t controls_no;
-	  const SCR_CONTROL_DEFINITION* controls;
+	  uint8_t controls_no;
+	  SCR_CONTROL_DEFINITION* controls;
 } SCR_CONTROLS_DEFINITION;
 
 void scr_controls_draw(const SCR_CONTROLS_DEFINITION*);

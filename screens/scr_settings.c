@@ -5,7 +5,6 @@
 #include "../mlcd_draw.h"
 #include "../mlcd.h"
 #include "../i18n/i18n.h"
-#include "../data_source.h"
 #include "nrf_soc.h"
 
 static int8_t selectedOption = 0;
@@ -17,7 +16,7 @@ typedef struct
 	  void (*handler)();
 } MENU_OPTION;	
 
-static void opt_handler_do_nothing() {};
+//static void opt_handler_do_nothing() {};
 	
 static void opt_handler_change_date() {
     scr_mngr_show_screen(SCR_CHANGE_DATE);
@@ -35,6 +34,8 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_RESTART, NVIC_SystemReset}
 };
 
+static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);
+
 static void scr_settings_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
@@ -48,8 +49,8 @@ static void scr_settings_handle_button_pressed(uint32_t button_id) {
 				    break;
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 					  selectedOption++;
-				    if (selectedOption > 4) {
-								selectedOption = 4;
+				    if (selectedOption >= SIZE_OF_MENU) {
+								selectedOption = SIZE_OF_MENU-1;
 						}
 				    break;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:

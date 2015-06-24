@@ -53,7 +53,7 @@ static const SCR_CONTROL_DEFINITION controls[] = {
 
 static const SCR_CONTROLS_DEFINITION controls_definition = {
 	  sizeof(controls)/sizeof(SCR_CONTROL_DEFINITION),
-	  controls
+	  (SCR_CONTROL_DEFINITION*)controls
 };
 
 static void scr_watchface_refresh_time() {
@@ -64,7 +64,7 @@ static void scr_watchface_refresh_time() {
 static void scr_watchface_handle_button_pressed(uint32_t button_id) {
     switch (button_id) {
         case SCR_EVENT_PARAM_BUTTON_UP:
-            scr_mngr_show_screen(SCR_TEST);
+            scr_mngr_show_screen(SCR_WATCH_SET);
             break;
     }
 }

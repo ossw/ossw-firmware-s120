@@ -7,7 +7,7 @@
 #include "screens/scr_changetime.h"
 #include "screens/scr_changedate.h"
 #include "screens/scr_settings.h"
-#include "screens/scr_test.h"
+#include "screens/scr_watchset.h"
 #include "mlcd.h"
 
 bool initScreen = false;
@@ -87,7 +87,7 @@ static const SCR_CONTROL_DEFINITION notification_bar_controls[] = {
 
 static const SCR_CONTROLS_DEFINITION notification_bar_controls_definition = {
 	  sizeof(notification_bar_controls)/sizeof(SCR_CONTROL_DEFINITION),
-	  notification_bar_controls
+	  (SCR_CONTROL_DEFINITION*)notification_bar_controls
 };
 
 void scr_mngr_init(void) {
@@ -136,9 +136,9 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 			  case SCR_SETTINGS:
 				    scr_settings_handle_event(event_type, event_param);
 				    break;
-			  case SCR_TEST:
+			  case SCR_WATCH_SET:
 					  allowDefaultHandler = false;
-				    scr_test_handle_event(event_type, event_param);
+				    scr_watch_set_handle_event(event_type, event_param);
 				    break;
 		}
 		if (allowDefaultHandler) {

@@ -9,7 +9,7 @@
 #define SCR_CHANGE_DATE                0x02
 #define SCR_CHANGE_TIME                0x03
 #define SCR_SETTINGS                   0x04
-#define SCR_TEST                       0xFF
+#define SCR_WATCH_SET                  0x05
 
 #define SCR_EVENT_INIT_SCREEN          0x01
 #define SCR_EVENT_REFRESH_SCREEN       0x02
