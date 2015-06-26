@@ -19,6 +19,9 @@
 
 uint8_t testValue;
 uint32_t screens_section_address;
+uint32_t external_properties_section_address;
+uint8_t external_properties_no;
+uint8_t* external_properties_data;
 SCR_CONTROLS_DEFINITION controls;
 
 FUNCTION action_handlers[8];
@@ -83,8 +86,13 @@ static uint16_t get_next_short(uint32_t *ptr) {
 static uint32_t (*(parse_data_source)(uint32_t *read_address))(void) {
     uint8_t type = get_next_byte(read_address);
     uint8_t property = get_next_byte(read_address);
-	  // TODO
-	  return data_source_get_handle(property);
+	  switch (type) {
+			  case DATA_SOURCE_TYPE_INTERNAL:
+			      return internal_data_source_get_handle(property);
+			  case DATA_SOURCE_TYPE_EXTERNAL:
+			      return external_data_source_get_handle(property);
+		}
+		return NULL;
 }
 
 static void* parse_screen_control_number(uint32_t *read_address) {
@@ -181,6 +189,35 @@ static bool init_screen(uint8_t screen_id) {
 		return parse_screen(screens_section_address + screen_offset);
 }
 
+static void parse_external_properties() {
+	  uint32_t read_address = external_properties_section_address;
+	  external_properties_no = get_next_byte(&read_address);
+	  uint16_t ptr = external_properties_no*2;
+	  uint8_t ptr_array[external_properties_no*2];
+	  for (int i=0; i<external_properties_no; i++) {
+			  uint8_t type = get_next_byte(&read_address);
+			  uint8_t range = get_next_byte(&read_address);
+			  
+			  ptr_array[i*2] = ptr >> 8;
+			  ptr_array[i*2+1] = ptr & 0xFF;
+			
+			  switch (type) {
+					  case WATCH_SET_EXT_PROP_TYPE_NUMBER:
+						    ptr+=1;
+								break;
+						case WATCH_SET_EXT_PROP_TYPE_STRING:
+							  ptr+=range+1;
+								break;
+						case WATCH_SET_EXT_PROP_TYPE_ENUM:
+							  ptr+=1;
+								break;
+				}
+		}
+			
+	  external_properties_data = malloc(ptr);
+		memcpy(external_properties_data, ptr_array, external_properties_no*2);
+}
+
 static void scr_watch_set_init() {
 	  uint32_t read_address = 0x1C00;
 	
@@ -188,22 +225,23 @@ static void scr_watch_set_init() {
 	
 	  uint8_t section;
 	  while ((section = get_next_byte(&read_address))!= WATCH_SET_END_OF_DATA){
+				uint16_t section_size = get_next_short(&read_address);
 				switch (section) {
 						case WATCH_SET_SECTION_SCREENS:
-								screens_section_address = read_address + 2;
-		
+								screens_section_address = read_address;
 								break;
 						
 						case WATCH_SET_SECTION_EXTERNAL_PROPERTIES:
+							  external_properties_section_address = read_address;
 								break;
 						
 						case WATCH_SET_SECTION_STATIC_CONTENT:
 								break;
 				}
-				uint16_t section_size = get_next_short(&read_address);
 				read_address+=section_size;
 	  };
 		//if(init_screen(0)){
+		parse_external_properties();
 		init_screen(0);
 		scr_controls_draw(&controls);
 		//}
@@ -216,8 +254,22 @@ static void scr_watch_set_init() {
   //  scr_watchset_refresh_screen();
 }
 
-static void scr_watch_set_cleanup() {
-	  
+static void scr_watch_set_clear_screen_data() {
+	  if (controls.controls_no == 0 || controls.controls == NULL) {
+			  return;
+		}
+		
+	  for (int i=0; i<controls.controls_no; i++) {
+			  switch (controls.controls[i].type){
+					  case SCR_CONTROL_NUMBER:
+							  free(((SCR_CONTROL_NUMBER_CONFIG *)controls.controls[i].config)->data);
+						    break;
+				}
+		    free(controls.controls[i].config);
+		}
+		free(controls.controls);
+		controls.controls_no = 0;
+		controls.controls = NULL;
 }
 
 void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
@@ -235,7 +287,10 @@ void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 				    scr_watch_set_handle_button_long_pressed(event_param);
 				    break;
 			  case SCR_EVENT_DESTROY_SCREEN:
-				    scr_watch_set_cleanup();
+				    scr_watch_set_clear_screen_data();
+				    if (external_properties_data != NULL) {
+								free(external_properties_data);
+						}
 				    break;
 		}
 }
@@ -259,6 +314,12 @@ void scr_watch_set_invoke_internal_function(uint8_t function_id, uint16_t param)
 			  case WATCH_SET_FUNC_SHOW_SETTINGS:
 				    scr_mngr_show_screen(SCR_SETTINGS);
 			      break;
+			  case WATCH_SET_FUNC_CHANGE_SCREEN:
+					  scr_watch_set_clear_screen_data();
+	          mlcd_fb_clear();
+				    init_screen(param);
+						scr_controls_draw(&controls);
+			      break;
 		}
 }
 
@@ -276,10 +337,63 @@ static uint32_t (* const data_source_handles[])(void) = {
 		/* 6 */ battery_get_level
 };
 
-uint16_t data_source_get_value(uint16_t data_source_id) {
+uint32_t internal_data_source_get_value(uint16_t data_source_id) {
 	  return data_source_handles[data_source_id]();
 }
 
-uint32_t (*(data_source_get_handle)(uint16_t data_source_id))(void) {
+uint32_t (*(internal_data_source_get_handle)(uint16_t data_source_id))(void) {
 	  return data_source_handles[data_source_id];
+}
+
+uint32_t external_data_source_get_property_value(uint8_t property_id) {	  
+	  if (external_properties_data == NULL) {
+			  return NULL;
+		}
+		if (property_id >= external_properties_no) {
+			  return NULL;
+		}
+		uint16_t offset = external_properties_data[property_id*2] << 8;
+		offset |= external_properties_data[property_id*2+1];
+		
+		// TODO
+		return external_properties_data[offset];
+}
+
+uint32_t external_data_source_get_property_0_value() {
+	  return external_data_source_get_property_value(0);
+}
+uint32_t external_data_source_get_property_1_value() {
+	  return external_data_source_get_property_value(1);
+}
+uint32_t external_data_source_get_property_2_value() {
+	  return external_data_source_get_property_value(2);
+}
+uint32_t external_data_source_get_property_3_value() {
+	  return external_data_source_get_property_value(3);
+}
+
+uint32_t (*(external_data_source_get_handle)(uint16_t data_source_id))(void) {
+	  switch(data_source_id) {
+			case 0:
+				  return external_data_source_get_property_0_value;
+			case 1:
+				  return external_data_source_get_property_1_value;
+			case 2:
+				  return external_data_source_get_property_2_value;
+			case 3:
+				  return external_data_source_get_property_3_value;
+		}
+	  return NULL;
+}
+
+void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t size) {
+	  if (external_properties_data == NULL) {
+			  return;
+		}
+		if (property_id >= external_properties_no) {
+			  return;
+		}
+		uint16_t offset = external_properties_data[property_id*2] << 8;
+		offset |= external_properties_data[property_id*2+1];
+		memcpy(&external_properties_data[offset], data_ptr, size);
 }

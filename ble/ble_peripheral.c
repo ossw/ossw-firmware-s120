@@ -21,6 +21,7 @@
 #include "../ext_flash.h"
 #include "../scr_mngr.h"
 #include "../ble/ble_peripheral.h"
+#include "../screens/scr_watchset.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -110,10 +111,6 @@ static void handle_data_upload_done() {
 static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t length)
 { 
 	 switch(p_data[0]) {
-		 case 0x11:
-			    // set ext param
-          testValue = p_data[2];
-					break;
 		 case 0x20:
 			    // init data upload
 					init_data_upload(p_data[1], (p_data[2]<<24) | (p_data[3]<<16) | (p_data[4]<<8) | p_data[5]);
@@ -125,7 +122,11 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 		 case 0x22:
 			    // upload data finished
 					handle_data_upload_done();
-			    break;	 
+			    break;	
+		 case 0x30:
+			    // set ext param
+					set_external_property_data(p_data[1], &p_data[2], length-2);
+					break; 
 	 }
 		 
    // for (uint32_t i = 0; i < length; i++)
