@@ -40,8 +40,6 @@
 #define MAX_PEER_COUNT             DEVICE_MANAGER_MAX_CONNECTIONS     /**< Maximum number of peer's application intends to manage. */
 #define UUID16_SIZE                2                                  /**< Size of 16 bit UUID */
 
-extern uint8_t testValue;
-
 /**@breif Macro to unpack 16bit unsigned UUID from octet stream. */
 #define UUID16_EXTRACT(DST, SRC) \
     do                           \
@@ -507,7 +505,7 @@ static void hrs_c_evt_handler(ble_hrs_c_t * p_hrs_c, ble_hrs_c_evt_t * p_hrs_c_e
         {
             APPL_LOG("[APPL]: HR Measurement received %d \r\n", p_hrs_c_evt->params.hrm.hr_value);
 
-					  testValue = p_hrs_c_evt->params.hrm.hr_value;
+					  //testValue = p_hrs_c_evt->params.hrm.hr_value;
 					
             printf("Heart Rate = %d\r\n", p_hrs_c_evt->params.hrm.hr_value);
             break;

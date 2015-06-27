@@ -10,11 +10,9 @@
 #include "screens/scr_watchset.h"
 #include "mlcd.h"
 
-bool initScreen = false;
+static uint16_t switch_to_screen = SCR_NOT_SET;
 
-static uint32_t current_screen = 0xFFFFFFFF;
-
-static bool initialized = false;
+static uint16_t current_screen = SCR_NOT_SET;
 		
 static CONTROL_DATA hour_ctrl_data;
 		
@@ -91,7 +89,6 @@ static const SCR_CONTROLS_DEFINITION notification_bar_controls_definition = {
 };
 
 void scr_mngr_init(void) {
-	  initialized = true;
 	  scr_mngr_show_screen(SCR_CHOOSE_MODE);
 }
 
@@ -114,13 +111,10 @@ void scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
 		}
 }
 
-void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
-	  if (!initialized) {
-			  return;
-		}
+void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_type, uint32_t event_param) {
 		bool allowDefaultHandler = true;
 		
-	  switch (current_screen) {
+	  switch (screen_id) {
 			  case SCR_CHOOSE_MODE:
 				    scr_choosemode_handle_event(event_type, event_param);
 				    break;
@@ -140,18 +134,20 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 					  allowDefaultHandler = false;
 				    scr_watch_set_handle_event(event_type, event_param);
 				    break;
+				case SCR_NOT_SET:
+					  return;
 		}
 		if (allowDefaultHandler) {
 			  scr_mngr_default_handle_event(event_type, event_param);
 		}
 }
 
-void scr_mngr_show_screen(uint32_t screen_id) {
-	  if (current_screen != 0xFFFFFFFF) {
-			  scr_mngr_handle_event(SCR_EVENT_DESTROY_SCREEN, 0);
-		}
-	  current_screen = screen_id;
-	  initScreen = true;
+void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
+	  scr_mngr_handle_event_internal(current_screen, event_type, event_param);
+}
+	
+void scr_mngr_show_screen(uint16_t screen_id) {
+	  switch_to_screen = screen_id;
 }
 
 void scr_mngr_draw_notification_bar() {
@@ -160,4 +156,21 @@ void scr_mngr_draw_notification_bar() {
 
 void scr_mngr_redraw_notification_bar() {
 	  scr_controls_redraw(&notification_bar_controls_definition);
+}
+
+void scr_mngr_draw_screen(void) {
+		if (switch_to_screen != SCR_NOT_SET) {
+				uint16_t old_screen = current_screen;
+			  // disable events
+			  current_screen = SCR_NOT_SET;
+			  // release memory used by old screen
+				scr_mngr_handle_event_internal(old_screen, SCR_EVENT_DESTROY_SCREEN, 0);
+			  // initilize new screen
+				scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_INIT_SCREEN, NULL);
+			  // set new screen
+			  current_screen = switch_to_screen;
+			  switch_to_screen = SCR_NOT_SET;
+		} else {
+				scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, NULL);
+		}
 }

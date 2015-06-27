@@ -15,13 +15,10 @@
 #include "../battery.h"
 #include <stdlib.h> 
 
-#define DIGITS_Y_POS 80
-
-uint8_t testValue;
 uint32_t screens_section_address;
 uint32_t external_properties_section_address;
-uint8_t external_properties_no;
-uint8_t* external_properties_data;
+uint8_t external_properties_no = 0;
+uint8_t* external_properties_data = NULL;
 SCR_CONTROLS_DEFINITION controls;
 
 FUNCTION action_handlers[8];
@@ -61,7 +58,6 @@ static void scr_watch_set_handle_button_long_pressed(uint32_t button_id) {
 }
 
 static void scr_watch_set_refresh_screen() {
-	 // scr_watchset_refresh_value1();
 	  scr_controls_redraw(&controls);
 	  mlcd_fb_flush();
 }
@@ -240,18 +236,9 @@ static void scr_watch_set_init() {
 				}
 				read_address+=section_size;
 	  };
-		//if(init_screen(0)){
 		parse_external_properties();
 		init_screen(0);
 		scr_controls_draw(&controls);
-		//}
-//	  uint8_t screens_no = data[0];
-	
-	                 
-	//  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_HEART_RATE), 5, 13, NULL, NULL, FONT_OPTION_BIG);
-	//  mlcd_draw_rect(0, 50, MLCD_XRES, 2);
-	
-  //  scr_watchset_refresh_screen();
 }
 
 static void scr_watch_set_clear_screen_data() {
@@ -290,6 +277,7 @@ void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 				    scr_watch_set_clear_screen_data();
 				    if (external_properties_data != NULL) {
 								free(external_properties_data);
+							  external_properties_data = NULL;
 						}
 				    break;
 		}
@@ -314,6 +302,9 @@ void scr_watch_set_invoke_internal_function(uint8_t function_id, uint16_t param)
 			  case WATCH_SET_FUNC_SHOW_SETTINGS:
 				    scr_mngr_show_screen(SCR_SETTINGS);
 			      break;
+				case WATCH_SET_FUNC_CLOSE:
+					  scr_mngr_show_screen(SCR_WATCHFACE);
+					  break;
 			  case WATCH_SET_FUNC_CHANGE_SCREEN:
 					  scr_watch_set_clear_screen_data();
 	          mlcd_fb_clear();

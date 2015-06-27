@@ -20,6 +20,7 @@
 #include "../ext_ram.h"
 #include "../ext_flash.h"
 #include "../scr_mngr.h"
+#include "../rtc.h"
 #include "../ble/ble_peripheral.h"
 #include "../screens/scr_watchset.h"
 
@@ -110,7 +111,11 @@ static void handle_data_upload_done() {
 /**@snippet [Handling the data received over BLE] */
 static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t length)
 { 
-	 switch(p_data[0]) {
+	 switch(p_data[0]) {	
+		 case 0x10:
+			    // set current time
+					rtc_set_current_time((p_data[1]<<24) | (p_data[2]<<16) | (p_data[3]<<8) | p_data[4]);
+					break; 
 		 case 0x20:
 			    // init data upload
 					init_data_upload(p_data[1], (p_data[2]<<24) | (p_data[3]<<16) | (p_data[4]<<8) | p_data[5]);
@@ -128,21 +133,11 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 					set_external_property_data(p_data[1], &p_data[2], length-2);
 					break; 
 	 }
-		 
-   // for (uint32_t i = 0; i < length; i++)
-   // {
-       // while(app_uart_put(p_data[i]) != NRF_SUCCESS);
-   // }
-    //while(app_uart_put('\n') != NRF_SUCCESS);
-	
-	//send
-	// err_code = ble_nus_string_send(&m_nus, data_array, index);
 }
 
 void ble_peripheral_invoke_external_function(uint8_t function_id) {
-    uint32_t err_code;
 	  uint8_t data[] = {0x10, function_id};
-	  err_code = ble_ossw_string_send(&m_ossw, data, sizeof(data));
+	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
 }
 
 /**@brief Function for performing battery measurement and updating the Battery Level characteristic

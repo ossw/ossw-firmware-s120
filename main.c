@@ -26,8 +26,6 @@
 #include "softdevice_handler.h"
 
 #define DEAD_BEEF                        0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
-
-extern bool initScreen;
 			
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -142,18 +140,13 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        power_manage();
-			
 			  if (rtc_should_store_current_time()) {
 					  rtc_store_current_time();
 				}
 			  
-			  if (initScreen) {  
-					  initScreen = false;
-	          scr_mngr_handle_event(SCR_EVENT_INIT_SCREEN, NULL);
-				} else {
-						scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, NULL);
-				}
+				scr_mngr_draw_screen();
+				
+        power_manage();
     }
 }
 
