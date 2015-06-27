@@ -78,17 +78,33 @@ static uint16_t get_next_short(uint32_t *ptr) {
 	  return data[0] << 8 | data[1];
 }
 
+static uint32_t external_data_source_get_property_value(uint32_t property_id) {	  
+	  if (external_properties_data == NULL) {
+			  return NULL;
+		}
+		if (property_id >= external_properties_no) {
+			  return NULL;
+		}
+		uint16_t offset = external_properties_data[property_id*2] << 8;
+		offset |= external_properties_data[property_id*2+1];
+		
+		// TODO
+		return external_properties_data[offset];
+}
 
-static uint32_t (*(parse_data_source)(uint32_t *read_address))(void) {
+static void parse_data_source(uint32_t *read_address, uint32_t (**data_source)(uint32_t), uint32_t* data_source_param) {
     uint8_t type = get_next_byte(read_address);
     uint8_t property = get_next_byte(read_address);
 	  switch (type) {
 			  case DATA_SOURCE_TYPE_INTERNAL:
-			      return internal_data_source_get_handle(property);
+			      *data_source = internal_data_source_get_value;
+				    *data_source_param = property;
+				    break;
 			  case DATA_SOURCE_TYPE_EXTERNAL:
-			      return external_data_source_get_handle(property);
+			      *data_source = external_data_source_get_property_value;
+				    *data_source_param = property;
+				    break;
 		}
-		return NULL;
 }
 
 static void* parse_screen_control_number(uint32_t *read_address) {
@@ -101,7 +117,6 @@ static void* parse_screen_control_number(uint32_t *read_address) {
     uint8_t style2 = get_next_byte(read_address);
     uint8_t thickness = style1 & 0x3F;
 	
-	  uint32_t (*data_source)(void) = parse_data_source(read_address);
 	
 	  CONTROL_DATA* data = malloc(sizeof(CONTROL_DATA));
 	  
@@ -113,8 +128,8 @@ static void* parse_screen_control_number(uint32_t *read_address) {
 		config->width = width;
 		config->height = height;
 		config->thickness = thickness;
-		config->data_handle = data_source;
 		config->data = data;
+	  parse_data_source(read_address, &config->data_handle, &config->data_handle_param);
 		
 		return config;
 }
@@ -328,53 +343,12 @@ static uint32_t (* const data_source_handles[])(void) = {
 		/* 6 */ battery_get_level
 };
 
-uint32_t internal_data_source_get_value(uint16_t data_source_id) {
+uint32_t internal_data_source_get_value(uint32_t data_source_id) {
 	  return data_source_handles[data_source_id]();
 }
 
-uint32_t (*(internal_data_source_get_handle)(uint16_t data_source_id))(void) {
+uint32_t (*(internal_data_source_get_handle)(uint32_t data_source_id))(void) {
 	  return data_source_handles[data_source_id];
-}
-
-uint32_t external_data_source_get_property_value(uint8_t property_id) {	  
-	  if (external_properties_data == NULL) {
-			  return NULL;
-		}
-		if (property_id >= external_properties_no) {
-			  return NULL;
-		}
-		uint16_t offset = external_properties_data[property_id*2] << 8;
-		offset |= external_properties_data[property_id*2+1];
-		
-		// TODO
-		return external_properties_data[offset];
-}
-
-uint32_t external_data_source_get_property_0_value() {
-	  return external_data_source_get_property_value(0);
-}
-uint32_t external_data_source_get_property_1_value() {
-	  return external_data_source_get_property_value(1);
-}
-uint32_t external_data_source_get_property_2_value() {
-	  return external_data_source_get_property_value(2);
-}
-uint32_t external_data_source_get_property_3_value() {
-	  return external_data_source_get_property_value(3);
-}
-
-uint32_t (*(external_data_source_get_handle)(uint16_t data_source_id))(void) {
-	  switch(data_source_id) {
-			case 0:
-				  return external_data_source_get_property_0_value;
-			case 1:
-				  return external_data_source_get_property_1_value;
-			case 2:
-				  return external_data_source_get_property_2_value;
-			case 3:
-				  return external_data_source_get_property_3_value;
-		}
-	  return NULL;
 }
 
 void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t size) {

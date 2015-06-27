@@ -43,11 +43,11 @@
 #define DATA_SOURCE_SENSOR_CYCLING_SPEED 0x11
 #define DATA_SOURCE_SENSOR_CYCLING_CADENCE 0x12
 
-uint32_t internal_data_source_get_value(uint16_t data_source_id);
+uint32_t internal_data_source_get_value(uint32_t data_source_id);
 
-uint32_t (*(internal_data_source_get_handle)(uint16_t data_source_id))(void);
+uint32_t (*(internal_data_source_get_handle)(uint32_t data_source_id))(void);
 
-uint32_t (*(external_data_source_get_handle)(uint16_t data_source_id))(void);
+uint32_t (*(external_data_source_get_handle)(uint32_t data_source_id))(void);
 
 typedef struct
 {

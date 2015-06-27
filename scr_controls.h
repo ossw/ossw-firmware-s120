@@ -30,7 +30,8 @@ typedef struct
 	  uint8_t width;
 	  uint8_t height;
 	  uint8_t thickness;
-	  uint32_t (* data_handle)();
+	  uint32_t (* data_handle)(uint32_t);
+	  uint32_t data_handle_param;
 	  CONTROL_DATA* data;
 } SCR_CONTROL_NUMBER_CONFIG;	
 
@@ -51,6 +52,7 @@ typedef struct
 	  const uint8_t max;
 	  const uint8_t border;
 	  uint32_t (* const data_handle)();
+	  uint32_t data_handle_param;
 	  CONTROL_DATA* data;
 } SCR_CONTROL_PROGRESS_BAR_CONFIG;	
 

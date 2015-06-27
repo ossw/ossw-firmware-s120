@@ -2,7 +2,7 @@
 #include "mlcd_draw.h"
 
 static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force) {
-	  uint32_t value = cfg->data_handle();
+	  uint32_t value = cfg->data_handle(cfg->data_handle_param);
 	
 	  switch(cfg->format & 0xF) {
 			  case NUMBER_FORMAT_0_99:
