@@ -8,19 +8,42 @@
 #define SCR_CONTROL_NUMBER                   1
 #define SCR_CONTROL_HORIZONTAL_PROGRESS_BAR  2
 //#define SCR_CONTROL_VERTICAL_PROGRESS_BAR    3
-//#define SCR_CONTROL_BATTERY_LEVEL	           4
+#define SCR_CONTROL_TEXT  4
 
-#define NUMBER_FORMAT_0_99     0
-//#define NUMBER_FORMAT_0_199    1
-//#define NUMBER_FORMAT_0_999    2
-//#define NUMBER_FORMAT_0_9999   3
+#define NUMBER_RANGE_0__9     0x10
+#define NUMBER_RANGE_0__19    0x20
+#define NUMBER_RANGE_0__99    0x30
+#define NUMBER_RANGE_0__199   0x40
+#define NUMBER_RANGE_0__999   0x50
+#define NUMBER_RANGE_0__1999  0x60
+#define NUMBER_RANGE_0__9999  0x70
+#define NUMBER_RANGE_0__19999 0x80
+#define NUMBER_RANGE_0__99999 0x90
 
-#define NUMBER_FORMAT_FLAG_ZERO_PADDED    0x80
+#define NUMBER_FORMAT_FLAG_ZERO_PADDED    0x8000
 
 typedef struct
 {
 	  uint32_t last_value;
-} CONTROL_DATA;
+} NUMBER_CONTROL_DATA;
+
+typedef struct
+{
+	  char last_value[17];
+} TEXT_CONTROL_DATA;
+
+typedef struct
+{
+	  uint8_t range;
+	  uint8_t x;
+	  uint8_t y;
+	  uint8_t width;
+	  uint8_t height;
+	  uint16_t style;
+	  uint32_t (* data_handle)(uint32_t);
+	  uint32_t data_handle_param;
+	  NUMBER_CONTROL_DATA* data;
+} SCR_CONTROL_NUMBER_CONFIG;	
 
 typedef struct
 {
@@ -29,11 +52,10 @@ typedef struct
 	  uint8_t y;
 	  uint8_t width;
 	  uint8_t height;
-	  uint8_t thickness;
 	  uint32_t (* data_handle)(uint32_t);
 	  uint32_t data_handle_param;
-	  CONTROL_DATA* data;
-} SCR_CONTROL_NUMBER_CONFIG;	
+	  TEXT_CONTROL_DATA* data;
+} SCR_CONTROL_TEXT_CONFIG;	
 
 typedef struct
 {
@@ -53,7 +75,7 @@ typedef struct
 	  const uint8_t border;
 	  uint32_t (* const data_handle)();
 	  uint32_t data_handle_param;
-	  CONTROL_DATA* data;
+	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_PROGRESS_BAR_CONFIG;	
 
 typedef struct

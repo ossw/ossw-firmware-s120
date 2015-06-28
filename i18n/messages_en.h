@@ -10,10 +10,9 @@ static const I18N_MESSAGE messages_en[] = {
   /*   5 */{"Restart"},
   /*   6 */{"Set date"},
   /*   7 */{"Set time"},
-  /*   8 */{"Heart rate"},
-  /*   9 */{"Peripheral"},
-  /*   10 */{"Central"},
-  /*   11 */{"Airplane"}
+  /*   8 */{"Peripheral"},
+  /*   9 */{"Central"},
+  /*   10 */{"Airplane"}
 };
 
 #endif

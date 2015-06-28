@@ -14,29 +14,29 @@ static uint16_t switch_to_screen = SCR_NOT_SET;
 
 static uint16_t current_screen = SCR_NOT_SET;
 		
-static CONTROL_DATA hour_ctrl_data;
+static NUMBER_CONTROL_DATA hour_ctrl_data;
 		
 static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
-		NUMBER_FORMAT_0_99 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
+		NUMBER_RANGE_0__99,
 	  1,
 	  1,
 	  20,
 	  15,
-	  2,
+	  2 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
 	  (uint32_t (*)(uint32_t))rtc_get_current_hour,
 	  0,
     &hour_ctrl_data
 };
 
-static CONTROL_DATA minutes_ctrl_data;
+static NUMBER_CONTROL_DATA minutes_ctrl_data;
 
 static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
-		NUMBER_FORMAT_0_99 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
+		NUMBER_RANGE_0__99,
 	  26,
 	  1,
 	  20,
 	  15,
-	  2,
+	  2 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
 	  (uint32_t (*)(uint32_t))rtc_get_current_minutes,
 	  0,
     &minutes_ctrl_data
@@ -63,7 +63,7 @@ static const SCR_CONTROL_STATIC_RECT_CONFIG hour_sep_dot_2_config = {
 	  2
 };
 
-static CONTROL_DATA battery_level_ctrl_data;
+static NUMBER_CONTROL_DATA battery_level_ctrl_data;
 
 static const SCR_CONTROL_PROGRESS_BAR_CONFIG battery_level_config = {
 	  119,

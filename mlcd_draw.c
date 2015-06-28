@@ -140,7 +140,7 @@ void mlcd_draw_arrow_down(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t w
 
 static const FONT_CHAR_INFO* resolve_char_info(uint32_t c, const FONT_INFO* font) {
    if ((c < font->startChar) || (c > font->endChar)) 
-      return 0; 
+      return NULL; 
 
 	 const FONT_CHAR_INFO_LOOKUP *matchingTable = 0;
 	 for (int t = 0; t < font->lookupTableSize; t++) {
@@ -150,7 +150,7 @@ static const FONT_CHAR_INFO* resolve_char_info(uint32_t c, const FONT_INFO* font
 			}
 	 }
 	 if (!matchingTable) {
-		   return 0;
+		   return NULL;
 	 }
    uint32_t charIndex = c - matchingTable->startChar;  //Character index 
    const FONT_CHAR_INFO *charInfo = matchingTable->charInfo;          //Point to start of descriptors 
@@ -158,19 +158,25 @@ static const FONT_CHAR_INFO* resolve_char_info(uint32_t c, const FONT_INFO* font
 	 return charInfo;
 }
 
-static uint_fast8_t mlcd_draw_char(uint32_t c, uint_fast8_t x, uint_fast8_t y, const FONT_INFO* font){
+static uint_fast8_t mlcd_draw_char(uint32_t c, uint_fast8_t x, uint_fast8_t y, uint_fast8_t width, uint_fast8_t height, const FONT_INFO* font){
 	 if (c == ' ') {
 	     return font->spaceWidth;
 	 }
 	
 	 const FONT_CHAR_INFO *charInfo = resolve_char_info(c, font);
+	 
+	 if (charInfo == NULL) {
+		   return font->spaceWidth;
+	 }
 
    const uint8_t *bitmapPointer = font->data;                   //Point to start of bitmaps 
    bitmapPointer += charInfo->offset;            //Point to start of c bitmap 
 
-	 mlcd_fb_draw_bitmap(bitmapPointer, x, y, charInfo->width, font->height);
+	 uint8_t char_width = charInfo->width > width ? width : charInfo->width;
+	 uint8_t char_height = font->height > height ? height : font->height;
+	 mlcd_fb_draw_bitmap(bitmapPointer, x, y, char_width, char_height, charInfo->width);
    
-   return charInfo->width; 
+   return char_width; 
 }
 
 static const FONT_INFO* mlcd_resolve_font(uint_fast8_t font_type) {
@@ -221,6 +227,11 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t x, uint_fast8_t y, ui
 	  int ptr = 0;
 	  uint32_t c;
 	
+	  uint8_t max_x = width != NULL ? x + width : MLCD_XRES;
+	  if (height == NULL) {
+			  height = MLCD_YRES - y;
+		}
+	
 	  const FONT_INFO* font = mlcd_resolve_font(font_type);
 	
 	  if (font_type & ALIGN_CENTER) {
@@ -229,8 +240,8 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t x, uint_fast8_t y, ui
 			  x += (width - calc_text_width(text, font_type));
 		}
 	
-	  while ((c = u8_nextchar(text, &ptr)) > 0) {
-			  x += mlcd_draw_char(c, x, y, font);
+	  while ((c = u8_nextchar(text, &ptr)) > 0 && max_x >= x) {
+			  x += mlcd_draw_char(c, x, y, max_x - x, height, font);
 			  x += font->charDist;
 		}
 		return 0;

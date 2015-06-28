@@ -6,35 +6,35 @@
 #include "../scr_controls.h"
 #include "nrf_delay.h"
 		
-static CONTROL_DATA hour_ctrl_data;
+static NUMBER_CONTROL_DATA hour_ctrl_data;
 		
 static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
-		NUMBER_FORMAT_0_99 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
+		NUMBER_RANGE_0__99,
 	  5,
 	  4,
 	  135,
 	  76,
-	  8,
+	  8 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
 	  (uint32_t (*)(uint32_t))rtc_get_current_hour,
 	  0,
     &hour_ctrl_data
 };
 
-static CONTROL_DATA minutes_ctrl_data;
+static NUMBER_CONTROL_DATA minutes_ctrl_data;
 
 static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
-		NUMBER_FORMAT_0_99 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
+		NUMBER_RANGE_0__99,
 	  5,
 	  85,
 	  135,
 	  76,
-	  6,
+	  6 | NUMBER_FORMAT_FLAG_ZERO_PADDED,
 	  (uint32_t (*)(uint32_t))rtc_get_current_minutes,
 	  0,
     &minutes_ctrl_data
 };
 
-static CONTROL_DATA seconds_ctrl_data;
+static NUMBER_CONTROL_DATA seconds_ctrl_data;
 
 static const SCR_CONTROL_PROGRESS_BAR_CONFIG seconds_config = {
 	  0,

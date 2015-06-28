@@ -28,8 +28,10 @@
 #define WATCH_SET_EXT_PROP_TYPE_STRING 2
 #define WATCH_SET_EXT_PROP_TYPE_ENUM 3
 
-#define DATA_SOURCE_TYPE_INTERNAL 0
-#define DATA_SOURCE_TYPE_EXTERNAL 1
+#define WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE 4
+
+#define DATA_SOURCE_INTERNAL 0
+#define DATA_SOURCE_EXTERNAL 1
 
 #define DATA_SOURCE_TIME_HOUR 0
 #define DATA_SOURCE_TIME_MINUTES 1
@@ -42,12 +44,6 @@
 #define DATA_SOURCE_SENSOR_HR 0x10
 #define DATA_SOURCE_SENSOR_CYCLING_SPEED 0x11
 #define DATA_SOURCE_SENSOR_CYCLING_CADENCE 0x12
-
-uint32_t internal_data_source_get_value(uint32_t data_source_id);
-
-uint32_t (*(internal_data_source_get_handle)(uint32_t data_source_id))(void);
-
-uint32_t (*(external_data_source_get_handle)(uint32_t data_source_id))(void);
 
 typedef struct
 {
