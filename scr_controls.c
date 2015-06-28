@@ -2,6 +2,35 @@
 #include "mlcd_draw.h"
 #include "string.h"
 
+static void limit_int_range(uint32_t* value, uint32_t max_value) {
+	  if(*value > max_value) {
+			  *value = max_value;
+		}
+}
+
+static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no, uint8_t x, uint8_t y, uint8_t digit_width, uint8_t digit_height, uint8_t thickness, uint8_t digit_space, bool force) {
+		/*if (force || value/10 != cfg->data->last_value/10) {
+								mlcd_draw_digit(value/10, cfg->x, cfg->y, digit_width, digit_height, thickness);
+						}
+						if (force || value%10 != cfg->data->last_value%10) {
+								mlcd_draw_digit(value%10, cfg->x + digit_dist + digit_width, cfg->y, digit_width, digit_height, thickness);
+						}*/
+	  int current_x = x;
+		int div = 1;
+		for (int i = 1; i < digits_no; i++) {
+				div *= 10;
+		}
+		for (int i = 0; i < digits_no; i++) {
+		    uint8_t old_digit = (old_value / div)%10;
+		    uint8_t new_digit = (value / div)%10;
+			  if (force || old_digit != new_digit) {
+			      mlcd_draw_digit(new_digit, current_x, y, digit_width, digit_height, thickness);
+				}
+				div = div/10;
+				current_x += digit_width + digit_space;
+		}
+}
+
 static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force) {
 	  uint32_t value = cfg->data_handle(cfg->data_handle_param);
 		
@@ -15,18 +44,26 @@ static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, boo
     uint8_t digit_dist = (cfg->style>>22) & 0x1F;
 						
 	  switch(cfg->range) {
+			  case NUMBER_RANGE_0__9:
+					  limit_int_range(&value, 9);
+					  draw_int_value(value, cfg->data->last_value, 1, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+				    break;
 			  case NUMBER_RANGE_0__99:
-				{
-					  if(value > 99) {value = 99;}
-					
-						if (force || value/10 != cfg->data->last_value/10) {
-								mlcd_draw_digit(value/10, cfg->x, cfg->y, digit_width, digit_height, thickness);
-						}
-						if (force || value%10 != cfg->data->last_value%10) {
-								mlcd_draw_digit(value%10, cfg->x + digit_dist + digit_width, cfg->y, digit_width, digit_height, thickness);
-						}
-				}
-				break;
+					  limit_int_range(&value, 99);
+					  draw_int_value(value, cfg->data->last_value, 2, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+				    break;
+			  case NUMBER_RANGE_0__999:
+					  limit_int_range(&value, 999);
+					  draw_int_value(value, cfg->data->last_value, 3, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+				    break;
+			  case NUMBER_RANGE_0__9999:
+					  limit_int_range(&value, 9999);
+					  draw_int_value(value, cfg->data->last_value, 4, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+				    break;
+			  case NUMBER_RANGE_0__99999:
+					  limit_int_range(&value, 99999);
+					  draw_int_value(value, cfg->data->last_value, 5, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+				    break;
 		}
 		
 		cfg->data->last_value = value;

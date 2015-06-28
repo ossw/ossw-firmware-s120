@@ -74,7 +74,7 @@ static uint16_t get_next_short(uint32_t *ptr) {
     uint8_t data[2];
 	  ext_ram_read_data(*ptr, data, 2);
 	  //ext_flash_read_data(*ptr, &data, 1);
-	  (*ptr)+=2;
+	  (*ptr)+=2;		
 	  return data[0] << 8 | data[1];
 }
 
@@ -105,8 +105,10 @@ static uint8_t calc_ext_property_size(uint8_t type, uint8_t range) {
 			  case WATCH_SET_EXT_PROP_TYPE_NUMBER:
 						if (range == NUMBER_RANGE_0__9 || range == NUMBER_RANGE_0__19 || range == NUMBER_RANGE_0__99 || range == NUMBER_RANGE_0__199) {
 								return 1;
-						} else if (range == NUMBER_RANGE_0__999 || range == NUMBER_RANGE_0__1999 || range == NUMBER_RANGE_0__9999 || range == NUMBER_RANGE_0__1999) {
+						} else if (range == NUMBER_RANGE_0__999 || range == NUMBER_RANGE_0__1999 || range == NUMBER_RANGE_0__9999 || range == NUMBER_RANGE_0__19999) {
 								return 2;
+						} else if (range == NUMBER_RANGE_0__99999) {
+								return 3;
 						}
 						return 0;
 				case WATCH_SET_EXT_PROP_TYPE_ENUM:
