@@ -78,6 +78,14 @@ static uint16_t get_next_short(uint32_t *ptr) {
 	  return data[0] << 8 | data[1];
 }
 
+static uint32_t get_next_int(uint32_t *ptr) {
+    uint8_t data[4];
+	  ext_ram_read_data(*ptr, data, 4);
+	  //ext_flash_read_data(*ptr, &data, 1);
+	  (*ptr)+=4;
+	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
+}
+
 static uint32_t (* const data_source_handles[])(void) = {
 		/* 0 */ rtc_get_current_hour,
 		/* 1 */ rtc_get_current_minutes,
@@ -179,9 +187,7 @@ static void* parse_screen_control_number(uint32_t *read_address) {
     uint8_t range = get_next_byte(read_address);
     uint8_t x = get_next_byte(read_address);
     uint8_t y = get_next_byte(read_address);
-    uint8_t width = get_next_byte(read_address);
-    uint8_t height = get_next_byte(read_address);
-    uint16_t style = get_next_short(read_address);
+    uint32_t style = get_next_int(read_address);
 	
 	
 	  NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
@@ -191,8 +197,6 @@ static void* parse_screen_control_number(uint32_t *read_address) {
 		config->range = range;
 		config->x = x;
 		config->y = y;
-		config->width = width;
-		config->height = height;
 		config->style = style;
 		config->data = data;
 	  parse_data_source(read_address, &config->data_handle, &config->data_handle_param);

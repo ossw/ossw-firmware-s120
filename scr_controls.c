@@ -4,28 +4,29 @@
 
 static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force) {
 	  uint32_t value = cfg->data_handle(cfg->data_handle_param);
-	
+		
+		if (!force && cfg->data->last_value == value) {
+				return;
+		}
+						
+    uint8_t digit_width = cfg->style >> 8 & 0xFF;
+    uint8_t digit_height = cfg->style & 0xFF;
+    uint8_t thickness = (cfg->style>>16) & 0x3F;
+    uint8_t digit_dist = (cfg->style>>22) & 0x1F;
+						
 	  switch(cfg->range) {
 			  case NUMBER_RANGE_0__99:
 				{
 					  if(value > 99) {value = 99;}
 					
-					  if (!force && cfg->data->last_value == value) {
-							  return;
-						}
-					
-					  uint8_t digit_dist = (cfg->width >> 5)+1;
-					  uint8_t digit_width = (cfg->width - digit_dist) / 2;
-						uint8_t thickness = cfg->style & 0x3F;
-						
 						if (force || value/10 != cfg->data->last_value/10) {
-								mlcd_draw_digit(value/10, cfg->x, cfg->y, digit_width, cfg->height, thickness);
+								mlcd_draw_digit(value/10, cfg->x, cfg->y, digit_width, digit_height, thickness);
 						}
 						if (force || value%10 != cfg->data->last_value%10) {
-								mlcd_draw_digit(value%10, cfg->x + digit_dist + digit_width, cfg->y, digit_width, cfg->height, thickness);
+								mlcd_draw_digit(value%10, cfg->x + digit_dist + digit_width, cfg->y, digit_width, digit_height, thickness);
 						}
 				}
-						break;
+				break;
 		}
 		
 		cfg->data->last_value = value;

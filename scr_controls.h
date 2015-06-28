@@ -20,7 +20,7 @@
 #define NUMBER_RANGE_0__19999 0x80
 #define NUMBER_RANGE_0__99999 0x90
 
-#define NUMBER_FORMAT_FLAG_ZERO_PADDED    0x8000
+#define NUMBER_FORMAT_FLAG_ZERO_PADDED    0x80000000
 
 typedef struct
 {
@@ -37,9 +37,7 @@ typedef struct
 	  uint8_t range;
 	  uint8_t x;
 	  uint8_t y;
-	  uint8_t width;
-	  uint8_t height;
-	  uint16_t style;
+	  uint32_t style;
 	  uint32_t (* data_handle)(uint32_t);
 	  uint32_t data_handle_param;
 	  NUMBER_CONTROL_DATA* data;
