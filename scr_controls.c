@@ -8,27 +8,45 @@ static void limit_int_range(uint32_t* value, uint32_t max_value) {
 		}
 }
 
-static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no, uint8_t x, uint8_t y, uint8_t digit_width, uint8_t digit_height, uint8_t thickness, uint8_t digit_space, bool force) {
-		/*if (force || value/10 != cfg->data->last_value/10) {
-								mlcd_draw_digit(value/10, cfg->x, cfg->y, digit_width, digit_height, thickness);
-						}
-						if (force || value%10 != cfg->data->last_value%10) {
-								mlcd_draw_digit(value%10, cfg->x + digit_dist + digit_width, cfg->y, digit_width, digit_height, thickness);
-						}*/
+static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no, uint8_t x, uint8_t y, uint8_t digit_width, uint8_t digit_height, uint8_t thickness, uint8_t digit_space, bool leftPadded, bool force) {
 	  int current_x = x;
 		int div = 1;
 		for (int i = 1; i < digits_no; i++) {
 				div *= 10;
 		}
 		for (int i = 0; i < digits_no; i++) {
-		    uint8_t old_digit = (old_value / div)%10;
-		    uint8_t new_digit = (value / div)%10;
-			  if (force || old_digit != new_digit) {
-			      mlcd_draw_digit(new_digit, current_x, y, digit_width, digit_height, thickness);
+        uint32_t scaled_old_val = old_value / div;
+		    uint8_t old_digit = scaled_old_val%10;
+        uint32_t scaled_val = value / div;
+		    uint8_t new_digit = scaled_val % 10;
+			  if (force || old_digit != new_digit || (scaled_val > 9)!=(scaled_old_val > 9)) {
+					  if (scaled_val > 0 || leftPadded || div == 1) {
+								mlcd_draw_digit(new_digit, current_x, y, digit_width, digit_height, thickness);
+						} else {
+							  mlcd_clear_rect(current_x, y, digit_width, digit_height);
+						}
 				}
 				div = div/10;
 				current_x += digit_width + digit_space;
 		}
+}
+
+static void draw_1X_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no, uint8_t x, uint8_t y, uint8_t digit_width, uint8_t digit_height, uint8_t thickness, uint8_t digit_space, bool force) {
+		int div = 1;
+		for (int i = 1; i < digits_no; i++) {
+				div *= 10;
+		}
+		uint8_t old_digit = (old_value / div)%10;
+		uint8_t new_digit = (value / div)%10;
+		
+		if (force || old_digit != new_digit) {
+			  if (new_digit) {
+					  mlcd_draw_rect(x, y, thickness, digit_height);
+				} else {
+					  mlcd_clear_rect(x, y, thickness, digit_height);
+				}
+		}
+		draw_int_value(value, old_value, digits_no - 1, x + thickness + digit_space, y, digit_width, digit_height, thickness, digit_space, false, force);
 }
 
 static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force) {
@@ -42,27 +60,44 @@ static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, boo
     uint8_t digit_height = cfg->style & 0xFF;
     uint8_t thickness = (cfg->style>>16) & 0x3F;
     uint8_t digit_dist = (cfg->style>>22) & 0x1F;
+    bool leftPadded = cfg->style & 0x80000000;
 						
 	  switch(cfg->range) {
 			  case NUMBER_RANGE_0__9:
 					  limit_int_range(&value, 9);
-					  draw_int_value(value, cfg->data->last_value, 1, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+					  draw_int_value(value, cfg->data->last_value, 1, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, leftPadded, force);
+				    break;
+			  case NUMBER_RANGE_0__19:
+					  limit_int_range(&value, 19);
+					  draw_1X_int_value(value, cfg->data->last_value, 2, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
 				    break;
 			  case NUMBER_RANGE_0__99:
 					  limit_int_range(&value, 99);
-					  draw_int_value(value, cfg->data->last_value, 2, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+					  draw_int_value(value, cfg->data->last_value, 2, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, leftPadded, force);
+				    break;
+			  case NUMBER_RANGE_0__199:
+					  limit_int_range(&value, 199);
+					  draw_1X_int_value(value, cfg->data->last_value, 3, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
 				    break;
 			  case NUMBER_RANGE_0__999:
 					  limit_int_range(&value, 999);
-					  draw_int_value(value, cfg->data->last_value, 3, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+					  draw_int_value(value, cfg->data->last_value, 3, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, leftPadded, force);
+				    break;
+			  case NUMBER_RANGE_0__1999:
+					  limit_int_range(&value, 1999);
+					  draw_1X_int_value(value, cfg->data->last_value, 4, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
 				    break;
 			  case NUMBER_RANGE_0__9999:
 					  limit_int_range(&value, 9999);
-					  draw_int_value(value, cfg->data->last_value, 4, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+					  draw_int_value(value, cfg->data->last_value, 4, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, leftPadded, force);
+				    break;
+			  case NUMBER_RANGE_0__19999:
+					  limit_int_range(&value, 19999);
+					  draw_1X_int_value(value, cfg->data->last_value, 5, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
 				    break;
 			  case NUMBER_RANGE_0__99999:
 					  limit_int_range(&value, 99999);
-					  draw_int_value(value, cfg->data->last_value, 5, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, force);
+					  draw_int_value(value, cfg->data->last_value, 5, cfg->x, cfg->y, digit_width, digit_height, thickness, digit_dist, leftPadded, force);
 				    break;
 		}
 		
