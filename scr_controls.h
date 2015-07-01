@@ -19,6 +19,24 @@
 #define NUMBER_RANGE_0__9999  0x70
 #define NUMBER_RANGE_0__19999 0x80
 #define NUMBER_RANGE_0__99999 0x90
+#define NUMBER_RANGE_0__9_9     0x11
+#define NUMBER_RANGE_0__19_9    0x21
+#define NUMBER_RANGE_0__99_9    0x31
+#define NUMBER_RANGE_0__199_9   0x41
+#define NUMBER_RANGE_0__999_9   0x51
+#define NUMBER_RANGE_0__1999_9  0x61
+#define NUMBER_RANGE_0__9999_9  0x71
+#define NUMBER_RANGE_0__19999_9 0x81
+#define NUMBER_RANGE_0__99999_9 0x91
+#define NUMBER_RANGE_0__9_99     0x12
+#define NUMBER_RANGE_0__19_99    0x22
+#define NUMBER_RANGE_0__99_99    0x32
+#define NUMBER_RANGE_0__199_99   0x42
+#define NUMBER_RANGE_0__999_99   0x52
+#define NUMBER_RANGE_0__1999_99  0x62
+#define NUMBER_RANGE_0__9999_99  0x72
+#define NUMBER_RANGE_0__19999_99 0x82
+#define NUMBER_RANGE_0__99999_99 0x92
 
 #define NUMBER_FORMAT_FLAG_ZERO_PADDED    0x80000000
 
@@ -38,7 +56,7 @@ typedef struct
 	  uint8_t x;
 	  uint8_t y;
 	  uint32_t style;
-	  uint32_t (* data_handle)(uint32_t);
+	  uint32_t (* data_handle)(uint32_t, uint8_t);
 	  uint32_t data_handle_param;
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_NUMBER_CONFIG;	

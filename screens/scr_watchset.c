@@ -103,11 +103,35 @@ static uint32_t internal_data_source_get_value(uint32_t data_source_id) {
 static uint8_t calc_ext_property_size(uint8_t type, uint8_t range) {
 	  switch(type) {
 			  case WATCH_SET_EXT_PROP_TYPE_NUMBER:
-						if (range == NUMBER_RANGE_0__9 || range == NUMBER_RANGE_0__19 || range == NUMBER_RANGE_0__99 || range == NUMBER_RANGE_0__199) {
+						if (range == NUMBER_RANGE_0__9 ||
+                        range == NUMBER_RANGE_0__19 ||
+                        range == NUMBER_RANGE_0__99 ||
+                        range == NUMBER_RANGE_0__199 ||
+                        range == NUMBER_RANGE_0__9_9 ||
+                        range == NUMBER_RANGE_0__19_9) {
 								return 1;
-						} else if (range == NUMBER_RANGE_0__999 || range == NUMBER_RANGE_0__1999 || range == NUMBER_RANGE_0__9999 || range == NUMBER_RANGE_0__19999) {
+						} else if (range == NUMBER_RANGE_0__999 ||
+                        range == NUMBER_RANGE_0__1999 ||
+                        range == NUMBER_RANGE_0__9999 ||
+                        range == NUMBER_RANGE_0__19999 ||
+                        range == NUMBER_RANGE_0__99_9 ||
+                        range == NUMBER_RANGE_0__199_9 ||
+                        range == NUMBER_RANGE_0__999_9 ||
+                        range == NUMBER_RANGE_0__1999_9 ||
+                        range == NUMBER_RANGE_0__9_99 ||
+                        range == NUMBER_RANGE_0__19_99 ||
+                        range == NUMBER_RANGE_0__99_99 ||
+                        range == NUMBER_RANGE_0__199_99) {
 								return 2;
-						} else if (range == NUMBER_RANGE_0__99999) {
+						} else if (range == NUMBER_RANGE_0__99999 ||
+                        range == NUMBER_RANGE_0__9999_9 ||
+                        range == NUMBER_RANGE_0__19999_9 ||
+                        range == NUMBER_RANGE_0__99999_9 ||
+                        range == NUMBER_RANGE_0__999_99 ||
+                        range == NUMBER_RANGE_0__1999_99 ||
+                        range == NUMBER_RANGE_0__9999_99 ||
+                        range == NUMBER_RANGE_0__19999_99 ||
+                        range == NUMBER_RANGE_0__99999_99) {
 								return 3;
 						}
 						return 0;
@@ -119,7 +143,15 @@ static uint8_t calc_ext_property_size(uint8_t type, uint8_t range) {
 		return 0;
 }
 
-static uint32_t external_data_source_get_property_value(uint32_t property_id) {	  
+static uint32_t pow(uint32_t x, uint8_t n) {
+	  uint32_t result = 1;
+	  for(uint32_t i = 0; i < n; i++) {
+			  result *= x;
+		}
+		return result;
+}
+
+static uint32_t external_data_source_get_property_value(uint32_t property_id, uint8_t expected_range) {	  
 	  if (external_properties_data == NULL) {
 			  return NULL;
 		}
@@ -134,18 +166,36 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id) {
 		uint8_t number_size;
 		switch(type) {
 			  case WATCH_SET_EXT_PROP_TYPE_NUMBER:
+				{
 						number_size = calc_ext_property_size(type, range);
+				    uint32_t result;
 				    switch (number_size) {
 							case 1:
-								  return external_properties_data[offset];
+								  result = external_properties_data[offset];
+									break;
 							case 2:
-								  return external_properties_data[offset] << 8 | external_properties_data[offset+1];
+								  result = external_properties_data[offset] << 8 | 
+										external_properties_data[offset+1];
+									break;
 							case 3:
-								  return external_properties_data[offset] << 16 | 
+								  result = (external_properties_data[offset] << 16 | 
 										  external_properties_data[offset+1] << 8 | 
-									    external_properties_data[offset+2];
+									    external_properties_data[offset+2]);
+									break;
+						  default:
+										result = 0;
 						}
-		        return NULL;
+						uint8_t decimal_size = range&0xF;
+						uint8_t expected_decimal_size = expected_range&0xF;
+						if (expected_decimal_size > decimal_size) {
+							  return result * pow(10, expected_decimal_size - decimal_size);
+						} else if (expected_decimal_size < decimal_size) {
+							  uint32_t divider = pow(10, decimal_size - expected_decimal_size);
+							  // divide and round half up
+							  return (result + (divider>>1)) / divider;
+						}
+						return result;
+				}
 			  case WATCH_SET_EXT_PROP_TYPE_STRING:
 		        return (uint32_t)&external_properties_data[offset];
 			  default:
@@ -153,7 +203,7 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id) {
 		}
 }
 
-static void parse_data_source(uint32_t *read_address, uint32_t (**data_source)(uint32_t), uint32_t* data_source_param) {
+static void parse_data_source(uint32_t *read_address, void **data_source, uint32_t* data_source_param) {
     uint8_t type = get_next_byte(read_address);
     uint8_t property = get_next_byte(read_address);
 	  switch (type) {
@@ -201,7 +251,7 @@ static void* parse_screen_control_number(uint32_t *read_address) {
 		config->y = y;
 		config->style = style;
 		config->data = data;
-	  parse_data_source(read_address, &config->data_handle, &config->data_handle_param);
+	  parse_data_source(read_address, (void **)&config->data_handle, &config->data_handle_param);
 		
 		return config;
 }
@@ -223,7 +273,7 @@ static void* parse_screen_control_text(uint32_t *read_address) {
 		config->width = width;
 		config->height = height;
 		config->data = data;
-	  parse_data_source(read_address, &config->data_handle, &config->data_handle_param);
+	  parse_data_source(read_address, (void **)&config->data_handle, &config->data_handle_param);
 		
 		return config;
 }
@@ -319,7 +369,16 @@ static void parse_external_properties() {
 }
 
 static void scr_watch_set_init() {
-	  uint32_t read_address = 0x1C00;
+	  uint32_t read_address = 0x1000;
+	
+    uint8_t valid = get_next_byte(&read_address);
+	  if (valid != 1) {
+			  screens_section_address = NULL;
+			  external_properties_section_address = NULL;
+			  scr_mngr_show_screen(SCR_WATCHFACE);
+			  return;
+		}
+	  uint32_t watchset_id = get_next_int(&read_address);
 	
 	  mlcd_fb_clear();
 	
@@ -341,6 +400,10 @@ static void scr_watch_set_init() {
 				read_address+=section_size;
 	  };
 		parse_external_properties();
+		
+		// send info to watch to send property values
+		ble_peripheral_set_watch_set_id(watchset_id);
+		
 		init_screen(0);
 		scr_controls_draw(&controls);
 }
@@ -354,6 +417,9 @@ static void scr_watch_set_clear_screen_data() {
 			  switch (controls.controls[i].type){
 					  case SCR_CONTROL_NUMBER:
 							  free(((SCR_CONTROL_NUMBER_CONFIG *)controls.controls[i].config)->data);
+						    break;
+					  case SCR_CONTROL_TEXT:
+							  free(((SCR_CONTROL_TEXT_CONFIG *)controls.controls[i].config)->data);
 						    break;
 				}
 		    free(controls.controls[i].config);
@@ -378,6 +444,7 @@ void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 				    scr_watch_set_handle_button_long_pressed(event_param);
 				    break;
 			  case SCR_EVENT_DESTROY_SCREEN:
+						ble_peripheral_set_watch_set_id(0);
 				    scr_watch_set_clear_screen_data();
 				    if (external_properties_data != NULL) {
 								free(external_properties_data);

@@ -39,8 +39,8 @@
 #define SPI0_SS1     23u                                     /**< SPI Slave Select GPIO pin number for device 1 */
 
 // SPI1. 
-#define SPI1_SCK     31u   //      15u //dev board 
-#define SPI1_MOSI    28u   //      16u //dev board 
+#define SPI1_SCK     31u   //  */    15u //dev board 
+#define SPI1_MOSI    28u   //  */    16u //dev board 
 #define SPI1_MISO    4u                                      
 #define SPI1_SS0     30u   
 

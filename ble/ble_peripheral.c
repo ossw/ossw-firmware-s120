@@ -82,9 +82,13 @@ extern uint8_t testValue;
 
 static uint32_t upload_data_ptr;
 
+#define WATCHSET_START_ADDRESS 0x1000
+
 static void init_data_upload(uint8_t type, uint32_t size) {
-		upload_data_ptr = 0x1C00;
-	//	mlcd_backlight_toggle();
+		upload_data_ptr = WATCHSET_START_ADDRESS;
+	  uint8_t zero = 0;
+	  ext_ram_write_data(upload_data_ptr, &zero, 1);
+	  upload_data_ptr++;
 	/*  int page_no = (size/0x100) + 1;
 	  for (int i=0; i < page_no; i++) {
 			  ext_flash_erase_page(i*0x100);
@@ -98,7 +102,8 @@ static void handle_data_upload_part(uint8_t *data, uint32_t size) {
 }
 
 static void handle_data_upload_done() {
-	//  mlcd_backlight_toggle();
+	  uint8_t one = 1;
+	  ext_ram_write_data(WATCHSET_START_ADDRESS, &one, 1);
 		scr_mngr_show_screen(SCR_WATCH_SET);
 }
 
@@ -136,7 +141,12 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 }
 
 void ble_peripheral_invoke_external_function(uint8_t function_id) {
-	  uint8_t data[] = {0x10, function_id};
+	  uint8_t data[] = {0x11, function_id};
+	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
+}
+
+void ble_peripheral_set_watch_set_id(uint32_t watch_set_id) {
+	  uint8_t data[] = {0x10, (watch_set_id>>24)&0xFF, (watch_set_id>>16)&0xFF, (watch_set_id>>8)&0xFF, watch_set_id&0xFF};
 	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
 }
 
