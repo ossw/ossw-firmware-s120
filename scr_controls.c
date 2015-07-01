@@ -8,7 +8,7 @@ static void limit_int_range(uint32_t* value, uint32_t max_value) {
 		}
 }
 
-static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no, uint8_t decimal_size, uint8_t x, uint8_t y, uint8_t digit_width, uint8_t digit_height, uint8_t thickness, uint8_t digit_space, bool leftPadded, bool force) {
+static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no, uint8_t decimal_size, uint8_t x, uint8_t y, uint8_t digit_width, uint8_t digit_height, uint8_t thickness, uint8_t digit_space, bool left_padded, bool force) {
 	  int current_x = x;
 		int div = 1;
 		for (int i = 1; i < digits_no; i++) {
@@ -27,8 +27,11 @@ static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no
 		    uint8_t old_digit = scaled_old_val%10;
         uint32_t scaled_val = value / div;
 		    uint8_t new_digit = scaled_val % 10;
+				
+				bool draw_zero_value = left_padded || (digits_no - i - 1 <= decimal_size);
+				
 			  if (force || old_digit != new_digit || (scaled_val > 9)!=(scaled_old_val > 9)) {
-					  if (scaled_val > 0 || leftPadded || div == 1) {
+					  if (scaled_val > 0 || draw_zero_value) {
 								mlcd_draw_digit(new_digit, current_x, y, digit_width, digit_height, thickness);
 						} else {
 							  mlcd_clear_rect(current_x, y, digit_width, digit_height);
