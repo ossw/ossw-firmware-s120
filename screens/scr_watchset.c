@@ -276,6 +276,30 @@ static void* parse_screen_control_text(uint32_t *read_address) {
 		return config;
 }
 
+static void* parse_screen_control_progress(uint32_t *read_address) {
+    uint32_t max_value = get_next_int(read_address);
+    uint8_t x = get_next_byte(read_address);
+    uint8_t y = get_next_byte(read_address);
+    uint8_t width = get_next_byte(read_address);
+    uint8_t height = get_next_byte(read_address);
+    uint16_t style = get_next_short(read_address);
+	
+	  NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
+	  
+	  SCR_CONTROL_PROGRESS_BAR_CONFIG* config = malloc(sizeof(SCR_CONTROL_PROGRESS_BAR_CONFIG));
+	
+	  config->max = max_value;
+		config->x = x;
+		config->y = y;
+		config->width = width;
+		config->height = height;
+		config->style = style;
+		config->data = data;
+	  parse_data_source(read_address, (void **)&config->data_handle, &config->data_handle_param);
+		
+		return config;
+}
+
 static bool parse_controls(uint32_t *read_address) {
 	  uint8_t controls_no = get_next_byte(read_address);
 	
@@ -292,6 +316,9 @@ static bool parse_controls(uint32_t *read_address) {
 					    break;
 					case SCR_CONTROL_TEXT:
 						  controls.controls[i].config = parse_screen_control_text(read_address);
+					    break;
+					case SCR_CONTROL_HORIZONTAL_PROGRESS_BAR:
+						  controls.controls[i].config = parse_screen_control_progress(read_address);
 					    break;
 				}
 		}
@@ -420,6 +447,9 @@ static void clear_subscreen_data() {
 						    break;
 					  case SCR_CONTROL_TEXT:
 							  free(((SCR_CONTROL_TEXT_CONFIG *)controls.controls[i].config)->data);
+						    break;
+					  case SCR_CONTROL_HORIZONTAL_PROGRESS_BAR:
+							  free(((SCR_CONTROL_PROGRESS_BAR_CONFIG *)controls.controls[i].config)->data);
 						    break;
 				}
 		    free(controls.controls[i].config);

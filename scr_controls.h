@@ -83,12 +83,12 @@ typedef struct
 
 typedef struct
 {
-	  const uint8_t x;
-	  const uint8_t y;
-	  const uint8_t width;
-	  const uint8_t height;
-	  const uint8_t max;
-	  const uint8_t border;
+	  uint8_t x;
+	  uint8_t y;
+	  uint8_t width;
+	  uint8_t height;
+	  uint32_t max;
+	  uint32_t style;
 	  uint32_t (* const data_handle)();
 	  uint32_t data_handle_param;
 	  NUMBER_CONTROL_DATA* data;
