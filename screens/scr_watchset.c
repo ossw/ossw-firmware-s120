@@ -21,6 +21,9 @@ uint8_t external_properties_no = 0;
 uint8_t* external_properties_data = NULL;
 SCR_CONTROLS_DEFINITION controls;
 
+uint8_t current_subscreen = 0;
+uint8_t switch_to_subscreen = 0;
+
 FUNCTION action_handlers[8];
 
 static void scr_watch_set_handle_button_pressed(uint32_t button_id) {
@@ -55,11 +58,6 @@ static void scr_watch_set_handle_button_long_pressed(uint32_t button_id) {
 					  scr_watch_set_invoke_function(&action_handlers[7]);
 				    break;
 		}
-}
-
-static void scr_watch_set_refresh_screen() {
-	  scr_controls_redraw(&controls);
-	  mlcd_fb_flush();
 }
 
 static uint8_t get_next_byte(uint32_t *ptr) {
@@ -257,21 +255,21 @@ static void* parse_screen_control_number(uint32_t *read_address) {
 }
 
 static void* parse_screen_control_text(uint32_t *read_address) {
-    uint8_t format = get_next_byte(read_address);
     uint8_t x = get_next_byte(read_address);
     uint8_t y = get_next_byte(read_address);
     uint8_t width = get_next_byte(read_address);
     uint8_t height = get_next_byte(read_address);
+    uint32_t style = get_next_int(read_address);
 	
 	  TEXT_CONTROL_DATA* data = malloc(sizeof(TEXT_CONTROL_DATA));
 	  
 	  SCR_CONTROL_TEXT_CONFIG* config = malloc(sizeof(SCR_CONTROL_TEXT_CONFIG));
 	
-		config->format = 0;
 		config->x = x;
 		config->y = y;
 		config->width = width;
 		config->height = height;
+		config->style = style;
 		config->data = data;
 	  parse_data_source(read_address, (void **)&config->data_handle, &config->data_handle_param);
 		
@@ -326,7 +324,7 @@ static bool parse_screen(uint32_t read_address) {
 		return true;
 }
 
-static bool init_screen(uint8_t screen_id) {
+static bool init_subscreen(uint8_t screen_id) {
 	  uint32_t read_address = screens_section_address;
 	  uint8_t screens_no = get_next_byte(&read_address);
 	
@@ -370,6 +368,8 @@ static void parse_external_properties() {
 
 static void scr_watch_set_init() {
 	  uint32_t read_address = 0x1000;
+	  current_subscreen = 0;
+	  switch_to_subscreen = 0;
 	
     uint8_t valid = get_next_byte(&read_address);
 	  if (valid != 1) {
@@ -404,11 +404,11 @@ static void scr_watch_set_init() {
 		// send info to watch to send property values
 		ble_peripheral_set_watch_set_id(watchset_id);
 		
-		init_screen(0);
+		init_subscreen(current_subscreen);
 		scr_controls_draw(&controls);
 }
 
-static void scr_watch_set_clear_screen_data() {
+static void clear_subscreen_data() {
 	  if (controls.controls_no == 0 || controls.controls == NULL) {
 			  return;
 		}
@@ -429,6 +429,19 @@ static void scr_watch_set_clear_screen_data() {
 		controls.controls = NULL;
 }
 
+static void scr_watch_set_refresh_screen() {
+	  if (current_subscreen != switch_to_subscreen) {
+				clear_subscreen_data();
+	      mlcd_fb_clear();
+			  init_subscreen(switch_to_subscreen);
+				scr_controls_draw(&controls);
+			  current_subscreen = switch_to_subscreen;
+		} else {
+				scr_controls_redraw(&controls);
+	  }
+	  mlcd_fb_flush();
+}
+
 void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
@@ -445,7 +458,7 @@ void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 				    break;
 			  case SCR_EVENT_DESTROY_SCREEN:
 						ble_peripheral_set_watch_set_id(0);
-				    scr_watch_set_clear_screen_data();
+				    clear_subscreen_data();
 				    if (external_properties_data != NULL) {
 								free(external_properties_data);
 							  external_properties_data = NULL;
@@ -477,10 +490,7 @@ void scr_watch_set_invoke_internal_function(uint8_t function_id, uint16_t param)
 					  scr_mngr_show_screen(SCR_WATCHFACE);
 					  break;
 			  case WATCH_SET_FUNC_CHANGE_SCREEN:
-					  scr_watch_set_clear_screen_data();
-	          mlcd_fb_clear();
-				    init_screen(param);
-						scr_controls_draw(&controls);
+					  switch_to_subscreen = param;
 			      break;
 		}
 }

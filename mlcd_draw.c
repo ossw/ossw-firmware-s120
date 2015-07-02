@@ -223,7 +223,7 @@ static uint_fast8_t calc_text_width(const char *text, uint_fast8_t font_type) {
 		return width;
 }
 
-uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type) {
+uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type, uint8_t font_alignment) {
 	  int ptr = 0;
 	  uint32_t c;
 	
@@ -234,9 +234,9 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t x, uint_fast8_t y, ui
 	
 	  const FONT_INFO* font = mlcd_resolve_font(font_type);
 	
-	  if (font_type & ALIGN_CENTER) {
+	  if (font_alignment & ALIGN_CENTER) {
 			  x += (width - calc_text_width(text, font_type))/2;
-		} else if (font_type & ALIGN_RIGHT) {
+		} else if (font_alignment & ALIGN_RIGHT) {
 			  x += (width - calc_text_width(text, font_type));
 		}
 	

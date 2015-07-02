@@ -29,9 +29,9 @@ static void scr_choosemode_handle_button_pressed(uint32_t button_id) {
 static void scr_choosemode_init() {
 	  mlcd_fb_clear();
 	                 
-	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_PERIPHERAL), 7, 16, NULL, NULL, FONT_OPTION_BIG);
-	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_AIRPLANE), 24, 74, NULL, NULL, FONT_OPTION_BIG);
-	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_CENTRAL), 28, 129, NULL, NULL, FONT_OPTION_BIG);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_PERIPHERAL), 7, 16, NULL, NULL, FONT_OPTION_BIG, 0);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_AIRPLANE), 24, 74, NULL, NULL, FONT_OPTION_BIG, 0);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_CENTRAL), 28, 129, NULL, NULL, FONT_OPTION_BIG, 0);
 	  mlcd_draw_rect(0, 55, MLCD_XRES, 2);
 		mlcd_draw_rect(0, 113, MLCD_XRES, 2);
 	

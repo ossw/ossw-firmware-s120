@@ -99,12 +99,16 @@ static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, boo
 static void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force) {
 	  char* value = (char*)cfg->data_handle(cfg->data_handle_param);
 	
+	  uint8_t font_type = (cfg->style >> 24) & 0xFF;
+	  uint8_t alignment = (cfg->style >> 16) & 0xFF;
+//	  uint8_t flags = (cfg->style >> 8) & 0xFF;
+	
 		if (force) {
-			  mlcd_draw_text(value, cfg->x, cfg->y,cfg->width, cfg->height, FONT_OPTION_NORMAL);
+			  mlcd_draw_text(value, cfg->x, cfg->y,cfg->width, cfg->height, font_type, alignment);
 		} else {
 			  if (strcmp(value, cfg->data->last_value)!=0) {
 				    mlcd_clear_rect(cfg->x, cfg->y,cfg->width, cfg->height);
-			      mlcd_draw_text(value, cfg->x, cfg->y,cfg->width, cfg->height, FONT_OPTION_NORMAL);
+			      mlcd_draw_text(value, cfg->x, cfg->y,cfg->width, cfg->height, font_type, alignment);
 				} else {
 					  return;
 				} 

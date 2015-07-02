@@ -63,11 +63,11 @@ typedef struct
 
 typedef struct
 {
-	  uint8_t format;
 	  uint8_t x;
 	  uint8_t y;
 	  uint8_t width;
 	  uint8_t height;
+	  uint32_t style;
 	  uint32_t (* data_handle)(uint32_t);
 	  uint32_t data_handle_param;
 	  TEXT_CONTROL_DATA* data;
