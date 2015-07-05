@@ -8,12 +8,17 @@ static void limit_int_range(uint32_t* value, uint32_t max_value) {
 		}
 }
 
+static uint32_t pow(uint32_t x, uint8_t n) {
+	  uint32_t result = 1;
+	  for(uint32_t i = 0; i < n; i++) {
+			  result *= x;
+		}
+		return result;
+}
+
 static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no, uint8_t decimal_size, uint8_t x, uint8_t y, uint8_t digit_width, uint8_t digit_height, uint8_t thickness, uint8_t digit_space, bool left_padded, bool force) {
 	  int current_x = x;
-		int div = 1;
-		for (int i = 1; i < digits_no; i++) {
-				div *= 10;
-		}
+		int div = pow(10, digits_no-1);
 		for (int i = 0; i < digits_no; i++) {
 			
 			  if (decimal_size > 0 && digits_no - i == decimal_size) {
@@ -44,9 +49,7 @@ static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no
 
 static void draw_1X_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no, uint8_t decimal_size, uint8_t x, uint8_t y, uint8_t digit_width, uint8_t digit_height, uint8_t thickness, uint8_t digit_space, bool force) {
 		int div = 1;
-		for (int i = 1; i < digits_no; i++) {
-				div *= 10;
-		}
+		int div = pow(10, digits_no-1);
 		uint8_t old_digit = (old_value / div)%10;
 		uint8_t new_digit = (value / div)%10;
 		
@@ -58,14 +61,6 @@ static void draw_1X_int_value(uint32_t value, uint32_t old_value, uint8_t digits
 				}
 		}
 		draw_int_value(value, old_value, digits_no - 1, decimal_size, x + thickness + digit_space, y, digit_width, digit_height, thickness, digit_space, false, force);
-}
-
-static uint32_t pow(uint32_t x, uint8_t n) {
-	  uint32_t result = 1;
-	  for(uint32_t i = 0; i < n; i++) {
-			  result *= x;
-		}
-		return result;
 }
 
 static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force) {
