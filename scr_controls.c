@@ -48,7 +48,6 @@ static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no
 }
 
 static void draw_1X_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no, uint8_t decimal_size, uint8_t x, uint8_t y, uint8_t digit_width, uint8_t digit_height, uint8_t thickness, uint8_t digit_space, bool force) {
-		int div = 1;
 		int div = pow(10, digits_no-1);
 		uint8_t old_digit = (old_value / div)%10;
 		uint8_t new_digit = (value / div)%10;

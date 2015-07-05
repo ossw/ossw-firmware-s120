@@ -235,9 +235,15 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t x, uint_fast8_t y, ui
 	  const FONT_INFO* font = mlcd_resolve_font(font_type);
 	
 	  if (font_alignment & ALIGN_CENTER) {
-			  x += (width - calc_text_width(text, font_type))/2;
+			  uint8_t text_width = calc_text_width(text, font_type);
+			  if (text_width < width) {
+					  x += (width - text_width)/2;
+				}
 		} else if (font_alignment & ALIGN_RIGHT) {
-			  x += (width - calc_text_width(text, font_type));
+			  uint8_t text_width = calc_text_width(text, font_type);
+			  if (text_width < width) {
+					  x += width - text_width;
+				}
 		}
 	
 	  while ((c = u8_nextchar(text, &ptr)) > 0 && max_x >= x) {
