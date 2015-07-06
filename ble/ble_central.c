@@ -74,6 +74,8 @@ static uint8_t                      m_scan_mode;                         /**< Sc
 
 static bool                         m_memory_access_in_progress = false; /**< Flag to keep track of ongoing operations on persistent memory. */
 
+static int heart_rate = 0;
+
 /**
  * @brief Connection parameters requested for connection.
  */
@@ -505,7 +507,7 @@ static void hrs_c_evt_handler(ble_hrs_c_t * p_hrs_c, ble_hrs_c_evt_t * p_hrs_c_e
         {
             APPL_LOG("[APPL]: HR Measurement received %d \r\n", p_hrs_c_evt->params.hrm.hr_value);
 
-					  //testValue = p_hrs_c_evt->params.hrm.hr_value;
+					  heart_rate = p_hrs_c_evt->params.hrm.hr_value;
 					
             printf("Heart Rate = %d\r\n", p_hrs_c_evt->params.hrm.hr_value);
             break;
@@ -681,4 +683,8 @@ void ble_central_mode_init(void) {
     // Start scanning for peripherals and initiate connection
     // with devices that advertise Heart Rate UUID.
     scan_start();
+}
+
+uint32_t ble_central_heart_rate(void) {
+	  return heart_rate;
 }

@@ -12,6 +12,7 @@
 #include "../pawn/amxutil.h"
 #include "../i18n/i18n.h"
 #include "../ble/ble_peripheral.h"
+#include "../ble/ble_central.h"
 #include "../battery.h"
 #include <stdlib.h> 
 
@@ -84,7 +85,7 @@ static uint32_t get_next_int(uint32_t *ptr) {
 	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
 }
 
-static uint32_t (* const data_source_handles[])(void) = {
+static uint32_t (* const internal_data_source_handles[])(void) = {
 		/* 0 */ rtc_get_current_hour,
 		/* 1 */ rtc_get_current_minutes,
 		/* 2 */ rtc_get_current_seconds,
@@ -94,8 +95,16 @@ static uint32_t (* const data_source_handles[])(void) = {
 		/* 6 */ battery_get_level
 };
 
+static uint32_t (* const sensor_data_source_handles[])(void) = {
+		/* 0 */ ble_central_heart_rate
+};
+
 static uint32_t internal_data_source_get_value(uint32_t data_source_id) {
-	  return data_source_handles[data_source_id]();
+	  return internal_data_source_handles[data_source_id]();
+}
+
+static uint32_t sensor_data_source_get_value(uint32_t data_source_id) {
+	  return sensor_data_source_handles[data_source_id]();
 }
 
 static uint8_t calc_ext_property_size(uint8_t type, uint8_t range) {
@@ -207,6 +216,10 @@ static void parse_data_source(uint32_t *read_address, void **data_source, uint32
 	  switch (type) {
 			  case DATA_SOURCE_INTERNAL:
 			      *data_source = internal_data_source_get_value;
+				    *data_source_param = property;
+				    break;
+			  case DATA_SOURCE_SENSOR:
+			      *data_source = sensor_data_source_get_value;
 				    *data_source_param = property;
 				    break;
 			  case DATA_SOURCE_EXTERNAL:

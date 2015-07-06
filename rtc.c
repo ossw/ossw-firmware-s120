@@ -69,7 +69,7 @@ uint32_t rtc_get_current_day_of_month(void) {
 
 uint32_t rtc_get_current_month(void) {
     struct tm* time_struct = localtime(&current_time);
-	  return time_struct->tm_mon;
+	  return time_struct->tm_mon + 1;
 }
 
 uint32_t rtc_get_current_year(void) {
