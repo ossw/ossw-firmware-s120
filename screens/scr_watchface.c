@@ -7,10 +7,6 @@
 #include "../vibration.h"
 #include "nrf_delay.h"
 		
-		
-#include "../notifications.h"
-#include "../ext_ram.h"
-		
 static NUMBER_CONTROL_DATA hour_ctrl_data;
 		
 static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
