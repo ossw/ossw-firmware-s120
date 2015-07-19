@@ -21,7 +21,7 @@
 #include "../ext_flash.h"
 #include "../scr_mngr.h"
 #include "../rtc.h"
-#include "../ble/ble_peripheral.h"
+#include "../notifications.h"
 #include "../screens/scr_watchset.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
@@ -83,12 +83,14 @@ extern uint8_t testValue;
 static uint32_t upload_data_ptr;
 
 #define WATCHSET_START_ADDRESS 0x1000
+ 
+#define NOTIFICATION_START_ADDRESS 0x1C00
 
 static void init_data_upload(uint8_t type, uint32_t size) {
 		upload_data_ptr = WATCHSET_START_ADDRESS;
-	  uint8_t zero = 0;
-	  ext_ram_write_data(upload_data_ptr, &zero, 1);
-	  upload_data_ptr++;
+		uint8_t zero = 0;
+		ext_ram_write_data(upload_data_ptr, &zero, 1);
+		upload_data_ptr++;
 	/*  int page_no = (size/0x100) + 1;
 	  for (int i=0; i < page_no; i++) {
 			  ext_flash_erase_page(i*0x100);
@@ -102,9 +104,30 @@ static void handle_data_upload_part(uint8_t *data, uint32_t size) {
 }
 
 static void handle_data_upload_done() {
-	  uint8_t one = 1;
-	  ext_ram_write_data(WATCHSET_START_ADDRESS, &one, 1);
+		uint8_t one = 1;
+		ext_ram_write_data(WATCHSET_START_ADDRESS, &one, 1);
 		scr_mngr_show_screen(SCR_WATCH_SET);
+}
+
+static void init_notification_upload(uint8_t type, uint32_t size) {
+		upload_data_ptr = NOTIFICATION_START_ADDRESS;
+}
+
+static void handle_notification_upload_part(uint8_t *data, uint32_t size) {
+	  ext_ram_write_data(upload_data_ptr, data, size);
+	  upload_data_ptr += size;
+}
+
+static void handle_notification_upload_done(uint16_t notification_id, uint32_t vibration_pattern, uint16_t timout) {
+		notifications_notify(notification_id, NOTIFICATION_START_ADDRESS, timout, vibration_pattern);
+}
+
+static void handle_notification_extend(uint16_t notification_id, uint16_t timout) {
+	  notifications_extend(notification_id, timout);
+}
+
+static void handle_notification_stop(uint16_t notification_id) {
+	  notifications_stop(notification_id);
 }
 
 /**@brief Function for handling the data from the OSSW.
@@ -133,15 +156,40 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 			    // upload data finished
 					handle_data_upload_done();
 			    break;	
+		 case 0x23:
+			    // init notification upload
+					init_notification_upload(p_data[1], (p_data[2]<<8) | p_data[3]);
+					break;
+		 case 0x24:
+			    // upload notification part
+		 			handle_notification_upload_part(&p_data[1], length - 1);
+					break;
+		 case 0x25:
+			    // upload notification finished
+					handle_notification_upload_done(p_data[1] << 8 | p_data[2], p_data[3] << 24 | p_data[4] << 16 | p_data[5] << 8 | p_data[6], p_data[7] << 8 | p_data[8] );
+			    break;	
+		 case 0x26:
+			    // extend notification
+					handle_notification_extend(p_data[1] << 8 | p_data[2], p_data[3] << 8 | p_data[4]);
+			    break;		
+		 case 0x27:
+			    // stop notification
+					handle_notification_stop(p_data[1] << 8 | p_data[2]);
+			    break;
 		 case 0x30:
 			    // set ext param
 					set_external_property_data(p_data[1], &p_data[2], length-2);
-					break; 
+					break;
 	 }
 }
 
 void ble_peripheral_invoke_external_function(uint8_t function_id) {
 	  uint8_t data[] = {0x11, function_id};
+	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
+}
+
+void ble_peripheral_invoke_notification_function(uint8_t function_id) {
+	  uint8_t data[] = {0x12, function_id};
 	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
 }
 

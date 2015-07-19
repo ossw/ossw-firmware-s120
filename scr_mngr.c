@@ -8,11 +8,15 @@
 #include "screens/scr_changedate.h"
 #include "screens/scr_settings.h"
 #include "screens/scr_watchset.h"
+#include "screens/scr_alert_notification.h"
 #include "mlcd.h"
 
-static uint16_t switch_to_screen = SCR_NOT_SET;
+static uint8_t switch_to_screen = SCR_NOT_SET;
 
-static uint16_t current_screen = SCR_NOT_SET;
+static uint8_t current_screen = SCR_NOT_SET;
+
+static uint8_t alert_notification_state = ALERT_NOTIFICATION_STATE_NONE;
+static uint32_t alert_notification_address = 0;
 		
 static NUMBER_CONTROL_DATA hour_ctrl_data;
 		
@@ -129,6 +133,9 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 			  case SCR_SETTINGS:
 				    scr_settings_handle_event(event_type, event_param);
 				    break;
+			  case SCR_ALERT_NOTIFICATION:
+				    scr_alert_notification_handle_event(event_type, event_param);
+				    break;
 			  case SCR_WATCH_SET:
 					  allowDefaultHandler = false;
 				    scr_watch_set_handle_event(event_type, event_param);
@@ -142,6 +149,13 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 }
 
 void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
+	  if (alert_notification_state != ALERT_NOTIFICATION_STATE_NONE) {
+		    if (alert_notification_state == ALERT_NOTIFICATION_STATE_SHOW) {
+				    scr_alert_notification_handle_event(event_type, event_param);
+		    }
+				return;
+	  }
+		
 	  scr_mngr_handle_event_internal(current_screen, event_type, event_param);
 }
 	
@@ -158,18 +172,50 @@ void scr_mngr_redraw_notification_bar() {
 }
 
 void scr_mngr_draw_screen(void) {
-		if (switch_to_screen != SCR_NOT_SET) {
-				uint16_t old_screen = current_screen;
-			  // disable events
-			  current_screen = SCR_NOT_SET;
-			  // release memory used by old screen
-				scr_mngr_handle_event_internal(old_screen, SCR_EVENT_DESTROY_SCREEN, 0);
-			  // initilize new screen
-				scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_INIT_SCREEN, NULL);
-			  // set new screen
-			  current_screen = switch_to_screen;
-			  switch_to_screen = SCR_NOT_SET;
+
+	  if (alert_notification_state != ALERT_NOTIFICATION_STATE_NONE) {
+				if (alert_notification_state == ALERT_NOTIFICATION_STATE_INIT) {
+						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_INIT_SCREEN, alert_notification_address);
+					  // draw alert notification screen
+						mlcd_fb_clear();
+						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_DRAW_SCREEN, NULL);
+						alert_notification_state = ALERT_NOTIFICATION_STATE_SHOW;
+				} else if (alert_notification_state == ALERT_NOTIFICATION_STATE_SHOW) {
+						scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, NULL);
+				} else if (alert_notification_state == ALERT_NOTIFICATION_STATE_CLOSE) {
+						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_DESTROY_SCREEN, NULL);
+						alert_notification_state = ALERT_NOTIFICATION_STATE_NONE;
+					  // draw sceen
+						mlcd_fb_clear();
+						scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, NULL);
+				}
 		} else {
-				scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, NULL);
+				if (switch_to_screen != SCR_NOT_SET) {
+						uint16_t old_screen = current_screen;
+						// disable events
+						current_screen = SCR_NOT_SET;
+						// release memory used by old screen
+						scr_mngr_handle_event_internal(old_screen, SCR_EVENT_DESTROY_SCREEN, 0);
+						// initilize new screen
+						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_INIT_SCREEN, NULL);
+						// draw screen
+						mlcd_fb_clear();
+						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_DRAW_SCREEN, NULL);
+						// set new screen
+						current_screen = switch_to_screen;
+						switch_to_screen = SCR_NOT_SET;
+				} else {
+						scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, NULL);
+				}
 		}
+    mlcd_fb_flush();
+}
+
+void scr_mngr_show_alert_notification(uint32_t address) {
+		alert_notification_address = address;
+	  alert_notification_state = ALERT_NOTIFICATION_STATE_INIT;
+}
+
+void scr_mngr_close_alert_notification() {
+	  alert_notification_state = ALERT_NOTIFICATION_STATE_CLOSE;
 }

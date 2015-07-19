@@ -347,10 +347,10 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>4</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
-            <OneElfS>1</OneElfS>
+            <OneElfS>0</OneElfS>
             <Strict>0</Strict>
             <EnumInt>0</EnumInt>
             <PlainCh>0</PlainCh>
@@ -483,6 +483,16 @@
               <FileType>5</FileType>
               <FilePath>..\screens\scr_watchset.h</FilePath>
             </File>
+            <File>
+              <FileName>scr_alert_notification.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_alert_notification.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_alert_notification.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\screens\scr_alert_notification.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -597,6 +607,26 @@
               <FileName>battery.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\battery.h</FilePath>
+            </File>
+            <File>
+              <FileName>vibration.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\vibration.c</FilePath>
+            </File>
+            <File>
+              <FileName>vibration.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\vibration.h</FilePath>
+            </File>
+            <File>
+              <FileName>notifications.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\notifications.c</FilePath>
+            </File>
+            <File>
+              <FileName>notifications.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\notifications.h</FilePath>
             </File>
           </Files>
         </Group>

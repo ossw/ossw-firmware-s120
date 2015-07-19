@@ -25,8 +25,6 @@ static void scr_changetime_draw_minutes() {
 }
 
 static void scr_changetime_draw_all() {
-	  mlcd_fb_clear();
-	
 	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_SET_TIME), 19, 13, NULL, NULL, FONT_OPTION_BIG, 0);
 	  mlcd_draw_rect(0, 50, MLCD_XRES, 2);
 	
@@ -82,6 +80,8 @@ static void scr_changetime_handle_button_down(void) {
 static void scr_changetime_handle_button_select(void) {
 	  if (change_mode == MODE_HOUR) {
 			  change_mode = MODE_MINUTES;
+			
+				mlcd_fb_clear();
 			  scr_changetime_draw_all();
 	      mlcd_fb_flush();
 		} else if (change_mode == MODE_MINUTES) {
@@ -104,6 +104,7 @@ static void scr_changetime_handle_button_back(void) {
 		    scr_mngr_show_screen(SCR_SETTINGS);
 		} else if (change_mode == MODE_MINUTES) {
 			  change_mode = MODE_HOUR;
+				mlcd_fb_clear();
 			  scr_changetime_draw_all();
 	      mlcd_fb_flush();
 		}
@@ -135,14 +136,15 @@ static void scr_changetime_init() {
 	  minutes = time_struct->tm_min;
 	
 	  change_mode = MODE_HOUR;
-	  scr_changetime_draw_all();
-	  mlcd_fb_flush();
 }
 
 void scr_changetime_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_changetime_init();
+				    break;
+			  case SCR_EVENT_DRAW_SCREEN:
+						scr_changetime_draw_all();
 				    break;
 			  case SCR_EVENT_BUTTON_PRESSED:
 				    scr_changetime_handle_button_pressed(event_param);

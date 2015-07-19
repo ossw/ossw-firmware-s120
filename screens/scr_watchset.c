@@ -254,6 +254,7 @@ static void* parse_screen_control_number(uint32_t *read_address) {
 	
 	
 	  NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
+	  memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
 	  
 	  SCR_CONTROL_NUMBER_CONFIG* config = malloc(sizeof(SCR_CONTROL_NUMBER_CONFIG));
 	
@@ -275,6 +276,7 @@ static void* parse_screen_control_text(uint32_t *read_address) {
     uint32_t style = get_next_int(read_address);
 	
 	  TEXT_CONTROL_DATA* data = malloc(sizeof(TEXT_CONTROL_DATA));
+	  memset(data, 0, sizeof(TEXT_CONTROL_DATA));
 	  
 	  SCR_CONTROL_TEXT_CONFIG* config = malloc(sizeof(SCR_CONTROL_TEXT_CONFIG));
 	
@@ -298,6 +300,7 @@ static void* parse_screen_control_progress(uint32_t *read_address) {
     uint16_t style = get_next_short(read_address);
 	
 	  NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
+	  memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
 	  
 	  SCR_CONTROL_PROGRESS_BAR_CONFIG* config = malloc(sizeof(SCR_CONTROL_PROGRESS_BAR_CONFIG));
 	
@@ -403,6 +406,7 @@ static void parse_external_properties() {
 		}
 			
 	  external_properties_data = malloc(ptr);
+		memset(external_properties_data, 0, ptr);
 		memcpy(external_properties_data, ptr_array, external_properties_no*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE);
 }
 
@@ -419,8 +423,6 @@ static void scr_watch_set_init() {
 			  return;
 		}
 	  uint32_t watchset_id = get_next_int(&read_address);
-	
-	  mlcd_fb_clear();
 	
 	  uint8_t section;
 	  while ((section = get_next_byte(&read_address))!= WATCH_SET_END_OF_DATA){
@@ -445,6 +447,9 @@ static void scr_watch_set_init() {
 		ble_peripheral_set_watch_set_id(watchset_id);
 		
 		init_subscreen(current_subscreen);
+}
+
+static void scr_watch_set_draw_screen() {
 		scr_controls_draw(&controls);
 }
 
@@ -482,13 +487,15 @@ static void scr_watch_set_refresh_screen() {
 		} else {
 				scr_controls_redraw(&controls);
 	  }
-	  mlcd_fb_flush();
 }
 
 void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_watch_set_init();
+				    break;
+			  case SCR_EVENT_DRAW_SCREEN:
+				    scr_watch_set_draw_screen();
 				    break;
         case SCR_EVENT_REFRESH_SCREEN:
             scr_watch_set_refresh_screen();

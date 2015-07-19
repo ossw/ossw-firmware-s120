@@ -11,11 +11,14 @@
 #define SCR_SETTINGS                   0x05
 #define SCR_WATCH_SET                  0x06
 
+#define SCR_ALERT_NOTIFICATION         0xA0
+
 #define SCR_NOT_SET                    0x00
 
 #define SCR_EVENT_INIT_SCREEN          0x01
-#define SCR_EVENT_REFRESH_SCREEN       0x02
-#define SCR_EVENT_DESTROY_SCREEN       0x03
+#define SCR_EVENT_DRAW_SCREEN          0x02
+#define SCR_EVENT_REFRESH_SCREEN       0x03
+#define SCR_EVENT_DESTROY_SCREEN       0x0f
 #define SCR_EVENT_RTC_TIME_CHANGED     0x10
 #define SCR_EVENT_BUTTON_PRESSED       0x11
 #define SCR_EVENT_BUTTON_LONG_PRESSED  0x12
@@ -24,6 +27,11 @@
 #define SCR_EVENT_PARAM_BUTTON_DOWN    0x02
 #define SCR_EVENT_PARAM_BUTTON_SELECT  0x04
 #define SCR_EVENT_PARAM_BUTTON_BACK    0x08
+
+#define ALERT_NOTIFICATION_STATE_NONE  0
+#define ALERT_NOTIFICATION_STATE_INIT  1
+#define ALERT_NOTIFICATION_STATE_SHOW  2
+#define ALERT_NOTIFICATION_STATE_CLOSE 3
 
 void scr_mngr_init(void);
 
@@ -36,5 +44,9 @@ void scr_mngr_show_screen(uint16_t screen_id);
 void scr_mngr_draw_notification_bar(void);
 
 void scr_mngr_redraw_notification_bar(void);
+
+void scr_mngr_show_alert_notification(uint32_t address);
+
+void scr_mngr_close_alert_notification(void);
 
 #endif /* SCR_MNGR_H */

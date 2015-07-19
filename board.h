@@ -45,8 +45,10 @@
 #define SPI1_SS0     30u   
 
 #define LCD_VOLTAGE_REG   13u
-#define LCD_ENABLE       6u
-#define LCD_BACKLIGHT    7u
+#define LCD_ENABLE         6u
+#define LCD_BACKLIGHT      7u
+
+#define VIBRATION_MOTOR   29u
 
 #define TIMEOUT_COUNTER         0x3000uL                     /**< Timeout for SPI transaction in units of loop iterations. */
 
@@ -62,7 +64,7 @@ extern uint32_t * p_spi1_base_address;
 #define MLCD_SPI_SS SPI1_SS0
 
 #define APP_TIMER_PRESCALER              0                                          /**< Value of the RTC1 PRESCALER register. */
-#define APP_TIMER_MAX_TIMERS             8+2												                  /**< Maximum number of simultaneously created timers. */
+#define APP_TIMER_MAX_TIMERS             10+2												                  /**< Maximum number of simultaneously created timers. */
 #define APP_TIMER_OP_QUEUE_SIZE          4                                          /**< Size of timer operation queues. */
 
 #endif // WATCH_BOARD_H

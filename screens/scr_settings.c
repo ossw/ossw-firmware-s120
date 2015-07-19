@@ -69,35 +69,36 @@ static void draw_selected_option(const char *text, uint_fast8_t *yPos) {
 	  *yPos += 30;
 }
 
+static void scr_settings_draw_options() {
+		int menu_size = sizeof(settings_menu)/sizeof(MENU_OPTION);
+		uint_fast8_t yPos = 25;  
+		for (int i=0; i<menu_size; i++) {
+				if (i==selectedOption){
+						draw_selected_option(I18N_TRANSLATE(settings_menu[i].message_key), &yPos);
+				} else {
+						draw_option(I18N_TRANSLATE(settings_menu[i].message_key), &yPos);
+				}
+		}
+}
+
 static void scr_settings_refresh_screen() {
 	  scr_mngr_redraw_notification_bar();
 	
 	  if (lastSelectedOption != selectedOption) {
-				uint_fast8_t yPos = 25;  
-				
 				mlcd_clear_rect(0, 18, MLCD_XRES, MLCD_YRES-18);
-			
-				int menu_size = sizeof(settings_menu)/sizeof(MENU_OPTION);
-				for (int i=0; i<menu_size; i++) {
-						if (i==selectedOption){
-								draw_selected_option(I18N_TRANSLATE(settings_menu[i].message_key), &yPos);
-						} else {
-								draw_option(I18N_TRANSLATE(settings_menu[i].message_key), &yPos);
-						}
-				}
+				scr_settings_draw_options();
 	  }
-	  mlcd_fb_flush();
 		lastSelectedOption = selectedOption;
 }
 
 static void scr_settings_init() {
+		selectedOption = 0;
 		lastSelectedOption = 0xFF;
-	
-	  mlcd_fb_clear();
-	
+}
+
+static void scr_settings_draw_screen() {
 	  scr_mngr_draw_notification_bar();
-	
-    scr_settings_refresh_screen();
+		scr_settings_draw_options();
 }
 
 void scr_settings_handle_event(uint32_t event_type, uint32_t event_param) {
@@ -105,6 +106,9 @@ void scr_settings_handle_event(uint32_t event_type, uint32_t event_param) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_settings_init();
 				    break;
+        case SCR_EVENT_DRAW_SCREEN:
+            scr_settings_draw_screen();
+            break;
         case SCR_EVENT_REFRESH_SCREEN:
             scr_settings_refresh_screen();
             break;

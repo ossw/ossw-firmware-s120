@@ -26,22 +26,18 @@ static void scr_choosemode_handle_button_pressed(uint32_t button_id) {
 		}
 }
 
-static void scr_choosemode_init() {
-	  mlcd_fb_clear();
-	                 
-	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_PERIPHERAL), 7, 16, NULL, NULL, FONT_OPTION_BIG, 0);
-	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_AIRPLANE), 24, 74, NULL, NULL, FONT_OPTION_BIG, 0);
-	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_CENTRAL), 28, 129, NULL, NULL, FONT_OPTION_BIG, 0);
+static void scr_choosemode_draw() {
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_PERIPHERAL), 0, 16, MLCD_XRES, 30, FONT_OPTION_BIG, ALIGN_CENTER);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_OFFLINE), 0, 74, MLCD_XRES, 30, FONT_OPTION_BIG, ALIGN_CENTER);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_CENTRAL), 0, 129, MLCD_XRES, 30, FONT_OPTION_BIG, ALIGN_CENTER);
 	  mlcd_draw_rect(0, 55, MLCD_XRES, 2);
 		mlcd_draw_rect(0, 113, MLCD_XRES, 2);
-	
-	  mlcd_fb_flush();
 }
 
 void scr_choosemode_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
-			  case SCR_EVENT_INIT_SCREEN:
-				    scr_choosemode_init();
+			  case SCR_EVENT_DRAW_SCREEN:
+				    scr_choosemode_draw();
 				    break;
 			  case SCR_EVENT_BUTTON_PRESSED:
 				    scr_choosemode_handle_button_pressed(event_param);
