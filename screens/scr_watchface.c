@@ -69,16 +69,6 @@ static void scr_watchface_handle_button_pressed(uint32_t button_id) {
         case SCR_EVENT_PARAM_BUTTON_UP:
             scr_mngr_show_screen(SCR_WATCH_SET);
             break;
-        case SCR_EVENT_PARAM_BUTTON_DOWN:
-						{
-            uint8_t data[] = {1, 0, 5, 0, 15, '6', '6', '0', '1', '3', '5', '1', '1', '5', 0, 'M', 'a', 'r', 'z', 'e', 'n', 'i', 'u', 'n', 'i', 'a', 0 };
-						
-	          ext_ram_write_data(0x1C00, data, sizeof(data));
-			      notifications_notify(8, 0x1C00, 10000, (2<<28) | 500<<16 | 2<<14);
-						}
-						break;
-				
-				   
     }
 }
 
