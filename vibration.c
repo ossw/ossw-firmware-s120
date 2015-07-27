@@ -4,7 +4,8 @@
 #include "board.h"
 #include "nrf_gpio.h"
 
-static app_timer_id_t      m_vibration_timer_id;
+static app_timer_id_t      m_vibration_pattern_timer_id;
+static app_timer_id_t      m_vibration_timeout_timer_id;
 static uint32_t m_pattern;
 static uint8_t m_next_step;
 
@@ -29,9 +30,17 @@ void vibration_next_step(void) {
 		}
 }
 
-static void vibration_timeout_handler(void * p_context) {
+static void vibration_pattern_change_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
 		vibration_next_step();
+}
+
+static void vibration_timeout_handler(void * p_context) {
+    UNUSED_PARAMETER(p_context);
+    uint32_t err_code;	 
+	  err_code = app_timer_stop(m_vibration_pattern_timer_id);
+    APP_ERROR_CHECK(err_code);
+	  vibration_motor_off();
 }
 
 void vibration_init(void) {
@@ -41,26 +50,38 @@ void vibration_init(void) {
 	
     uint32_t err_code;	 
 		
-    err_code = app_timer_create(&m_vibration_timer_id,
+    err_code = app_timer_create(&m_vibration_pattern_timer_id,
                                 APP_TIMER_MODE_REPEATED,
+                                vibration_pattern_change_handler);
+    APP_ERROR_CHECK(err_code);
+	
+    err_code = app_timer_create(&m_vibration_timeout_timer_id,
+                                APP_TIMER_MODE_SINGLE_SHOT,
                                 vibration_timeout_handler);
     APP_ERROR_CHECK(err_code);
 }
 
-void vibration_vibrate(uint32_t pattern) {
+void vibration_vibrate(uint32_t pattern, uint16_t timeout) {
 	  m_pattern = pattern;
 	  m_next_step = 0;
 	  vibration_next_step();
 	  uint32_t step_length = (pattern >> 16) & 0x3FF;
 	
-    uint32_t err_code;	 
-    err_code = app_timer_start(m_vibration_timer_id, APP_TIMER_TICKS(step_length, 0), NULL);
+    uint32_t err_code;
+    err_code = app_timer_start(m_vibration_pattern_timer_id, APP_TIMER_TICKS(step_length, 0), NULL);
     APP_ERROR_CHECK(err_code);
+	
+	  if (timeout != 0) {
+				err_code = app_timer_start(m_vibration_timeout_timer_id, APP_TIMER_TICKS(timeout, 0), NULL);
+				APP_ERROR_CHECK(err_code);
+		}
 }
 
 void vibration_stop() {
     uint32_t err_code;	 
-	  err_code = app_timer_stop(m_vibration_timer_id);
+	  err_code = app_timer_stop(m_vibration_pattern_timer_id);
+    APP_ERROR_CHECK(err_code);
+	  err_code = app_timer_stop(m_vibration_timeout_timer_id);
     APP_ERROR_CHECK(err_code);
 	  vibration_motor_off();
 }

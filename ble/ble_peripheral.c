@@ -78,19 +78,19 @@ static app_timer_id_t                    m_battery_timer_id;                    
 static ble_dfu_t m_dfus; /**< Structure used to identify the DFU service. */
 #endif // BLE_DFU_APP_SUPPORT  
 			
-extern uint8_t testValue;
-
-static uint32_t upload_data_ptr;
+static uint32_t data_upload_ptr;
+static uint32_t notification_upload_ptr;
+static uint16_t notification_upload_size;
 
 #define WATCHSET_START_ADDRESS 0x1000
  
 #define NOTIFICATION_START_ADDRESS 0x1C00
 
 static void init_data_upload(uint8_t type, uint32_t size) {
-		upload_data_ptr = WATCHSET_START_ADDRESS;
+		data_upload_ptr = WATCHSET_START_ADDRESS;
 		uint8_t zero = 0;
-		ext_ram_write_data(upload_data_ptr, &zero, 1);
-		upload_data_ptr++;
+		ext_ram_write_data(data_upload_ptr, &zero, 1);
+		data_upload_ptr++;
 	/*  int page_no = (size/0x100) + 1;
 	  for (int i=0; i < page_no; i++) {
 			  ext_flash_erase_page(i*0x100);
@@ -99,8 +99,8 @@ static void init_data_upload(uint8_t type, uint32_t size) {
 
 static void handle_data_upload_part(uint8_t *data, uint32_t size) {
 	  //ext_flash_write_data_block(upload_data_ptr, data, size);
-	  ext_ram_write_data(upload_data_ptr, data, size);
-	  upload_data_ptr += size;
+	  ext_ram_write_data(data_upload_ptr, data, size);
+	  data_upload_ptr += size;
 }
 
 static void handle_data_upload_done() {
@@ -109,25 +109,33 @@ static void handle_data_upload_done() {
 		scr_mngr_show_screen(SCR_WATCH_SET);
 }
 
-static void init_notification_upload(uint8_t type, uint32_t size) {
-		upload_data_ptr = NOTIFICATION_START_ADDRESS;
+static void ble_peripheral_send_notification_upload_permission(bool permission) {
+	  uint8_t data[] = {0x23, permission};
+	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
+}
+
+static void init_notification_upload(uint32_t size) {
+		notification_upload_ptr = NOTIFICATION_START_ADDRESS;
+		notification_upload_size = size;
+	
+		ble_peripheral_send_notification_upload_permission(notifications_is_data_handled());
 }
 
 static void handle_notification_upload_part(uint8_t *data, uint32_t size) {
-	  ext_ram_write_data(upload_data_ptr, data, size);
-	  upload_data_ptr += size;
+	  ext_ram_write_data(notification_upload_ptr, data, size);
+	  notification_upload_ptr += size;
 }
 
-static void handle_notification_upload_done(uint16_t notification_id, uint32_t vibration_pattern, uint16_t timout) {
-		notifications_notify(notification_id, NOTIFICATION_START_ADDRESS, timout, vibration_pattern);
+static void handle_notification_upload_done() {
+	  notifications_handle_data(NOTIFICATION_START_ADDRESS, notification_upload_size);
 }
 
-static void handle_notification_extend(uint16_t notification_id, uint16_t timout) {
-	  notifications_extend(notification_id, timout);
+static void handle_notification_alert_extend(uint16_t notification_id, uint16_t timout) {
+	  notifications_alert_extend(notification_id, timout);
 }
 
-static void handle_notification_stop(uint16_t notification_id) {
-	  notifications_stop(notification_id);
+static void handle_notification_alert_stop(uint16_t notification_id) {
+	  notifications_alert_stop(notification_id);
 }
 
 /**@brief Function for handling the data from the OSSW.
@@ -158,7 +166,7 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 			    break;	
 		 case 0x23:
 			    // init notification upload
-					init_notification_upload(p_data[1], (p_data[2]<<8) | p_data[3]);
+					init_notification_upload((p_data[1]<<8) | p_data[2]);
 					break;
 		 case 0x24:
 			    // upload notification part
@@ -166,15 +174,15 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 					break;
 		 case 0x25:
 			    // upload notification finished
-					handle_notification_upload_done(p_data[1] << 8 | p_data[2], p_data[3] << 24 | p_data[4] << 16 | p_data[5] << 8 | p_data[6], p_data[7] << 8 | p_data[8] );
+					handle_notification_upload_done();
 			    break;	
 		 case 0x26:
-			    // extend notification
-					handle_notification_extend(p_data[1] << 8 | p_data[2], p_data[3] << 8 | p_data[4]);
+			    // extend alert notification
+					handle_notification_alert_extend(p_data[1] << 8 | p_data[2], p_data[3] << 8 | p_data[4]);
 			    break;		
 		 case 0x27:
-			    // stop notification
-					handle_notification_stop(p_data[1] << 8 | p_data[2]);
+			    // stop alert notification
+					handle_notification_alert_stop(p_data[1] << 8 | p_data[2]);
 			    break;
 		 case 0x30:
 			    // set ext param

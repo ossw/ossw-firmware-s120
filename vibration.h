@@ -6,7 +6,7 @@
 
 void vibration_init(void);
 
-void vibration_vibrate(uint32_t pattern); 
+void vibration_vibrate(uint32_t pattern, uint16_t timeout); 
 
 void vibration_stop(void);
 

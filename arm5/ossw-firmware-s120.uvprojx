@@ -493,6 +493,16 @@
               <FileType>5</FileType>
               <FilePath>..\screens\scr_alert_notification.h</FilePath>
             </File>
+            <File>
+              <FileName>scr_notifications.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_notifications.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_notifications.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\screens\scr_notifications.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

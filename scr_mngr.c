@@ -8,6 +8,7 @@
 #include "screens/scr_changedate.h"
 #include "screens/scr_settings.h"
 #include "screens/scr_watchset.h"
+#include "screens/scr_notifications.h"
 #include "screens/scr_alert_notification.h"
 #include "mlcd.h"
 
@@ -15,8 +16,11 @@ static uint8_t switch_to_screen = SCR_NOT_SET;
 
 static uint8_t current_screen = SCR_NOT_SET;
 
-static uint8_t alert_notification_state = ALERT_NOTIFICATION_STATE_NONE;
-static uint32_t alert_notification_address = 0;
+static uint8_t scr_notifications_state = SCR_NOTIFICATIONS_STATE_NONE;
+static uint32_t scr_notifications_address = 0;
+
+static uint8_t scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_NONE;
+static uint32_t scr_alert_notification_address = 0;
 		
 static NUMBER_CONTROL_DATA hour_ctrl_data;
 		
@@ -136,6 +140,9 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 			  case SCR_ALERT_NOTIFICATION:
 				    scr_alert_notification_handle_event(event_type, event_param);
 				    break;
+			  case SCR_NOTIFICATIONS:
+				    scr_notifications_handle_event(event_type, event_param);
+				    break;
 			  case SCR_WATCH_SET:
 					  allowDefaultHandler = false;
 				    scr_watch_set_handle_event(event_type, event_param);
@@ -149,13 +156,18 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 }
 
 void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
-	  if (alert_notification_state != ALERT_NOTIFICATION_STATE_NONE) {
-		    if (alert_notification_state == ALERT_NOTIFICATION_STATE_SHOW) {
-				    scr_alert_notification_handle_event(event_type, event_param);
+	  if (scr_alert_notification_state != SCR_ALERT_NOTIFICATION_STATE_NONE) {
+		    if (scr_alert_notification_state == SCR_ALERT_NOTIFICATION_STATE_SHOW) {
+				    scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, event_type, event_param);
 		    }
 				return;
 	  }
-		
+	  if (scr_notifications_state != SCR_NOTIFICATIONS_STATE_NONE) {
+		    if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_SHOW) {
+				   scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, event_type, event_param);
+		    }
+				return;
+	  }
 	  scr_mngr_handle_event_internal(current_screen, event_type, event_param);
 }
 	
@@ -173,18 +185,34 @@ void scr_mngr_redraw_notification_bar() {
 
 void scr_mngr_draw_screen(void) {
 
-	  if (alert_notification_state != ALERT_NOTIFICATION_STATE_NONE) {
-				if (alert_notification_state == ALERT_NOTIFICATION_STATE_INIT) {
-						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_INIT_SCREEN, alert_notification_address);
+	  if (scr_alert_notification_state != SCR_ALERT_NOTIFICATION_STATE_NONE) {
+				if (scr_alert_notification_state == SCR_ALERT_NOTIFICATION_STATE_INIT) {
+						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_INIT_SCREEN, scr_alert_notification_address);
 					  // draw alert notification screen
 						mlcd_fb_clear();
 						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_DRAW_SCREEN, NULL);
-						alert_notification_state = ALERT_NOTIFICATION_STATE_SHOW;
-				} else if (alert_notification_state == ALERT_NOTIFICATION_STATE_SHOW) {
-						scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, NULL);
-				} else if (alert_notification_state == ALERT_NOTIFICATION_STATE_CLOSE) {
+						scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_SHOW;
+				} else if (scr_alert_notification_state == SCR_ALERT_NOTIFICATION_STATE_SHOW) {
+						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_REFRESH_SCREEN, NULL);
+				} else if (scr_alert_notification_state == SCR_ALERT_NOTIFICATION_STATE_CLOSE) {
 						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_DESTROY_SCREEN, NULL);
-						alert_notification_state = ALERT_NOTIFICATION_STATE_NONE;
+						scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_NONE;
+					  // draw sceen
+						mlcd_fb_clear();
+						scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, NULL);
+				}
+		} else if (scr_notifications_state != SCR_NOTIFICATIONS_STATE_NONE) {
+				if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_INIT) {
+						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_INIT_SCREEN, scr_notifications_address);
+					  // draw alert notification screen
+						mlcd_fb_clear();
+						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DRAW_SCREEN, NULL);
+						scr_notifications_state = SCR_NOTIFICATIONS_STATE_SHOW;
+				} else if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_SHOW) {
+						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_REFRESH_SCREEN, NULL);
+				} else if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_CLOSE) {
+						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DESTROY_SCREEN, NULL);
+						scr_notifications_state = SCR_NOTIFICATIONS_STATE_NONE;
 					  // draw sceen
 						mlcd_fb_clear();
 						scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, NULL);
@@ -212,10 +240,20 @@ void scr_mngr_draw_screen(void) {
 }
 
 void scr_mngr_show_alert_notification(uint32_t address) {
-		alert_notification_address = address;
-	  alert_notification_state = ALERT_NOTIFICATION_STATE_INIT;
+		scr_alert_notification_address = address;
+	  scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_INIT;
 }
 
 void scr_mngr_close_alert_notification() {
-	  alert_notification_state = ALERT_NOTIFICATION_STATE_CLOSE;
+	  scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_CLOSE;
 }
+
+void scr_mngr_show_notifications(uint32_t address) {
+		scr_notifications_address = address;
+	  scr_notifications_state = SCR_NOTIFICATIONS_STATE_INIT;
+}
+
+void scr_mngr_close_notifications() {
+	  scr_notifications_state = SCR_NOTIFICATIONS_STATE_CLOSE;
+}
+

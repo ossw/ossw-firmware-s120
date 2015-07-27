@@ -14,19 +14,21 @@
 #include "../ble/ble_peripheral.h"
 #include <stdlib.h> 
 
-uint32_t m_address;
-uint8_t m_notification_type;
+static uint32_t m_address;
+static uint8_t m_notification_type;
 
 static void scr_alert_notification_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
-						notifications_invoke_function(NOTIFICATION_FUNCTION_REJECT);
+						//notifications_invoke_function(ALERT_NOTIFICATION_FUNCTION_);
+				    break;
+			  case SCR_EVENT_PARAM_BUTTON_UP:
+						notifications_invoke_function(NOTIFICATIONS_FUNCTION_ALERT_OPTION_1);
+				    break;
+			  case SCR_EVENT_PARAM_BUTTON_DOWN:
+						notifications_invoke_function(NOTIFICATIONS_FUNCTION_ALERT_OPTION_2);
 				    break;
 		}
-}
-
-static void scr_alert_notification_handle_button_long_pressed(uint32_t button_id) {
-	 
 }
 
 static uint8_t get_next_byte(uint32_t *ptr) {
@@ -64,13 +66,31 @@ static void draw_incmonig_call_notification() {
 	  mlcd_draw_text((char*)data, 0, 90, MLCD_XRES, 20, FONT_OPTION_NORMAL, ALIGN_CENTER);
 }
 
+static void draw_default_notification() {
+	  uint32_t read_address = m_address + 1;
+    uint16_t param_1_offset = get_next_short(&read_address);
+    uint16_t param_2_offset = get_next_short(&read_address);
+	
+	  uint8_t data[32];
+		read_address = m_address + param_1_offset;
+	  ext_ram_read_data(read_address, data, 32);
+	  mlcd_draw_text((char*)data, 0, 60, MLCD_XRES, 20, FONT_OPTION_NORMAL, ALIGN_CENTER);
+	
+		read_address = m_address + param_2_offset;
+	  ext_ram_read_data(read_address, data, 32);
+	  mlcd_draw_text((char*)data, 0, 90, MLCD_XRES, 20, FONT_OPTION_NORMAL, ALIGN_CENTER);
+}
+
 static void scr_alert_notification_draw_screen() {
 	  uint32_t read_address = m_address;
     m_notification_type = get_next_byte(&read_address);
 	
 	  switch(m_notification_type) {
-			case NOTIFICATION_TYPE_INCOMING_CALL:
+			case NOTIFICATIONS_CATEGORY_INCOMING_CALL:
 				  draw_incmonig_call_notification();
+					break;
+			default:
+				  draw_default_notification();
 		}
 }
 
@@ -90,9 +110,6 @@ void scr_alert_notification_handle_event(uint32_t event_type, uint32_t event_par
             break;
 			  case SCR_EVENT_BUTTON_PRESSED:
 				    scr_alert_notification_handle_button_pressed(event_param);
-				    break;
-			  case SCR_EVENT_BUTTON_LONG_PRESSED:
-				    scr_alert_notification_handle_button_long_pressed(event_param);
 				    break;
 			  case SCR_EVENT_DESTROY_SCREEN:
 				    break;
