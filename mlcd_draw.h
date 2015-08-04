@@ -5,14 +5,26 @@
 #include <stdint.h>
 #include "mlcd.h"
 
-#define FONT_SMALL_REGULAR    0
-#define FONT_SMALL_BOLD       1
+#define FONT_SMALL_REGULAR    1
+#define FONT_SMALL_BOLD       2
+#define FONT_NORMAL_REGULAR   3
+#define FONT_NORMAL_BOLD      4
+#define FONT_BIG_REGULAR   		5
+#define FONT_BIG_BOLD		      6
 #define FONT_OPTION_NORMAL    0x10
 #define FONT_OPTION_BIG       0x11
 
-#define ALIGN_LEFT  					0x0
-#define ALIGN_CENTER					0x40
-#define ALIGN_RIGHT						0x80
+#define HORIZONTAL_ALIGN_LEFT  					0x0
+#define HORIZONTAL_ALIGN_CENTER					0x40
+#define HORIZONTAL_ALIGN_RIGHT					0x80
+
+#define VERTICAL_ALIGN_TOP	  					0x0
+#define VERTICAL_ALIGN_CENTER						0x10
+#define VERTICAL_ALIGN_BOTTOM						0x20
+
+#define MULTILINE												0x8
+#define SPLIT_WORD											0x4
+
 
 void mlcd_draw_digit(uint_fast8_t digit, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness);
 

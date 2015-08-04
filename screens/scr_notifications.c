@@ -46,16 +46,16 @@ static void draw_simple_notification() {
     uint16_t param_1_offset = get_next_short(&read_address);
     uint16_t param_2_offset = get_next_short(&read_address);
 	
-	  mlcd_draw_text("SAMPLE NOTIFICATION", 0, 5, MLCD_XRES, 20, FONT_OPTION_NORMAL, ALIGN_CENTER);
+	  mlcd_draw_text("SAMPLE NOTIFICATION", 0, 5, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 	
 	  uint8_t data[32];
 		read_address = m_address + param_1_offset;
 	  ext_ram_read_data(read_address, data, 32);
-	  mlcd_draw_text((char*)data, 0, 60, MLCD_XRES, 20, FONT_OPTION_NORMAL, ALIGN_CENTER);
+	  mlcd_draw_text((char*)data, 0, 60, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 	
 		read_address = m_address + param_2_offset;
 	  ext_ram_read_data(read_address, data, 32);
-	  mlcd_draw_text((char*)data, 0, 90, MLCD_XRES, 20, FONT_OPTION_NORMAL, ALIGN_CENTER);
+	  mlcd_draw_text((char*)data, 0, 90, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 }
 
 static void scr_notifications_draw_screen() {

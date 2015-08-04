@@ -6,6 +6,8 @@
 #include "ble/ble_peripheral.h"
 #include "ext_ram.h"
 
+#define NOTIFICATION_INFO_ADDRESS 0x1800
+
 static app_timer_id_t      m_notifications_alert_timer_id;
 static uint16_t m_current_alert_notification_id = 0;
 static bool handle_data = false;
@@ -56,33 +58,56 @@ void notifications_process(void) {
 		handle_data = false;
 }
 
+void copy_notification_info_data(uint16_t address, uint16_t size) {
+		uint8_t buffer[16];
+		uint16_t current_read_address = address;
+	  uint16_t current_write_address = NOTIFICATION_INFO_ADDRESS;
+		uint16_t data_to_copy = size > 1024 ? 1024 : size;
+		uint8_t part_size;
+			while(data_to_copy > 0) {
+				part_size = data_to_copy > 16 ? 16 : data_to_copy;
+				ext_ram_read_data(current_read_address, buffer, part_size);
+				ext_ram_write_data(current_write_address, buffer, part_size);
+				current_read_address += part_size;
+				current_write_address += part_size;
+				data_to_copy -= part_size;
+		}
+}
+
 void notifications_handle_data(uint16_t address, uint16_t size) {
 		uint8_t notification_type = get_next_byte(&address);
 	 	switch (notification_type) {
 				case NOTIFICATIONS_TYPE_ALERT:
-						{
+				{
 						uint16_t notification_id = get_next_short(&address);
 						uint32_t vibration_pattern = get_next_int(&address);
 						uint16_t timeout = get_next_short(&address);
 						notifications_alert_notify(notification_id, address, timeout, vibration_pattern);
+						// mark data as handled after rendering notification alert (no need to rerender so data can be lost)
+						handle_data = true;	
 						}
 						break;
 				case NOTIFICATIONS_TYPE_INFO:
-						{
+				{	
 						uint32_t vibration_pattern = get_next_int(&address);
 						uint16_t time = get_next_short(&address);
-						notifications_info_notify(address, time, vibration_pattern);
+						copy_notification_info_data(address, size - 7);
+						handle_data = true;	
+						notifications_info_notify(NOTIFICATION_INFO_ADDRESS, time, vibration_pattern);
 						}
 						break;
 				case NOTIFICATIONS_TYPE_UPDATE:
 						if (size == 1) {
 							  notifications_info_clear_all();
 						} else {
-							  notifications_info_update(address);
+								copy_notification_info_data(address, size - 1);
+								handle_data = true;	
+							  notifications_info_update(NOTIFICATION_INFO_ADDRESS);
 						}
 						break;
+				default:
+						handle_data = true;	
 		}
-	  handle_data = true;
 }
 
 bool notifications_is_data_handled(void) {

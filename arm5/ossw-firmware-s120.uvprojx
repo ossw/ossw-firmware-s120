@@ -684,9 +684,9 @@
           <GroupName>Fonts</GroupName>
           <Files>
             <File>
-              <FileName>small_bold.h</FileName>
+              <FileName>font.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\fonts\small_bold.h</FilePath>
+              <FilePath>..\fonts\font.h</FilePath>
             </File>
             <File>
               <FileName>small_regular.h</FileName>
@@ -694,9 +694,29 @@
               <FilePath>..\fonts\small_regular.h</FilePath>
             </File>
             <File>
-              <FileName>font.h</FileName>
+              <FileName>small_bold.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\fonts\font.h</FilePath>
+              <FilePath>..\fonts\small_bold.h</FilePath>
+            </File>
+            <File>
+              <FileName>normal_regular.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\fonts\normal_regular.h</FilePath>
+            </File>
+            <File>
+              <FileName>normal_bold.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\fonts\normal_bold.h</FilePath>
+            </File>
+            <File>
+              <FileName>big_regular.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\fonts\big_regular.h</FilePath>
+            </File>
+            <File>
+              <FileName>big_bold.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\fonts\big_bold.h</FilePath>
             </File>
             <File>
               <FileName>option_normal.h</FileName>

@@ -15,12 +15,11 @@
 #include <stdlib.h> 
 
 static uint32_t m_address;
-static uint8_t m_notification_type;
 
 static void scr_alert_notification_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
-						//notifications_invoke_function(ALERT_NOTIFICATION_FUNCTION_);
+						notifications_invoke_function(NOTIFICATIONS_FUNCTION_ALERT_DISMISS);
 				    break;
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 						notifications_invoke_function(NOTIFICATIONS_FUNCTION_ALERT_OPTION_1);
@@ -48,7 +47,7 @@ static uint16_t get_next_short(uint32_t *ptr) {
 static void scr_alert_notification_init(uint32_t address) {
 	  m_address = address;
 }
-	
+	/*
 static void draw_incmonig_call_notification() {
 	  uint32_t read_address = m_address + 1;
     uint16_t param_1_offset = get_next_short(&read_address);
@@ -65,33 +64,48 @@ static void draw_incmonig_call_notification() {
 	  ext_ram_read_data(read_address, data, 32);
 	  mlcd_draw_text((char*)data, 0, 90, MLCD_XRES, 20, FONT_OPTION_NORMAL, ALIGN_CENTER);
 }
-
+*/
 static void draw_default_notification() {
 	  uint32_t read_address = m_address + 1;
     uint16_t param_1_offset = get_next_short(&read_address);
     uint16_t param_2_offset = get_next_short(&read_address);
+    uint8_t operationsNo = get_next_byte(&read_address);
+		uint16_t op1_name_offset = operationsNo>0?get_next_short(&read_address):0;
+	  uint16_t op2_name_offset = operationsNo>1?get_next_short(&read_address):0;
 	
 	  uint8_t data[32];
 		read_address = m_address + param_1_offset;
 	  ext_ram_read_data(read_address, data, 32);
-	  mlcd_draw_text((char*)data, 0, 60, MLCD_XRES, 20, FONT_OPTION_NORMAL, ALIGN_CENTER);
+	  mlcd_draw_text((char*)data, 0, 60, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 	
 		read_address = m_address + param_2_offset;
 	  ext_ram_read_data(read_address, data, 32);
-	  mlcd_draw_text((char*)data, 0, 90, MLCD_XRES, 20, FONT_OPTION_NORMAL, ALIGN_CENTER);
+	  mlcd_draw_text((char*)data, 0, 90, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
+	
+		if(op1_name_offset != 0) {
+				read_address = m_address + op1_name_offset;
+				ext_ram_read_data(read_address, data, 32);
+				mlcd_draw_text((char*)data, 0, 0, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+		}
+		
+		if(op2_name_offset != 0) {
+				read_address = m_address + op2_name_offset;
+				ext_ram_read_data(read_address, data, 32);
+				mlcd_draw_text((char*)data, 0, MLCD_YRES-20, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+		}
 }
 
 static void scr_alert_notification_draw_screen() {
-	  uint32_t read_address = m_address;
-    m_notification_type = get_next_byte(&read_address);
+	//  uint32_t read_address = m_address;
+ //   m_notification_type = get_next_byte(&read_address);
 	
-	  switch(m_notification_type) {
-			case NOTIFICATIONS_CATEGORY_INCOMING_CALL:
-				  draw_incmonig_call_notification();
-					break;
-			default:
+//	  switch(m_notification_type) {
+//			case NOTIFICATIONS_CATEGORY_INCOMING_CALL:
+//				  draw_incmonig_call_notification();
+//					break;
+//			default:
 				  draw_default_notification();
-		}
+//		}
 }
 
 static void scr_alert_notification_refresh_screen() {

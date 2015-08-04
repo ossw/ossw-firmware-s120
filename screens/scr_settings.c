@@ -60,12 +60,12 @@ static void scr_settings_handle_button_pressed(uint32_t button_id) {
 }
 
 static void draw_option(const char *text, uint_fast8_t *yPos) {
-  	mlcd_draw_text(text, 0, *yPos, MLCD_XRES, NULL, FONT_OPTION_NORMAL, ALIGN_CENTER);
+  	mlcd_draw_text(text, 0, *yPos, MLCD_XRES, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 	  *yPos += 23;
 }
 
 static void draw_selected_option(const char *text, uint_fast8_t *yPos) {
-  	mlcd_draw_text(text, 0, *yPos, MLCD_XRES, NULL, FONT_OPTION_BIG, ALIGN_CENTER);
+  	mlcd_draw_text(text, 0, *yPos, MLCD_XRES, NULL, FONT_OPTION_BIG, HORIZONTAL_ALIGN_CENTER);
 	  *yPos += 30;
 }
 
