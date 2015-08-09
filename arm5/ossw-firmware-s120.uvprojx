@@ -359,10 +359,10 @@
             <wLevel>0</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <useXO>0</useXO>
             <VariousControls>
-              <MiscControls>--c99</MiscControls>
+              <MiscControls></MiscControls>
               <Define>BLE_DFU_APP_SUPPORT BLE_STACK_SUPPORT_REQD S110 AMX_ANSIONLY BOARD_CUSTOM SOFTDEVICE_PRESENT NRF51</Define>
               <Undefine></Undefine>
               <IncludePath>..\sdk_mod</IncludePath>
@@ -712,11 +712,6 @@
               <FileName>big_regular.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\fonts\big_regular.h</FilePath>
-            </File>
-            <File>
-              <FileName>big_bold.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\fonts\big_bold.h</FilePath>
             </File>
             <File>
               <FileName>option_normal.h</FileName>

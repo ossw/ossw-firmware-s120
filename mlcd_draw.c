@@ -7,7 +7,6 @@
 #include "fonts/normal_regular.h"
 #include "fonts/normal_bold.h"
 #include "fonts/big_regular.h"
-#include "fonts/big_bold.h"
 #include "fonts/option_normal.h"
 #include "fonts/option_big.h"
 
@@ -195,8 +194,6 @@ static const FONT_INFO* mlcd_resolve_font(uint_fast8_t font_type) {
 			 return &normalBoldFontInfo;
 		 case FONT_BIG_REGULAR:
 			 return &bigRegularFontInfo;
-		 case FONT_BIG_BOLD:
-			 return &bigBoldFontInfo;
 		 case FONT_OPTION_NORMAL:
 			 return &optionNormalFontInfo;
 		 case FONT_OPTION_BIG:
@@ -218,11 +215,15 @@ static uint_fast8_t calc_char_width(uint32_t c, const FONT_INFO* font) {
 		return width;
 }
 
-static bool is_whitespace(int c) {
-		return c == ' ' || c == '\t';
+static inline bool is_new_line(int c) {
+		return c == 10 || c == 13 || c == 11;
 }
 
-static uint_fast8_t calc_text_width(const char *text, int ptr, uint_fast8_t font_type, bool multiline, bool split_word, uint8_t max_width) {
+static inline bool is_whitespace(int c) {
+		return c == ' ' || c == '\t' || is_new_line(c);
+}
+
+static uint_fast8_t calc_text_width(const char *text, int ptr, uint_fast8_t font_type, bool split_word, uint8_t max_width) {
 	  uint32_t c;
 	  const FONT_INFO* font = mlcd_resolve_font(font_type);
 	  uint_fast8_t width = 0;
@@ -233,6 +234,9 @@ static uint_fast8_t calc_text_width(const char *text, int ptr, uint_fast8_t font
 						width += font->charDist;
 				} else if (is_whitespace(c)) {
 						continue;
+				}
+				if (is_new_line(c)){ 
+						break;
 				}
 				width += calc_char_width(c, font);
 				
@@ -272,7 +276,7 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t
 		do {
 				last_line = !multiline || (y + 2 * font->height + font->charDist > max_y);
 			
-				uint8_t text_width = calc_text_width(text, ptr, font_type, multiline, split_word, width);
+				uint8_t text_width = calc_text_width(text, ptr, font_type, split_word || !multiline, width);
 				if (font_alignment & HORIZONTAL_ALIGN_CENTER) {
 						if (text_width < width) {
 								x += (width - text_width)/2;
@@ -306,7 +310,7 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t
 				}
 				
 				x = start_x;
-				y += font->height + font->charDist;
+				y += font->height + (c==11 ? font->height/2 : font->charDist);
 		} while(!last_line);
 				
 		return 0;

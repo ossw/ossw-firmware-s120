@@ -5,13 +5,14 @@
 #include <stdarg.h>
 
 #include "utf8.h"
+#include "ext_ram.h"
 
 static const uint32_t offsetsFromUTF8[6] = {
     0x00000000UL, 0x00003080UL, 0x000E2080UL,
     0x03C82080UL, 0xFA082080UL, 0x82082080UL
 };
 
-static const char trailingBytesForUTF8[256] = {
+/*static const char trailingBytesForUTF8[256] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -20,13 +21,13 @@ static const char trailingBytesForUTF8[256] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
     2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
-};
+};*/
 
 /* returns length of next utf-8 sequence */
-int u8_seqlen(char *s)
+/*int u8_seqlen(char *s)
 {
     return trailingBytesForUTF8[(unsigned int)(unsigned char)s[0]] + 1;
-}
+}*/
 
 /* conversions without error checking
    only works for valid UTF-8, i.e. no 5- or 6-byte sequences
@@ -38,7 +39,7 @@ int u8_seqlen(char *s)
    for all the characters.
    if sz = srcsz+1 (i.e. 4*srcsz+4 bytes), there will always be enough space.
 */
-int u8_toucs(uint32_t *dest, int sz, char *src, int srcsz)
+/*int u8_toucs(uint32_t *dest, int sz, char *src, int srcsz)
 {
     uint32_t ch;
     char *src_end = src + srcsz;
@@ -57,7 +58,7 @@ int u8_toucs(uint32_t *dest, int sz, char *src, int srcsz)
         }
         ch = 0;
         switch (nb) {
-            /* these fall through deliberately */
+            // these fall through deliberately 
         case 3: ch += (unsigned char)*src++; ch <<= 6;
         case 2: ch += (unsigned char)*src++; ch <<= 6;
         case 1: ch += (unsigned char)*src++; ch <<= 6;
@@ -69,7 +70,7 @@ int u8_toucs(uint32_t *dest, int sz, char *src, int srcsz)
  done_toucs:
     dest[i] = 0;
     return i;
-}
+}*/
 
 /* srcsz = number of source characters, or -1 if 0-terminated
    sz = size of dest buffer in bytes
@@ -83,7 +84,7 @@ int u8_toucs(uint32_t *dest, int sz, char *src, int srcsz)
    the NUL as well.
    the destination string will never be bigger than the source string.
 */
-int u8_toutf8(char *dest, int sz, uint32_t *src, int srcsz)
+/*int u8_toutf8(char *dest, int sz, uint32_t *src, int srcsz)
 {
     uint32_t ch;
     int i = 0;
@@ -149,10 +150,10 @@ int u8_wc_toutf8(char *dest, uint32_t ch)
         return 4;
     }
     return 0;
-}
+}*/
 
 /* charnum => byte offset */
-int u8_offset(char *str, int charnum)
+/*int u8_offset(char *str, int charnum)
 {
     int offs=0;
 
@@ -162,10 +163,10 @@ int u8_offset(char *str, int charnum)
         charnum--;
     }
     return offs;
-}
+}*/
 
 /* byte offset => charnum */
-int u8_charnum(char *s, int offset)
+/*int u8_charnum(char *s, int offset)
 {
     int charnum = 0, offs=0;
 
@@ -175,10 +176,10 @@ int u8_charnum(char *s, int offset)
         charnum++;
     }
     return charnum;
-}
+}*/
 
 /* number of characters */
-int u8_strlen(char *s)
+/*int u8_strlen(char *s)
 {
     int count = 0;
     int i = 0;
@@ -187,7 +188,7 @@ int u8_strlen(char *s)
         count++;
 
     return count;
-}
+}*/
 
 /* reads the next utf-8 sequence out of a string, updating an index */
 uint32_t u8_nextchar(const char *s, int *i)
@@ -195,16 +196,25 @@ uint32_t u8_nextchar(const char *s, int *i)
     uint32_t ch = 0;
     int sz = 0;
 
+		uint8_t next_bytes[2];
     do {
         ch <<= 6;
-        ch += (unsigned char)s[(*i)++];
+			
+				if ((unsigned int)s >= 0x80000000) {
+						ext_ram_read_data(((unsigned int)s-0x80000000+(*i))&0xFFFF, next_bytes, 2);
+						(*i)++;
+				} else {
+						next_bytes[0] = s[(*i)++];
+						next_bytes[1] = s[*i];
+				}
+        ch += (unsigned char)next_bytes[0];
         sz++;
-    } while (s[*i] && !isutf(s[*i]));
+    } while (next_bytes[1] && !isutf(next_bytes[1]));
     ch -= offsetsFromUTF8[sz-1];
 
     return ch;
 }
-
+/*
 void u8_inc(char *s, int *i)
 {
     (void)(isutf(s[++(*i)]) || isutf(s[++(*i)]) ||
@@ -215,9 +225,9 @@ void u8_dec(char *s, int *i)
 {
     (void)(isutf(s[--(*i)]) || isutf(s[--(*i)]) ||
            isutf(s[--(*i)]) || --(*i));
-}
+}*/
 
-int octal_digit(char c)
+/*int octal_digit(char c)
 {
     return (c >= '0' && c <= '7');
 }
@@ -227,17 +237,17 @@ int hex_digit(char c)
     return ((c >= '0' && c <= '9') ||
             (c >= 'A' && c <= 'F') ||
             (c >= 'a' && c <= 'f'));
-}
+}*/
 
 /* assumes that src points to the character after a backslash
    returns number of input characters processed */
-int u8_read_escape_sequence(char *str, uint32_t *dest)
+/*int u8_read_escape_sequence(char *str, uint32_t *dest)
 {
     uint32_t ch;
     char digs[9]="\0\0\0\0\0\0\0\0";
     int dno=0, i=1;
 
-    ch = (uint32_t)str[0];    /* take literal character */
+    ch = (uint32_t)str[0];    // take literal character 
     if (str[0] == 'n')
         ch = L'\n';
     else if (str[0] == 't')
@@ -283,12 +293,12 @@ int u8_read_escape_sequence(char *str, uint32_t *dest)
     *dest = ch;
 
     return i;
-}
+}*/
 
 /* convert a string with literal \uxxxx or \Uxxxxxxxx characters to UTF-8
    example: u8_unescape(mybuf, 256, "hello\\u220e")
    note the double backslash is needed if called on a C string literal */
-int u8_unescape(char *buf, int sz, char *src)
+/*int u8_unescape(char *buf, int sz, char *src)
 {
     int c=0, amt;
     uint32_t ch;
@@ -403,4 +413,4 @@ char *u8_memchr(char *s, uint32_t ch, size_t sz, int *charn)
         (*charn)++;
     }
     return NULL;
-}
+}*/

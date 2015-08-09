@@ -10,7 +10,6 @@
 #define FONT_NORMAL_REGULAR   3
 #define FONT_NORMAL_BOLD      4
 #define FONT_BIG_REGULAR   		5
-#define FONT_BIG_BOLD		      6
 #define FONT_OPTION_NORMAL    0x10
 #define FONT_OPTION_BIG       0x11
 
@@ -24,7 +23,6 @@
 
 #define MULTILINE												0x8
 #define SPLIT_WORD											0x4
-
 
 void mlcd_draw_digit(uint_fast8_t digit, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness);
 

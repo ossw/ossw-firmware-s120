@@ -2089,7 +2089,7 @@ const FONT_INFO bigRegularFontInfo =
 	'!', //  Start character
 	'~', //  End character
 	1,
-	2, //  Width, in pixels, of space character
+	4, //  Width, in pixels, of space character
 	bigRegularFontBlockLookup, //  Character descriptor array
 	1,
 	bigRegularFontBitmaps, //  Character bitmap array

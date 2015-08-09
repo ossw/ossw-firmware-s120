@@ -12,17 +12,6 @@
 #include "../ble/ble_peripheral.h"
 #include <stdlib.h> 
 
-static uint32_t m_address;
-
-static void scr_notifications_handle_button_pressed(uint32_t button_id) {
-	  switch (button_id) {
-			  case SCR_EVENT_PARAM_BUTTON_BACK:
-						notifications_invoke_function(NOTIFICATIONS_FUNCTION_DISMISS_ALL);
-						scr_mngr_close_notifications();
-				    break;
-		}
-}
-
 static uint8_t get_next_byte(uint32_t *ptr) {
     uint8_t data;
 	  ext_ram_read_data(*ptr, &data, 1);
@@ -37,35 +26,100 @@ static uint16_t get_next_short(uint32_t *ptr) {
 	  return data[0] << 8 | data[1];
 }
 
-static void scr_notifications_init(uint32_t address) {
-	  m_address = address;
+static void scr_notifications_handle_button_pressed(uint32_t button_id) {
+	  switch (button_id) {
+			  case SCR_EVENT_PARAM_BUTTON_BACK:
+						scr_mngr_close_notifications();
+				    break;
+			  case SCR_EVENT_PARAM_BUTTON_UP:
+				{
+						uint32_t read_address = notifications_get_current_data();
+						uint8_t notification_type = get_next_byte(&read_address);
+	
+						if (notification_type != NOTIFICATIONS_CATEGORY_SUMMARY) {
+								uint16_t notification_id = get_next_short(&read_address);
+								uint8_t page = get_next_byte(&read_address);
+								if (page > 0) {
+										notifications_prev_part(notification_id, page);
+								}
+						}
+				}
+				    break;
+			  case SCR_EVENT_PARAM_BUTTON_DOWN:
+				{
+					
+						uint32_t read_address = notifications_get_current_data();
+						uint8_t notification_type = get_next_byte(&read_address);
+	
+						if (notification_type == NOTIFICATIONS_CATEGORY_SUMMARY) {
+								//show first
+								notifications_invoke_function(NOTIFICATIONS_SHOW_FIRST);
+						} else {
+								uint16_t notification_id = get_next_short(&read_address);
+								uint8_t page = get_next_byte(&read_address);
+								uint8_t font = get_next_byte(&read_address);
+								bool has_more = get_next_byte(&read_address);
+								if (has_more) {
+										notifications_next_part(notification_id, page);
+								} else {
+										notifications_next(notification_id);
+								}
+						}
+				}
+				    break;
+		}
 }
-	
-static void draw_simple_notification() {
-	  uint32_t read_address = m_address + 1;
-    uint16_t param_1_offset = get_next_short(&read_address);
-    uint16_t param_2_offset = get_next_short(&read_address);
-	
-	  mlcd_draw_text("SAMPLE NOTIFICATION", 0, 5, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
-	
-	  uint8_t data[32];
-		read_address = m_address + param_1_offset;
-	  ext_ram_read_data(read_address, data, 32);
-	  mlcd_draw_text((char*)data, 0, 60, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
-	
-		read_address = m_address + param_2_offset;
-	  ext_ram_read_data(read_address, data, 32);
-	  mlcd_draw_text((char*)data, 0, 90, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
+
+static void scr_notifications_handle_button_long_pressed(uint32_t button_id) {
+	  switch (button_id) {
+			  case SCR_EVENT_PARAM_BUTTON_DOWN:
+				{
+						uint32_t read_address = notifications_get_current_data();
+						uint8_t notification_type = get_next_byte(&read_address);
+						if (notification_type != NOTIFICATIONS_CATEGORY_SUMMARY) {
+								uint16_t notification_id = get_next_short(&read_address);
+								notifications_next(notification_id);
+						}				
+				}
+				    break;
+		}
+}
+
+static void scr_notifications_init() {
 }
 
 static void scr_notifications_draw_screen() {
-//	  uint32_t read_address = m_address;
-   // m_notification_type = get_next_byte(&read_address);
+		uint32_t read_address = notifications_get_current_data();
+    uint8_t notification_type = get_next_byte(&read_address);
 	
-	  //switch(m_notification_type) {
-		//	case NOTIFICATION_TYPE_INCOMING_CALL:
-				  draw_simple_notification();
-		//}
+		switch(notification_type) {
+				case NOTIFICATIONS_CATEGORY_MESSAGE:
+				case NOTIFICATIONS_CATEGORY_EMAIL:
+				case NOTIFICATIONS_CATEGORY_SOCIAL:
+				case NOTIFICATIONS_CATEGORY_ALARM:
+				case NOTIFICATIONS_CATEGORY_INCOMING_CALL:
+				case NOTIFICATIONS_CATEGORY_OTHER:
+				{
+						uint16_t notification_id = get_next_short(&read_address);
+						uint8_t page = get_next_byte(&read_address);
+						uint8_t font = get_next_byte(&read_address);
+						bool has_more = get_next_byte(&read_address);
+					
+						char* data_ptr = (char*)(0x80000000 + read_address);
+						mlcd_draw_text(data_ptr, 3, 3,  MLCD_XRES - 6, MLCD_YRES - 6, font, HORIZONTAL_ALIGN_LEFT | MULTILINE);
+				}
+						break;
+				case NOTIFICATIONS_CATEGORY_SUMMARY:
+				{
+						uint8_t notification_count = get_next_byte(&read_address);
+				
+						if (notification_count>9) {
+								notification_count = 9;
+						}
+						mlcd_draw_digit(notification_count, 20, 20, MLCD_XRES-40, MLCD_YRES-40, 11);
+				}
+						break;
+		}
 }
 
 static void scr_notifications_refresh_screen() {
@@ -74,7 +128,7 @@ static void scr_notifications_refresh_screen() {
 void scr_notifications_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
-				    scr_notifications_init(event_param);
+				    scr_notifications_init();
 				    break;
         case SCR_EVENT_DRAW_SCREEN:
             scr_notifications_draw_screen();
@@ -84,6 +138,9 @@ void scr_notifications_handle_event(uint32_t event_type, uint32_t event_param) {
             break;
 			  case SCR_EVENT_BUTTON_PRESSED:
 				    scr_notifications_handle_button_pressed(event_param);
+				    break;
+			  case SCR_EVENT_BUTTON_LONG_PRESSED:
+				    scr_notifications_handle_button_long_pressed(event_param);
 				    break;
 			  case SCR_EVENT_DESTROY_SCREEN:
 				    break;

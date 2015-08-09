@@ -201,6 +201,14 @@ void ble_peripheral_invoke_notification_function(uint8_t function_id) {
 	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
 }
 
+void ble_peripheral_invoke_notification_function_with_data(uint8_t function_id, uint8_t* additional_data, uint8_t data_size) {
+	  uint8_t data[data_size+2];
+		data[0] = 0x12;
+		data[1] = function_id;
+		memcpy(data+2, additional_data, data_size);
+	  ble_ossw_string_send(&m_ossw, data, data_size+2);
+}
+
 void ble_peripheral_set_watch_set_id(uint32_t watch_set_id) {
 	  uint8_t data[] = {0x10, (watch_set_id>>24)&0xFF, (watch_set_id>>16)&0xFF, (watch_set_id>>8)&0xFF, watch_set_id&0xFF};
 	  ble_ossw_string_send(&m_ossw, data, sizeof(data));

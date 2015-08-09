@@ -93,7 +93,7 @@ void notifications_handle_data(uint16_t address, uint16_t size) {
 						uint16_t time = get_next_short(&address);
 						copy_notification_info_data(address, size - 7);
 						handle_data = true;	
-						notifications_info_notify(NOTIFICATION_INFO_ADDRESS, time, vibration_pattern);
+						notifications_info_notify(time, vibration_pattern);
 						}
 						break;
 				case NOTIFICATIONS_TYPE_UPDATE:
@@ -102,7 +102,7 @@ void notifications_handle_data(uint16_t address, uint16_t size) {
 						} else {
 								copy_notification_info_data(address, size - 1);
 								handle_data = true;	
-							  notifications_info_update(NOTIFICATION_INFO_ADDRESS);
+							  notifications_info_update();
 						}
 						break;
 				default:
@@ -114,17 +114,17 @@ bool notifications_is_data_handled(void) {
 		return !handle_data;
 }
 
-void notifications_info_notify(uint16_t address, uint16_t time, uint32_t vibration_pattern) {
+void notifications_info_notify(uint16_t time, uint32_t vibration_pattern) {
 		//m_current_notification_id = notification_id;
-	  scr_mngr_show_notifications(address);
+	  scr_mngr_show_notifications();
 	
 	  if (m_current_alert_notification_id == 0) {
 				vibration_vibrate(vibration_pattern, time);
 		}
 }
 
-void notifications_info_update(uint16_t address) {
-	  scr_mngr_show_notifications(address);
+void notifications_info_update() {
+	  scr_mngr_show_notifications();
 }
 
 void notifications_info_clear_all() {
@@ -166,4 +166,23 @@ void notifications_alert_stop(uint16_t notification_id) {
 
 void notifications_invoke_function(uint8_t function_id) {
 	  ble_peripheral_invoke_notification_function(function_id);
+}
+
+void notifications_prev_part(uint16_t notification_id, uint8_t current_part_no) {
+		uint8_t data[3] = {notification_id >> 8, notification_id&0xFF, current_part_no};
+		ble_peripheral_invoke_notification_function_with_data(NOTIFICATIONS_PREV_PART, data, 3);
+}
+
+void notifications_next_part(uint16_t notification_id, uint8_t current_part_no) {
+		uint8_t data[3] = {notification_id >> 8, notification_id&0xFF, current_part_no};
+		ble_peripheral_invoke_notification_function_with_data(NOTIFICATIONS_NEXT_PART, data, 3);
+}
+
+void notifications_next(uint16_t notification_id) {
+		uint8_t data[2] = {notification_id >> 8, notification_id&0xFF};
+		ble_peripheral_invoke_notification_function_with_data(NOTIFICATIONS_NEXT, data, 2);
+}
+
+uint32_t notifications_get_current_data(void) {
+		return NOTIFICATION_INFO_ADDRESS;
 }

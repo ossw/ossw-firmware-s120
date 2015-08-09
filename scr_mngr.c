@@ -17,7 +17,6 @@ static uint8_t switch_to_screen = SCR_NOT_SET;
 static uint8_t current_screen = SCR_NOT_SET;
 
 static uint8_t scr_notifications_state = SCR_NOTIFICATIONS_STATE_NONE;
-static uint32_t scr_notifications_address = 0;
 
 static uint8_t scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_NONE;
 static uint32_t scr_alert_notification_address = 0;
@@ -203,13 +202,17 @@ void scr_mngr_draw_screen(void) {
 				}
 		} else if (scr_notifications_state != SCR_NOTIFICATIONS_STATE_NONE) {
 				if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_INIT) {
-						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_INIT_SCREEN, scr_notifications_address);
+						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_INIT_SCREEN, NULL);
 					  // draw alert notification screen
 						mlcd_fb_clear();
 						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DRAW_SCREEN, NULL);
 						scr_notifications_state = SCR_NOTIFICATIONS_STATE_SHOW;
 				} else if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_SHOW) {
 						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_REFRESH_SCREEN, NULL);
+				} else if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_REDRAW) {
+						mlcd_fb_clear();
+						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DRAW_SCREEN, NULL);
+						scr_notifications_state = SCR_NOTIFICATIONS_STATE_SHOW;
 				} else if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_CLOSE) {
 						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DESTROY_SCREEN, NULL);
 						scr_notifications_state = SCR_NOTIFICATIONS_STATE_NONE;
@@ -223,7 +226,7 @@ void scr_mngr_draw_screen(void) {
 						// disable events
 						current_screen = SCR_NOT_SET;
 						// release memory used by old screen
-						scr_mngr_handle_event_internal(old_screen, SCR_EVENT_DESTROY_SCREEN, 0);
+						scr_mngr_handle_event_internal(old_screen, SCR_EVENT_DESTROY_SCREEN, NULL);
 						// initilize new screen
 						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_INIT_SCREEN, NULL);
 						// draw screen
@@ -248,9 +251,12 @@ void scr_mngr_close_alert_notification() {
 	  scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_CLOSE;
 }
 
-void scr_mngr_show_notifications(uint32_t address) {
-		scr_notifications_address = address;
-	  scr_notifications_state = SCR_NOTIFICATIONS_STATE_INIT;
+void scr_mngr_show_notifications() {
+		if (scr_notifications_state != SCR_NOTIFICATIONS_STATE_SHOW) {
+				scr_notifications_state = SCR_NOTIFICATIONS_STATE_INIT;
+		} else {
+				scr_notifications_state = SCR_NOTIFICATIONS_STATE_REDRAW;
+		}
 }
 
 void scr_mngr_close_notifications() {

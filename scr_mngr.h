@@ -29,10 +29,11 @@
 #define SCR_EVENT_PARAM_BUTTON_SELECT  0x04
 #define SCR_EVENT_PARAM_BUTTON_BACK    0x08
 
-#define SCR_NOTIFICATIONS_STATE_NONE  0
-#define SCR_NOTIFICATIONS_STATE_INIT  1
-#define SCR_NOTIFICATIONS_STATE_SHOW  2
-#define SCR_NOTIFICATIONS_STATE_CLOSE 3
+#define SCR_NOTIFICATIONS_STATE_NONE  		0
+#define SCR_NOTIFICATIONS_STATE_INIT  		1
+#define SCR_NOTIFICATIONS_STATE_SHOW  		2
+#define SCR_NOTIFICATIONS_STATE_REDRAW  	3
+#define SCR_NOTIFICATIONS_STATE_CLOSE 		4
 
 #define SCR_ALERT_NOTIFICATION_STATE_NONE  0
 #define SCR_ALERT_NOTIFICATION_STATE_INIT  1
@@ -55,7 +56,7 @@ void scr_mngr_show_alert_notification(uint32_t address);
 
 void scr_mngr_close_alert_notification(void);
 
-void scr_mngr_show_notifications(uint32_t address);
+void scr_mngr_show_notifications(void);
 
 void scr_mngr_close_notifications(void);
 
