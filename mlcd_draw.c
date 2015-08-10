@@ -223,13 +223,13 @@ static inline bool is_whitespace(int c) {
 		return c == ' ' || c == '\t' || is_new_line(c);
 }
 
-static uint_fast8_t calc_text_width(const char *text, int ptr, uint_fast8_t font_type, bool split_word, uint8_t max_width) {
+static uint_fast8_t calc_text_width(const char *text, int *ptr, uint_fast8_t font_type, bool split_word, uint8_t max_width) {
 	  uint32_t c;
 	  const FONT_INFO* font = mlcd_resolve_font(font_type);
 	  uint_fast8_t width = 0;
 		uint_fast8_t last_non_space = 0;
 		uint_fast8_t last_word_end = 0;
-	  while ((c = u8_nextchar(text, &ptr)) > 0) {
+	  while ((c = u8_nextchar(text, ptr)) > 0) {
 				if (width > 0) {
 						width += font->charDist;
 				} else if (is_whitespace(c)) {
@@ -254,7 +254,7 @@ static uint_fast8_t calc_text_width(const char *text, int ptr, uint_fast8_t font
 		return width > max_width ? max_width : width;
 }
 
-uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t start_y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type, uint8_t font_alignment) {
+uint_fast8_t mlcd_calc_text_height(const char *text, uint_fast8_t start_x, uint_fast8_t start_y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type, uint8_t font_alignment) {
 	  int ptr = 0;
 		int prev_ptr = 0;
 	  uint32_t c;
@@ -273,10 +273,80 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t
 		
 		uint8_t max_y = y + height;
 		bool last_line;
+		int tmp_ptr;
 		do {
 				last_line = !multiline || (y + 2 * font->height + font->charDist > max_y);
+				tmp_ptr = ptr;
+				uint8_t text_width = calc_text_width(text, &tmp_ptr, font_type, split_word || !multiline, width);
+				uint8_t max_x = x + text_width;
 			
-				uint8_t text_width = calc_text_width(text, ptr, font_type, split_word || !multiline, width);
+				bool first_char = true;
+				while ((c = u8_nextchar(text, &ptr)) > 0) {
+						if (first_char && is_whitespace(c)) {
+								continue;
+						}
+						first_char = false;
+						uint8_t char_width = calc_char_width(c, font);
+						if (x + char_width > max_x) {
+								//overflow
+								ptr = prev_ptr;
+								break;
+						}
+					
+						x += char_width;
+						x += font->charDist;
+						prev_ptr = ptr;
+				}
+				if (c <= 0){
+						last_line = true;
+				}
+				
+				x = start_x;
+				y += font->height;
+				if(!last_line) {
+						y += (c==11 ? font->height/2 : font->charDist);
+				}
+		} while(!last_line);
+				
+		return y - start_y;
+}
+
+uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t start_y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type, uint8_t font_alignment) {
+	  int ptr = 0;
+		int prev_ptr = 0;
+	  uint32_t c;
+		
+		uint8_t x = start_x;
+		uint8_t y = start_y;
+	  if (width == NULL) {
+			  width = MLCD_XRES - x;
+		}
+	  if (height == NULL) {
+			  height = MLCD_YRES - y;
+		}
+	  const FONT_INFO* font = mlcd_resolve_font(font_type);
+	  bool multiline = font_alignment & MULTILINE;
+	  bool split_word = font_alignment & SPLIT_WORD;
+		
+		if (font_alignment & VERTICAL_ALIGN_CENTER) {
+				int calc_height = mlcd_calc_text_height(text, start_x, start_y, width, height, font_type, font_alignment);
+				if (calc_height < height) {
+						y += (height-calc_height)/2;
+				}
+		} else if (font_alignment & VERTICAL_ALIGN_BOTTOM) {
+				int calc_height = mlcd_calc_text_height(text, start_x, start_y, width, height, font_type, font_alignment);
+				if (calc_height < height) {
+						y += height-calc_height;
+				}
+		}
+		
+		uint8_t max_y = y + height;
+		bool last_line;
+		int tmp_ptr;
+		do {
+				last_line = !multiline || (y + 2 * font->height + font->charDist > max_y);
+				tmp_ptr = ptr;
+				uint8_t text_width = calc_text_width(text, &tmp_ptr, font_type, split_word || !multiline, width);
 				if (font_alignment & HORIZONTAL_ALIGN_CENTER) {
 						if (text_width < width) {
 								x += (width - text_width)/2;
