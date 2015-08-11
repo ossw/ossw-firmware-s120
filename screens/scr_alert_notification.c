@@ -68,21 +68,22 @@ static void draw_incmonig_call_notification() {
 static void draw_default_notification() {
 	  uint32_t read_address = m_address + 1;
     uint16_t text_offset = get_next_short(&read_address);
+    uint8_t font = get_next_byte(&read_address);
     uint8_t operationsNo = get_next_byte(&read_address);
 		uint16_t op1_name_offset = operationsNo>0?get_next_short(&read_address):0;
 	  uint16_t op2_name_offset = operationsNo>1?get_next_short(&read_address):0;
 	
 		char* data_ptr = (char*)(0x80000000 + m_address + text_offset);
-	  mlcd_draw_text(data_ptr, 3, 20, MLCD_XRES - 6, MLCD_YRES-40, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER | MULTILINE | VERTICAL_ALIGN_CENTER);
+	  mlcd_draw_text(data_ptr, 3, 20, MLCD_XRES - 6, MLCD_YRES-40, font, HORIZONTAL_ALIGN_CENTER | MULTILINE | VERTICAL_ALIGN_CENTER);
 
 		if (op1_name_offset != 0) {
 				data_ptr = (char*)(0x80000000 + m_address + op1_name_offset);
-				mlcd_draw_text(data_ptr, 0, 0, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
+				mlcd_draw_text(data_ptr, 0, 0, MLCD_XRES, 20, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 		
 		if (op2_name_offset != 0) {
 				data_ptr = (char*)(0x80000000 + m_address + op2_name_offset);
-				mlcd_draw_text(data_ptr, 0, MLCD_YRES-20, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
+				mlcd_draw_text(data_ptr, 0, MLCD_YRES-20, MLCD_XRES, 20, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 }
 

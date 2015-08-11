@@ -132,13 +132,17 @@ void notifications_info_clear_all() {
 }
 
 void notifications_alert_notify(uint16_t notification_id, uint16_t address, uint16_t timeout, uint32_t vibration_pattern) {
+		bool update = m_current_alert_notification_id == notification_id;
+
 		m_current_alert_notification_id = notification_id;
 	  scr_mngr_show_alert_notification(address);
-    vibration_vibrate(vibration_pattern, 0);
+		if (!update) {
+				vibration_vibrate(vibration_pattern, 0);
 	  
-    uint32_t err_code;	 
-    err_code = app_timer_start(m_notifications_alert_timer_id, APP_TIMER_TICKS(timeout, 0), NULL);
-    APP_ERROR_CHECK(err_code);
+				uint32_t err_code;	 
+				err_code = app_timer_start(m_notifications_alert_timer_id, APP_TIMER_TICKS(timeout, 0), NULL);
+				APP_ERROR_CHECK(err_code);
+		}
 }
 
 void notifications_alert_extend(uint16_t notification_id, uint16_t timeout) {
