@@ -74,16 +74,16 @@ static void draw_default_notification() {
 	  uint16_t op2_name_offset = operationsNo>1?get_next_short(&read_address):0;
 	
 		char* data_ptr = (char*)(0x80000000 + m_address + text_offset);
-	  mlcd_draw_text(data_ptr, 3, 20, MLCD_XRES - 6, MLCD_YRES-40, font, HORIZONTAL_ALIGN_CENTER | MULTILINE | VERTICAL_ALIGN_CENTER);
+	  mlcd_draw_text(data_ptr, 3, 30, MLCD_XRES - 6, MLCD_YRES-60, font, HORIZONTAL_ALIGN_CENTER | MULTILINE | VERTICAL_ALIGN_CENTER);
 
 		if (op1_name_offset != 0) {
 				data_ptr = (char*)(0x80000000 + m_address + op1_name_offset);
-				mlcd_draw_text(data_ptr, 0, 0, MLCD_XRES, 20, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
+				mlcd_draw_text(data_ptr, 3, 0, MLCD_XRES-6, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 		
 		if (op2_name_offset != 0) {
 				data_ptr = (char*)(0x80000000 + m_address + op2_name_offset);
-				mlcd_draw_text(data_ptr, 0, MLCD_YRES-20, MLCD_XRES, 20, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
+				mlcd_draw_text(data_ptr, 3, MLCD_YRES-30, MLCD_XRES-6, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 }
 
