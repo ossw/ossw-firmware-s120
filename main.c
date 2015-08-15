@@ -12,7 +12,6 @@
 #include "nrf51_bitfields.h"
 #include "board.h"
 #include "app_trace.h"
-#include "app_gpiote.h"
 #include "nrf_delay.h"
 #include "nrf_soc.h"
 #include "spi.h"
@@ -127,7 +126,7 @@ int main(void)
     // Initialize.
     timers_init();
 	  rtc_timer_init();
-    APP_GPIOTE_INIT(1);
+		buttons_init();
 	
     // Initialize the SoftDevice handler module.
     SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
@@ -136,11 +135,10 @@ int main(void)
 		nrf_delay_ms(500);
 	
 		scr_mngr_init();
-		buttons_init();
 	  battery_init();
 		vibration_init();
 		notifications_init();
-
+						
     // Enter main loop.
     for (;;)
     {

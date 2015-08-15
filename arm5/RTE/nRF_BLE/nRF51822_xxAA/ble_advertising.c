@@ -12,40 +12,38 @@
 
 #include "ble_advdata.h"
 #include "ble_advertising.h"
-#include "pstorage.h"
 #include "nrf_soc.h"
 #include "app_trace.h"
 #include "nordic_common.h"
+#include "pstorage.h"
 
 
 #define LOG app_trace_log
 
-static bool m_advertising_start_pending = false; /**< Flag to keep track of ongoing operations on persistent memory. */
+static bool                            m_advertising_start_pending = false; /**< Flag to keep track of ongoing operations on persistent memory. */
 
-static ble_gap_addr_t                  m_peer_address;           /**< Address of the most recently connected peer, used for direct advertising. */
-static ble_advdata_t                   m_advdata;                /**< Used by the initialization function to set name, appearance, and UUIDs and advertising flags visible to peer devices. */
-static ble_adv_evt_t                   m_adv_evt;                /**< Advertising event propogated to the main application. The event is either a transaction to a new advertising mode, or a request for whitelist or peer address.. */
-static ble_advertising_evt_handler_t   m_evt_handler;            /**< Handler for the advertising events. Can be initialized as NULL if no handling is implemented on in the main application. */
-static ble_advertising_error_handler_t m_error_handler;          /**< Handler for the advertising error events. */
+static ble_gap_addr_t                  m_peer_address;     /**< Address of the most recently connected peer, used for direct advertising. */
+static ble_advdata_t                   m_advdata;          /**< Used by the initialization function to set name, appearance, and UUIDs and advertising flags visible to peer devices. */
+static ble_adv_evt_t                   m_adv_evt;          /**< Advertising event propogated to the main application. The event is either a transaction to a new advertising mode, or a request for whitelist or peer address.. */
+static ble_advertising_evt_handler_t   m_evt_handler;      /**< Handler for the advertising events. Can be initialized as NULL if no handling is implemented on in the main application. */
+static ble_advertising_error_handler_t m_error_handler;    /**< Handler for the advertising error events. */
 
-static ble_adv_mode_t                m_adv_mode_current;         /**< Variable to keep track of the current advertising mode. */
-static uint8_t                       m_direct_adv_cnt;           /**< Counter of direct advertising retries. */
-static bool                          m_whitelist_temporarily_disabled = false; /**< Flag to keep track of temporary disabling of the whitelist. */
-                                   
-static ble_gap_whitelist_t           m_whitelist;                                         /**< Struct that points to whitelisted addresses. */
-static ble_gap_addr_t              * mp_whitelist_addr[BLE_GAP_WHITELIST_ADDR_MAX_COUNT]; /**< Pointer to a list of addresses. Pointed to by the whitelist */
-static ble_gap_irk_t               * mp_whitelist_irk[BLE_GAP_WHITELIST_IRK_MAX_COUNT];   /**< Pointer to a list of Identity Resolving Keys (IRK). Pointed to by the whitelist */
-static bool                          m_whitelist_reply_expected = false;                  /**< Flag to verify that whitelist is only set when it is requested. */
-static bool                          m_peer_addr_reply_expected = false;                  /**< Flag to verify that. */
+static ble_adv_mode_t                  m_adv_mode_current; /**< Variable to keep track of the current advertising mode. */
+static ble_adv_modes_config_t          m_adv_modes_config; /**< Struct to keep track of disabled and enabled advertising modes, as well as time-outs and intervals.*/
 
-static ble_adv_modes_config_t m_adv_modes_config; /**< Struct to keep track of disabled and enabled advertising modes, as well as time-outs and intervals.*/
+static ble_gap_whitelist_t             m_whitelist;                                         /**< Struct that points to whitelisted addresses. */
+static ble_gap_addr_t                * mp_whitelist_addr[BLE_GAP_WHITELIST_ADDR_MAX_COUNT]; /**< Pointer to a list of addresses. Pointed to by the whitelist */
+static ble_gap_irk_t                 * mp_whitelist_irk[BLE_GAP_WHITELIST_IRK_MAX_COUNT];   /**< Pointer to a list of Identity Resolving Keys (IRK). Pointed to by the whitelist */
+static bool                            m_whitelist_temporarily_disabled = false;            /**< Flag to keep track of temporary disabling of the whitelist. */
+static bool                            m_whitelist_reply_expected = false;                  /**< Flag to verify that whitelist is only set when it is requested. */
+static bool                            m_peer_addr_reply_expected = false;                  /**< Flag to verify that peer address is only set when requested. */
 
-static ble_advdata_manuf_data_t      m_manuf_specific_data;                               /**< Manufacturer specific data structure*/
-static uint8_t                       m_manuf_data_array[BLE_GAP_ADV_MAX_SIZE];            /**< Array to store the Manufacturer specific data*/
-static ble_advdata_service_data_t    m_service_data;                                      /**< Service data structure. */
-static uint8_t                       m_service_data_array[BLE_GAP_ADV_MAX_SIZE];          /**< Array to store the service data. */
-static ble_advdata_conn_int_t        m_slave_conn_int;                                    /**< Connection interval range structure.*/
-static int8_t                        m_tx_power_level;                                    /**< TX power level*/
+static ble_advdata_manuf_data_t        m_manuf_specific_data;                      /**< Manufacturer specific data structure*/
+static uint8_t                         m_manuf_data_array[BLE_GAP_ADV_MAX_SIZE];   /**< Array to store the Manufacturer specific data*/
+static ble_advdata_service_data_t      m_service_data;                             /**< Service data structure. */
+static uint8_t                         m_service_data_array[BLE_GAP_ADV_MAX_SIZE]; /**< Array to store the service data. */
+static ble_advdata_conn_int_t          m_slave_conn_int;                           /**< Connection interval range structure.*/
+static int8_t                          m_tx_power_level;                           /**< TX power level*/
 
 
 /**@brief Function for checking that the whitelist has entries.
@@ -86,6 +84,7 @@ static bool peer_address_exists(uint8_t const * address)
 
 
 uint32_t ble_advertising_init(ble_advdata_t const                 * p_advdata,
+                              ble_advdata_t const                 * p_srdata,
                               ble_adv_modes_config_t const        * p_config,
                               ble_advertising_evt_handler_t const   evt_handler,
                               ble_advertising_error_handler_t const error_handler)
@@ -100,16 +99,6 @@ uint32_t ble_advertising_init(ble_advdata_t const                 * p_advdata,
     m_evt_handler      = evt_handler;
     m_error_handler    = error_handler;
     m_adv_modes_config = *p_config;
-
-    // If interval or timeout is 0, disable the mode.
-    if (m_adv_modes_config.ble_adv_fast_interval == 0 || m_adv_modes_config.ble_adv_fast_timeout == 0)
-    {
-        m_adv_modes_config.ble_adv_fast_enabled = false;
-    }
-    if (m_adv_modes_config.ble_adv_slow_interval == 0 || m_adv_modes_config.ble_adv_slow_timeout == 0)
-    {
-        m_adv_modes_config.ble_adv_slow_enabled = false;
-    }
 
     ble_advertising_peer_address_clear();
 
@@ -131,7 +120,7 @@ uint32_t ble_advertising_init(ble_advdata_t const                 * p_advdata,
         m_advdata.uuids_complete = p_advdata->uuids_complete;
     }
     */
-    m_advdata.uuids_complete = p_advdata->uuids_complete;
+    m_advdata.uuids_complete       = p_advdata->uuids_complete;
     m_advdata.uuids_more_available = p_advdata->uuids_more_available;
     m_advdata.uuids_solicited      = p_advdata->uuids_solicited;
     
@@ -178,7 +167,7 @@ uint32_t ble_advertising_init(ble_advdata_t const                 * p_advdata,
         m_advdata.p_tx_power_level     = &m_tx_power_level;
         m_advdata.p_tx_power_level     = p_advdata->p_tx_power_level;
     }
-    err_code = ble_advdata_set(&m_advdata, NULL);
+    err_code = ble_advdata_set(&m_advdata, p_srdata);
     return err_code;
 }
 
@@ -187,14 +176,20 @@ uint32_t ble_advertising_start(ble_adv_mode_t advertising_mode)
 {
     uint32_t             err_code;
     ble_gap_adv_params_t adv_params;
-    uint32_t             count;
 
     m_adv_mode_current = advertising_mode;
 
-    // Verify if there is any flash access pending. If there is, delay starting advertising until
-    // it is complete.
+    uint32_t             count = 0;
+
+    // Verify if there are any pending flash operations. If so, delay starting advertising until
+    // the flash operations are complete.
     err_code = pstorage_access_status_get(&count);
-    if (err_code != NRF_SUCCESS)
+    if (err_code == NRF_ERROR_INVALID_STATE)
+    {
+        // Pstorage is not initialized, i.e. not in use.
+        count = 0;
+    }
+    else if (err_code != NRF_SUCCESS)
     {
         return err_code;
     }
@@ -207,8 +202,10 @@ uint32_t ble_advertising_start(ble_adv_mode_t advertising_mode)
 
     // Fetch the peer address.
     ble_advertising_peer_address_clear();
-    if (   (m_adv_modes_config.ble_adv_directed_enabled)
+    if (  ((m_adv_modes_config.ble_adv_directed_enabled)
            && m_adv_mode_current == BLE_ADV_MODE_DIRECTED)
+        ||((m_adv_modes_config.ble_adv_directed_slow_enabled)
+           && m_adv_mode_current == BLE_ADV_MODE_DIRECTED_SLOW))
     {
         if (m_evt_handler != NULL)
         {
@@ -224,6 +221,11 @@ uint32_t ble_advertising_start(ble_adv_mode_t advertising_mode)
     // If a mode is disabled, continue to the next mode. I.e fast instead of direct, slow instead of fast, idle instead of slow.
     if (  (m_adv_mode_current == BLE_ADV_MODE_DIRECTED)
         &&(!m_adv_modes_config.ble_adv_directed_enabled || !peer_address_exists(m_peer_address.addr)))
+    {
+        m_adv_mode_current = BLE_ADV_MODE_DIRECTED_SLOW;
+    }
+    if (  (m_adv_mode_current == BLE_ADV_MODE_DIRECTED_SLOW)
+        &&(!m_adv_modes_config.ble_adv_directed_slow_enabled || !peer_address_exists(m_peer_address.addr)))
     {
         m_adv_mode_current = BLE_ADV_MODE_FAST;
     }
@@ -266,9 +268,18 @@ uint32_t ble_advertising_start(ble_adv_mode_t advertising_mode)
             LOG("[ADV]: Starting direct advertisement.\r\n");
             adv_params.p_peer_addr = &m_peer_address; // Directed advertising.
             adv_params.type        = BLE_GAP_ADV_TYPE_ADV_DIRECT_IND;
-            adv_params.timeout     = 0;               // High dutycycle.
-            adv_params.interval    = 0;               // High dutycycle.
+            adv_params.timeout     = 0;
+            adv_params.interval    = 0;
             m_adv_evt              = BLE_ADV_EVT_DIRECTED;
+            break;
+
+        case BLE_ADV_MODE_DIRECTED_SLOW:
+            LOG("[ADV]: Starting direct advertisement.\r\n");
+            adv_params.p_peer_addr = &m_peer_address; // Directed advertising.
+            adv_params.type        = BLE_GAP_ADV_TYPE_ADV_DIRECT_IND;
+            adv_params.timeout     = m_adv_modes_config.ble_adv_directed_slow_timeout;
+            adv_params.interval    = m_adv_modes_config.ble_adv_directed_slow_interval;
+            m_adv_evt              = BLE_ADV_EVT_DIRECTED_SLOW;
             break;
 
         case BLE_ADV_MODE_FAST:
@@ -368,9 +379,6 @@ void ble_advertising_on_ble_evt(ble_evt_t const * p_ble_evt)
             uint32_t err_code;
             m_whitelist_temporarily_disabled = false;
 
-
-            m_direct_adv_cnt = m_adv_modes_config.ble_adv_directed_timeout;
-
             if (p_ble_evt->evt.gap_evt.conn_handle == current_slave_link_conn_handle)
             {
                err_code = ble_advertising_start(BLE_ADV_MODE_DIRECTED);
@@ -389,20 +397,17 @@ void ble_advertising_on_ble_evt(ble_evt_t const * p_ble_evt)
                 {
                     case BLE_ADV_MODE_DIRECTED:
                         LOG("[ADV]: Timed out from directed advertising.\r\n");
-                        if ((m_direct_adv_cnt > 0) && peer_address_exists(m_peer_address.addr))
                         {
                             uint32_t err_code;
-
-                            m_direct_adv_cnt--;
-                            LOG("[ADV]: Remaining direct advertising attempts: %d\r\n",
-                                m_direct_adv_cnt);
-                            err_code = ble_advertising_start(BLE_ADV_MODE_DIRECTED);
+                            err_code = ble_advertising_start(BLE_ADV_MODE_DIRECTED_SLOW);
                             if ((err_code != NRF_SUCCESS) && (m_error_handler != NULL))
                             {
                                 m_error_handler(err_code);
                             }
                         }
-                        else
+                        break;
+                    case BLE_ADV_MODE_DIRECTED_SLOW:
+                        LOG("[ADV]: Timed out from directed slow advertising.\r\n");
                         {
                             uint32_t err_code;
                             err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
@@ -412,7 +417,6 @@ void ble_advertising_on_ble_evt(ble_evt_t const * p_ble_evt)
                             }
                         }
                         break;
-
                     case BLE_ADV_MODE_FAST:
                     {
                         uint32_t err_code;
@@ -446,13 +450,12 @@ void ble_advertising_on_ble_evt(ble_evt_t const * p_ble_evt)
             break;
     }
 }
-
-
 void ble_advertising_on_sys_evt(uint32_t sys_evt)
 {
     uint32_t err_code = NRF_SUCCESS;
     switch (sys_evt)
     {
+
         case NRF_EVT_FLASH_OPERATION_SUCCESS:
         // Fall through.
 

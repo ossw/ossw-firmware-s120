@@ -14,7 +14,7 @@
  *
  * @defgroup ble_sdk_lib_db_discovery Database Discovery
  * @{
- * @ingroup  nrf51_sdk_api
+ * @ingroup  ble_sdk_lib
  * @brief    Database discovery module.
  *
  * @details  This module contains the APIs and types exposed by the DB Discovery module. These APIs

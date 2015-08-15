@@ -14,35 +14,19 @@
 #include <string.h>
 #include "nordic_common.h"
 #include "app_util.h"
-#include "app_gpiote.h"
 #include "app_timer.h"
 #include "app_error.h"
-
+#include "nrf_drv_gpiote.h"
+#include "nrf_assert.h"
 
 static app_button_cfg_t *             mp_buttons = NULL;           /**< Button configuration. */
 static uint8_t                        m_button_count;              /**< Number of configured buttons. */
 static uint32_t                       m_detection_delay;           /**< Delay before a button is reported as pushed. */
-static app_gpiote_user_id_t           m_gpiote_user_id;            /**< GPIOTE user id for buttons module. */
 static app_timer_id_t                 m_detection_delay_timer_id;  /**< Polling timer id. */
-static pin_transition_t               m_pin_transition;            /**< pin transaction direction. */
 
 
-/**@brief Function for executing the application button handler for specified button.
- *
- * @param[in]  p_btn   Button that has been pushed.
- */
-static void button_handler_execute(app_button_cfg_t * p_btn, uint32_t transition)
-{
-    if(transition == APP_BUTTON_PUSH)
-    {
-        p_btn->button_handler(p_btn->pin_no, APP_BUTTON_PUSH);
-    }
-    else if(transition == APP_BUTTON_RELEASE)
-    {
-        p_btn->button_handler(p_btn->pin_no, APP_BUTTON_RELEASE);
-    }
-}
-
+static uint32_t m_pin_state;
+static uint32_t m_pin_transition;
 
 /**@brief Function for handling the timeout that delays reporting buttons as pushed.
  *
@@ -58,93 +42,71 @@ static void button_handler_execute(app_button_cfg_t * p_btn, uint32_t transition
  */
 static void detection_delay_timeout_handler(void * p_context)
 {
-    uint32_t err_code;
-    uint32_t current_state_pins;
-
-    // Get current state of pins.
-    err_code = app_gpiote_pins_state_get(m_gpiote_user_id, &current_state_pins);
-
-    if (err_code != NRF_SUCCESS)
-    {
-        return;
-    }
-
     uint8_t i;
     
     // Pushed button(s) detected, execute button handler(s).
     for (i = 0; i < m_button_count; i++)
     {
         app_button_cfg_t * p_btn = &mp_buttons[i];
+        uint32_t btn_mask = 1 << p_btn->pin_no;
+        if (btn_mask & m_pin_transition)
+        {
+            m_pin_transition &= ~btn_mask;
+            bool pin_is_set = nrf_drv_gpiote_in_is_set(p_btn->pin_no);
+            if ((m_pin_state & (1 << p_btn->pin_no)) == (pin_is_set << p_btn->pin_no))
+            {
+                uint32_t transition = !(pin_is_set ^ (p_btn->active_state == APP_BUTTON_ACTIVE_HIGH));
 
-        if (((m_pin_transition.high_to_low & (1 << p_btn->pin_no)) != 0) && (p_btn->button_handler != NULL))
-        {
-            //If it's active high then going from high to low was a release of the button.
-            if(p_btn->active_state == APP_BUTTON_ACTIVE_HIGH)
-            {
-                button_handler_execute(p_btn, APP_BUTTON_RELEASE);
-            }
-            //If it's active low then going from high to low was a push of the button.
-            else
-            {
-                button_handler_execute(p_btn, APP_BUTTON_PUSH);
-            }
-        }
-        else if (((m_pin_transition.low_to_high & (1 << p_btn->pin_no)) != 0) && (p_btn->button_handler != NULL))
-        {
-            //If it's active high then going from low to high was a push of the button.
-            if(p_btn->active_state == APP_BUTTON_ACTIVE_HIGH)
-            {
-                button_handler_execute(p_btn,APP_BUTTON_PUSH);
-            }
-            //If it's active low then going from low to high was a release of the button.
-            else
-            {
-                button_handler_execute(p_btn,APP_BUTTON_RELEASE);
+                if (p_btn->button_handler)
+                {
+                    p_btn->button_handler(p_btn->pin_no, transition);
+                }
             }
         }
     }
 }
 
-
-/**@brief Function for handling the GPIOTE event.
- *
- * @details Saves the current status of the button pins, and starts a timer. If the timer is already
- *          running, it will be restarted.
- *
- * @param[in]  event_pins_low_to_high   Mask telling which pin(s) had a low to high transition.
- * @param[in]  event_pins_high_to_low   Mask telling which pin(s) had a high to low transition.
- */
-static void gpiote_event_handler(uint32_t event_pins_low_to_high, uint32_t event_pins_high_to_low)
+static void gpiote_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
     uint32_t err_code;
- 
+    uint32_t pin_mask = 1 << pin;
+
     // Start detection timer. If timer is already running, the detection period is restarted.
     // NOTE: Using the p_context parameter of app_timer_start() to transfer the pin states to the
     //       timeout handler (by casting event_pins_mask into the equally sized void * p_context
     //       parameter).
-    STATIC_ASSERT(sizeof(void *) == sizeof(uint32_t));
-
     err_code = app_timer_stop(m_detection_delay_timer_id);
     if (err_code != NRF_SUCCESS)
     {
         // The impact in app_button of the app_timer queue running full is losing a button press.
-        // The current implementation ensures that the system will continue working as normal. 
+        // The current implementation ensures that the system will continue working as normal.
         return;
     }
 
-    m_pin_transition.low_to_high = event_pins_low_to_high;
-    m_pin_transition.high_to_low = event_pins_high_to_low;
-    
-    err_code = app_timer_start(m_detection_delay_timer_id,
-                               m_detection_delay,
-                               (void *)(event_pins_low_to_high | event_pins_high_to_low));
-    if (err_code != NRF_SUCCESS)
+    if (!(m_pin_transition & pin_mask))
     {
-        // The impact in app_button of the app_timer queue running full is losing a button press.
-        // The current implementation ensures that the system will continue working as normal. 
+        if (nrf_drv_gpiote_in_is_set(pin))
+        {
+            m_pin_state |= pin_mask;
+        }
+        else
+        {
+            m_pin_state &= ~(pin_mask);
+        }
+        m_pin_transition |= (pin_mask);
+
+        err_code = app_timer_start(m_detection_delay_timer_id, m_detection_delay, NULL);
+        if (err_code != NRF_SUCCESS)
+        {
+            // The impact in app_button of the app_timer queue running full is losing a button press.
+            // The current implementation ensures that the system will continue working as normal.
+        }
+    }
+    else
+    {
+        m_pin_transition &= ~pin_mask;
     }
 }
-
 
 uint32_t app_button_init(app_button_cfg_t *             p_buttons,
                          uint8_t                        button_count,
@@ -157,33 +119,35 @@ uint32_t app_button_init(app_button_cfg_t *             p_buttons,
         return NRF_ERROR_INVALID_PARAM;
     }
 
+    if (!nrf_drv_gpiote_is_init())
+    {
+        err_code = nrf_drv_gpiote_init();
+        if (err_code != NRF_SUCCESS)
+        {
+            return err_code;
+        }
+    }
+
     // Save configuration.
     mp_buttons          = p_buttons;
     m_button_count      = button_count;
     m_detection_delay   = detection_delay;
-  
-    // Configure pins.
-    uint32_t pins_transition_mask = 0;
+
+    m_pin_state      = 0;
+    m_pin_transition = 0;
     
     while (button_count--)
     {
         app_button_cfg_t * p_btn = &p_buttons[button_count];
 
-        // Configure pin.
-        nrf_gpio_cfg_input(p_btn->pin_no, p_btn->pull_cfg);
+        nrf_drv_gpiote_in_config_t config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(false);
+        config.pull = p_btn->pull_cfg;
         
-        // Build GPIOTE user registration masks.
-        pins_transition_mask |= (1 << p_btn->pin_no);
-    }
-    
-    // Register button module as a GPIOTE user.
-    err_code = app_gpiote_user_register(&m_gpiote_user_id,
-                                        pins_transition_mask,
-                                        pins_transition_mask,
-                                        gpiote_event_handler);
-    if (err_code != NRF_SUCCESS)
-    {
-        return err_code;
+        err_code = nrf_drv_gpiote_in_init(p_btn->pin_no, &config, gpiote_event_handler);
+        if (err_code != NRF_SUCCESS)
+        {
+            return err_code;
+        }
     }
 
     // Create polling timer.
@@ -192,32 +156,28 @@ uint32_t app_button_init(app_button_cfg_t *             p_buttons,
                             detection_delay_timeout_handler);
 }
 
-
 uint32_t app_button_enable(void)
 {
-    if (mp_buttons == NULL)
+    ASSERT(mp_buttons);
+
+    uint32_t i;
+    for (i = 0; i < m_button_count; i++)
     {
-        return NRF_ERROR_INVALID_STATE;
+        nrf_drv_gpiote_in_event_enable(mp_buttons[i].pin_no, true);
     }
 
-    return app_gpiote_user_enable(m_gpiote_user_id);
+    return NRF_SUCCESS;
 }
 
 
 uint32_t app_button_disable(void)
 {
-    uint32_t err_code;
-    
-    if (mp_buttons == NULL)
-    {
-        return NRF_ERROR_INVALID_STATE;
-    }
+    ASSERT(mp_buttons);
 
-    err_code = app_gpiote_user_disable(m_gpiote_user_id);
-
-    if (err_code != NRF_SUCCESS)
+    uint32_t i;
+    for (i = 0; i < m_button_count; i++)
     {
-        return err_code;
+       nrf_drv_gpiote_in_event_disable(mp_buttons[i].pin_no);
     }
 
     // Make sure polling timer is not running.
@@ -227,51 +187,13 @@ uint32_t app_button_disable(void)
 
 uint32_t app_button_is_pushed(uint8_t button_id, bool * p_is_pushed)
 {
-    uint32_t err_code;
-    uint32_t active_pins;
-    
-    if (button_id > m_button_count)
-    {
-        return NRF_ERROR_INVALID_PARAM;
-    }
+    ASSERT(button_id <= m_button_count);
+    ASSERT(mp_buttons != NULL);
+
     app_button_cfg_t * p_btn = &mp_buttons[button_id];
-    
-    if (mp_buttons == NULL)
-    {
-        return NRF_ERROR_INVALID_STATE;
-    }
+    bool is_set = nrf_drv_gpiote_in_is_set(p_btn->pin_no);
 
-    err_code = app_gpiote_pins_state_get(m_gpiote_user_id, &active_pins);
-    
-    if (err_code != NRF_SUCCESS)
-    {
-        return err_code;
-    }
-
-    if(p_btn->active_state == APP_BUTTON_ACTIVE_LOW)
-    {
-        // If the pin is active low, then the pin being high means it is not pushed.
-        if(((active_pins >> p_btn->pin_no) & 0x01))
-        {
-            *p_is_pushed = false;
-        }
-        else
-        {
-            *p_is_pushed = true;  
-        }            
-    }
-    else if(p_btn->active_state == APP_BUTTON_ACTIVE_HIGH)
-    {
-        // If the pin is active high, then the pin being high means it is pushed.
-        if(((active_pins >> p_btn->pin_no) & 0x01))
-        {
-            *p_is_pushed = true;
-        }
-        else
-        {
-            *p_is_pushed = false;   
-        }
-    }
+    *p_is_pushed = !(is_set^(p_btn->active_state == APP_BUTTON_ACTIVE_HIGH));
     
     return NRF_SUCCESS;
 }

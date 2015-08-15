@@ -5,8 +5,22 @@
 
 static app_timer_id_t         m_button_long_press_timer_id;
 
+
+static void button_handler(uint8_t pin_no, uint8_t button_action);
+
+static app_button_cfg_t buttons[] =
+{
+    {BUTTON_UP, APP_BUTTON_ACTIVE_LOW, BUTTON_PULL, button_handler},
+    {BUTTON_DOWN, APP_BUTTON_ACTIVE_LOW, BUTTON_PULL, button_handler},
+    {BUTTON_SELECT, APP_BUTTON_ACTIVE_LOW, BUTTON_PULL, button_handler},
+    {BUTTON_BACK, APP_BUTTON_ACTIVE_LOW, BUTTON_PULL, button_handler}
+};
+
+static const uint8_t BUTTONS_NO = sizeof(buttons)/sizeof(buttons[0]);
+
 static void button_handler(uint8_t pin_no, uint8_t button_action) {
     uint32_t err_code;
+	
 	  if(APP_BUTTON_PUSH == button_action){
 		
 		  err_code = app_timer_start(m_button_long_press_timer_id,
@@ -20,20 +34,12 @@ static void button_handler(uint8_t pin_no, uint8_t button_action) {
    }
 }
 
-static app_button_cfg_t buttons[] =
-{
-    {BUTTON_UP, APP_BUTTON_ACTIVE_LOW, BUTTON_PULL, button_handler},
-    {BUTTON_DOWN, APP_BUTTON_ACTIVE_LOW, BUTTON_PULL, button_handler},
-    {BUTTON_SELECT, APP_BUTTON_ACTIVE_LOW, BUTTON_PULL, button_handler},
-    {BUTTON_BACK, APP_BUTTON_ACTIVE_LOW, BUTTON_PULL, button_handler}
-};
-
 static void button_long_press_timeout_handler(void * p_context) {
     uint32_t err_code;
 	  uint8_t pin_no = (uint8_t)((uint32_t)p_context&0xFF);
 	  bool pushed = false;
 
-	  for (uint32_t i = 0; i < 4; i++)
+	  for (uint32_t i = 0; i < BUTTONS_NO; i++)
     {
         app_button_cfg_t * p_btn = &buttons[i];
 
@@ -56,7 +62,8 @@ static void button_long_press_timeout_handler(void * p_context) {
 
 void buttons_init(void) {
     uint32_t err_code;
-	  app_button_init(buttons, sizeof(buttons) / sizeof(buttons[0]), BUTTON_DETECTION_DELAY);
+	  err_code = app_button_init(buttons, BUTTONS_NO, BUTTON_DETECTION_DELAY);
+		APP_ERROR_CHECK(err_code);
 	
 	  err_code = app_timer_create(&m_button_long_press_timer_id,
                                 APP_TIMER_MODE_SINGLE_SHOT,

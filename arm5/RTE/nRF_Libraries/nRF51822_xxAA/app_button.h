@@ -87,17 +87,13 @@ uint32_t app_button_init(app_button_cfg_t *             p_buttons,
 
 /**@brief Function for enabling button detection.
  *
- * @retval  NRF_ERROR_INVALID_PARAM   GPIOTE has to many users.
- * @retval  NRF_ERROR_INVALID_STATE   Button or GPIOTE not initialized.
- * @retval  NRF_SUCCESS               Button detection successfully enabled.
+ * @retval NRF_SUCCESS Module successfully enabled.
  */
 uint32_t app_button_enable(void);
 
 /**@brief Function for disabling button detection.
  *
- * @retval  NRF_ERROR_INVALID_PARAM   GPIOTE has to many users.
- * @retval  NRF_ERROR_INVALID_STATE   Button or GPIOTE not initialized.
- * @retval  NRF_SUCCESS               Button detection successfully enabled.
+ * @retval  NRF_SUCCESS               Button detection successfully disabled. Error code otherwise.
  */
 uint32_t app_button_disable(void);
 

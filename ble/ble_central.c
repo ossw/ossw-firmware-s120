@@ -17,7 +17,6 @@
 #include "ble_bas_c.h"
 #include "app_util.h"
 #include "app_timer.h"
-#include "app_gpiote.h"
 
 #define APPL_LOG                   app_trace_log                      /**< Debug logger macro that will be used in this file to do logging of debug information over UART. */
 
