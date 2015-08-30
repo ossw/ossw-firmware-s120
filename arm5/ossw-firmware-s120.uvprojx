@@ -14,7 +14,7 @@
         <TargetCommonOption>
           <Device>nRF51822_xxAA</Device>
           <Vendor>Nordic Semiconductor</Vendor>
-          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.8.0.3</PackID>
+          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.7.2.1</PackID>
           <PackURL>http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/</PackURL>
           <Cpu>IROM(0x00000000,0x40000) IRAM(0x20000000,0x4000) CPUTYPE("Cortex-M0") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -636,6 +636,46 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>spiffs</GroupName>
+          <Files>
+            <File>
+              <FileName>spiffs_check.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\spiffs\spiffs_check.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_gc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\spiffs\spiffs_gc.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_hydrogen.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\spiffs\spiffs_hydrogen.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_nucleus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\spiffs\spiffs_nucleus.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\spiffs\spiffs.h</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\spiffs\spiffs_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_nucleus.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\spiffs\spiffs_nucleus.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
         <Group>
@@ -663,7 +703,7 @@
         <TargetCommonOption>
           <Device>nRF51822_XXAA</Device>
           <Vendor>Nordic Semiconductor</Vendor>
-          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.8.0.3</PackID>
+          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.7.2.1</PackID>
           <PackURL>http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/</PackURL>
           <Cpu>IROM(0x00000000,0x40000) IRAM(0x20000000,0x8000) CPUTYPE("Cortex-M0") CLOCK(16000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -680,7 +720,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile></SFDFile>
+          <SFDFile>$$Device:nRF51822_xxAA$SVD\nrf51.xml</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -796,7 +836,7 @@
             <RestoreSysVw>1</RestoreSysVw>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>7</TargetSelection>
+          <TargetSelection>6</TargetSelection>
           <SimDlls>
             <CpuDll></CpuDll>
             <CpuDllArguments></CpuDllArguments>
@@ -824,7 +864,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>Segger\JL2CM3.dll</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -1285,6 +1325,46 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>spiffs</GroupName>
+          <Files>
+            <File>
+              <FileName>spiffs_check.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\spiffs\spiffs_check.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_gc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\spiffs\spiffs_gc.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_hydrogen.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\spiffs\spiffs_hydrogen.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_nucleus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\spiffs\spiffs_nucleus.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\spiffs\spiffs.h</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\spiffs\spiffs_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_nucleus.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\spiffs\spiffs_nucleus.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
           <GroupOption>
             <CommonProperty>
@@ -1706,7 +1786,7 @@
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
-      <package name="nRF_SoftDevice_S120" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S120/" vendor="NordicSemiconductor" version="2.0.0">
+      <package name="nRF_SoftDevice_S120" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S120/" vendor="NordicSemiconductor" version="2.1.0">
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
@@ -1847,7 +1927,19 @@
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </component>
+      <component Cclass="nRF_Drivers" Cgroup="nrf_soc" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_soc_default">
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </component>
       <component Cclass="nRF_Drivers" Cgroup="pstorage" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="pstorage_default">
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_Drivers" Cgroup="twi_master" Cvariant="Software" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="twi_master_Software">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>
@@ -1925,8 +2017,8 @@
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </component>
-      <component Cclass="nRF_SoftDevice" Cgroup="s120" Cvariant="Headers" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="s120_Headers">
-        <package name="nRF_SoftDevice_S120" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S120/" vendor="NordicSemiconductor" version="2.0.0"/>
+      <component Cclass="nRF_SoftDevice" Cgroup="s120" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="2.1.0" condition="s120_default">
+        <package name="nRF_SoftDevice_S120" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S120/" vendor="NordicSemiconductor" version="2.1.0"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
@@ -2164,6 +2256,42 @@
       <file attr="config" category="header" name="pstorage\config\pstorage_platform.h" version="3.0.1">
         <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\pstorage_platform.h</instance>
         <component Cclass="nRF_Drivers" Cgroup="pstorage" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="pstorage_default"/>
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="source" name="spi_master\spi_master.c" version="3.0.1">
+        <instance index="0" removed="1">RTE\nRF_Drivers\nRF51822_xxAA\spi_master.c</instance>
+        <component Cclass="nRF_Drivers" Cgroup="spi_master" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="spi_master"/>
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos/>
+      </file>
+      <file attr="config" category="header" name="spi_master\spi_master.h" version="3.0.1">
+        <instance index="0" removed="1">RTE\nRF_Drivers\nRF51822_xxAA\spi_master.h</instance>
+        <component Cclass="nRF_Drivers" Cgroup="spi_master" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="spi_master"/>
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos/>
+      </file>
+      <file attr="config" category="header" name="twi_master\incubated\twi_master.h" version="3.0.1">
+        <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\twi_master.h</instance>
+        <component Cclass="nRF_Drivers" Cgroup="twi_master" Cvariant="Software" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="twi_master_Software"/>
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="twi_master\incubated\config\twi_master_config.h" version="3.0.1">
+        <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\twi_master_config.h</instance>
+        <component Cclass="nRF_Drivers" Cgroup="twi_master" Cvariant="Software" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="twi_master_Software"/>
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="source" name="twi_master\incubated\twi_sw_master.c" version="3.0.1">
+        <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\twi_sw_master.c</instance>
+        <component Cclass="nRF_Drivers" Cgroup="twi_master" Cvariant="Software" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="twi_master_Software"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>
@@ -2435,6 +2563,12 @@
         <instance index="0" removed="1">RTE\nRF_SoftDevice\nRF51822_xxAA\s120_softdevice.hex</instance>
         <component Cclass="nRF_SoftDevice" Cgroup="s120_hex" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="s120_hex"/>
         <package name="nRF_SoftDevice_S120" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S120/" vendor="NordicSemiconductor" version="2.0.0"/>
+        <targetInfos/>
+      </file>
+      <file attr="config" category="doc" name="doc\s130_nrf51822_1.0.0_licence_agreement.txt" version="1.0.1">
+        <instance index="0" removed="1">RTE\nRF_SoftDevice\nRF51822_xxAA\s130_nrf51822_1.0.0_licence_agreement.txt</instance>
+        <component Cclass="nRF_SoftDevice" Cgroup="s130" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="1.0.1" condition="s130_default"/>
+        <package name="nRF_SoftDevice_S130" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S130/" vendor="NordicSemiconductor" version="1.0.1"/>
         <targetInfos/>
       </file>
       <file attr="config" category="source" name="softdevice_handler\softdevice_handler.c" version="1.1.4">

@@ -39,12 +39,27 @@ bool ext_flash_wait_until_ready() {
     return true;
 }
 
-bool ext_flash_erase_page(uint32_t page_address) {
+bool ext_flash_erase_data(int32_t ext_flash_address, uint32_t data_size) {
+    int32_t end_address = ext_flash_address + data_size;
+    bool success;
+    success = ext_flash_erase_sector(ext_flash_address);
+    ext_flash_address = (0xFFFFF000&ext_flash_address) + EXT_FLASH_SECTOR_SIZE;
+    while (ext_flash_address < end_address) {
+        if (!success) {
+            return false;
+        }
+        success = ext_flash_erase_sector(ext_flash_address);
+        ext_flash_address += EXT_FLASH_SECTOR_SIZE;
+    }
+    return success;
+}
+
+bool ext_flash_erase_sector(uint32_t page_address) {
     bool success = ext_flash_write_enable();
     if (success) {
         uint8_t command[] = {0x20, 0xFF, 0xFF, 0x00};
         command[1] = page_address >> 16 & 0xFF;
-        command[2] = page_address >> 8 & 0xFF;
+        command[2] = page_address >> 8 & 0xF0;
         success = spi_master_tx(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 4);
     }
     if (success) {
@@ -80,7 +95,7 @@ bool ext_flash_write_page(int32_t ext_flash_address, uint8_t *buffer, uint32_t d
     return success;
 }
 
-bool ext_flash_write_data_block(int32_t ext_flash_address, uint8_t *buffer, uint32_t data_size) {
+bool ext_flash_write_data(int32_t ext_flash_address, uint8_t *buffer, uint32_t data_size) {
     int32_t end_address = ext_flash_address + data_size;
     int32_t first_page_offset = ext_flash_address & (EXT_FLASH_PAGE_SIZE-1);
     int32_t page_size = (data_size + first_page_offset > EXT_FLASH_PAGE_SIZE) ? EXT_FLASH_PAGE_SIZE - first_page_offset : data_size;

@@ -22,6 +22,7 @@
 #include "../scr_mngr.h"
 #include "../rtc.h"
 #include "../notifications.h"
+#include "../spiffs/spiffs.h"
 #include "../screens/scr_watchset.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
@@ -78,34 +79,34 @@ static app_timer_id_t                    m_battery_timer_id;                    
 static ble_dfu_t m_dfus; /**< Structure used to identify the DFU service. */
 #endif // BLE_DFU_APP_SUPPORT  
 			
-static uint32_t data_upload_ptr;
+//static uint32_t data_upload_ptr;
 static uint32_t notification_upload_ptr;
 static uint16_t notification_upload_size;
+
+//static bool data_upload_handled = true;
+static spiffs_file data_upload_fd;
+extern spiffs fs;
 
 #define WATCHSET_START_ADDRESS 0x1000
  
 #define NOTIFICATION_START_ADDRESS 0x1C00
 
+static void ble_peripheral_send_data_upload_permission(bool permission) {
+	  uint8_t data[] = {0x20, permission};
+	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
+}
+
 static void init_data_upload(uint8_t type, uint32_t size) {
-		data_upload_ptr = WATCHSET_START_ADDRESS;
-		uint8_t zero = 0;
-		ext_ram_write_data(data_upload_ptr, &zero, 1);
-		data_upload_ptr++;
-	/*  int page_no = (size/0x100) + 1;
-	  for (int i=0; i < page_no; i++) {
-			  ext_flash_erase_page(i*0x100);
-		}*/
+    data_upload_fd = SPIFFS_open(&fs, "watchset", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
+		//ble_peripheral_send_data_upload_permission(true);
 }
 
 static void handle_data_upload_part(uint8_t *data, uint32_t size) {
-	  //ext_flash_write_data_block(upload_data_ptr, data, size);
-	  ext_ram_write_data(data_upload_ptr, data, size);
-	  data_upload_ptr += size;
+		SPIFFS_write(&fs, data_upload_fd, data, size);
 }
 
 static void handle_data_upload_done() {
-		uint8_t one = 1;
-		ext_ram_write_data(WATCHSET_START_ADDRESS, &one, 1);
+    SPIFFS_close(&fs, data_upload_fd);
 		scr_mngr_show_screen(SCR_WATCH_SET);
 }
 
