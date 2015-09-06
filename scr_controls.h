@@ -47,7 +47,7 @@ typedef struct
 
 typedef struct
 {
-	  char last_value[17];
+	  char* last_value;
 } TEXT_CONTROL_DATA;
 
 typedef struct
@@ -89,7 +89,7 @@ typedef struct
 	  uint8_t height;
 	  uint32_t max;
 	  uint32_t style;
-	  uint32_t (* const data_handle)();
+	  uint32_t (* data_handle)();
 	  uint32_t data_handle_param;
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_PROGRESS_BAR_CONFIG;	
@@ -109,5 +109,11 @@ typedef struct
 void scr_controls_draw(const SCR_CONTROLS_DEFINITION*);
 
 void scr_controls_redraw(const SCR_CONTROLS_DEFINITION*);
+
+void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force);
+
+void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force);
+
+void scr_controls_draw_horizontal_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force);
 
 #endif /* SCR_CONTROLS_H */

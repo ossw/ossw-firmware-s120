@@ -163,10 +163,10 @@ typedef uint8_t u8_t;
 #define SPIFFS_CFG_PHYS_ADDR(ignore)      (0)
 #endif
 #ifndef SPIFFS_CFG_LOG_PAGE_SZ
-#define SPIFFS_CFG_LOG_PAGE_SZ(ignore)    (128)
+#define SPIFFS_CFG_LOG_PAGE_SZ(ignore)    (256)
 #endif
 #ifndef SPIFFS_CFG_LOG_BLOCK_SZ
-#define SPIFFS_CFG_LOG_BLOCK_SZ(ignore)   (16*1024)
+#define SPIFFS_CFG_LOG_BLOCK_SZ(ignore)   (64*1024)
 #endif
 #endif
 

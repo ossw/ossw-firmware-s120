@@ -18,10 +18,12 @@
 #include <stdlib.h> 
 
 uint32_t screens_section_address;
+uint32_t current_screen_controls_address;
 uint32_t external_properties_section_address;
 uint8_t external_properties_no = 0;
 uint8_t* external_properties_data = NULL;
-SCR_CONTROLS_DEFINITION controls;
+//SCR_CONTROLS_DEFINITION controls;
+uint8_t* screen_data_buffer = NULL;
 
 uint8_t current_subscreen = 0;
 uint8_t switch_to_subscreen = 0;
@@ -73,13 +75,13 @@ static uint8_t get_next_byte() {
 
 static uint16_t get_next_short() {
     uint8_t data[2];
-		SPIFFS_read(&fs, watchset_fd, &data, 2);
+		SPIFFS_read(&fs, watchset_fd, data, 2);
 	  return data[0] << 8 | data[1];
 }
 
 static uint32_t get_next_int() {
     uint8_t data[4];
-		SPIFFS_read(&fs, watchset_fd, &data, 4);
+		SPIFFS_read(&fs, watchset_fd, data, 4);
 	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
 }
 
@@ -244,52 +246,52 @@ void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t 
 		}
 }
 
-static void* parse_screen_control_number() {
+static void parse_screen_control_number(SCR_CONTROL_NUMBER_CONFIG* config) {
     uint8_t range = get_next_byte();
     uint8_t x = get_next_byte();
     uint8_t y = get_next_byte();
     uint32_t style = get_next_int();
 	
 	
-	  NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
-	  memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
+	  //NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
+	  //memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
 	  
-	  SCR_CONTROL_NUMBER_CONFIG* config = malloc(sizeof(SCR_CONTROL_NUMBER_CONFIG));
+	  //SCR_CONTROL_NUMBER_CONFIG* config = malloc(sizeof(SCR_CONTROL_NUMBER_CONFIG));
 	
 		config->range = range;
 		config->x = x;
 		config->y = y;
 		config->style = style;
-		config->data = data;
 	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
-		
-		return config;
+		uint16_t dataPtr = get_next_short();
+		config->data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
 }
 
-static void* parse_screen_control_text() {
+static void* parse_screen_control_text(SCR_CONTROL_TEXT_CONFIG* config) {
     uint8_t x = get_next_byte();
     uint8_t y = get_next_byte();
     uint8_t width = get_next_byte();
     uint8_t height = get_next_byte();
     uint32_t style = get_next_int();
 	
-	  TEXT_CONTROL_DATA* data = malloc(sizeof(TEXT_CONTROL_DATA));
-	  memset(data, 0, sizeof(TEXT_CONTROL_DATA));
+	  //TEXT_CONTROL_DATA* data = malloc(sizeof(TEXT_CONTROL_DATA));
+	  //memset(data, 0, sizeof(TEXT_CONTROL_DATA));
 	  
-	  SCR_CONTROL_TEXT_CONFIG* config = malloc(sizeof(SCR_CONTROL_TEXT_CONFIG));
+	  //SCR_CONTROL_TEXT_CONFIG* config = malloc(sizeof(SCR_CONTROL_TEXT_CONFIG));
 	
 		config->x = x;
 		config->y = y;
 		config->width = width;
 		config->height = height;
 		config->style = style;
-		config->data = data;
+		//config->data = data;
 	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
-		
+		uint16_t dataPtr = get_next_short();
+		config->data->last_value = (char*)(screen_data_buffer + dataPtr);
 		return config;
 }
 
-static void* parse_screen_control_progress() {
+static void parse_screen_control_progress(SCR_CONTROL_PROGRESS_BAR_CONFIG* config) {
     uint32_t max_value = get_next_int();
     uint8_t x = get_next_byte();
     uint8_t y = get_next_byte();
@@ -297,10 +299,10 @@ static void* parse_screen_control_progress() {
     uint8_t height = get_next_byte();
     uint16_t style = get_next_short();
 	
-	  NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
-	  memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
+	  //NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
+	  //memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
 	  
-	  SCR_CONTROL_PROGRESS_BAR_CONFIG* config = malloc(sizeof(SCR_CONTROL_PROGRESS_BAR_CONFIG));
+	  //SCR_CONTROL_PROGRESS_BAR_CONFIG* config = malloc(sizeof(SCR_CONTROL_PROGRESS_BAR_CONFIG));
 	
 	  config->max = max_value;
 		config->x = x;
@@ -308,31 +310,45 @@ static void* parse_screen_control_progress() {
 		config->width = width;
 		config->height = height;
 		config->style = style;
-		config->data = data;
+		//config->data = data;
 	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
-		
-		return config;
+		uint16_t dataPtr = get_next_short();
+		config->data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
 }
 
-static bool parse_controls() {
+static bool draw_screen_controls(bool force) {
 	  uint8_t controls_no = get_next_byte();
 	
 	  //alloc memory for controls
-	  controls.controls_no = controls_no;
-	  controls.controls = malloc(sizeof(SCR_CONTROL_DEFINITION)*controls_no);
+	 // controls.controls_no = controls_no;
+	  //controls.controls = malloc(sizeof(SCR_CONTROL_DEFINITION)*controls_no);
 	
 		for (int i = 0; i < controls_no; i++) {
 			  uint8_t control_type = get_next_byte();
-			  controls.controls[i].type = control_type;
+			  //controls.controls[i].type = control_type;
 			  switch (control_type) {
 					case SCR_CONTROL_NUMBER:
-						  controls.controls[i].config = parse_screen_control_number();
+					{
+							SCR_CONTROL_NUMBER_CONFIG config;
+						  parse_screen_control_number(&config);
+							scr_controls_draw_number_control(&config, force);
+					}
 					    break;
 					case SCR_CONTROL_TEXT:
-						  controls.controls[i].config = parse_screen_control_text();
+					{
+							SCR_CONTROL_TEXT_CONFIG config;
+							TEXT_CONTROL_DATA data;
+							config.data = &data;
+						  parse_screen_control_text(&config);
+							scr_controls_draw_text_control(&config, force);
+					}
 					    break;
 					case SCR_CONTROL_HORIZONTAL_PROGRESS_BAR:
-						  controls.controls[i].config = parse_screen_control_progress();
+					{
+							SCR_CONTROL_PROGRESS_BAR_CONFIG config;
+						  parse_screen_control_progress(&config);
+							scr_controls_draw_horizontal_progress_bar_control(&config, force);
+					}
 					    break;
 				}
 		}
@@ -355,10 +371,21 @@ static bool parse_screen() {
 				section = get_next_byte();
 				switch (section) {
 					case WATCH_SET_SCREEN_SECTION_CONTROLS:
-						  parse_controls();
+					{
+							uint32_t size = get_next_short();
+							current_screen_controls_address = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
+							SPIFFS_lseek(&fs, watchset_fd, size, SPIFFS_SEEK_CUR);
+					}
+						  //parse_controls(true);
 							break;
 					case WATCH_SET_SCREEN_SECTION_ACTIONS:
 						  parse_actions();
+							break;
+					case WATCH_SET_SCREEN_SECTION_MEMORY:
+					{
+						  uint16_t buffer_size = get_next_short();
+							screen_data_buffer = malloc(buffer_size);
+					}
 							break;
 				}
 	  } while (section != WATCH_SET_END_OF_DATA);
@@ -452,11 +479,12 @@ static void scr_watch_set_init() {
 }
 
 static void scr_watch_set_draw_screen() {
-		scr_controls_draw(&controls);
+		SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
+		draw_screen_controls(true);
 }
 
 static void clear_subscreen_data() {
-	  if (controls.controls_no == 0 || controls.controls == NULL) {
+	 /* if (controls.controls_no == 0 || controls.controls == NULL) {
 			  return;
 		}
 		
@@ -476,7 +504,11 @@ static void clear_subscreen_data() {
 		}
 		free(controls.controls);
 		controls.controls_no = 0;
-		controls.controls = NULL;
+		controls.controls = NULL;*/
+		if (screen_data_buffer != NULL) {
+				free(screen_data_buffer);
+		}
+		screen_data_buffer = NULL;
 }
 
 static void scr_watch_set_refresh_screen() {
@@ -484,10 +516,14 @@ static void scr_watch_set_refresh_screen() {
 				clear_subscreen_data();
 	      mlcd_fb_clear();
 			  init_subscreen(switch_to_subscreen);
-				scr_controls_draw(&controls);
+			
+				SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
+				draw_screen_controls(true);
+			
 			  current_subscreen = switch_to_subscreen;
 		} else {
-				scr_controls_redraw(&controls);
+				SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
+				draw_screen_controls(false);
 	  }
 }
 

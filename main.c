@@ -30,7 +30,7 @@
 #include "spiffs/spiffs.h"
 
 
-#define LOG_PAGE_SIZE       128
+#define LOG_PAGE_SIZE       256
   
 static u8_t spiffs_work_buf[LOG_PAGE_SIZE*2];
 static u8_t spiffs_fds[32*4];

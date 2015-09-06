@@ -62,7 +62,7 @@ static void draw_1X_int_value(uint32_t value, uint32_t old_value, uint8_t digits
 		draw_int_value(value, old_value, digits_no - 1, decimal_size, x + thickness + digit_space, y, digit_width, digit_height, thickness, digit_space, false, force);
 }
 
-static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force) {
+void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force) {
 	  uint8_t decimal_size = cfg->range&0xF;
 	  uint32_t value = cfg->data_handle(cfg->data_handle_param, decimal_size);
 		
@@ -90,7 +90,7 @@ static void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, boo
 		cfg->data->last_value = value;
 }
 
-static void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force) {
+void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force) {
 	  char* value = (char*)cfg->data_handle(cfg->data_handle_param);
 	
 	  uint8_t font_type = (cfg->style >> 24) & 0xFF;
@@ -110,7 +110,7 @@ static void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool fo
 		strcpy((void*)cfg->data->last_value, (void*)value);
 }
 
-static void scr_controls_draw_horizontal_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force) {
+void scr_controls_draw_horizontal_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force) {
 	  uint32_t value = cfg->data_handle(cfg->data_handle_param, 0);
 	
 	  uint8_t border = cfg->style&0xFF;
