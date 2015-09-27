@@ -294,3 +294,77 @@ void mlcd_fb_draw_bitmap(const uint8_t *bitmap, uint_fast8_t x_pos, uint_fast8_t
 				bitmap += byte_width;
 	  }
 }
+
+void mlcd_fb_draw_bitmap_from_file(spiffs_file file, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t bitmap_width) {
+
+		if (x_pos + width > MLCD_XRES) {
+			  if (x_pos >= MLCD_XRES) {
+					  return;
+				}
+			  width = MLCD_XRES - x_pos;
+		}
+		x_pos = MLCD_XRES - x_pos - width;
+	  uint_fast8_t start_bit_off = x_pos & 0x7;
+	  uint_fast8_t first_byte_max_bit = width + start_bit_off;
+	  if (first_byte_max_bit > 8) {
+			  first_byte_max_bit = 8;
+		}
+    uint8_t line_size = (start_bit_off + width + 7) >> 3;
+    uint8_t tmp_buff[line_size];
+    uint16_t ext_ram_address = EXT_RAM_DATA_FB + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
+		uint8_t byte_width = (bitmap_width+7)>>3;
+    uint8_t old_val = 0;
+		uint8_t bitmap[byte_width];
+		
+	  for (uint8_t y = 0; y < height; y++) {
+				SPIFFS_read(&fs, file, bitmap, byte_width);
+			  uint8_t x = width-1;
+			  uint_fast8_t width_left = width;
+        uint8_t val = 0;
+			  uint_fast8_t byte_no = 0;
+			
+			  fb_line_changes[y_pos+y] = true;
+			
+			  if (start_bit_off > 0 || width_left < 8 - start_bit_off) {
+					  ext_ram_read_data(ext_ram_address, &old_val, 1);
+							
+						if ( start_bit_off > 0 ){
+								val = old_val & (0xFF << 8 - start_bit_off);
+						}
+						
+						if ( width_left < 8 - start_bit_off) {
+								val |= old_val & (0xFF >> width_left + start_bit_off);
+						}
+			  }
+					  
+				for(uint_fast8_t bit=start_bit_off; bit<first_byte_max_bit; bit++){
+            val |= (((bitmap[x >> 3] >> (~x&0x7)) & 0x1) << (7-bit));
+			  	  x--;
+        }
+				tmp_buff[byte_no++] = val;
+				width_left -= first_byte_max_bit - start_bit_off;
+				
+				while(width_left > 0) {
+				    if ( width_left < 8) {
+					      ext_ram_read_data(ext_ram_address + byte_no, &val, 1);
+				    	  val &= (0xFF >> width_left);
+							
+						    for(uint_fast8_t bit=0; bit<width_left; bit++){
+                    val |= (((bitmap[x >> 3] >> (~x&0x7)) & 0x1) << (7-bit));
+			  	          x--;
+                }
+					      width_left = 0;
+				    } else {
+					      val = 0;
+					    	for(uint_fast8_t bit=0; bit<8; bit++){
+                    val |= (((bitmap[x >> 3] >> (~x&0x7)) & 0x1) << (7-bit));
+			  	          x--;
+                }
+								width_left -= 8;
+						}
+				    tmp_buff[byte_no++] = val;
+				}
+				ext_ram_write_data(ext_ram_address, tmp_buff, line_size);
+				ext_ram_address += MLCD_LINE_BYTES;
+	  }
+}

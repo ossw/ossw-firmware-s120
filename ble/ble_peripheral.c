@@ -22,7 +22,7 @@
 #include "../scr_mngr.h"
 #include "../rtc.h"
 #include "../notifications.h"
-#include "../spiffs/spiffs.h"
+#include "../command.h"
 #include "../screens/scr_watchset.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
@@ -84,31 +84,29 @@ static uint32_t notification_upload_ptr;
 static uint16_t notification_upload_size;
 
 //static bool data_upload_handled = true;
-static spiffs_file data_upload_fd;
-extern spiffs fs;
 
-#define WATCHSET_START_ADDRESS 0x1000
+//#define WATCHSET_START_ADDRESS 0x1700
  
 #define NOTIFICATION_START_ADDRESS 0x1C00
 
-static void ble_peripheral_send_data_upload_permission(bool permission) {
+/*static void ble_peripheral_send_data_upload_permission(bool permission) {
 	  uint8_t data[] = {0x20, permission};
 	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
-}
+}*/
 
-static void init_data_upload(uint8_t type, uint32_t size) {
-    data_upload_fd = SPIFFS_open(&fs, "watchset", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
+/*static void init_data_upload(uint8_t type, uint32_t size) {
+    //data_upload_fd = SPIFFS_open(&fs, "watchset", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
 		//ble_peripheral_send_data_upload_permission(true);
-}
+}*/
 
-static void handle_data_upload_part(uint8_t *data, uint32_t size) {
-		SPIFFS_write(&fs, data_upload_fd, data, size);
-}
+/*static void handle_data_upload_part(uint8_t *data, uint32_t size) {
+		//SPIFFS_write(&fs, data_upload_fd, data, size);
+}*/
 
-static void handle_data_upload_done() {
-    SPIFFS_close(&fs, data_upload_fd);
-		scr_mngr_show_screen(SCR_WATCH_SET);
-}
+/*static void handle_data_upload_done() {
+    //SPIFFS_close(&fs, data_upload_fd);
+		//scr_mngr_show_screen(SCR_WATCH_SET);
+}*/
 
 static void ble_peripheral_send_notification_upload_permission(bool permission) {
 	  uint8_t data[] = {0x23, permission};
@@ -153,7 +151,7 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 			    // set current time
 					rtc_set_current_time((p_data[1]<<24) | (p_data[2]<<16) | (p_data[3]<<8) | p_data[4]);
 					break; 
-		 case 0x20:
+	/*	 case 0x20:
 			    // init data upload
 					init_data_upload(p_data[1], (p_data[2]<<24) | (p_data[3]<<16) | (p_data[4]<<8) | p_data[5]);
 					break;
@@ -164,7 +162,27 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 		 case 0x22:
 			    // upload data finished
 					handle_data_upload_done();
-			    break;	
+			    break;	*/
+		 case 0x40:
+					// command first part
+					command_reset_data();
+					command_append_data(p_data+1, length-1);
+					break;
+		 case 0x41:
+					// command next part
+					command_append_data(p_data+1, length-1);
+					break;
+		 case 0x42:
+					// command last part
+					command_append_data(p_data+1, length-1);
+					command_data_complete();
+					break;
+		 case 0x43:
+					// command first and last part
+					command_reset_data();
+					command_append_data(p_data+1, length-1);
+					command_data_complete();
+					break;
 		 case 0x23:
 			    // init notification upload
 					init_notification_upload((p_data[1]<<8) | p_data[2]);
@@ -190,6 +208,11 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 					set_external_property_data(p_data[1], &p_data[2], length-2);
 					break;
 	 }
+}
+
+void ble_peripheral_confirm_command_processed() {
+	  uint8_t data[] = {0x40};
+	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
 }
 
 void ble_peripheral_invoke_external_function(uint8_t function_id) {

@@ -20,10 +20,12 @@
 uint32_t screens_section_address;
 uint32_t current_screen_controls_address;
 uint32_t external_properties_section_address;
+uint32_t resources_section_address;
 uint8_t external_properties_no = 0;
 uint8_t* external_properties_data = NULL;
 //SCR_CONTROLS_DEFINITION controls;
 uint8_t* screen_data_buffer = NULL;
+uint32_t checkpoint;
 
 uint8_t current_subscreen = 0;
 uint8_t switch_to_subscreen = 0;
@@ -261,10 +263,49 @@ static void parse_screen_control_number(SCR_CONTROL_NUMBER_CONFIG* config) {
 		config->range = range;
 		config->x = x;
 		config->y = y;
-		config->style = style;
+	
 	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
 		uint16_t dataPtr = get_next_short();
 		config->data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
+	
+		checkpoint = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
+				
+		if ((style>>30)==1) {
+				//uint8_t res_type = style >> 8 & 0xFF;
+				uint8_t res_id = style & 0xFF;
+				config->style = (style & 0xFF000000) | watchset_fd;
+			
+				SPIFFS_lseek(&fs, watchset_fd, resources_section_address+1+(3*res_id), SPIFFS_SEEK_SET);
+				uint8_t offset_t[3];
+				SPIFFS_read(&fs, watchset_fd, offset_t, 3);
+				uint32_t offset = offset_t[0]<<16 | offset_t[1]<<8 | offset_t[2];
+				SPIFFS_lseek(&fs, watchset_fd, resources_section_address+offset, SPIFFS_SEEK_SET);
+		} else {
+				config->style = style;
+		}
+}
+
+static void parse_screen_control_static_image(SCR_CONTROL_STATIC_IMAGE_CONFIG* config) {
+    uint8_t x = get_next_byte();
+    uint8_t y = get_next_byte();
+    uint8_t width = get_next_byte();
+    uint8_t height = get_next_byte();
+    uint8_t res_source = get_next_byte();
+    uint8_t res_id = get_next_byte();
+	
+		checkpoint = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
+	
+		SPIFFS_lseek(&fs, watchset_fd, resources_section_address+1+(3*res_id), SPIFFS_SEEK_SET);
+		uint8_t offset_t[3];
+		SPIFFS_read(&fs, watchset_fd, offset_t, 3);
+		uint32_t offset = offset_t[0]<<16 | offset_t[1]<<8 | offset_t[2];
+		SPIFFS_lseek(&fs, watchset_fd, resources_section_address+offset, SPIFFS_SEEK_SET);
+	
+		config->x = x;
+		config->y = y;
+		config->width = width;
+		config->height = height;
+		config->file = watchset_fd;
 }
 
 static void* parse_screen_control_text(SCR_CONTROL_TEXT_CONFIG* config) {
@@ -332,6 +373,7 @@ static bool draw_screen_controls(bool force) {
 							SCR_CONTROL_NUMBER_CONFIG config;
 						  parse_screen_control_number(&config);
 							scr_controls_draw_number_control(&config, force);
+							SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
 					}
 					    break;
 					case SCR_CONTROL_TEXT:
@@ -348,6 +390,14 @@ static bool draw_screen_controls(bool force) {
 							SCR_CONTROL_PROGRESS_BAR_CONFIG config;
 						  parse_screen_control_progress(&config);
 							scr_controls_draw_horizontal_progress_bar_control(&config, force);
+					}
+					    break;
+					case SCR_CONTROL_STATIC_IMAGE:
+					{
+							SCR_CONTROL_STATIC_IMAGE_CONFIG config;
+						  parse_screen_control_static_image(&config);
+							scr_controls_draw_static_image_control(&config, force);
+							SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
 					}
 					    break;
 				}
@@ -466,6 +516,7 @@ static void scr_watch_set_init() {
 								break;
 						
 						case WATCH_SET_SECTION_STATIC_CONTENT:
+							  resources_section_address = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
 								break;
 				}
 				SPIFFS_lseek(&fs, watchset_fd, section_size, SPIFFS_SEEK_CUR);

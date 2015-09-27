@@ -26,6 +26,7 @@
 #include "vibration.h"
 #include "notifications.h"
 #include "softdevice_handler.h"
+#include "command.h"
 
 #include "spiffs/spiffs.h"
 
@@ -201,8 +202,10 @@ int main(void)
 			  if (rtc_should_store_current_time()) {
 					  rtc_store_current_time();
 				}
-				
+			
 				notifications_process();
+				
+				command_process();
 			  
 				scr_mngr_draw_screen();
 				

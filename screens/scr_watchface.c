@@ -13,7 +13,7 @@ static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
 		NUMBER_RANGE_0__99,
 	  4,
 	  4,
-	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 4 << 22 | 8 << 16 | 66 << 8 | 76,
+	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 4 << 24 | 8 << 16 | 66 << 8 | 76,
 	  (uint32_t (*)(uint32_t, uint8_t))rtc_get_current_hour,
 	  0,
     &hour_ctrl_data
@@ -25,7 +25,7 @@ static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
 		NUMBER_RANGE_0__99,
 	  4,
 	  85,
-	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 4 << 22 | 6 << 16 | 66 << 8 | 76,
+	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 4 << 24 | 6 << 16 | 66 << 8 | 76,
 	  (uint32_t (*)(uint32_t, uint8_t))rtc_get_current_minutes,
 	  0,
     &minutes_ctrl_data
