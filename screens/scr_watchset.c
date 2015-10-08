@@ -88,13 +88,17 @@ static uint32_t get_next_int() {
 }
 
 static uint32_t (* const internal_data_source_handles[])(void) = {
-		/* 0 */ rtc_get_current_hour,
-		/* 1 */ rtc_get_current_minutes,
-		/* 2 */ rtc_get_current_seconds,
-		/* 3 */ rtc_get_current_day_of_month,
-		/* 4 */ rtc_get_current_month,
-		/* 5 */ rtc_get_current_year,
-		/* 6 */ battery_get_level
+		/* 0 */ battery_get_level,
+		/* 1 */ rtc_get_current_hour_24,
+		/* 2 */ rtc_get_current_hour_12,
+		/* 3 */ rtc_get_current_hour_12_designator,
+		/* 4 */ rtc_get_current_minutes,
+		/* 5 */ rtc_get_current_seconds,
+		/* 6 */ rtc_get_current_day_of_week,
+		/* 7 */ rtc_get_current_day_of_month,
+		/* 8 */ rtc_get_current_day_of_year,
+		/* 9 */ rtc_get_current_month,
+		/* 10 */ rtc_get_current_year,
 };
 
 static uint32_t (* const sensor_data_source_handles[])(void) = {
@@ -308,6 +312,33 @@ static void parse_screen_control_static_image(SCR_CONTROL_STATIC_IMAGE_CONFIG* c
 		config->file = watchset_fd;
 }
 
+static void parse_screen_control_image_from_set(SCR_CONTROL_IMAGE_FROM_SET_CONFIG* config) {
+    uint8_t x = get_next_byte();
+    uint8_t y = get_next_byte();
+    uint8_t width = get_next_byte();
+    uint8_t height = get_next_byte();
+    uint8_t res_source = get_next_byte();
+    uint8_t res_id = get_next_byte();
+	
+	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
+		uint16_t dataPtr = get_next_short();
+		config->data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
+	
+		checkpoint = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
+	
+		SPIFFS_lseek(&fs, watchset_fd, resources_section_address+1+(3*res_id), SPIFFS_SEEK_SET);
+		uint8_t offset_t[3];
+		SPIFFS_read(&fs, watchset_fd, offset_t, 3);
+		uint32_t offset = offset_t[0]<<16 | offset_t[1]<<8 | offset_t[2];
+		SPIFFS_lseek(&fs, watchset_fd, resources_section_address+offset, SPIFFS_SEEK_SET);
+	
+		config->x = x;
+		config->y = y;
+		config->width = width;
+		config->height = height;
+		config->file = watchset_fd;
+}
+
 static void* parse_screen_control_text(SCR_CONTROL_TEXT_CONFIG* config) {
     uint8_t x = get_next_byte();
     uint8_t y = get_next_byte();
@@ -397,6 +428,14 @@ static bool draw_screen_controls(bool force) {
 							SCR_CONTROL_STATIC_IMAGE_CONFIG config;
 						  parse_screen_control_static_image(&config);
 							scr_controls_draw_static_image_control(&config, force);
+							SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
+					}
+					    break;
+					case SCR_CONTROL_IMAGE_FROM_SET:
+					{
+							SCR_CONTROL_IMAGE_FROM_SET_CONFIG config;
+						  parse_screen_control_image_from_set(&config);
+							scr_controls_draw_image_from_set_control(&config, force);
 							SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
 					}
 					    break;

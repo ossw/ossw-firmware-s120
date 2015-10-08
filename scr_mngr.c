@@ -28,7 +28,7 @@ static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
 	  2,
 	  2,
 	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 2 << 24 | 2 << 16 | 8 << 8 | 13,
-	  (uint32_t (*)(uint32_t, uint8_t))rtc_get_current_hour,
+	  (uint32_t (*)(uint32_t, uint8_t))rtc_get_current_hour_24,
 	  0,
     &hour_ctrl_data
 };

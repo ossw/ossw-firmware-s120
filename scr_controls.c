@@ -158,6 +158,34 @@ void scr_controls_draw_static_image_control(SCR_CONTROL_STATIC_IMAGE_CONFIG* cfg
 		mlcd_fb_draw_bitmap_from_file(cfg->file, cfg->x, cfg->y, cfg->width, cfg->height, header[2]);
 }
 
+void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG* cfg, bool force) {
+
+	  uint32_t value = cfg->data_handle(cfg->data_handle_param);
+	
+		if (!force && cfg->data->last_value == value) {
+				return;
+		}
+		
+		uint8_t header[6];
+		SPIFFS_read(&fs, cfg->file, header, 6);
+		
+    uint8_t firstImageId = header[2];
+    uint8_t numberOfImages = header[3];
+
+    if (value < firstImageId || value >= firstImageId + numberOfImages) {
+        return;
+    }
+				
+    uint8_t imageWidth = header[4];
+    uint8_t imageHeight = header[5];
+				
+    uint8_t imageNo = value - firstImageId;
+    uint32_t offset = (((imageWidth + 7) / 8) * imageHeight * imageNo);
+		SPIFFS_lseek(&fs, cfg->file, offset, SPIFFS_SEEK_CUR);
+		mlcd_fb_draw_bitmap_from_file(cfg->file, cfg->x, cfg->y, cfg->width, cfg->height, imageWidth);
+		cfg->data->last_value = value;
+}
+
 void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force) {
 	  char* value = (char*)cfg->data_handle(cfg->data_handle_param);
 	

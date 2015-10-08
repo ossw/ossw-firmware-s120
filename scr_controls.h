@@ -11,6 +11,7 @@
 //#define SCR_CONTROL_VERTICAL_PROGRESS_BAR    3
 #define SCR_CONTROL_TEXT  4
 #define SCR_CONTROL_STATIC_IMAGE  5
+#define SCR_CONTROL_IMAGE_FROM_SET 6
 
 #define NUMBER_RANGE_0__9     0x10
 #define NUMBER_RANGE_0__19    0x20
@@ -98,6 +99,18 @@ typedef struct
 	  uint8_t y;
 	  uint8_t width;
 	  uint8_t height;
+		spiffs_file file;
+	  uint32_t (* data_handle)(uint32_t);
+	  uint32_t data_handle_param;
+	  NUMBER_CONTROL_DATA* data;
+} SCR_CONTROL_IMAGE_FROM_SET_CONFIG;	
+
+typedef struct
+{
+	  uint8_t x;
+	  uint8_t y;
+	  uint8_t width;
+	  uint8_t height;
 	  uint32_t max;
 	  uint32_t style;
 	  uint32_t (* data_handle)();
@@ -128,5 +141,7 @@ void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force);
 void scr_controls_draw_horizontal_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force);
 
 void scr_controls_draw_static_image_control(SCR_CONTROL_STATIC_IMAGE_CONFIG* cfg, bool force);
+
+void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG* cfg, bool force);
 
 #endif /* SCR_CONTROLS_H */
