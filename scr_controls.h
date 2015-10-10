@@ -45,7 +45,7 @@
 
 typedef struct
 {
-	  uint32_t last_value;
+	  uint32_t last_value __attribute__((__packed__));
 } NUMBER_CONTROL_DATA;
 
 typedef struct

@@ -12,6 +12,7 @@ static bool fb_line_changes[MLCD_YRES];
 static uint8_t vcom;
 static bool backlight_on = false;
 static bool colors_inverted = false;
+static bool toggle_colors = false;
 
 static uint8_t bit_reverse(uint8_t byte) {
     #if (__CORTEX_M >= 0x03)
@@ -98,6 +99,12 @@ void mlcd_fb_clear() {
 }
 
 void mlcd_fb_flush () {
+		if (toggle_colors) {
+				colors_inverted = !colors_inverted;
+				mlcd_fb_invalidate_all();
+				toggle_colors = false;
+		}
+	
     uint8_t command = MLCD_WR | vcom;
     uint8_t dummy = 0;
 	  uint8_t line_address;
@@ -121,7 +128,7 @@ void mlcd_fb_flush () {
   
     spi_master_tx_data_no_cs(MLCD_SPI, &command, 1);
   
-    for(uint8_t line_no = 0; line_no < MLCD_YRES; line_no++) {
+    for (uint8_t line_no = 0; line_no < MLCD_YRES; line_no++) {
 			
 			  if (fb_line_changes[line_no]){
 					  // line changed, send line update
@@ -155,9 +162,7 @@ void mlcd_fb_flush () {
 }
 
 void mlcd_colors_toggle(void) {
-	  colors_inverted = !colors_inverted;
-	  mlcd_fb_invalidate_all();
-	  mlcd_fb_flush();
+		toggle_colors = true;
 }
 
 void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {
