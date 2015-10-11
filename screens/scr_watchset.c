@@ -369,7 +369,7 @@ static void parse_screen_control_progress(SCR_CONTROL_PROGRESS_BAR_CONFIG* confi
     uint8_t y = get_next_byte();
     uint8_t width = get_next_byte();
     uint8_t height = get_next_byte();
-    uint16_t style = get_next_short();
+    uint32_t style = get_next_int();
 	
 	  //NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
 	  //memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
@@ -390,14 +390,9 @@ static void parse_screen_control_progress(SCR_CONTROL_PROGRESS_BAR_CONFIG* confi
 
 static bool draw_screen_controls(bool force) {
 	  uint8_t controls_no = get_next_byte();
-	
-	  //alloc memory for controls
-	 // controls.controls_no = controls_no;
-	  //controls.controls = malloc(sizeof(SCR_CONTROL_DEFINITION)*controls_no);
-	
+
 		for (int i = 0; i < controls_no; i++) {
 			  uint8_t control_type = get_next_byte();
-			  //controls.controls[i].type = control_type;
 			  switch (control_type) {
 					case SCR_CONTROL_NUMBER:
 					{
@@ -416,11 +411,11 @@ static bool draw_screen_controls(bool force) {
 							scr_controls_draw_text_control(&config, force);
 					}
 					    break;
-					case SCR_CONTROL_HORIZONTAL_PROGRESS_BAR:
+					case SCR_CONTROL_PROGRESS_BAR:
 					{
 							SCR_CONTROL_PROGRESS_BAR_CONFIG config;
 						  parse_screen_control_progress(&config);
-							scr_controls_draw_horizontal_progress_bar_control(&config, force);
+							scr_controls_draw_progress_bar_control(&config, force);
 					}
 					    break;
 					case SCR_CONTROL_STATIC_IMAGE:

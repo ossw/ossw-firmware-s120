@@ -205,10 +205,11 @@ void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force) {
 		strcpy((void*)cfg->data->last_value, (void*)value);
 }
 
-void scr_controls_draw_horizontal_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force) {
+void scr_controls_draw_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force) {
 	  uint32_t value = cfg->data_handle(cfg->data_handle_param, 0);
-	
-	  uint8_t border = cfg->style&0xFF;
+
+	  bool horizontal = !((cfg->style>>24)&0x20);
+	  uint8_t border = (cfg->style>>16)&0xFF;
 	  
 	  if (force || cfg->data->last_value != value) {
 				if (border > 0) {
@@ -216,12 +217,12 @@ void scr_controls_draw_horizontal_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_
 					  if (force) {
 								mlcd_draw_rect_border(cfg->x, cfg->y, cfg->width, cfg->height, border);
 					  }
-						mlcd_draw_simple_progress(value, cfg->max, cfg->x + delta, cfg->y + delta, cfg->width - 2 * delta, cfg->height - 2 * delta);
+						mlcd_draw_simple_progress(value, cfg->max, cfg->x + delta, cfg->y + delta, cfg->width - 2 * delta, cfg->height - 2 * delta, horizontal);
 				} else {
-				    mlcd_draw_simple_progress(value, cfg->max, cfg->x, cfg->y, cfg->width, cfg->height);
+				    mlcd_draw_simple_progress(value, cfg->max, cfg->x, cfg->y, cfg->width, cfg->height, horizontal);
 				}
 		}
-		
+
 		cfg->data->last_value = value;
 }
 
@@ -242,8 +243,8 @@ static void scr_controls_draw_internal(const SCR_CONTROLS_DEFINITION* ctrls_def,
 					  case SCR_CONTROL_TEXT:
 						    scr_controls_draw_text_control((SCR_CONTROL_TEXT_CONFIG*)ctrl_def->config, force);
 					      break;
-					  case SCR_CONTROL_HORIZONTAL_PROGRESS_BAR:
-						    scr_controls_draw_horizontal_progress_bar_control((SCR_CONTROL_PROGRESS_BAR_CONFIG*)ctrl_def->config, force);
+					  case SCR_CONTROL_PROGRESS_BAR:
+						    scr_controls_draw_progress_bar_control((SCR_CONTROL_PROGRESS_BAR_CONFIG*)ctrl_def->config, force);
 					      break;
 						case SCR_CONTROL_STATIC_RECT:
 							  scr_controls_draw_static_rect((SCR_CONTROL_STATIC_RECT_CONFIG*)ctrl_def->config, force);

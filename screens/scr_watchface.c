@@ -48,7 +48,7 @@ static const SCR_CONTROL_PROGRESS_BAR_CONFIG seconds_config = {
 static const SCR_CONTROL_DEFINITION controls[] = {
 	  {SCR_CONTROL_NUMBER, (void*)&hour_config},
 		{SCR_CONTROL_NUMBER, (void*)&minutes_config},
-		{SCR_CONTROL_HORIZONTAL_PROGRESS_BAR, (void*)&seconds_config}
+		{SCR_CONTROL_PROGRESS_BAR, (void*)&seconds_config}
 };
 
 static const SCR_CONTROLS_DEFINITION controls_definition = {

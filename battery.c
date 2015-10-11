@@ -6,7 +6,7 @@
                                  NRF_ADC_CONFIG_SCALING_INPUT_ONE_THIRD, \
                                  NRF_ADC_CONFIG_REF_VBG }
 
-#define BATTERY_MIN 107
+#define BATTERY_MIN 119
 #define BATTERY_MAX 149
 
 void battery_init(void) {

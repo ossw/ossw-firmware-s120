@@ -7,11 +7,10 @@
 
 #define SCR_CONTROL_STATIC_RECT              0
 #define SCR_CONTROL_NUMBER                   1
-#define SCR_CONTROL_HORIZONTAL_PROGRESS_BAR  2
-//#define SCR_CONTROL_VERTICAL_PROGRESS_BAR    3
-#define SCR_CONTROL_TEXT  4
-#define SCR_CONTROL_STATIC_IMAGE  5
-#define SCR_CONTROL_IMAGE_FROM_SET 6
+#define SCR_CONTROL_PROGRESS_BAR  					 2
+#define SCR_CONTROL_TEXT  									 4
+#define SCR_CONTROL_STATIC_IMAGE  					 5
+#define SCR_CONTROL_IMAGE_FROM_SET 					 6
 
 #define NUMBER_RANGE_0__9     0x10
 #define NUMBER_RANGE_0__19    0x20
@@ -138,7 +137,7 @@ void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force
 
 void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force);
 
-void scr_controls_draw_horizontal_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force);
+void scr_controls_draw_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force);
 
 void scr_controls_draw_static_image_control(SCR_CONTROL_STATIC_IMAGE_CONFIG* cfg, bool force);
 

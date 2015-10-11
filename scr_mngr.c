@@ -74,7 +74,7 @@ static const SCR_CONTROL_PROGRESS_BAR_CONFIG battery_level_config = {
 	  23,
 	  11,
 	  100,
-		1,
+		1<<16,
 	  battery_get_level,
 	  0,
     &battery_level_ctrl_data
@@ -83,7 +83,7 @@ static const SCR_CONTROL_PROGRESS_BAR_CONFIG battery_level_config = {
 static const SCR_CONTROL_DEFINITION notification_bar_controls[] = {
 	  {SCR_CONTROL_NUMBER, (void*)&hour_config},
 		{SCR_CONTROL_NUMBER, (void*)&minutes_config},
-		{SCR_CONTROL_HORIZONTAL_PROGRESS_BAR, (void*)&battery_level_config},
+		{SCR_CONTROL_PROGRESS_BAR, (void*)&battery_level_config},
 		{SCR_CONTROL_STATIC_RECT, (void*)&vert_separator_config},
 		{SCR_CONTROL_STATIC_RECT, (void*)&hour_sep_dot_1_config},
 		{SCR_CONTROL_STATIC_RECT, (void*)&hour_sep_dot_2_config}

@@ -62,6 +62,10 @@ static uint_fast8_t draw_horizontal_progress_func(uint_fast8_t x, uint_fast8_t y
 	  return x < draw_param ? 1 : 0;
 }
 
+static uint_fast8_t draw_vertical_progress_func(uint_fast8_t x, uint_fast8_t y) {
+	  return y >= draw_param ? 1 : 0;
+}
+
 static uint_fast8_t clear_rect_func(uint_fast8_t x, uint_fast8_t y) {
 	  return 0;
 }
@@ -101,11 +105,11 @@ void mlcd_draw_digit(uint_fast8_t digit, uint_fast8_t x_pos, uint_fast8_t y_pos,
 	  mlcd_fb_draw_with_func(draw_digit_func, x_pos, y_pos, width, height);
 }
 
-void mlcd_draw_simple_progress(uint_fast8_t value, uint_fast8_t max, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {
+void mlcd_draw_simple_progress(uint_fast8_t value, uint_fast8_t max, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, bool horizontal) {
 		draw_width = width;
 	  draw_height = height;
-	  draw_param = value*width/max;
-	  mlcd_fb_draw_with_func(draw_horizontal_progress_func, x_pos, y_pos, width, height);
+		draw_param = horizontal?(value*width/max):height - (value*height/max);
+		mlcd_fb_draw_with_func(horizontal?draw_horizontal_progress_func:draw_vertical_progress_func, x_pos, y_pos, width, height);
 }
 
 void mlcd_clear_rect(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {
@@ -324,6 +328,7 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t
 	  if (height == NULL) {
 			  height = MLCD_YRES - y;
 		}
+		uint8_t max_y = y + height;
 	  const FONT_INFO* font = mlcd_resolve_font(font_type);
 	  bool multiline = font_alignment & MULTILINE;
 	  bool split_word = font_alignment & SPLIT_WORD;
@@ -339,8 +344,6 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t
 						y += height-calc_height;
 				}
 		}
-		
-		uint8_t max_y = y + height;
 		bool last_line;
 		int tmp_ptr;
 		do {
