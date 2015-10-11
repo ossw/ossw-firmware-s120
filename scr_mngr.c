@@ -263,3 +263,6 @@ void scr_mngr_close_notifications() {
 	  scr_notifications_state = SCR_NOTIFICATIONS_STATE_CLOSE;
 }
 
+uint8_t scr_mngr_current_screen(void) {
+		return current_screen;
+}

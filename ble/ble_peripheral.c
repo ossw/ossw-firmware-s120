@@ -211,8 +211,8 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 	 }
 }
 
-void ble_peripheral_confirm_command_processed() {
-	  uint8_t data[] = {0x40};
+void ble_peripheral_confirm_command_processed(uint8_t respCode) {
+	  uint8_t data[] = {0x40, respCode};
 	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
 }
 

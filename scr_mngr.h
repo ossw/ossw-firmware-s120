@@ -60,4 +60,6 @@ void scr_mngr_show_notifications(void);
 
 void scr_mngr_close_notifications(void);
 
+uint8_t scr_mngr_current_screen(void);
+
 #endif /* SCR_MNGR_H */
