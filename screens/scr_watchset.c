@@ -116,40 +116,7 @@ static uint32_t sensor_data_source_get_value(uint32_t data_source_id) {
 static uint8_t calc_ext_property_size(uint8_t type, uint8_t range) {
 	  switch(type) {
 			  case WATCH_SET_EXT_PROP_TYPE_NUMBER:
-						if (range == NUMBER_RANGE_0__9 ||
-                        range == NUMBER_RANGE_0__19 ||
-                        range == NUMBER_RANGE_0__99 ||
-                        range == NUMBER_RANGE_0__199 ||
-                        range == NUMBER_RANGE_0__9_9 ||
-                        range == NUMBER_RANGE_0__19_9) {
-								return 1;
-						} else if (range == NUMBER_RANGE_0__999 ||
-                        range == NUMBER_RANGE_0__1999 ||
-                        range == NUMBER_RANGE_0__9999 ||
-                        range == NUMBER_RANGE_0__19999 ||
-                        range == NUMBER_RANGE_0__99_9 ||
-                        range == NUMBER_RANGE_0__199_9 ||
-                        range == NUMBER_RANGE_0__999_9 ||
-                        range == NUMBER_RANGE_0__1999_9 ||
-                        range == NUMBER_RANGE_0__9_99 ||
-                        range == NUMBER_RANGE_0__19_99 ||
-                        range == NUMBER_RANGE_0__99_99 ||
-                        range == NUMBER_RANGE_0__199_99) {
-								return 2;
-						} else if (range == NUMBER_RANGE_0__99999 ||
-                        range == NUMBER_RANGE_0__9999_9 ||
-                        range == NUMBER_RANGE_0__19999_9 ||
-                        range == NUMBER_RANGE_0__99999_9 ||
-                        range == NUMBER_RANGE_0__999_99 ||
-                        range == NUMBER_RANGE_0__1999_99 ||
-                        range == NUMBER_RANGE_0__9999_99 ||
-                        range == NUMBER_RANGE_0__19999_99 ||
-                        range == NUMBER_RANGE_0__99999_99) {
-								return 3;
-						}
-						return 0;
-				case WATCH_SET_EXT_PROP_TYPE_ENUM:
-					  return 1;
+					  return range >> 5;
 				case WATCH_SET_EXT_PROP_TYPE_STRING:
 					  return range + 1;
 		}
@@ -180,7 +147,7 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id, ui
 		switch(type) {
 			  case WATCH_SET_EXT_PROP_TYPE_NUMBER:
 				{
-						number_size = calc_ext_property_size(type, range);
+						number_size = range>>5;
 				    uint32_t result;
 				    switch (number_size) {
 							case 1:
@@ -198,7 +165,7 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id, ui
 						  default:
 										result = 0;
 						}
-						uint8_t decimal_size = range&0xF;
+						uint8_t decimal_size = range&0x1F;
 						uint8_t expected_decimal_size = expected_range&0xF;
 						if (expected_decimal_size > decimal_size) {
 							  return result * pow(10, expected_decimal_size - decimal_size);

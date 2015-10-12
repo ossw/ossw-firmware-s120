@@ -160,7 +160,7 @@ void scr_controls_draw_static_image_control(SCR_CONTROL_STATIC_IMAGE_CONFIG* cfg
 
 void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG* cfg, bool force) {
 
-	  uint32_t value = cfg->data_handle(cfg->data_handle_param);
+	  uint32_t value = cfg->data_handle(cfg->data_handle_param, 0);
 	
 		if (!force && cfg->data->last_value == value) {
 				return;
@@ -175,7 +175,7 @@ void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG*
     if (value < firstImageId || value >= firstImageId + numberOfImages) {
         return;
     }
-				
+		
     uint8_t imageWidth = header[4];
     uint8_t imageHeight = header[5];
 				

@@ -99,7 +99,7 @@ typedef struct
 	  uint8_t width;
 	  uint8_t height;
 		spiffs_file file;
-	  uint32_t (* data_handle)(uint32_t);
+	  uint32_t (* data_handle)(uint32_t, uint8_t);
 	  uint32_t data_handle_param;
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_IMAGE_FROM_SET_CONFIG;	
