@@ -23,7 +23,6 @@
 #include "../rtc.h"
 #include "../notifications.h"
 #include "../command.h"
-#include "../screens/scr_watchset.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -90,25 +89,6 @@ static uint16_t notification_upload_size;
  
 #define NOTIFICATION_START_ADDRESS 0x1C00
 
-/*static void ble_peripheral_send_data_upload_permission(bool permission) {
-	  uint8_t data[] = {0x20, permission};
-	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
-}*/
-
-/*static void init_data_upload(uint8_t type, uint32_t size) {
-    //data_upload_fd = SPIFFS_open(&fs, "watchset", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
-		//ble_peripheral_send_data_upload_permission(true);
-}*/
-
-/*static void handle_data_upload_part(uint8_t *data, uint32_t size) {
-		//SPIFFS_write(&fs, data_upload_fd, data, size);
-}*/
-
-/*static void handle_data_upload_done() {
-    //SPIFFS_close(&fs, data_upload_fd);
-		//scr_mngr_show_screen(SCR_WATCH_SET);
-}*/
-
 static void ble_peripheral_send_notification_upload_permission(bool permission) {
 	  uint8_t data[] = {0x23, permission};
 	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
@@ -152,18 +132,6 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 			    // set current time
 					rtc_set_current_time((p_data[1]<<24) | (p_data[2]<<16) | (p_data[3]<<8) | p_data[4]);
 					break; 
-	/*	 case 0x20:
-			    // init data upload
-					init_data_upload(p_data[1], (p_data[2]<<24) | (p_data[3]<<16) | (p_data[4]<<8) | p_data[5]);
-					break;
-		 case 0x21:
-			    // upload data part
-		 			handle_data_upload_part(&p_data[1], length - 1);
-					break;
-		 case 0x22:
-			    // upload data finished
-					handle_data_upload_done();
-			    break;	*/
 		 case 0x40:
 					// command first part
 					command_reset_data();
@@ -204,10 +172,6 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 			    // stop alert notification
 					handle_notification_alert_stop(p_data[1] << 8 | p_data[2]);
 			    break;
-		 case 0x30:
-			    // set ext param
-					set_external_property_data(p_data[1], &p_data[2], length-2);
-					break;
 	 }
 }
 

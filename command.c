@@ -3,6 +3,7 @@
 #include "ble/ble_peripheral.h"
 #include "spiffs/spiffs.h"
 #include "scr_mngr.h"
+#include "screens/scr_watchset.h"
 
 static uint32_t data_ptr = 0;
 static uint8_t data_buf[256];
@@ -13,6 +14,7 @@ static spiffs_file data_upload_fd;
 #define COMMAND_OPEN_FILE_STREAM 0x20
 #define COMMAND_APPEND_DATA_TO_FILE_STREAM 0x21
 #define COMMAND_CLOSE_FILE_STREAM 0x22
+#define COMMAND_SET_EXT_PROPERTY_VALUE 0x30
 
 void command_process(void) {
 		
@@ -51,6 +53,10 @@ void command_process(void) {
 				}
 				scr_mngr_show_screen(SCR_WATCH_SET);
 				break;
+			case COMMAND_SET_EXT_PROPERTY_VALUE:
+			    // set ext param
+					set_external_property_data(data_buf[1], &data_buf[2], data_ptr-2);
+					break;
 		}
 		
 		handle_data = false;
