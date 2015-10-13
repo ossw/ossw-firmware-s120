@@ -21,7 +21,6 @@
 #include "../ext_flash.h"
 #include "../scr_mngr.h"
 #include "../rtc.h"
-#include "../notifications.h"
 #include "../command.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
@@ -78,45 +77,6 @@ static app_timer_id_t                    m_battery_timer_id;                    
 #ifdef BLE_DFU_APP_SUPPORT    
 static ble_dfu_t m_dfus; /**< Structure used to identify the DFU service. */
 #endif // BLE_DFU_APP_SUPPORT  
-			
-//static uint32_t data_upload_ptr;
-static uint32_t notification_upload_ptr;
-static uint16_t notification_upload_size;
-
-//static bool data_upload_handled = true;
-
-//#define WATCHSET_START_ADDRESS 0x1700
- 
-#define NOTIFICATION_START_ADDRESS 0x1C00
-
-static void ble_peripheral_send_notification_upload_permission(bool permission) {
-	  uint8_t data[] = {0x23, permission};
-	  ble_ossw_string_send(&m_ossw, data, sizeof(data));
-}
-
-static void init_notification_upload(uint32_t size) {
-		notification_upload_ptr = NOTIFICATION_START_ADDRESS;
-		notification_upload_size = size;
-	
-		ble_peripheral_send_notification_upload_permission(notifications_is_data_handled());
-}
-
-static void handle_notification_upload_part(uint8_t *data, uint32_t size) {
-	  ext_ram_write_data(notification_upload_ptr, data, size);
-	  notification_upload_ptr += size;
-}
-
-static void handle_notification_upload_done() {
-	  notifications_handle_data(NOTIFICATION_START_ADDRESS, notification_upload_size);
-}
-
-static void handle_notification_alert_extend(uint16_t notification_id, uint16_t timout) {
-	  notifications_alert_extend(notification_id, timout);
-}
-
-static void handle_notification_alert_stop(uint16_t notification_id) {
-	  notifications_alert_stop(notification_id);
-}
 
 /**@brief Function for handling the data from the OSSW.
  *
@@ -127,6 +87,12 @@ static void handle_notification_alert_stop(uint16_t notification_id) {
 /**@snippet [Handling the data received over BLE] */
 static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t length)
 { 
+		#ifdef OSSW_DEBUG
+				sd_nvic_critical_region_enter(0);
+				printf("DAT: 0x%02x 0x%02x 0x%02x\r\n", p_data[0], p_data[1], p_data[2]);
+				sd_nvic_critical_region_exit(0);
+		#endif
+	
 	 switch(p_data[0]) {	
 		 case 0x10:
 			    // set current time
@@ -152,26 +118,6 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 					command_append_data(p_data+1, length-1);
 					command_data_complete();
 					break;
-		 case 0x23:
-			    // init notification upload
-					init_notification_upload((p_data[1]<<8) | p_data[2]);
-					break;
-		 case 0x24:
-			    // upload notification part
-		 			handle_notification_upload_part(&p_data[1], length - 1);
-					break;
-		 case 0x25:
-			    // upload notification finished
-					handle_notification_upload_done();
-			    break;	
-		 case 0x26:
-			    // extend alert notification
-					handle_notification_alert_extend(p_data[1] << 8 | p_data[2], p_data[3] << 8 | p_data[4]);
-			    break;		
-		 case 0x27:
-			    // stop alert notification
-					handle_notification_alert_stop(p_data[1] << 8 | p_data[2]);
-			    break;
 	 }
 }
 

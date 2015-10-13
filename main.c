@@ -30,6 +30,10 @@
 
 #include "spiffs/spiffs.h"
 
+#ifdef OSSW_DEBUG
+		#include "app_uart.h"
+#endif
+
 
 #define LOG_PAGE_SIZE       256
   
@@ -39,6 +43,44 @@ static u8_t spiffs_fds[32*4];
 spiffs fs;
 
 #define DEAD_BEEF                        0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
+		
+		
+#ifdef OSSW_DEBUG
+void uart_error_handle(app_uart_evt_t * p_event)
+{
+    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
+    {
+        APP_ERROR_HANDLER(p_event->data.error_communication);
+    }
+    else if (p_event->evt_type == APP_UART_FIFO_ERROR)
+    {
+        APP_ERROR_HANDLER(p_event->data.error_code);
+    }
+}
+
+void init_uart(void) {
+    uint32_t err_code;
+		const app_uart_comm_params_t comm_params =
+      {
+          RX_PIN_NUMBER,
+          TX_PIN_NUMBER,
+          0xFF,
+          0xFF,
+          APP_UART_FLOW_CONTROL_DISABLED,
+          false,
+          UART_BAUDRATE_BAUDRATE_Baud921600
+      };
+
+    APP_UART_FIFO_INIT(&comm_params,
+                         1,
+                         128,
+                         uart_error_handle,
+                         APP_IRQ_PRIORITY_LOW,
+                         err_code);
+
+    APP_ERROR_CHECK(err_code);
+	}
+#endif
 		
 	static s32_t spiffs_spi_read(u32_t addr, u32_t size, u8_t *dst) {
 			return ext_flash_read_data(addr, dst, size) ? SPIFFS_OK : SPIFFS_ERR_INTERNAL;
@@ -174,6 +216,11 @@ static void init_lcd_with_splash_screen() {
  */
 int main(void)
 {
+	
+#ifdef OSSW_DEBUG
+		init_uart();
+#endif
+	
 	  spi_init();
 	  ext_ram_init();
 	  init_lcd_with_splash_screen();
@@ -185,7 +232,7 @@ int main(void)
 	
     // Initialize the SoftDevice handler module.
     SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
-		
+	
 	  // splash screen
 		nrf_delay_ms(500);
 	
@@ -202,8 +249,6 @@ int main(void)
 			  if (rtc_should_store_current_time()) {
 					  rtc_store_current_time();
 				}
-			
-				notifications_process();
 				
 				command_process();
 			  

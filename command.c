@@ -3,18 +3,48 @@
 #include "ble/ble_peripheral.h"
 #include "spiffs/spiffs.h"
 #include "scr_mngr.h"
+#include "notifications.h"
 #include "screens/scr_watchset.h"
-
-static uint32_t data_ptr = 0;
-static uint8_t data_buf[256];
-static bool handle_data = 0;
-
-static spiffs_file data_upload_fd;
+#include "ext_ram.h"
+#include "nrf_soc.h"
 
 #define COMMAND_OPEN_FILE_STREAM 0x20
 #define COMMAND_APPEND_DATA_TO_FILE_STREAM 0x21
 #define COMMAND_CLOSE_FILE_STREAM 0x22
 #define COMMAND_SET_EXT_PROPERTY_VALUE 0x30
+#define NOTIFICATION_START_ADDRESS 0x1C00
+
+static uint32_t data_ptr = 0;
+static uint8_t data_buf[256];
+static bool handle_data = false;
+
+static spiffs_file data_upload_fd;
+
+static uint32_t notification_upload_ptr;
+static uint16_t notification_upload_size;
+
+static int init_notification_upload(uint32_t size) {
+		notification_upload_ptr = NOTIFICATION_START_ADDRESS;
+		notification_upload_size = size;
+		return 0;
+}
+
+static void handle_notification_upload_part(uint8_t *data, uint32_t size) {
+	  ext_ram_write_data(notification_upload_ptr, data, size);
+	  notification_upload_ptr += size;
+}
+
+static void handle_notification_upload_done() {
+	  notifications_handle_data(NOTIFICATION_START_ADDRESS, notification_upload_size);
+}
+
+static void handle_notification_alert_extend(uint16_t notification_id, uint16_t timout) {
+	  notifications_alert_extend(notification_id, timout);
+}
+
+static void handle_notification_alert_stop(uint16_t notification_id) {
+	  notifications_alert_stop(notification_id);
+}
 
 void command_process(void) {
 		
@@ -22,12 +52,17 @@ void command_process(void) {
 				return;
 		}
 		
+		#ifdef OSSW_DEBUG
+				sd_nvic_critical_region_enter(0);
+				printf("CMD: 0x%02x 0x%02x\r\n", data_buf[0], data_buf[1]);
+				sd_nvic_critical_region_exit(0);
+		#endif
+		
 		uint8_t respCode = 0;
 	
 	//	sd_nvic_critical_region_enter();
 		
-		uint8_t command_id = data_buf[0];
-		switch (command_id) {
+		switch (data_buf[0]) {
 			case COMMAND_OPEN_FILE_STREAM:
 				
 				if (scr_mngr_current_screen() == SCR_WATCH_SET) {	
@@ -57,6 +92,26 @@ void command_process(void) {
 			    // set ext param
 					set_external_property_data(data_buf[1], &data_buf[2], data_ptr-2);
 					break;
+		 case 0x40:
+			    // init notification upload
+					respCode = init_notification_upload((data_buf[1]<<8) | data_buf[2]);
+					break;
+		 case 0x41:
+			    // upload notification part
+		 			handle_notification_upload_part(&data_buf[1], data_ptr - 1);
+					break;
+		 case 0x42:
+			    // upload notification finished
+					handle_notification_upload_done();
+			    break;	
+		 case 0x43:
+			    // extend alert notification
+					handle_notification_alert_extend(data_buf[1] << 8 | data_buf[2], data_buf[3] << 8 | data_buf[4]);
+			    break;		
+		 case 0x44:
+			    // stop alert notification
+					handle_notification_alert_stop(data_buf[1] << 8 | data_buf[2]);
+			    break;
 		}
 		
 		handle_data = false;
@@ -66,15 +121,30 @@ void command_process(void) {
 
 void command_reset_data() {
 		data_ptr=0;
+		#ifdef OSSW_DEBUG
+				sd_nvic_critical_region_enter(0);
+				printf("CMD RESET\r\n");
+				sd_nvic_critical_region_exit(0);
+		#endif
 }
 
 void command_append_data(uint8_t *data, uint8_t size) {
+		#ifdef OSSW_DEBUG
+				sd_nvic_critical_region_enter(0);
+				printf("CMD APPEND 0x%04x 0x%02x\r\n", data_ptr, size);
+				sd_nvic_critical_region_exit(0);
+		#endif
 		memcpy(data_buf+data_ptr, data, size);
 		data_ptr+=size;
 }
 
 void command_data_complete() {
 		handle_data = true;
+		#ifdef OSSW_DEBUG
+				sd_nvic_critical_region_enter(0);
+				printf("CMD COMMIT\r\n");
+				sd_nvic_critical_region_exit(0);
+		#endif
 }
 
 bool command_is_data_handled(void) {

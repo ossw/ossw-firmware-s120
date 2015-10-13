@@ -10,7 +10,6 @@
 
 static app_timer_id_t      m_notifications_alert_timer_id;
 static uint16_t m_current_alert_notification_id = 0;
-static bool handle_data = false;
 
 static void notifications_alert_timeout_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
@@ -53,11 +52,6 @@ static uint32_t get_next_int(uint16_t *ptr) {
 	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
 }
 
-
-void notifications_process(void) {
-		handle_data = false;
-}
-
 void copy_notification_info_data(uint16_t address, uint16_t size) {
 		uint8_t buffer[16];
 		uint16_t current_read_address = address;
@@ -83,8 +77,6 @@ void notifications_handle_data(uint16_t address, uint16_t size) {
 						uint32_t vibration_pattern = get_next_int(&address);
 						uint16_t timeout = get_next_short(&address);
 						notifications_alert_notify(notification_id, address, timeout, vibration_pattern);
-						// mark data as handled after rendering notification alert (no need to rerender so data can be lost)
-						handle_data = true;	
 						}
 						break;
 				case NOTIFICATIONS_TYPE_INFO:
@@ -92,7 +84,6 @@ void notifications_handle_data(uint16_t address, uint16_t size) {
 						uint32_t vibration_pattern = get_next_int(&address);
 						uint16_t time = get_next_short(&address);
 						copy_notification_info_data(address, size - 7);
-						handle_data = true;	
 						notifications_info_notify(time, vibration_pattern);
 						}
 						break;
@@ -101,17 +92,10 @@ void notifications_handle_data(uint16_t address, uint16_t size) {
 							  notifications_info_clear_all();
 						} else {
 								copy_notification_info_data(address, size - 1);
-								handle_data = true;	
 							  notifications_info_update();
 						}
 						break;
-				default:
-						handle_data = true;	
 		}
-}
-
-bool notifications_is_data_handled(void) {
-		return !handle_data;
 }
 
 void notifications_info_notify(uint16_t time, uint32_t vibration_pattern) {

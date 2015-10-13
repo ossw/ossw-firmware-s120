@@ -30,11 +30,7 @@
 		
 void notifications_init(void);
 
-void notifications_process(void);
-
 void notifications_handle_data(uint16_t notification_id, uint16_t address);
-
-bool notifications_is_data_handled(void);
 
 void notifications_info_notify(uint16_t time, uint32_t vibration_pattern);
 
