@@ -46,6 +46,21 @@ static void handle_notification_alert_stop(uint16_t notification_id) {
 	  notifications_alert_stop(notification_id);
 }
 
+static void handle_external_properties_change(uint8_t *data, uint32_t size) {
+		int p=0;
+		while (p < size) {
+				uint8_t propId = data[p++];
+				uint8_t propSize = data[p++];
+				#ifdef OSSW_DEBUG
+						sd_nvic_critical_region_enter(0);
+						printf("SET: 0x%02x 0x%02x 0x%02x\r\n", propId, propSize, data[p]);
+						sd_nvic_critical_region_exit(0);
+				#endif
+				set_external_property_data(propId, &data[p], propSize);
+				p += propSize;
+		}
+}
+
 void command_process(void) {
 		
 		if (!handle_data) {
@@ -90,7 +105,7 @@ void command_process(void) {
 				break;
 			case COMMAND_SET_EXT_PROPERTY_VALUE:
 			    // set ext param
-					set_external_property_data(data_buf[1], &data_buf[2], data_ptr-2);
+					handle_external_properties_change(&data_buf[1], data_ptr-1);
 					break;
 		 case 0x40:
 			    // init notification upload
