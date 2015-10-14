@@ -5,6 +5,7 @@
 #include "vibration.h"
 #include "ble/ble_peripheral.h"
 #include "ext_ram.h"
+#include "nrf_soc.h"
 
 #define NOTIFICATION_INFO_ADDRESS 0x1800
 
@@ -130,6 +131,12 @@ void notifications_alert_notify(uint16_t notification_id, uint16_t address, uint
 }
 
 void notifications_alert_extend(uint16_t notification_id, uint16_t timeout) {
+	
+		#ifdef OSSW_DEBUG
+				sd_nvic_critical_region_enter(0);
+				printf("EXTEND: 0x%04x 0x%04x 0x%04x\r\n", notification_id, m_current_alert_notification_id, timeout);
+				sd_nvic_critical_region_exit(0);
+		#endif
 	  if (m_current_alert_notification_id == notification_id) {
 				uint32_t err_code;	 
 				err_code = app_timer_stop(m_notifications_alert_timer_id);

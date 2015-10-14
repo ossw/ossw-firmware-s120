@@ -69,7 +69,11 @@ void command_process(void) {
 		
 		#ifdef OSSW_DEBUG
 				sd_nvic_critical_region_enter(0);
-				printf("CMD: 0x%02x 0x%02x\r\n", data_buf[0], data_buf[1]);
+				printf("CMD:");
+				for (int i=0; i<data_ptr; i++) {
+						printf(" %02x", data_buf[i]);
+				}
+				printf("\r\n");
 				sd_nvic_critical_region_exit(0);
 		#endif
 		
