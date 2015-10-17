@@ -25,7 +25,11 @@ void vibration_next_step(void) {
 		}
 		
 	  m_next_step++;
-	  if (m_next_step >= (m_pattern >> 28)) {
+		uint8_t steps_no = (m_pattern >> 26)&0xF;
+		if (steps_no == 0) {
+				steps_no = 16;
+		}
+	  if (m_next_step >= steps_no) {
 				m_next_step = 0;
 		}
 }
@@ -66,6 +70,10 @@ void vibration_vibrate(uint32_t pattern, uint16_t timeout) {
 	  m_next_step = 0;
 	  vibration_next_step();
 	  uint32_t step_length = (pattern >> 16) & 0x3FF;
+		if (step_length == 0) {
+			  vibration_motor_off();
+				return;
+		}
 	
     uint32_t err_code;
     err_code = app_timer_start(m_vibration_pattern_timer_id, APP_TIMER_TICKS(step_length, 0), NULL);
