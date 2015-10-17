@@ -33,7 +33,8 @@ uint8_t switch_to_subscreen = 0;
 static spiffs_file watchset_fd;
 extern spiffs fs;
 
-FUNCTION action_handlers[8];
+static FUNCTION action_handlers[8];
+static uint32_t watchset_id;
 
 static void scr_watch_set_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
@@ -502,7 +503,7 @@ static void scr_watch_set_init() {
 	  current_subscreen = 0;
 	  switch_to_subscreen = 0;
 	
-	  uint32_t watchset_id = get_next_int();
+	  watchset_id = get_next_int();
 	
 	  uint8_t section;
 	  while ((section = get_next_byte())!= WATCH_SET_END_OF_DATA){
@@ -596,7 +597,11 @@ void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 			  case SCR_EVENT_BUTTON_LONG_PRESSED:
 				    scr_watch_set_handle_button_long_pressed(event_param);
 				    break;
+				case SCR_EVENT_APP_CONNECTION_CONFIRMED:
+						ble_peripheral_set_watch_set_id(watchset_id);
+						break;
 			  case SCR_EVENT_DESTROY_SCREEN:
+						watchset_id = 0;
 						ble_peripheral_set_watch_set_id(0);
 				    clear_subscreen_data();		
 						SPIFFS_close(&fs, watchset_fd); 

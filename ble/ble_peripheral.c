@@ -94,6 +94,8 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 		#endif
 	
 	 switch(p_data[0]) {	
+		 case 0x01:
+					scr_mngr_handle_event(SCR_EVENT_APP_CONNECTION_CONFIRMED, NULL);
 		 case 0x10:
 			    // set current time
 					rtc_set_current_time((p_data[1]<<24) | (p_data[2]<<16) | (p_data[3]<<8) | p_data[4]);
