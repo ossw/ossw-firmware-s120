@@ -106,12 +106,22 @@ static uint32_t (* const sensor_data_source_handles[])(void) = {
 		/* 0 */ ble_central_heart_rate
 };
 
-static uint32_t internal_data_source_get_value(uint32_t data_source_id) {
-	  return internal_data_source_handles[data_source_id]();
+static uint32_t pow(uint32_t x, uint8_t n) {
+	  uint32_t result = 1;
+	  for(uint32_t i = 0; i < n; i++) {
+			  result *= x;
+		}
+		return result;
 }
 
-static uint32_t sensor_data_source_get_value(uint32_t data_source_id) {
-	  return sensor_data_source_handles[data_source_id]();
+static uint32_t internal_data_source_get_value(uint32_t data_source_id, uint8_t expected_range) {
+		uint32_t multiplier = pow(10, expected_range&0xF);
+	  return multiplier * internal_data_source_handles[data_source_id]();
+}
+
+static uint32_t sensor_data_source_get_value(uint32_t data_source_id, uint8_t expected_range) {
+		uint32_t multiplier = pow(10, expected_range&0xF);
+	  return multiplier * sensor_data_source_handles[data_source_id]();
 }
 
 static uint8_t calc_ext_property_size(uint8_t type, uint8_t range) {
@@ -122,14 +132,6 @@ static uint8_t calc_ext_property_size(uint8_t type, uint8_t range) {
 					  return range + 1;
 		}
 		return 0;
-}
-
-static uint32_t pow(uint32_t x, uint8_t n) {
-	  uint32_t result = 1;
-	  for(uint32_t i = 0; i < n; i++) {
-			  result *= x;
-		}
-		return result;
 }
 
 static uint32_t external_data_source_get_property_value(uint32_t property_id, uint8_t expected_range) {	  
