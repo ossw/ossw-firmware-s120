@@ -4,8 +4,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "app_timer.h"
+#include "board.h"
 
-#define RTC_INTERVAL       APP_TIMER_TICKS(1000, 0)
+#define RTC_INTERVAL                      APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
 
 void rtc_timer_init(void);
 

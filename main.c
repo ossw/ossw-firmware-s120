@@ -27,6 +27,7 @@
 #include "notifications.h"
 #include "softdevice_handler.h"
 #include "command.h"
+#include "stopwatch.h"
 
 #include "spiffs/spiffs.h"
 
@@ -68,7 +69,7 @@ void init_uart(void) {
           0xFF,
           APP_UART_FLOW_CONTROL_DISABLED,
           false,
-          UART_BAUDRATE_BAUDRATE_Baud921600
+          UART_BAUDRATE_BAUDRATE_Baud230400
       };
 
     APP_UART_FIFO_INIT(&comm_params,
@@ -242,6 +243,8 @@ int main(void)
 	  battery_init();
 		vibration_init();
 		notifications_init();
+		
+		stopwatch_init();
 			
     // Enter main loop.
     for (;;)

@@ -7,17 +7,14 @@
 static app_timer_id_t      m_rtc_timer_id;
 
 static uint32_t current_time;
-
 static bool store_time = false;
 
 static void rtc_timeout_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
 
-		current_time++;
-	  store_time = true;
-	
-		scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
-
+    current_time++;
+    store_time = true;
+    scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
 }
 
 static uint32_t rtc_load_time(void) {
@@ -100,8 +97,10 @@ uint32_t rtc_get_current_year(void) {
 }
 
 void rtc_set_current_time(uint32_t new_time) {
-	  current_time = new_time;
-	  store_time = true;
+		if (new_time != current_time) {
+				current_time = new_time;
+				store_time = true;
+		}
 }
 
 void rtc_store_current_time(void) {

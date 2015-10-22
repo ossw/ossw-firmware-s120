@@ -15,6 +15,7 @@
 #include "../ble/ble_central.h"
 #include "../battery.h"
 #include "../spiffs/spiffs.h"
+#include "../stopwatch.h"
 #include <stdlib.h> 
 
 uint32_t screens_section_address;
@@ -99,7 +100,24 @@ static uint32_t (* const internal_data_source_handles[])(void) = {
 		/* 7 */ rtc_get_current_day_of_month,
 		/* 8 */ rtc_get_current_day_of_year,
 		/* 9 */ rtc_get_current_month,
-		/* 10 */ rtc_get_current_year,
+		/* 10 */rtc_get_current_year,
+		/* 11 */stopwatch_get_total_h,
+		/* 12 */stopwatch_get_total_m,
+		/* 13 */stopwatch_get_total_s,
+		/* 14 */stopwatch_get_total_cs,
+		/* 15 */stopwatch_get_total_ms,
+		/* 16 */stopwatch_get_current_lap_number,
+		/* 17 */stopwatch_get_current_lap_h,
+		/* 18 */stopwatch_get_current_lap_m,
+		/* 19 */stopwatch_get_current_lap_s,
+		/* 20 */stopwatch_get_current_lap_cs,
+		/* 21 */stopwatch_get_current_lap_ms,
+		/* 22 */stopwatch_get_last_lap_h,
+		/* 23 */stopwatch_get_last_lap_m,
+		/* 24 */stopwatch_get_last_lap_s,
+		/* 25 */stopwatch_get_last_lap_cs,
+		/* 26 */stopwatch_get_last_lap_ms
+
 };
 
 static uint32_t (* const sensor_data_source_handles[])(void) = {
@@ -639,6 +657,21 @@ void scr_watch_set_invoke_internal_function(uint8_t function_id, uint16_t param)
 					  break;
 			  case WATCH_SET_FUNC_CHANGE_SCREEN:
 					  switch_to_subscreen = param;
+			      break;
+			  case WATCH_SET_FUNC_STOPWATCH_START:
+						stopwatch_fn_start();
+			      break;
+			  case WATCH_SET_FUNC_STOPWATCH_RESET:
+						stopwatch_fn_reset();
+			      break;
+			  case WATCH_SET_FUNC_STOPWATCH_STOP:
+						stopwatch_fn_stop();
+			      break;
+			  case WATCH_SET_FUNC_STOPWATCH_START_STOP:
+						stopwatch_fn_start_stop();
+			      break;
+			  case WATCH_SET_FUNC_STOPWATCH_NEXT_LAP:
+						stopwatch_fn_next_lap();
 			      break;
 		}
 }

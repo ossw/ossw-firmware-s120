@@ -493,6 +493,11 @@
               <FileType>1</FileType>
               <FilePath>..\command.c</FilePath>
             </File>
+            <File>
+              <FileName>stopwatch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\stopwatch.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1186,6 +1191,11 @@
               <FileName>command.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\command.c</FilePath>
+            </File>
+            <File>
+              <FileName>stopwatch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\stopwatch.c</FilePath>
             </File>
           </Files>
         </Group>
