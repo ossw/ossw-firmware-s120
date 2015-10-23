@@ -66,7 +66,17 @@ static uint32_t stopwatch_get_ms_counter_value() {
 		return ms_count1 + (1000*diff/APP_TIMER_CLOCK_FREQ);
 }
 
-void rtc_stop_ms_counter() {
+void stopwatch_fn_start(void) {
+		if (ms_counter_active) {
+				return;
+		}
+		app_timer_cnt_get(&ms_counter_last_ticks);
+		ms_counter_active = true;
+    uint32_t err_code = app_timer_start(stopwatch_timer_id, INTERRUPT_INTERVAL, NULL);
+    APP_ERROR_CHECK(err_code);
+}
+
+void stopwatch_fn_stop(void) {
 		if (!ms_counter_active) {
 				return;
 		}
@@ -80,20 +90,6 @@ void rtc_stop_ms_counter() {
 		app_timer_cnt_get(&current_ticks);
 		app_timer_cnt_diff_compute(current_ticks, ms_counter_last_ticks, &diff);
 		ms_counter += 1000*diff/APP_TIMER_CLOCK_FREQ;
-}
-
-void stopwatch_fn_start(void) {
-		if (ms_counter_active) {
-				return;
-		}
-		app_timer_cnt_get(&ms_counter_last_ticks);
-		ms_counter_active = true;
-    uint32_t err_code = app_timer_start(stopwatch_timer_id, INTERRUPT_INTERVAL, NULL);
-    APP_ERROR_CHECK(err_code);
-}
-
-void stopwatch_fn_stop(void) {
-		rtc_stop_ms_counter();
 }
 
 void stopwatch_fn_start_stop(void) {
@@ -113,6 +109,10 @@ void stopwatch_fn_reset(void) {
 }
 
 void stopwatch_fn_next_lap(void) {
+		if (stopwatch_get_current_lap_time() == 0) {
+				// do not count empty lap
+				return;
+		}
 		uint32_t curr = stopwatch_get_ms_counter_value();
 		last_lap_length = curr - lap_start;
 		lap_start = curr;
