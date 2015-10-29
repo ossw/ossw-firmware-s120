@@ -4,8 +4,12 @@
 #include "nrf_gpio.h"
 #include "common.h"
 #include "board.h"
+#include "app_timer.h"
 #include <inttypes.h>
 #include <string.h>
+#include "nordic_common.h"
+
+#define TEMP_BL_TIMEOUT            APP_TIMER_TICKS(3000, APP_TIMER_PRESCALER)
 
 //static uint8_t fb[MLCD_LINE_BYTES * MLCD_YRES];
 static bool fb_line_changes[MLCD_YRES];
@@ -13,6 +17,8 @@ static uint8_t vcom;
 static bool backlight_on = false;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
+
+static app_timer_id_t mlcd_bl_timer_id;
 
 static uint8_t bit_reverse(uint8_t byte) {
     #if (__CORTEX_M >= 0x03)
@@ -28,6 +34,12 @@ static uint8_t bit_reverse(uint8_t byte) {
     #endif /* #if (__CORTEX_M >= 0x03) */
 }
 
+void mlcd_bl_timeout_handler(void * p_context) {
+    UNUSED_PARAMETER(p_context);
+	
+		mlcd_backlight_off();
+}
+
 void mlcd_init(void)
 {
     nrf_gpio_cfg_output(LCD_ENABLE);
@@ -37,6 +49,16 @@ void mlcd_init(void)
     nrf_gpio_pin_clear(LCD_BACKLIGHT);
     nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
 	  vcom = VCOM_LO;
+}
+
+
+void mlcd_timers_init(void)
+{
+    uint32_t err_code;	 
+    err_code = app_timer_create(&mlcd_bl_timer_id,
+                                APP_TIMER_MODE_SINGLE_SHOT,
+                                mlcd_bl_timeout_handler);
+    APP_ERROR_CHECK(err_code);
 }
 
 void mlcd_display_off(void)
@@ -61,23 +83,29 @@ void mlcd_power_on(void)
 
 void mlcd_backlight_off(void)
 {
+	app_timer_stop(mlcd_bl_timer_id);
 	backlight_on = false;
   nrf_gpio_pin_clear(LCD_BACKLIGHT);
 }
 
 void mlcd_backlight_on(void)
 {
+	app_timer_stop(mlcd_bl_timer_id);
 	backlight_on = true;
   nrf_gpio_pin_set(LCD_BACKLIGHT);
 }
 
+void mlcd_backlight_temp_on(void) {
+	mlcd_backlight_on();
+	app_timer_start(mlcd_bl_timer_id, TEMP_BL_TIMEOUT, NULL);
+}
+
 void mlcd_backlight_toggle(void)
 {
-	backlight_on = !backlight_on;
 	if (backlight_on) {
-		  nrf_gpio_pin_set(LCD_BACKLIGHT);
+		  mlcd_backlight_off();
 	} else {
-		  nrf_gpio_pin_clear(LCD_BACKLIGHT);
+		  mlcd_backlight_on();
 	}
 }
 

@@ -20,6 +20,8 @@
 
 void mlcd_init(void);
 
+void mlcd_timers_init(void);
+
 void mlcd_power_on(void);
 
 void mlcd_power_off(void);

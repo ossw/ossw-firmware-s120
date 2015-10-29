@@ -28,6 +28,7 @@
 #include "softdevice_handler.h"
 #include "command.h"
 #include "stopwatch.h"
+#include "accel.h"
 
 #include "spiffs/spiffs.h"
 
@@ -226,6 +227,8 @@ int main(void)
 	  ext_ram_init();
 	  init_lcd_with_splash_screen();
 
+		accel_init();
+	
     // Initialize.
     timers_init();
 	  rtc_timer_init();
@@ -245,7 +248,9 @@ int main(void)
 		notifications_init();
 		
 		stopwatch_init();
-			
+		
+		mlcd_timers_init();
+		
     // Enter main loop.
     for (;;)
     {
