@@ -13,7 +13,8 @@ static const I18N_MESSAGE messages_en[] = {
   /*   8 */{"Peripheral"},
   /*   9 */{"Central"},
   /*   10 */{"Offline"},
-  /*   11 */{"Incoming call"}
+  /*   11 */{"Incoming call"},
+  /*   12 */{"Format"}
 };
 
 #endif

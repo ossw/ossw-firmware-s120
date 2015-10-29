@@ -26,11 +26,19 @@ static void opt_handler_change_time() {
     scr_mngr_show_screen(SCR_CHANGE_TIME);
 };
 
+void fs_reformat(void);
+
+static void reformat() {
+		fs_reformat();
+		scr_mngr_show_screen(SCR_WATCHFACE);
+}
+
 static const MENU_OPTION settings_menu[] = {
 	  {MESSAGE_DATE, opt_handler_change_date},
 		{MESSAGE_TIME, opt_handler_change_time},
 		{MESSAGE_DISPLAY, mlcd_colors_toggle},
 	//	{MESSAGE_SENSORS, opt_handler_do_nothing},
+		{MESSAGE_FORMAT, reformat},
 		{MESSAGE_RESTART, NVIC_SystemReset}
 };
 
