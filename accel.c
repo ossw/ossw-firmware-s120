@@ -31,8 +31,8 @@ static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t 
 {
 		uint8_t int_src;
 		accel_read_register(0x0C, &int_src);
-		uint8_t sysmod;
-		accel_read_register(0x0B, &sysmod);
+//		uint8_t sysmod;
+//		accel_read_register(0x0B, &sysmod);
 /*		switch(pin) {
 			case ACCEL_INT1:
 					mlcd_backlight_toggle();
@@ -42,16 +42,16 @@ static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t 
 					break;
 		}*/
 				#ifdef OSSW_DEBUG
-		//				printf("SYSMOD: 0x%02x\r\n", sysmod);
+//						printf("SYSMOD: 0x%02x\r\n", sysmod);
 				#endif
 	
 		
 				#ifdef OSSW_DEBUG
-		//				printf("INT_SRC: 0x%02x\r\n", int_src);
+						printf("INT_SRC: 0x%02x\r\n", int_src);
 				#endif
 
 				
-	/*	if (int_src & 0x08) {
+		if (int_src & 0x08) {
 
 				uint8_t pulse_src;
 				accel_read_register(0x22, &pulse_src);
@@ -59,11 +59,14 @@ static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t 
 		//		if (pulse_src>>6&0x1) {
 		//				mlcd_backlight_toggle();
 	//			}
-			
+				mlcd_backlight_temp_on();
 				#ifdef OSSW_DEBUG
 			printf("PULSE_SRC: [x:%d, y:%d, z:%d, dbl: %d]\r\n", (pulse_src>>4&0x1)*(pulse_src&0x1?-1:1), (pulse_src>>5&0x1)*(pulse_src>>1&0x1?-1:1), (pulse_src>>6&0x1)*(pulse_src>>2&0x1?-1:1), pulse_src>>3&0x1);
 				#endif
-		}*/
+		}
+	/*	if (int_src & 0x80) {
+				printf("ASLEEP\r\n");
+		}
 		if (int_src & 0x20) {
 
 				uint8_t trans_src;
@@ -87,7 +90,7 @@ static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t 
 								app_timer_cnt_diff_compute(curr, wirst_start, &diff);
 							
 				#ifdef OSSW_DEBUG
-						printf("DIFF: 0x%06x\r\n", diff);
+			//			printf("DIFF: 0x%06x\r\n", diff);
 				#endif
 							
 								if (diff<=WHIRST_MOVE_MAX_TIME) {
@@ -98,7 +101,7 @@ static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t 
 				}			
 			
 				#ifdef OSSW_DEBUG
-						printf("DATA: [x:%d, y:%d, z:%d]\r\n", data[0], data[1], data[2]);
+		//				printf("DATA: [x:%d, y:%d, z:%d]\r\n", data[0], data[1], data[2]);
 				#endif
 			
 			
@@ -106,7 +109,7 @@ static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t 
 				#ifdef OSSW_DEBUG
 		//	printf("TRANS_SRC: [x:%d, y:%d, z:%d]\r\n", (trans_src>>1&0x1)*(trans_src&0x1?-1:1), (trans_src>>3&0x1)*(trans_src>>2&0x1?-1:1), (trans_src>>5&0x1)*(trans_src>>4&0x1?-1:1));
 				#endif
-		}
+		}*/
 	/*	if (int_src & 0x10) {
 
 				uint8_t lndc_src;
@@ -118,9 +121,9 @@ static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t 
 			
 		}*/
 		
-		accel_read_register(0x0B, &sysmod);
+	//	accel_read_register(0x0B, &sysmod);
 		#ifdef OSSW_DEBUG
-				printf("SYSMOD: 0x%02x\r\n", sysmod);
+	//			printf("SYSMOD: 0x%02x\r\n", sysmod);
 		#endif
 }
 
@@ -184,18 +187,18 @@ void accel_init(void) {
 		accel_write_register(0x2B, 0x1F);
 
 		//0x2C: CTRL_REG3 Interrupt Control register
-		accel_write_register(0x2C, 0x40);
+		accel_write_register(0x2C, 0x30);//0x40
 
 		//0x2D: CTRL_REG4 Interrupt Enable register (Read/Write)
-		accel_write_register(0x2D, 0x38);
+		accel_write_register(0x2D, 0x08);
 
 		 //0x21: PULSE_CFG Pulse Configuration register
-		accel_write_register(0x21, 0x7F);
+		accel_write_register(0x21, 0x50);
 
 		//0x23 – 0x25: PULSE_THSX, Y, Z Pulse Threshold for X, Y and Z registers
 		accel_write_register(0x23, 0x20);
 		accel_write_register(0x24, 0x20);
-		accel_write_register(0x25, 0x20);
+		accel_write_register(0x25, 0x30);
 
 		//0x26: PULSE_TMLT Pulse Time Window 1 register
 		accel_write_register(0x26, 0x2);
@@ -221,13 +224,16 @@ void accel_init(void) {
 
 		//0x0F: HP_FILTER_CUTOFF 
 		accel_write_register(0x0F, 0);
+		
+		//0x29: ASLP_COUNT 
+		accel_write_register(0x29, 0x1);
 
 		//0x2A: CTRL_REG1 System Control 1 register
 		//ASLP_RATE 01 - 12,5Hz
 		//DR 101 - 12,5Hz
 		//go to active mode
-		accel_write_register(0x2A, 0x23);
-		//accel_write_register(0x2A, 0x6B);
+		//accel_write_register(0x2A, 0x63);
+		accel_write_register(0x2A, 0x6B);
 }
 
 void accel_write_register(uint8_t reg, uint8_t value) {
