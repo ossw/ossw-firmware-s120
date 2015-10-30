@@ -140,8 +140,8 @@ static uint32_t accel_int_init(uint8_t pin_no)
         }
     }
 
-    nrf_drv_gpiote_in_config_t config = GPIOTE_CONFIG_IN_SENSE_HITOLO(true);
-    config.pull = NRF_GPIO_PIN_PULLDOWN;
+    nrf_drv_gpiote_in_config_t config = GPIOTE_CONFIG_IN_SENSE_HITOLO(false);
+    config.pull = NRF_GPIO_PIN_PULLUP;
 
     err_code = nrf_drv_gpiote_in_init(pin_no, &config, accel_event_handler);
     if (err_code != NRF_SUCCESS)
@@ -154,17 +154,12 @@ static uint32_t accel_int_init(uint8_t pin_no)
 
 void accel_init(void) {
 		twi_master_init();
-
+	
     uint32_t err_code;
 		err_code = accel_int_init(ACCEL_INT1);
     APP_ERROR_CHECK(err_code);
 		err_code = accel_int_init(ACCEL_INT2);
     APP_ERROR_CHECK(err_code);
-
-		//ret_code_t err_code = nrf_drv_twi_init(&twi, &twi_config, NULL);
-		//APP_ERROR_CHECK(err_code);
-		//nrf_drv_twi_enable(&twi);
-	
 	
 		//0x2B: CTRL_REG2 System Control 2 register
 		//reset
@@ -238,20 +233,15 @@ void accel_init(void) {
 
 void accel_write_register(uint8_t reg, uint8_t value) {
 		uint8_t data[] = {reg, value};
-		//nrf_drv_twi_tx(&twi, DEFAULT_I2C_ADDR, data, 2, false);
 		twi_master_transfer	(	DEFAULT_I2C_ADDR<<1, data, 2, true);
 }
 
 void accel_read_register(uint8_t reg, uint8_t* value) {
-		//nrf_drv_twi_tx(&twi, DEFAULT_I2C_ADDR, &reg, 1, true);
-		//nrf_drv_twi_rx(&twi, DEFAULT_I2C_ADDR, value, 1, false);
 		twi_master_transfer	(	DEFAULT_I2C_ADDR<<1, &reg, 1, false);
 		twi_master_transfer	(	(DEFAULT_I2C_ADDR<<1)|TWI_READ_BIT, value, 1, true);
 }
 
 void accel_read_multi_register(uint8_t reg, uint8_t* value, uint8_t length) {
-		//nrf_drv_twi_tx(&twi, DEFAULT_I2C_ADDR, &reg, 1, true);
-		//nrf_drv_twi_rx(&twi, DEFAULT_I2C_ADDR, value, length, false);
 		twi_master_transfer	(	DEFAULT_I2C_ADDR<<1, &reg, 1, false);
 		twi_master_transfer	(	(DEFAULT_I2C_ADDR<<1)|TWI_READ_BIT, value, length, true);
 }
