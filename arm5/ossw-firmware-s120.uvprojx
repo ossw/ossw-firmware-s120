@@ -498,6 +498,11 @@
               <FileType>1</FileType>
               <FilePath>..\stopwatch.c</FilePath>
             </File>
+            <File>
+              <FileName>accel.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\accel.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1196,6 +1201,11 @@
               <FileName>stopwatch.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\stopwatch.c</FilePath>
+            </File>
+            <File>
+              <FileName>accel.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\accel.c</FilePath>
             </File>
           </Files>
         </Group>

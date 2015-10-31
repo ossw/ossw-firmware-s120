@@ -9,12 +9,16 @@
 #include <string.h>
 #include "nordic_common.h"
 
-#define TEMP_BL_TIMEOUT            APP_TIMER_TICKS(3000, APP_TIMER_PRESCALER)
+#define TEMP_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
+
+#define MLCD_BL_OFF 			0x0
+#define MLCD_BL_ON 				0x1
+#define MLCD_BL_ON_TEMP 	0x10
 
 //static uint8_t fb[MLCD_LINE_BYTES * MLCD_YRES];
 static bool fb_line_changes[MLCD_YRES];
 static uint8_t vcom;
-static bool backlight_on = false;
+static uint8_t bl_mode = MLCD_BL_OFF;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
 
@@ -36,8 +40,9 @@ static uint8_t bit_reverse(uint8_t byte) {
 
 void mlcd_bl_timeout_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
-	
-		mlcd_backlight_off();
+		if (bl_mode == MLCD_BL_ON_TEMP) {
+				mlcd_backlight_off();
+		}
 }
 
 void mlcd_init(void)
@@ -84,28 +89,45 @@ void mlcd_power_on(void)
 void mlcd_backlight_off(void)
 {
 	app_timer_stop(mlcd_bl_timer_id);
-	backlight_on = false;
+	bl_mode = MLCD_BL_OFF;
   nrf_gpio_pin_clear(LCD_BACKLIGHT);
 }
 
 void mlcd_backlight_on(void)
 {
 	app_timer_stop(mlcd_bl_timer_id);
-	backlight_on = true;
+	bl_mode = MLCD_BL_ON;
   nrf_gpio_pin_set(LCD_BACKLIGHT);
 }
 
 void mlcd_backlight_temp_on(void) {
-	mlcd_backlight_on();
-	app_timer_start(mlcd_bl_timer_id, TEMP_BL_TIMEOUT, NULL);
+	if (bl_mode == MLCD_BL_ON) {
+			return;
+	}
+	app_timer_stop(mlcd_bl_timer_id);
+	bl_mode = MLCD_BL_ON_TEMP;
+  nrf_gpio_pin_set(LCD_BACKLIGHT);
+	app_timer_start(mlcd_bl_timer_id, 3 * TEMP_BL_TIMEOUT_UNIT, NULL);
+}
+
+void mlcd_backlight_temp_extend(void) {
+		if (bl_mode == MLCD_BL_ON_TEMP) {
+				mlcd_backlight_temp_on();
+		}
 }
 
 void mlcd_backlight_toggle(void)
 {
-	if (backlight_on) {
-		  mlcd_backlight_off();
-	} else {
-		  mlcd_backlight_on();
+	switch (bl_mode) {
+			case MLCD_BL_OFF:
+					mlcd_backlight_on();
+					break;
+			case MLCD_BL_ON:
+					mlcd_backlight_off();
+					break;
+			case MLCD_BL_ON_TEMP:
+					mlcd_backlight_on();
+					break;
 	}
 }
 

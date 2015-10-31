@@ -38,6 +38,8 @@ void mlcd_backlight_toggle(void);
 
 void mlcd_backlight_temp_on(void);
 
+void mlcd_backlight_temp_extend(void);
+
 void mlcd_colors_toggle(void);
 
 void mlcd_switch_vcom(void);
