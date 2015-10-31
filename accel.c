@@ -13,20 +13,6 @@
 
 #define DEFAULT_I2C_ADDR 0x1D
 
-#define WHIRST_MOVE_MAX_TIME            APP_TIMER_TICKS(60, APP_TIMER_PRESCALER)
-
-uint32_t wirst_start = 0;
-
-//static const nrf_drv_twi_t twi = NRF_DRV_TWI_INSTANCE(0);
-/*static const nrf_drv_twi_t twi = {
-         .p_reg       = NRF_TWI0,
-         .irq         = NULL,//GPIOTE_IRQn,//SPI0_TWI0_IRQn,
-         .instance_id = TWI0_INSTANCE_INDEX
-        };*/
-				 
-
-//static const nrf_drv_twi_config_t twi_config = NRF_DRV_TWI_DEFAULT_CONFIG(0);
-
 static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
 		uint8_t int_src;
@@ -156,8 +142,8 @@ void accel_init(void) {
 		twi_master_init();
 	
     uint32_t err_code;
-		err_code = accel_int_init(ACCEL_INT1);
-    APP_ERROR_CHECK(err_code);
+		//err_code = accel_int_init(ACCEL_INT1);
+    //APP_ERROR_CHECK(err_code);
 		err_code = accel_int_init(ACCEL_INT2);
     APP_ERROR_CHECK(err_code);
 	
