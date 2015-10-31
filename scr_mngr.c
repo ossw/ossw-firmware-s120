@@ -22,6 +22,8 @@ static uint8_t scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_NONE;
 static uint32_t scr_alert_notification_address = 0;
 		
 static NUMBER_CONTROL_DATA hour_ctrl_data;
+
+static bool redraw = true;
 		
 static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
 		NUMBER_RANGE_0__99,
@@ -152,6 +154,10 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 		if (allowDefaultHandler) {
 			  scr_mngr_default_handle_event(event_type, event_param);
 		}
+		
+		if (event_type >= 0x10) {
+				scr_mngr_redraw();
+		}
 }
 
 void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
@@ -236,7 +242,22 @@ void scr_mngr_draw_screen(void) {
 						current_screen = switch_to_screen;
 						switch_to_screen = SCR_NOT_SET;
 				} else {
-						scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, NULL);
+						if (redraw == true) {
+							
+								#ifdef OSSW_DEBUG
+										uint32_t start_draw_ticks;
+										app_timer_cnt_get(&start_draw_ticks);
+								#endif
+								scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, NULL);
+								#ifdef OSSW_DEBUG
+										uint32_t end_draw_ticks;
+										uint32_t total_diff;
+										app_timer_cnt_get(&end_draw_ticks);
+										app_timer_cnt_diff_compute(end_draw_ticks, start_draw_ticks, &total_diff);
+										printf("REDRAW: 0x%08x\r\n", total_diff);
+								#endif
+								redraw = false;
+						}
 				}
 		}
     mlcd_fb_flush();
@@ -265,4 +286,8 @@ void scr_mngr_close_notifications() {
 
 uint8_t scr_mngr_current_screen(void) {
 		return current_screen;
+}
+
+void scr_mngr_redraw(void) {
+		redraw = true;
 }

@@ -19,9 +19,9 @@
 #include <stdlib.h> 
 
 uint32_t screens_section_address;
-uint32_t current_screen_controls_address;
 uint32_t external_properties_section_address;
 uint32_t resources_section_address;
+uint32_t ws_data_ptr;
 uint8_t external_properties_no = 0;
 uint8_t* external_properties_data = NULL;
 //SCR_CONTROLS_DEFINITION controls;
@@ -52,6 +52,29 @@ static void scr_watch_set_handle_button_pressed(uint32_t button_id) {
 					  scr_watch_set_invoke_function(&action_handlers[3]);
 				    break;
 		}
+}
+
+static void clear_subscreen_data() {
+		if (screen_data_buffer != NULL) {
+				free(screen_data_buffer);
+				screen_data_buffer = NULL;
+		}
+}
+
+void clean_before_exit() {
+		watchset_id = NULL;
+		ble_peripheral_set_watch_set_id(NULL);
+	  clear_subscreen_data();		
+		SPIFFS_close(&fs, watchset_fd); 
+		if (external_properties_data != NULL) {
+				free(external_properties_data);
+			  external_properties_data = NULL;
+		}
+}
+
+void close() {
+		clean_before_exit();
+		scr_mngr_show_screen(SCR_WATCHFACE);
 }
 
 static void scr_watch_set_handle_button_long_pressed(uint32_t button_id) {
@@ -87,6 +110,32 @@ static uint32_t get_next_int() {
     uint8_t data[4];
 		SPIFFS_read(&fs, watchset_fd, data, 4);
 	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
+}
+
+static uint8_t ws_data_get_next_byte() {
+    uint8_t data;
+		ext_ram_read_data(ws_data_ptr, &data, 1);
+		ws_data_ptr++;
+	  return data;
+}
+
+static uint16_t ws_data_get_next_short() {
+    uint8_t data[2];
+		ext_ram_read_data(ws_data_ptr, data, 2);
+		ws_data_ptr+=2;
+	  return data[0] << 8 | data[1];
+}
+
+static uint32_t ws_data_get_next_int() {
+    uint8_t data[4];
+		ext_ram_read_data(ws_data_ptr, data, 4);
+		ws_data_ptr+=4;
+	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
+}
+
+static inline void ws_data_read(uint8_t *data, uint32_t size) {
+		ext_ram_read_data(ws_data_ptr, data, size);
+		ws_data_ptr += size;
 }
 
 static uint32_t (* const internal_data_source_handles[])(void) = {
@@ -204,9 +253,7 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id, ui
 		}
 }
 
-static void parse_data_source(void **data_source, uint32_t* data_source_param) {
-    uint8_t type = get_next_byte();
-    uint8_t property = get_next_byte();
+static void build_data_source(uint8_t type, uint8_t property, void **data_source, uint32_t* data_source_param) {
 	  switch (type) {
 			  case DATA_SOURCE_INTERNAL:
 			      *data_source = internal_data_source_get_value;
@@ -221,6 +268,12 @@ static void parse_data_source(void **data_source, uint32_t* data_source_param) {
 				    *data_source_param = property;
 				    break;
 		}
+}
+
+static void parse_data_source(void **data_source, uint32_t* data_source_param) {
+    uint8_t type = ws_data_get_next_byte();
+    uint8_t property = ws_data_get_next_byte();
+	  build_data_source(type, property, data_source, data_source_param);
 }
 
 void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t size) {
@@ -240,11 +293,16 @@ void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t 
 		}
 }
 
-static void parse_screen_control_number(SCR_CONTROL_NUMBER_CONFIG* config) {
-    uint8_t range = get_next_byte();
-    uint8_t x = get_next_byte();
-    uint8_t y = get_next_byte();
-    uint32_t style = get_next_int();
+static void parse_and_draw_screen_control_number(bool force) {
+	
+    uint8_t data[11];
+		ws_data_read(data, sizeof(data));
+	
+		SCR_CONTROL_NUMBER_CONFIG config;
+    uint8_t range = data[0];
+    uint8_t x = data[1];
+    uint8_t y = data[2];
+    uint32_t style = data[3]<<24|data[4]<<16|data[5]<<8|data[6];
 	
 	
 	  //NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
@@ -252,20 +310,27 @@ static void parse_screen_control_number(SCR_CONTROL_NUMBER_CONFIG* config) {
 	  
 	  //SCR_CONTROL_NUMBER_CONFIG* config = malloc(sizeof(SCR_CONTROL_NUMBER_CONFIG));
 	
-		config->range = range;
-		config->x = x;
-		config->y = y;
+		config.range = range;
+		config.x = x;
+		config.y = y;
 	
-	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
-		uint16_t dataPtr = get_next_short();
-		config->data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
+	  build_data_source(data[7], data[8], (void **)&config.data_handle, &config.data_handle_param);
+		uint16_t dataPtr = data[9] << 8 | data[10];
+		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
 	
-		checkpoint = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
+		uint8_t decimal_size = config.range&0xF;
+	  uint32_t value = config.data_handle(config.data_handle_param, decimal_size);
+		
+		if (!force && config.data->last_value == value) {
+				return;
+		}
 				
 		if ((style>>30)==1) {
+				checkpoint = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
+			
 				//uint8_t res_type = style >> 8 & 0xFF;
 				uint8_t res_id = style & 0xFF;
-				config->style = (style & 0xFF000000) | watchset_fd;
+				config.style = (style & 0xFF000000) | watchset_fd;
 			
 				SPIFFS_lseek(&fs, watchset_fd, resources_section_address+1+(3*res_id), SPIFFS_SEEK_SET);
 				uint8_t offset_t[3];
@@ -273,17 +338,33 @@ static void parse_screen_control_number(SCR_CONTROL_NUMBER_CONFIG* config) {
 				uint32_t offset = offset_t[0]<<16 | offset_t[1]<<8 | offset_t[2];
 				SPIFFS_lseek(&fs, watchset_fd, resources_section_address+offset, SPIFFS_SEEK_SET);
 		} else {
-				config->style = style;
+				config.style = style;
+		}
+		
+		scr_controls_draw_number_control(&config, force);
+		
+		
+		if ((style>>30)==1) {
+				SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
 		}
 }
 
-static void parse_screen_control_static_image(SCR_CONTROL_STATIC_IMAGE_CONFIG* config) {
-    uint8_t x = get_next_byte();
-    uint8_t y = get_next_byte();
-    uint8_t width = get_next_byte();
-    uint8_t height = get_next_byte();
-    uint8_t res_source = get_next_byte();
-    uint8_t res_id = get_next_byte();
+static void parse_and_draw_screen_control_static_image(bool force) {
+	
+    uint8_t data[6];
+		ws_data_read(data, sizeof(data));
+	
+		if (!force) {
+				return;
+		}
+	
+		SCR_CONTROL_STATIC_IMAGE_CONFIG config;
+    uint8_t x = data[0];
+    uint8_t y = data[1];
+    uint8_t width = data[2];
+    uint8_t height = data[3];
+    //uint8_t res_source = data[4];
+    uint8_t res_id = data[5];
 	
 		checkpoint = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
 	
@@ -293,25 +374,40 @@ static void parse_screen_control_static_image(SCR_CONTROL_STATIC_IMAGE_CONFIG* c
 		uint32_t offset = offset_t[0]<<16 | offset_t[1]<<8 | offset_t[2];
 		SPIFFS_lseek(&fs, watchset_fd, resources_section_address+offset, SPIFFS_SEEK_SET);
 	
-		config->x = x;
-		config->y = y;
-		config->width = width;
-		config->height = height;
-		config->file = watchset_fd;
+		config.x = x;
+		config.y = y;
+		config.width = width;
+		config.height = height;
+		config.file = watchset_fd;
+		
+		scr_controls_draw_static_image_control(&config, force);
+		SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
 }
 
-static void parse_screen_control_image_from_set(SCR_CONTROL_IMAGE_FROM_SET_CONFIG* config) {
-    uint8_t x = get_next_byte();
-    uint8_t y = get_next_byte();
-    uint8_t width = get_next_byte();
-    uint8_t height = get_next_byte();
-    uint8_t res_source = get_next_byte();
-    uint8_t res_id = get_next_byte();
+static void parse_and_draw_screen_control_image_from_set(bool force) {
 	
-	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
-		uint16_t dataPtr = get_next_short();
-		config->data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
+    uint8_t data[10];
+		ws_data_read(data, sizeof(data));
 	
+		SCR_CONTROL_IMAGE_FROM_SET_CONFIG config;
+	
+    uint8_t x = data[0];
+    uint8_t y = data[1];
+    uint8_t width = data[2];
+    uint8_t height = data[3];
+    //uint8_t res_source = data[4];
+    uint8_t res_id = data[5];
+	
+	  build_data_source(data[6], data[7], (void **)&config.data_handle, &config.data_handle_param);
+		uint16_t dataPtr = data[8]<<8 | data[9];
+		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
+	
+	  uint32_t value = config.data_handle(config.data_handle_param, 0);
+	
+		if (!force && config.data->last_value == value) {
+				return;
+		}
+		
 		checkpoint = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
 	
 		SPIFFS_lseek(&fs, watchset_fd, resources_section_address+1+(3*res_id), SPIFFS_SEEK_SET);
@@ -320,19 +416,22 @@ static void parse_screen_control_image_from_set(SCR_CONTROL_IMAGE_FROM_SET_CONFI
 		uint32_t offset = offset_t[0]<<16 | offset_t[1]<<8 | offset_t[2];
 		SPIFFS_lseek(&fs, watchset_fd, resources_section_address+offset, SPIFFS_SEEK_SET);
 	
-		config->x = x;
-		config->y = y;
-		config->width = width;
-		config->height = height;
-		config->file = watchset_fd;
+		config.x = x;
+		config.y = y;
+		config.width = width;
+		config.height = height;
+		config.file = watchset_fd;
+		
+		scr_controls_draw_image_from_set_control(&config, force);
+		SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
 }
 
 static void* parse_screen_control_text(SCR_CONTROL_TEXT_CONFIG* config) {
-    uint8_t x = get_next_byte();
-    uint8_t y = get_next_byte();
-    uint8_t width = get_next_byte();
-    uint8_t height = get_next_byte();
-    uint32_t style = get_next_int();
+    uint8_t x = ws_data_get_next_byte();
+    uint8_t y = ws_data_get_next_byte();
+    uint8_t width = ws_data_get_next_byte();
+    uint8_t height = ws_data_get_next_byte();
+    uint32_t style = ws_data_get_next_int();
 	
 	  //TEXT_CONTROL_DATA* data = malloc(sizeof(TEXT_CONTROL_DATA));
 	  //memset(data, 0, sizeof(TEXT_CONTROL_DATA));
@@ -346,18 +445,18 @@ static void* parse_screen_control_text(SCR_CONTROL_TEXT_CONFIG* config) {
 		config->style = style;
 		//config->data = data;
 	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
-		uint16_t dataPtr = get_next_short();
+		uint16_t dataPtr = ws_data_get_next_short();
 		config->data->last_value = (char*)(screen_data_buffer + dataPtr);
 		return config;
 }
 
 static void parse_screen_control_progress(SCR_CONTROL_PROGRESS_BAR_CONFIG* config) {
-    uint32_t max_value = get_next_int();
-    uint8_t x = get_next_byte();
-    uint8_t y = get_next_byte();
-    uint8_t width = get_next_byte();
-    uint8_t height = get_next_byte();
-    uint32_t style = get_next_int();
+    uint32_t max_value = ws_data_get_next_int();
+    uint8_t x = ws_data_get_next_byte();
+    uint8_t y = ws_data_get_next_byte();
+    uint8_t width = ws_data_get_next_byte();
+    uint8_t height = ws_data_get_next_byte();
+    uint32_t style = ws_data_get_next_int();
 	
 	  //NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
 	  //memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
@@ -372,23 +471,25 @@ static void parse_screen_control_progress(SCR_CONTROL_PROGRESS_BAR_CONFIG* confi
 		config->style = style;
 		//config->data = data;
 	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
-		uint16_t dataPtr = get_next_short();
+		uint16_t dataPtr = ws_data_get_next_short();
 		config->data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
 }
 
 static bool draw_screen_controls(bool force) {
-	  uint8_t controls_no = get_next_byte();
-
+		ws_data_ptr = EXT_RAM_DATA_WATCHSET_DATA;
+	  uint8_t controls_no = ws_data_get_next_byte();
+	
 		for (int i = 0; i < controls_no; i++) {
-			  uint8_t control_type = get_next_byte();
+			  uint8_t control_type = ws_data_get_next_byte();
+			
+	/*	#ifdef OSSW_DEBUG
+				uint32_t start_control_ticks;
+				app_timer_cnt_get(&start_control_ticks);
+		#endif*/
+			
 			  switch (control_type) {
 					case SCR_CONTROL_NUMBER:
-					{
-							SCR_CONTROL_NUMBER_CONFIG config;
-						  parse_screen_control_number(&config);
-							scr_controls_draw_number_control(&config, force);
-							SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
-					}
+						  parse_and_draw_screen_control_number(force);
 					    break;
 					case SCR_CONTROL_TEXT:
 					{
@@ -408,21 +509,23 @@ static bool draw_screen_controls(bool force) {
 					    break;
 					case SCR_CONTROL_STATIC_IMAGE:
 					{
-							SCR_CONTROL_STATIC_IMAGE_CONFIG config;
-						  parse_screen_control_static_image(&config);
-							scr_controls_draw_static_image_control(&config, force);
-							SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
+						  parse_and_draw_screen_control_static_image(force);
 					}
 					    break;
 					case SCR_CONTROL_IMAGE_FROM_SET:
 					{
-							SCR_CONTROL_IMAGE_FROM_SET_CONFIG config;
-						  parse_screen_control_image_from_set(&config);
-							scr_controls_draw_image_from_set_control(&config, force);
-							SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
+						  parse_and_draw_screen_control_image_from_set(force);
 					}
 					    break;
 				}
+				
+/*				#ifdef OSSW_DEBUG
+						uint32_t end_control_ticks;
+						uint32_t control_diff;
+						app_timer_cnt_get(&end_control_ticks);
+						app_timer_cnt_diff_compute(end_control_ticks, start_control_ticks, &control_diff);
+						printf("CTRL 0x%02x: 0x%08x\r\n", control_type, control_diff);
+				#endif*/
 		}
 		return true;
 }
@@ -444,9 +547,22 @@ static bool parse_screen() {
 				switch (section) {
 					case WATCH_SET_SCREEN_SECTION_CONTROLS:
 					{
-							uint32_t size = get_next_short();
-							current_screen_controls_address = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
-							SPIFFS_lseek(&fs, watchset_fd, size, SPIFFS_SEEK_CUR);
+							uint32_t size_left = get_next_short();
+							uint32_t dest_addr = EXT_RAM_DATA_WATCHSET_DATA;
+						
+							uint8_t buff[128];
+							while (size_left > 0) {
+									uint32_t chunk_size = size_left > 128? 128 : size_left;
+									SPIFFS_read(&fs, watchset_fd, buff, chunk_size);
+									ext_ram_write_data(dest_addr, buff, chunk_size);
+									size_left -= chunk_size;
+									dest_addr += chunk_size;
+							}
+						
+							//current_screen_controls_address = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
+						
+							
+							//SPIFFS_lseek(&fs, watchset_fd, size, SPIFFS_SEEK_CUR);
 					}
 						  //parse_controls(true);
 							break;
@@ -457,6 +573,9 @@ static bool parse_screen() {
 					{
 						  uint16_t buffer_size = get_next_short();
 							screen_data_buffer = malloc(buffer_size);
+							if (screen_data_buffer == NULL) {
+									close();
+							}
 					}
 							break;
 				}
@@ -489,7 +608,7 @@ static bool init_subscreen(uint8_t screen_id) {
 		return parse_screen();
 }
 
-static void parse_external_properties() {
+static bool parse_external_properties() {
 		SPIFFS_lseek(&fs, watchset_fd, external_properties_section_address, SPIFFS_SEEK_SET);
 	  external_properties_no = get_next_byte();
 	  uint16_t ptr = external_properties_no*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE;
@@ -507,16 +626,18 @@ static void parse_external_properties() {
 		}
 			
 	  external_properties_data = malloc(ptr);
+		if (external_properties_data == NULL) {
+				return false;
+		}
 		memset(external_properties_data, 0, ptr);
 		memcpy(external_properties_data, ptr_array, external_properties_no*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE);
+		return true;
 }
 
 static void scr_watch_set_init() {
     watchset_fd = SPIFFS_open(&fs, "watchset", SPIFFS_RDONLY, 0);
 		if (watchset_fd < 0) {
-			  screens_section_address = NULL;
-			  external_properties_section_address = NULL;
-			  scr_mngr_show_screen(SCR_WATCHFACE);
+			  close();
 			  return;
 		}
 	
@@ -543,7 +664,10 @@ static void scr_watch_set_init() {
 				}
 				SPIFFS_lseek(&fs, watchset_fd, section_size, SPIFFS_SEEK_CUR);
 	  };
-		parse_external_properties();
+		if (!parse_external_properties()){
+				close();
+			  return;
+		}
 		
 		// send info to watch to send property values
 		ble_peripheral_set_watch_set_id(watchset_id);
@@ -552,36 +676,8 @@ static void scr_watch_set_init() {
 }
 
 static void scr_watch_set_draw_screen() {
-		SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
+//		SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
 		draw_screen_controls(true);
-}
-
-static void clear_subscreen_data() {
-	 /* if (controls.controls_no == 0 || controls.controls == NULL) {
-			  return;
-		}
-		
-	  for (int i=0; i<controls.controls_no; i++) {
-			  switch (controls.controls[i].type){
-					  case SCR_CONTROL_NUMBER:
-							  free(((SCR_CONTROL_NUMBER_CONFIG *)controls.controls[i].config)->data);
-						    break;
-					  case SCR_CONTROL_TEXT:
-							  free(((SCR_CONTROL_TEXT_CONFIG *)controls.controls[i].config)->data);
-						    break;
-					  case SCR_CONTROL_HORIZONTAL_PROGRESS_BAR:
-							  free(((SCR_CONTROL_PROGRESS_BAR_CONFIG *)controls.controls[i].config)->data);
-						    break;
-				}
-		    free(controls.controls[i].config);
-		}
-		free(controls.controls);
-		controls.controls_no = 0;
-		controls.controls = NULL;*/
-		if (screen_data_buffer != NULL) {
-				free(screen_data_buffer);
-		}
-		screen_data_buffer = NULL;
 }
 
 static void scr_watch_set_refresh_screen() {
@@ -590,12 +686,12 @@ static void scr_watch_set_refresh_screen() {
 	      mlcd_fb_clear();
 			  init_subscreen(switch_to_subscreen);
 			
-				SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
+//				SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
 				draw_screen_controls(true);
 			
 			  current_subscreen = switch_to_subscreen;
 		} else {
-				SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
+	//			SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
 				draw_screen_controls(false);
 	  }
 }
@@ -621,14 +717,7 @@ void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 						ble_peripheral_set_watch_set_id(watchset_id);
 						break;
 			  case SCR_EVENT_DESTROY_SCREEN:
-						watchset_id = 0;
-						ble_peripheral_set_watch_set_id(0);
-				    clear_subscreen_data();		
-						SPIFFS_close(&fs, watchset_fd); 
-				    if (external_properties_data != NULL) {
-								free(external_properties_data);
-							  external_properties_data = NULL;
-						}
+						clean_before_exit();
 				    break;
 		}
 }

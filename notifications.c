@@ -7,8 +7,6 @@
 #include "ext_ram.h"
 #include "nrf_soc.h"
 
-#define NOTIFICATION_INFO_ADDRESS 0x1800
-
 static app_timer_id_t      m_notifications_alert_timer_id;
 static uint16_t m_current_alert_notification_id = 0;
 
@@ -56,7 +54,7 @@ static uint32_t get_next_int(uint16_t *ptr) {
 void copy_notification_info_data(uint16_t address, uint16_t size) {
 		uint8_t buffer[16];
 		uint16_t current_read_address = address;
-	  uint16_t current_write_address = NOTIFICATION_INFO_ADDRESS;
+	  uint16_t current_write_address = EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS;
 		uint16_t data_to_copy = size > 1024 ? 1024 : size;
 		uint8_t part_size;
 			while(data_to_copy > 0) {
@@ -179,5 +177,5 @@ void notifications_next(uint16_t notification_id) {
 }
 
 uint32_t notifications_get_current_data(void) {
-		return NOTIFICATION_INFO_ADDRESS;
+		return EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS;
 }
