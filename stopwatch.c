@@ -2,9 +2,10 @@
 #include "nordic_common.h"
 #include "app_timer.h"
 #include "board.h"
+#include "scr_mngr.h"
 
 // interrupt is only to increase number of fps in main loop
-#define INTERRUPT_INTERVAL            APP_TIMER_TICKS(125, APP_TIMER_PRESCALER)
+#define INTERRUPT_INTERVAL            APP_TIMER_TICKS(175, APP_TIMER_PRESCALER)
 #define MS_COUNTER_UPDATE_INTERVAL    APP_TIMER_TICKS(120000, APP_TIMER_PRESCALER)
 
 #define TIME_H_PART(v)	(v/3600000)
@@ -37,6 +38,7 @@ static void stopwatch_timeout_handler(void * p_context) {
 						ms_counter_last_ticks = current_ticks;
 				}
 		}
+		scr_mngr_redraw();
 }
 
 void stopwatch_init(void) {

@@ -96,13 +96,18 @@ void init_uart(void) {
 			return ext_flash_erase_data(addr, size) ? SPIFFS_OK : SPIFFS_ERR_INTERNAL;
   } 
 	
-  void spiffs_mount() {
+void fs_format(void) {
+		ext_flash_erase_chip();
+		SPIFFS_format(&fs);
+}
+
+int fs_mount(void) {
 			spiffs_config cfg;
 			cfg.hal_read_f = spiffs_spi_read;
 			cfg.hal_write_f = spiffs_spi_write;
 			cfg.hal_erase_f = spiffs_spi_erase;
-    
-			int res = SPIFFS_mount(&fs,
+	
+			return SPIFFS_mount(&fs,
 					&cfg,
 					spiffs_work_buf,
 					spiffs_fds,
@@ -110,20 +115,26 @@ void init_uart(void) {
 					NULL,
 					0,
 					0);
+}
+
+void fs_unmount(void) {
+		SPIFFS_unmount(&fs);
+}
+
+void fs_reformat(void) {
+		fs_unmount();
+		fs_format();
+		fs_mount();
+}
+
+  void fs_init() {
+			int res = fs_mount();
 			//printf("mount res: %i\n", res);
 			
-		//	if(res == SPIFFS_ERR_NOT_A_FS) {
-			if(res < 0) {
-				ext_flash_erase_chip();
-				SPIFFS_format(&fs);
-				res = SPIFFS_mount(&fs,
-				&cfg,
-				spiffs_work_buf,
-				spiffs_fds,
-				sizeof(spiffs_fds),
-				NULL,
-				0,
-				0);
+			//	if(res == SPIFFS_ERR_NOT_A_FS) {
+			if (res < 0) {
+					fs_format();
+					res = fs_mount();
 			}
   }
 
@@ -150,7 +161,6 @@ static void power_manage(void)
     uint32_t err_code = sd_app_evt_wait();
     APP_ERROR_CHECK(err_code);
 }
-
 
 static uint_fast8_t splashscreen_draw_func(uint_fast8_t x, uint_fast8_t y)
 {
@@ -193,7 +203,6 @@ static uint_fast8_t splashscreen_draw_func(uint_fast8_t x, uint_fast8_t y)
 		}
 		return 0;
 }
-
 
 static void timers_init(void)
 {
@@ -240,7 +249,7 @@ int main(void)
 	  // splash screen
 		nrf_delay_ms(500);
 	
-		spiffs_mount();
+		fs_init();
 	
 		scr_mngr_init();
 	  battery_init();

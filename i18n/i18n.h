@@ -17,6 +17,7 @@
 #define MESSAGE_MODE_CENTRAL 9
 #define MESSAGE_MODE_OFFLINE 10
 #define MESSAGE_INCOMING_CALL 11
+#define MESSAGE_FORMAT 12
 
 typedef struct
 {

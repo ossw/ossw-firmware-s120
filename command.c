@@ -12,7 +12,6 @@
 #define COMMAND_APPEND_DATA_TO_FILE_STREAM 0x21
 #define COMMAND_CLOSE_FILE_STREAM 0x22
 #define COMMAND_SET_EXT_PROPERTY_VALUE 0x30
-#define NOTIFICATION_START_ADDRESS 0x1C00
 
 static uint32_t data_ptr = 0;
 static uint8_t data_buf[256];
@@ -24,7 +23,7 @@ static uint32_t notification_upload_ptr;
 static uint16_t notification_upload_size;
 
 static int init_notification_upload(uint32_t size) {
-		notification_upload_ptr = NOTIFICATION_START_ADDRESS;
+		notification_upload_ptr = EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS;
 		notification_upload_size = size;
 		return 0;
 }
@@ -35,7 +34,7 @@ static void handle_notification_upload_part(uint8_t *data, uint32_t size) {
 }
 
 static void handle_notification_upload_done() {
-	  notifications_handle_data(NOTIFICATION_START_ADDRESS, notification_upload_size);
+	  notifications_handle_data(EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS, notification_upload_size);
 }
 
 static void handle_notification_alert_extend(uint16_t notification_id, uint16_t timout) {
@@ -110,6 +109,7 @@ void command_process(void) {
 			case COMMAND_SET_EXT_PROPERTY_VALUE:
 			    // set ext param
 					handle_external_properties_change(&data_buf[1], data_ptr-1);
+					scr_mngr_redraw();
 					break;
 		 case 0x40:
 			    // init notification upload
