@@ -19,6 +19,7 @@
 static bool fb_line_changes[MLCD_YRES];
 static uint8_t vcom;
 static uint8_t bl_mode = MLCD_BL_OFF;
+static uint8_t temp_bl_timeout = 3;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
 
@@ -107,7 +108,7 @@ void mlcd_backlight_temp_on(void) {
 	app_timer_stop(mlcd_bl_timer_id);
 	bl_mode = MLCD_BL_ON_TEMP;
   nrf_gpio_pin_set(LCD_BACKLIGHT);
-	app_timer_start(mlcd_bl_timer_id, 3 * TEMP_BL_TIMEOUT_UNIT, NULL);
+	app_timer_start(mlcd_bl_timer_id, temp_bl_timeout * TEMP_BL_TIMEOUT_UNIT, NULL);
 }
 
 void mlcd_backlight_temp_extend(void) {
@@ -129,6 +130,22 @@ void mlcd_backlight_toggle(void)
 					mlcd_backlight_on();
 					break;
 	}
+}
+
+uint32_t mlcd_temp_backlight_timeout(void) {
+		return temp_bl_timeout;
+}
+
+void mlcd_temp_backlight_timeout_inc(void) {
+		if (temp_bl_timeout < 10) {
+				temp_bl_timeout++;
+		}
+}
+
+void mlcd_temp_backlight_timeout_dec(void) {
+		if (temp_bl_timeout > 1) {
+				temp_bl_timeout--;
+		}
 }
 
 void mlcd_switch_vcom() {

@@ -40,6 +40,12 @@ void mlcd_backlight_temp_on(void);
 
 void mlcd_backlight_temp_extend(void);
 
+void mlcd_temp_backlight_timeout_inc(void);
+
+void mlcd_temp_backlight_timeout_dec(void);
+
+uint32_t mlcd_temp_backlight_timeout(void);
+
 void mlcd_colors_toggle(void);
 
 void mlcd_switch_vcom(void);
