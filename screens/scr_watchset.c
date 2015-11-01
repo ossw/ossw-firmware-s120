@@ -64,8 +64,9 @@ static void clear_subscreen_data() {
 void clean_before_exit() {
 		watchset_id = NULL;
 		ble_peripheral_set_watch_set_id(NULL);
-	  clear_subscreen_data();		
 		SPIFFS_close(&fs, watchset_fd); 
+
+	  clear_subscreen_data();		
 		if (external_properties_data != NULL) {
 				free(external_properties_data);
 			  external_properties_data = NULL;
@@ -572,7 +573,7 @@ static bool parse_screen() {
 					case WATCH_SET_SCREEN_SECTION_MEMORY:
 					{
 						  uint16_t buffer_size = get_next_short();
-							screen_data_buffer = malloc(buffer_size);
+							screen_data_buffer = calloc(buffer_size, 1);
 							if (screen_data_buffer == NULL) {
 									close();
 									return false;
@@ -612,26 +613,31 @@ static bool init_subscreen(uint8_t screen_id) {
 static bool parse_external_properties() {
 		SPIFFS_lseek(&fs, watchset_fd, external_properties_section_address, SPIFFS_SEEK_SET);
 	  external_properties_no = get_next_byte();
-	  uint16_t ptr = external_properties_no*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE;
-	  uint8_t ptr_array[external_properties_no*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE];
+	
+	  uint16_t header_size = external_properties_no*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE;
+	  external_properties_data = malloc(header_size);
+		if (external_properties_data == NULL) {
+				return false;
+		}
+		
+		uint16_t ptr = header_size;
 	  for (int i=0; i<external_properties_no; i++) {
 			  uint8_t type = get_next_byte();
 			  uint8_t range = get_next_byte();
 			  
-			  ptr_array[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE] = type;
-			  ptr_array[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+1] = range;
-			  ptr_array[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+2] = ptr >> 8;
-			  ptr_array[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+3] = ptr & 0xFF;
+			  external_properties_data[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE] = type;
+			  external_properties_data[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+1] = range;
+			  external_properties_data[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+2] = ptr >> 8;
+			  external_properties_data[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+3] = ptr & 0xFF;
 			
 			  ptr+=calc_ext_property_size(type, range);
 		}
-			
-	  external_properties_data = malloc(ptr);
-		if (external_properties_data == NULL) {
+	  void* after_realloc = realloc(external_properties_data, ptr);
+		if (after_realloc == NULL) {
 				return false;
 		}
-		memset(external_properties_data, 0, ptr);
-		memcpy(external_properties_data, ptr_array, external_properties_no*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE);
+		external_properties_data = after_realloc; 
+		memset(external_properties_data + header_size, 0, ptr - header_size);
 		return true;
 }
 

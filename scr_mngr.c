@@ -237,7 +237,19 @@ void scr_mngr_draw_screen(void) {
 						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_INIT_SCREEN, NULL);
 						// draw screen
 						mlcd_fb_clear();
+					
+						#ifdef OSSW_DEBUG
+								uint32_t start_draw_ticks;
+								app_timer_cnt_get(&start_draw_ticks);
+						#endif
 						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_DRAW_SCREEN, NULL);
+						#ifdef OSSW_DEBUG
+								uint32_t end_draw_ticks;
+								uint32_t total_diff;
+								app_timer_cnt_get(&end_draw_ticks);
+								app_timer_cnt_diff_compute(end_draw_ticks, start_draw_ticks, &total_diff);
+								printf("DRAW: 0x%08x\r\n", total_diff);
+						#endif
 						// set new screen
 						current_screen = switch_to_screen;
 						switch_to_screen = SCR_NOT_SET;

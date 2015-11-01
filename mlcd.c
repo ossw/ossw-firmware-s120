@@ -173,7 +173,7 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
 			  first_byte_max_bit = 8;
 		}
     uint8_t line_size = (start_bit_off + width + 7) >> 3;
-    uint8_t tmp_buff[line_size];
+    uint8_t tmp_buff[MLCD_LINE_BYTES];
     uint16_t ext_ram_address = EXT_RAM_DATA_FB + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
 		
     uint8_t old_val = 0;
@@ -243,7 +243,7 @@ void mlcd_fb_draw_bitmap(const uint8_t *bitmap, uint_fast8_t x_pos, uint_fast8_t
 			  first_byte_max_bit = 8;
 		}
     uint8_t line_size = (start_bit_off + width + 7) >> 3;
-    uint8_t tmp_buff[line_size];
+    uint8_t tmp_buff[MLCD_LINE_BYTES];
     uint16_t ext_ram_address = EXT_RAM_DATA_FB + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
 		uint8_t byte_width = (bitmap_width+7)>>3;
     uint8_t old_val = 0;
@@ -315,11 +315,11 @@ void mlcd_fb_draw_bitmap_from_file(spiffs_file file, uint_fast8_t x_pos, uint_fa
 			  first_byte_max_bit = 8;
 		}
     uint8_t line_size = (start_bit_off + width + 7) >> 3;
-    uint8_t tmp_buff[line_size];
+    uint8_t tmp_buff[MLCD_LINE_BYTES];
     uint16_t ext_ram_address = EXT_RAM_DATA_FB + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
 		uint8_t byte_width = (bitmap_width+7)>>3;
     uint8_t old_val = 0;
-		uint8_t bitmap[byte_width];
+		uint8_t bitmap[MLCD_LINE_BYTES];
 		
 	  for (uint8_t y = 0; y < height; y++) {
 				SPIFFS_read(&fs, file, bitmap, byte_width);
