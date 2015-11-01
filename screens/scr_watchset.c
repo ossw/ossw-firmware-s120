@@ -575,6 +575,7 @@ static bool parse_screen() {
 							screen_data_buffer = malloc(buffer_size);
 							if (screen_data_buffer == NULL) {
 									close();
+									return false;
 							}
 					}
 							break;
