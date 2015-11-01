@@ -32,14 +32,14 @@
 
 #define DEVICE_NAME                      "OSSW"                                     /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                "OpenSource"                               /**< Manufacturer. Will be passed to Device Information Service. */
-#define FIRMWARE_VERSION                 "0.5.0-snapshot"                                    /**< Firmware version. */
-#define APP_ADV_INTERVAL                 300                                        /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
-#define APP_ADV_TIMEOUT_IN_SECONDS       0xFFFF                                     /**< The advertising timeout in units of seconds. */
+#define FIRMWARE_VERSION                 "0.4.1"                                    /**< Firmware version. */
+#define APP_ADV_INTERVAL                 600                                        /**< The advertising interval (in units of 0.625 ms.). */
+#define APP_ADV_TIMEOUT_IN_SECONDS       0		                                     /**< The advertising timeout in units of seconds. */
 
 
 #define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(10000, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
 
-#define MIN_CONN_INTERVAL                MSEC_TO_UNITS(10, UNIT_1_25_MS)           /**< Minimum acceptable connection interval. */
+#define MIN_CONN_INTERVAL                MSEC_TO_UNITS(30, UNIT_1_25_MS)           /**< Minimum acceptable connection interval. */
 #define MAX_CONN_INTERVAL                MSEC_TO_UNITS(75, UNIT_1_25_MS)           /**< Maximum acceptable connection interval. */
 
 #define SLAVE_LATENCY                    1                                          /**< Slave latency. */
