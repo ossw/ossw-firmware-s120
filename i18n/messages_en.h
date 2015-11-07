@@ -14,7 +14,11 @@ static const I18N_MESSAGE messages_en[] = {
   /*   9 */{"Central"},
   /*   10 */{"Offline"},
   /*   11 */{"Incoming call"},
-  /*   12 */{"Format"}
+  /*   12 */{"Format"},
+  /*   13 */{"No files found"},
+  /*   14 */{"Remove?"},
+  /*   15 */{"Yes"},
+  /*   16 */{"No"}
 };
 
 #endif

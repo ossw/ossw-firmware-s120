@@ -10,6 +10,7 @@
 #define SCR_CHANGE_TIME                0x04
 #define SCR_SETTINGS                   0x05
 #define SCR_WATCH_SET                  0x06
+#define SCR_WATCH_SET_LIST             0x07
 
 #define SCR_ALERT_NOTIFICATION         0xA0
 #define SCR_NOTIFICATIONS              0xA1

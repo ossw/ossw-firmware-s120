@@ -477,7 +477,7 @@ static void parse_screen_control_progress(SCR_CONTROL_PROGRESS_BAR_CONFIG* confi
 }
 
 static bool draw_screen_controls(bool force) {
-		ws_data_ptr = EXT_RAM_DATA_WATCHSET_DATA;
+		ws_data_ptr = EXT_RAM_DATA_CURRENT_SCREEN_CACHE;
 	  uint8_t controls_no = ws_data_get_next_byte();
 	
 		for (int i = 0; i < controls_no; i++) {
@@ -549,7 +549,7 @@ static bool parse_screen() {
 					case WATCH_SET_SCREEN_SECTION_CONTROLS:
 					{
 							uint32_t size_left = get_next_short();
-							uint32_t dest_addr = EXT_RAM_DATA_WATCHSET_DATA;
+							uint32_t dest_addr = EXT_RAM_DATA_CURRENT_SCREEN_CACHE;
 						
 							uint8_t buff[128];
 							while (size_left > 0) {

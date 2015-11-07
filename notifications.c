@@ -161,6 +161,11 @@ void notifications_invoke_function(uint8_t function_id) {
 	  ble_peripheral_invoke_notification_function(function_id);
 }
 
+void notifications_open(uint16_t notification_id) {
+		uint8_t data[2] = {notification_id >> 8, notification_id&0xFF};
+		ble_peripheral_invoke_notification_function_with_data(NOTIFICATIONS_OPEN, data, 2);
+}
+
 void notifications_prev_part(uint16_t notification_id, uint8_t current_part_no) {
 		uint8_t data[3] = {notification_id >> 8, notification_id&0xFF, current_part_no};
 		ble_peripheral_invoke_notification_function_with_data(NOTIFICATIONS_PREV_PART, data, 3);

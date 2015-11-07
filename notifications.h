@@ -15,6 +15,7 @@
 #define NOTIFICATIONS_NEXT_PART							          0x31
 #define NOTIFICATIONS_NEXT									          0x32
 #define NOTIFICATIONS_PREV_PART							          0x33
+#define NOTIFICATIONS_OPEN							              0x34
 
 #define NOTIFICATIONS_TYPE_ALERT 											1
 #define NOTIFICATIONS_TYPE_INFO												2
@@ -29,6 +30,8 @@
 #define NOTIFICATIONS_CATEGORY_OTHER									255
 		
 void notifications_init(void);
+
+void notifications_open(uint16_t notification_id);
 
 void notifications_handle_data(uint16_t notification_id, uint16_t address);
 

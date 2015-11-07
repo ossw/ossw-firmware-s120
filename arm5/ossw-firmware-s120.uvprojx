@@ -543,6 +543,11 @@
               <FileType>1</FileType>
               <FilePath>..\screens\scr_watchset.c</FilePath>
             </File>
+            <File>
+              <FileName>scr_watchset_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_watchset_list.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1241,6 +1246,11 @@
               <FileName>scr_watchset.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_watchset.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchset_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_watchset_list.c</FilePath>
             </File>
           </Files>
         </Group>

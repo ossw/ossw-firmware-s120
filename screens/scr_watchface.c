@@ -73,6 +73,9 @@ static void scr_watchface_handle_button_long_pressed(uint32_t button_id) {
         case SCR_EVENT_PARAM_BUTTON_SELECT:
             scr_mngr_show_screen(SCR_SETTINGS);
             break;
+        case SCR_EVENT_PARAM_BUTTON_UP:
+            scr_mngr_show_screen(SCR_WATCH_SET_LIST);
+            break;
     }
 }
 

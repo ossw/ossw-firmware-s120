@@ -67,6 +67,17 @@ static void scr_notifications_handle_button_pressed(uint32_t button_id) {
 						}
 				}
 				    break;
+			  case SCR_EVENT_PARAM_BUTTON_SELECT:
+				{
+						uint32_t read_address = notifications_get_current_data();
+						uint8_t notification_type = get_next_byte(&read_address);
+	
+						if (notification_type != NOTIFICATIONS_CATEGORY_SUMMARY) {
+								uint16_t notification_id = get_next_short(&read_address);
+								notifications_open(notification_id);
+						}
+				}
+				    break;
 		}
 }
 

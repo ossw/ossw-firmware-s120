@@ -8,6 +8,7 @@
 #include "screens/scr_changedate.h"
 #include "screens/scr_settings.h"
 #include "screens/scr_watchset.h"
+#include "screens/scr_watchset_list.h"
 #include "screens/scr_notifications.h"
 #include "screens/scr_alert_notification.h"
 #include "mlcd.h"
@@ -147,6 +148,9 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 			  case SCR_WATCH_SET:
 					  allowDefaultHandler = false;
 				    scr_watch_set_handle_event(event_type, event_param);
+				    break;
+			  case SCR_WATCH_SET_LIST:
+				    scr_watchset_list_handle_event(event_type, event_param);
 				    break;
 				case SCR_NOT_SET:
 					  return;

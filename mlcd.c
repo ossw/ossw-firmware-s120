@@ -13,6 +13,7 @@ static uint8_t vcom;
 static bool backlight_on = false;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
+extern spiffs fs;
 
 static uint8_t bit_reverse(uint8_t byte) {
     #if (__CORTEX_M >= 0x03)
@@ -174,7 +175,7 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
 		}
     uint8_t line_size = (start_bit_off + width + 7) >> 3;
     uint8_t tmp_buff[MLCD_LINE_BYTES];
-    uint16_t ext_ram_address = EXT_RAM_DATA_FB + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
+    uint16_t ext_ram_address = EXT_RAM_DATA_FRAME_BUFFER + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
 		
     uint8_t old_val = 0;
 	  for (uint8_t y = 0; y < height; y++) {
@@ -244,7 +245,7 @@ void mlcd_fb_draw_bitmap(const uint8_t *bitmap, uint_fast8_t x_pos, uint_fast8_t
 		}
     uint8_t line_size = (start_bit_off + width + 7) >> 3;
     uint8_t tmp_buff[MLCD_LINE_BYTES];
-    uint16_t ext_ram_address = EXT_RAM_DATA_FB + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
+    uint16_t ext_ram_address = EXT_RAM_DATA_FRAME_BUFFER + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
 		uint8_t byte_width = (bitmap_width+7)>>3;
     uint8_t old_val = 0;
 	  for (uint8_t y = 0; y < height; y++) {
@@ -316,7 +317,7 @@ void mlcd_fb_draw_bitmap_from_file(spiffs_file file, uint_fast8_t x_pos, uint_fa
 		}
     uint8_t line_size = (start_bit_off + width + 7) >> 3;
     uint8_t tmp_buff[MLCD_LINE_BYTES];
-    uint16_t ext_ram_address = EXT_RAM_DATA_FB + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
+    uint16_t ext_ram_address = EXT_RAM_DATA_FRAME_BUFFER + (x_pos >> 3) + y_pos * MLCD_LINE_BYTES;
 		uint8_t byte_width = (bitmap_width+7)>>3;
     uint8_t old_val = 0;
 		uint8_t bitmap[MLCD_LINE_BYTES];

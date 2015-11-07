@@ -13,6 +13,7 @@
 #define COMMAND_CLOSE_FILE_STREAM 0x22
 #define COMMAND_SET_EXT_PROPERTY_VALUE 0x30
 
+extern spiffs fs;
 static uint32_t data_ptr = 0;
 static uint8_t data_buf[256];
 static bool handle_data = false;
@@ -82,30 +83,32 @@ void command_process(void) {
 		
 		switch (data_buf[0]) {
 			case COMMAND_OPEN_FILE_STREAM:
+			{
+					if (scr_mngr_current_screen() == SCR_WATCH_SET) {	
+							scr_mngr_show_screen(SCR_WATCHFACE);
+					}
 				
-				if (scr_mngr_current_screen() == SCR_WATCH_SET) {	
-						scr_mngr_show_screen(SCR_WATCHFACE);
-				}
-			
-				data_upload_fd = SPIFFS_open(&fs, "watchset", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
-			  if (data_upload_fd < 0) {
-						// file open error
-						respCode = (SPIFFS_errno(&fs)*-1)-9999;
-				}
+					void* name_ptr = data_ptr > 1 ? &data_buf[4] : "watchset";
+					data_upload_fd = SPIFFS_open(&fs, name_ptr, SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
+					if (data_upload_fd < 0) {
+							// file open error
+							respCode = (SPIFFS_errno(&fs)*-1)-9999;
+					}
+			}
 				break;
 			case COMMAND_APPEND_DATA_TO_FILE_STREAM:
-				if (SPIFFS_write(&fs, data_upload_fd, data_buf+1, data_ptr-1) < 0 ) {
-						//file write error
-						respCode = (SPIFFS_errno(&fs)*-1)-9999;
-				}
-				break;
+					if (SPIFFS_write(&fs, data_upload_fd, data_buf+1, data_ptr-1) < 0 ) {
+							//file write error
+							respCode = (SPIFFS_errno(&fs)*-1)-9999;
+					}
+					break;
 			case COMMAND_CLOSE_FILE_STREAM:
-				if (SPIFFS_close(&fs, data_upload_fd) < 0) {
-						// file close error
-						respCode = (SPIFFS_errno(&fs)*-1)-9999;
-				}
-				scr_mngr_show_screen(SCR_WATCH_SET);
-				break;
+					if (SPIFFS_close(&fs, data_upload_fd) < 0) {
+							// file close error
+							respCode = (SPIFFS_errno(&fs)*-1)-9999;
+					}
+					scr_mngr_show_screen(SCR_WATCH_SET);
+					break;
 			case COMMAND_SET_EXT_PROPERTY_VALUE:
 			    // set ext param
 					handle_external_properties_change(&data_buf[1], data_ptr-1);

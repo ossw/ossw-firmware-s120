@@ -2,6 +2,8 @@
 #include "mlcd_draw.h"
 #include "string.h"
 
+extern spiffs fs;
+
 static void limit_int_range(uint32_t* value, uint32_t max_value) {
 	  if(*value > max_value) {
 			  *value = max_value;
