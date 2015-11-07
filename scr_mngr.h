@@ -50,6 +50,8 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param);
 
 void scr_mngr_show_screen(uint16_t screen_id);
 
+void scr_mngr_show_screen_with_param(uint16_t screen_id, uint32_t param);
+	
 void scr_mngr_draw_notification_bar(void);
 
 void scr_mngr_redraw_notification_bar(void);

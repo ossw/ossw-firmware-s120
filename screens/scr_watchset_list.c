@@ -129,6 +129,11 @@ static void scr_watchset_list_handle_button_pressed(uint32_t button_id) {
 								data->mode = MODE_SELECT;
 						}
 				    break;
+			  case SCR_EVENT_PARAM_BUTTON_SELECT:
+						if (data->mode == MODE_SELECT) {
+								scr_mngr_show_screen_with_param(SCR_WATCH_SET, EXT_RAM_DATA_CURRENT_SCREEN_CACHE + (ENTRY_BUF_SIZE*data->show_file_no));
+						}
+				    break;
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 						if (data->mode == MODE_SELECT) {
 								if (data->show_file_no > 0 ) {

@@ -641,8 +641,15 @@ static bool parse_external_properties() {
 		return true;
 }
 
-static void scr_watch_set_init() {
-    watchset_fd = SPIFFS_open(&fs, "watchset", SPIFFS_RDONLY, 0);
+static void scr_watch_set_init(uint32_t param) {
+			
+		if (param != NULL) {
+				struct spiffs_dirent entry;
+				ext_ram_read_data(param, (uint8_t*)&entry, sizeof(struct spiffs_dirent));	
+				watchset_fd = SPIFFS_open_by_dirent(&fs, &entry, SPIFFS_RDONLY, 0);
+		} else {
+				watchset_fd = SPIFFS_open(&fs, "watchset", SPIFFS_RDONLY, 0);
+		}
 		if (watchset_fd < 0) {
 			  close();
 			  return;
@@ -706,7 +713,7 @@ static void scr_watch_set_refresh_screen() {
 void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
-				    scr_watch_set_init();
+				    scr_watch_set_init(event_param);
 				    break;
 			  case SCR_EVENT_DRAW_SCREEN:
 				    scr_watch_set_draw_screen();

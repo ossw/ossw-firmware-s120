@@ -14,7 +14,7 @@
 #include "mlcd.h"
 
 static uint8_t switch_to_screen = SCR_NOT_SET;
-
+static uint32_t switch_to_screen_param = 0;
 static uint8_t current_screen = SCR_NOT_SET;
 
 static uint8_t scr_notifications_state = SCR_NOTIFICATIONS_STATE_NONE;
@@ -180,8 +180,14 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 	  scr_mngr_handle_event_internal(current_screen, event_type, event_param);
 }
 	
+void scr_mngr_show_screen_with_param(uint16_t screen_id, uint32_t param) {
+	  switch_to_screen = screen_id;
+	  switch_to_screen_param = param;
+}
+
 void scr_mngr_show_screen(uint16_t screen_id) {
 	  switch_to_screen = screen_id;
+	  switch_to_screen_param = NULL;
 }
 
 void scr_mngr_draw_notification_bar() {
@@ -238,7 +244,7 @@ void scr_mngr_draw_screen(void) {
 						// release memory used by old screen
 						scr_mngr_handle_event_internal(old_screen, SCR_EVENT_DESTROY_SCREEN, NULL);
 						// initilize new screen
-						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_INIT_SCREEN, NULL);
+						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_INIT_SCREEN, switch_to_screen_param);
 						// draw screen
 						mlcd_fb_clear();
 					
