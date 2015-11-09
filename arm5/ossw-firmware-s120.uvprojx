@@ -498,6 +498,16 @@
               <FileType>1</FileType>
               <FilePath>..\stopwatch.c</FilePath>
             </File>
+            <File>
+              <FileName>watchset.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\watchset.c</FilePath>
+            </File>
+            <File>
+              <FileName>fs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\fs.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1201,6 +1211,16 @@
               <FileName>stopwatch.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\stopwatch.c</FilePath>
+            </File>
+            <File>
+              <FileName>watchset.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\watchset.c</FilePath>
+            </File>
+            <File>
+              <FileName>fs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\fs.c</FilePath>
             </File>
           </Files>
         </Group>

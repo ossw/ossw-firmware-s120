@@ -1,7 +1,9 @@
 #include <string.h>
 #include "scr_watchset_list.h"
+#include "../watchset.h"
 #include "../scr_mngr.h"
 #include "../ext_ram.h"
+#include "../fs.h"
 #include "../mlcd_draw.h"
 #include "../i18n/i18n.h"
 
@@ -10,12 +12,9 @@
 #define MODE_REMOVE 1
 #define MODE_NO_FILES_FOUND 0x10
 
-#define FILE_PATH "w/"
 #define FILE_PATH_LENGTH 2
 
 #define ENTRY_BUF_SIZE sizeof(struct spiffs_dirent)
-
-extern spiffs fs;
 		
 struct scr_watchset_list_data {
 		spiffs_DIR dir;
@@ -25,6 +24,8 @@ struct scr_watchset_list_data {
 		uint8_t mode;
 		uint8_t last_rendered_mode;
 		uint8_t show_file_no;
+		uint8_t type;
+		void* path; 
 };
 
 static struct scr_watchset_list_data* data;
@@ -34,12 +35,11 @@ static void scr_watchset_list_store_file_info (uint8_t fileNo, struct spiffs_dir
 }
 
 static void scr_watchset_list_read_next_file_names(void) {
-		void* path = FILE_PATH;
 	
 		struct spiffs_dirent* entryPtr = &data->last_entry;
 		
 		while ((entryPtr = SPIFFS_readdir(&data->dir, entryPtr))!=0) {
-				if (strncmp((const char*) data->last_entry.name, path, FILE_PATH_LENGTH) == 0) {
+				if (strncmp((const char*) data->last_entry.name, data->path, FILE_PATH_LENGTH) == 0) {
 						scr_watchset_list_store_file_info(data->last_fetched_file_no + 1, entryPtr);
 						data->last_fetched_file_no+=1;
 						
@@ -53,17 +53,29 @@ static void scr_watchset_list_read_next_file_names(void) {
 		}
 }
 
-static void scr_watchset_list_init(void) {
+static void scr_watchset_list_init(uint32_t param) {
 	
 		data = malloc(sizeof(struct scr_watchset_list_data));
-		SPIFFS_opendir(&fs, NULL, &data->dir);
 	
-		void* path = FILE_PATH;
+		data->type = param&0xFF;
+		switch (param) {
+				case WATCH_SET_TYPE_WATCH_FACE:
+						data->path = WATCH_SET_PATH_WATCH_FACE;
+						break;
+				case WATCH_SET_TYPE_APPLICATION:
+						data->path = WATCH_SET_PATH_APPLICATION;
+						break;
+				case WATCH_SET_TYPE_UTILITY:
+						data->path = WATCH_SET_PATH_UTILITY;
+						break;
+		}
+		
+		SPIFFS_opendir(&fs, data->path, &data->dir);
 		
 		struct spiffs_dirent* entryPtr = &data->last_entry;
 		
 		while ((entryPtr = SPIFFS_readdir(&data->dir, entryPtr)) != 0) {
-				if (strncmp((const char*) data->last_entry.name, path, FILE_PATH_LENGTH) == 0) {
+				if (strncmp((const char*) data->last_entry.name, data->path, FILE_PATH_LENGTH) == 0) {
 					scr_watchset_list_store_file_info(0, entryPtr);
 					break;
 				}
@@ -131,7 +143,15 @@ static void scr_watchset_list_handle_button_pressed(uint32_t button_id) {
 				    break;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
 						if (data->mode == MODE_SELECT) {
-								scr_mngr_show_screen_with_param(SCR_WATCH_SET, EXT_RAM_DATA_CURRENT_SCREEN_CACHE + (ENTRY_BUF_SIZE*data->show_file_no));
+								uint32_t ptr = EXT_RAM_DATA_CURRENT_SCREEN_CACHE + (ENTRY_BUF_SIZE*data->show_file_no);
+								if (data->type == WATCH_SET_TYPE_WATCH_FACE) {
+										struct spiffs_dirent entry;
+										ext_ram_read_data(ptr, (uint8_t*)&entry, sizeof(struct spiffs_dirent));
+										watchset_set_default_watch_face(&entry);
+										scr_mngr_show_screen(SCR_WATCHFACE);
+								} else {
+										scr_mngr_show_screen_with_param(SCR_WATCH_SET, (1<<24) | ptr);
+								}
 						}
 				    break;
 			  case SCR_EVENT_PARAM_BUTTON_UP:
@@ -211,7 +231,7 @@ static void scr_watchset_list_redraw() {
 void scr_watchset_list_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
-				    scr_watchset_list_init();
+				    scr_watchset_list_init(event_param);
 				    break;
 			  case SCR_EVENT_DRAW_SCREEN:
 				    scr_watchset_list_draw();

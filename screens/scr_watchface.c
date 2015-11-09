@@ -5,6 +5,8 @@
 #include "../mlcd.h"
 #include "../scr_controls.h"
 #include "../vibration.h"
+#include "../watchset.h"
+#include "../fs.h"
 #include "nrf_delay.h"
 		
 static NUMBER_CONTROL_DATA hour_ctrl_data;
@@ -60,23 +62,12 @@ static void scr_watchface_refresh_time() {
 	  scr_controls_redraw(&controls_definition);
 }
 
-static void scr_watchface_handle_button_pressed(uint32_t button_id) {
-    switch (button_id) {
-        case SCR_EVENT_PARAM_BUTTON_UP:
-            scr_mngr_show_screen(SCR_WATCH_SET);
-            break;
-    }
-}
-
-static void scr_watchface_handle_button_long_pressed(uint32_t button_id) {
-    switch (button_id) {
-        case SCR_EVENT_PARAM_BUTTON_SELECT:
-            scr_mngr_show_screen(SCR_SETTINGS);
-            break;
-        case SCR_EVENT_PARAM_BUTTON_UP:
-            scr_mngr_show_screen(SCR_WATCH_SET_LIST);
-            break;
-    }
+static void scr_watchface_init() {
+	  spiffs_file fd = watchset_get_dafault_watch_face_fd();
+		if (fd >= 0) {
+				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
+				scr_mngr_show_screen_with_param(SCR_WATCH_SET, 2<<24 | fd);
+		}
 }
 
 static void scr_watchface_draw() {
@@ -85,17 +76,15 @@ static void scr_watchface_draw() {
 
 void scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
     switch(event_type) {
+        case SCR_EVENT_INIT_SCREEN:
+            scr_watchface_init();
+            break;
         case SCR_EVENT_DRAW_SCREEN:
             scr_watchface_draw();
             break;
         case SCR_EVENT_REFRESH_SCREEN:
             scr_watchface_refresh_time();
             break;
-        case SCR_EVENT_BUTTON_PRESSED:
-            scr_watchface_handle_button_pressed(event_param);
-            break;
-        case SCR_EVENT_BUTTON_LONG_PRESSED:
-            scr_watchface_handle_button_long_pressed(event_param);
-            break;
     }
+		watchset_default_watch_face_handle_event(event_type, event_param);
 }

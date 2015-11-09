@@ -16,26 +16,28 @@
 #include "../battery.h"
 #include "../spiffs/spiffs.h"
 #include "../stopwatch.h"
+#include "../fs.h"
+#include "../watchset.h"
 #include <stdlib.h> 
 
-uint32_t screens_section_address;
-uint32_t external_properties_section_address;
-uint32_t resources_section_address;
-uint32_t ws_data_ptr;
-uint8_t external_properties_no = 0;
-uint8_t* external_properties_data = NULL;
-//SCR_CONTROLS_DEFINITION controls;
-uint8_t* screen_data_buffer = NULL;
-uint32_t checkpoint;
+//struct scr_watchset_data {
+		uint32_t screens_section_address;
+		uint32_t external_properties_section_address;
+		uint32_t resources_section_address;
+		uint32_t ws_data_ptr;
+		uint8_t external_properties_no = 0;
+		uint8_t* external_properties_data = NULL;
+		uint8_t* screen_data_buffer = NULL;
+		uint32_t checkpoint;
 
-uint8_t current_subscreen = 0;
-uint8_t switch_to_subscreen = 0;
+		uint8_t current_subscreen = 0;
+		uint8_t switch_to_subscreen = 0;
 
-static spiffs_file watchset_fd;
-extern spiffs fs;
-
-static FUNCTION action_handlers[8];
-static uint32_t watchset_id;
+		spiffs_file watchset_fd;
+		FUNCTION action_handlers[8];
+		uint32_t watchset_id;
+		void (* base_actions_handler)(uint32_t event_type, uint32_t event_param);
+//}
 
 static void scr_watch_set_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
@@ -61,10 +63,17 @@ static void clear_subscreen_data() {
 		}
 }
 
-void clean_before_exit() {
+static bool is_default_watch_face() {
+		return watchset_get_dafault_watch_face_fd() == watchset_fd;
+}
+
+static void clean_before_exit() {
 		watchset_id = NULL;
 		ble_peripheral_set_watch_set_id(NULL);
-		SPIFFS_close(&fs, watchset_fd); 
+	
+		if (!is_default_watch_face()) {
+				SPIFFS_close(&fs, watchset_fd); 
+		}
 
 	  clear_subscreen_data();		
 		if (external_properties_data != NULL) {
@@ -541,6 +550,14 @@ static void parse_actions() {
 		}
 }
 
+static void parse_base_actions() {
+		uint8_t base_actions_id = get_next_byte();
+		switch(base_actions_id) {
+				case WATCH_SET_BASE_ACTIONS_WATCH_FACE:
+						base_actions_handler = &watchset_default_watch_face_handle_event;
+		}
+}
+
 static bool parse_screen() {
 	  uint8_t section;
 	  do {
@@ -559,13 +576,7 @@ static bool parse_screen() {
 									size_left -= chunk_size;
 									dest_addr += chunk_size;
 							}
-						
-							//current_screen_controls_address = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
-						
-							
-							//SPIFFS_lseek(&fs, watchset_fd, size, SPIFFS_SEEK_CUR);
 					}
-						  //parse_controls(true);
 							break;
 					case WATCH_SET_SCREEN_SECTION_ACTIONS:
 						  parse_actions();
@@ -579,6 +590,9 @@ static bool parse_screen() {
 									return false;
 							}
 					}
+							break;
+					case WATCH_SET_SCREEN_SECTION_BASE_ACTIONS:
+						  parse_base_actions();
 							break;
 				}
 	  } while (section != WATCH_SET_END_OF_DATA);
@@ -601,6 +615,7 @@ static bool init_subscreen(uint8_t screen_id) {
 		
 		// reset action handlers
 		memset(action_handlers, 0, 8 * sizeof(FUNCTION));
+		base_actions_handler = 0;
 		
 		// jump to screen offset
 		SPIFFS_lseek(&fs, watchset_fd, 2 * screen_id, SPIFFS_SEEK_CUR);
@@ -643,12 +658,12 @@ static bool parse_external_properties() {
 
 static void scr_watch_set_init(uint32_t param) {
 			
-		if (param != NULL) {
+		if (param>>24 == 1) {
 				struct spiffs_dirent entry;
-				ext_ram_read_data(param, (uint8_t*)&entry, sizeof(struct spiffs_dirent));	
+				ext_ram_read_data(param&0xFFFFFF, (uint8_t*)&entry, sizeof(struct spiffs_dirent));
 				watchset_fd = SPIFFS_open_by_dirent(&fs, &entry, SPIFFS_RDONLY, 0);
-		} else {
-				watchset_fd = SPIFFS_open(&fs, "watchset", SPIFFS_RDONLY, 0);
+		} else if (param>>24 == 2) {
+				watchset_fd = param & 0xFFFF;
 		}
 		if (watchset_fd < 0) {
 			  close();
@@ -733,6 +748,9 @@ void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 			  case SCR_EVENT_DESTROY_SCREEN:
 						clean_before_exit();
 				    break;
+		}
+		if (base_actions_handler != NULL) {
+				base_actions_handler(event_type, event_param);
 		}
 }
 

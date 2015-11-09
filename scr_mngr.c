@@ -239,12 +239,19 @@ void scr_mngr_draw_screen(void) {
 		} else {
 				if (switch_to_screen != SCR_NOT_SET) {
 						uint16_t old_screen = current_screen;
+						uint16_t new_screen;
 						// disable events
 						current_screen = SCR_NOT_SET;
-						// release memory used by old screen
-						scr_mngr_handle_event_internal(old_screen, SCR_EVENT_DESTROY_SCREEN, NULL);
-						// initilize new screen
-						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_INIT_SCREEN, switch_to_screen_param);
+						do {
+							// release memory used by old screen
+							scr_mngr_handle_event_internal(old_screen, SCR_EVENT_DESTROY_SCREEN, NULL);
+							new_screen = switch_to_screen;
+							// initilize new screen
+							scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_INIT_SCREEN, switch_to_screen_param);
+							old_screen = new_screen;
+							// handle case when init redirects to other screen
+						} while (new_screen != switch_to_screen);
+						
 						// draw screen
 						mlcd_fb_clear();
 					

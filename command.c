@@ -7,13 +7,13 @@
 #include "screens/scr_watchset.h"
 #include "ext_ram.h"
 #include "nrf_soc.h"
+#include "fs.h"
 
 #define COMMAND_OPEN_FILE_STREAM 0x20
 #define COMMAND_APPEND_DATA_TO_FILE_STREAM 0x21
 #define COMMAND_CLOSE_FILE_STREAM 0x22
 #define COMMAND_SET_EXT_PROPERTY_VALUE 0x30
 
-extern spiffs fs;
 static uint32_t data_ptr = 0;
 static uint8_t data_buf[256];
 static bool handle_data = false;
@@ -107,7 +107,6 @@ void command_process(void) {
 							// file close error
 							respCode = (SPIFFS_errno(&fs)*-1)-9999;
 					}
-					scr_mngr_show_screen(SCR_WATCH_SET);
 					break;
 			case COMMAND_SET_EXT_PROPERTY_VALUE:
 			    // set ext param

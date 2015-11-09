@@ -1,8 +1,7 @@
 #include "scr_controls.h"
 #include "mlcd_draw.h"
 #include "string.h"
-
-extern spiffs fs;
+#include "fs.h"
 
 static void limit_int_range(uint32_t* value, uint32_t max_value) {
 	  if(*value > max_value) {

@@ -6,6 +6,7 @@
 #include "board.h"
 #include <inttypes.h>
 #include <string.h>
+#include "fs.h"
 
 //static uint8_t fb[MLCD_LINE_BYTES * MLCD_YRES];
 static bool fb_line_changes[MLCD_YRES];
@@ -13,7 +14,6 @@ static uint8_t vcom;
 static bool backlight_on = false;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
-extern spiffs fs;
 
 static uint8_t bit_reverse(uint8_t byte) {
     #if (__CORTEX_M >= 0x03)
