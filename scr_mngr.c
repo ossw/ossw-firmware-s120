@@ -114,6 +114,11 @@ void scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
 			  case SCR_EVENT_RTC_TIME_CHANGED:
 				    mlcd_switch_vcom();
 				    break;
+		}
+}
+
+void scr_mngr_default_action_handle_event(uint32_t event_type, uint32_t event_param) {
+	  switch(event_type) {
         case SCR_EVENT_BUTTON_LONG_PRESSED:
             scr_mngr_default_handle_button_long_pressed(event_param);
             break;
@@ -121,7 +126,7 @@ void scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
 }
 
 void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_type, uint32_t event_param) {
-		bool allowDefaultHandler = true;
+		bool allowDefaultActionHandler = true;
 		
 	  switch (screen_id) {
 			  case SCR_CHOOSE_MODE:
@@ -129,6 +134,7 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 				    break;
 			  case SCR_WATCHFACE:
 				    scr_watchface_handle_event(event_type, event_param);
+					  allowDefaultActionHandler = false;
 				    break;
 			  case SCR_CHANGE_DATE:
 				    scr_changedate_handle_event(event_type, event_param);
@@ -146,7 +152,7 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 				    scr_notifications_handle_event(event_type, event_param);
 				    break;
 			  case SCR_WATCH_SET:
-					  allowDefaultHandler = false;
+					  allowDefaultActionHandler = false;
 				    scr_watch_set_handle_event(event_type, event_param);
 				    break;
 			  case SCR_WATCH_SET_LIST:
@@ -155,9 +161,10 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 				case SCR_NOT_SET:
 					  return;
 		}
-		if (allowDefaultHandler) {
-			  scr_mngr_default_handle_event(event_type, event_param);
+		if (allowDefaultActionHandler) {
+			  scr_mngr_default_action_handle_event(event_type, event_param);
 		}
+		scr_mngr_default_handle_event(event_type, event_param);
 		
 		if (event_type >= 0x10) {
 				scr_mngr_redraw();
