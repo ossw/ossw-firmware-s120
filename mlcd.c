@@ -4,16 +4,26 @@
 #include "nrf_gpio.h"
 #include "common.h"
 #include "board.h"
+#include "app_timer.h"
 #include <inttypes.h>
 #include <string.h>
 #include "fs.h"
+#include "nordic_common.h"
 
-//static uint8_t fb[MLCD_LINE_BYTES * MLCD_YRES];
+#define TEMP_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
+
+#define MLCD_BL_OFF 			0x0
+#define MLCD_BL_ON 				0x1
+#define MLCD_BL_ON_TEMP 	0x10
+
 static bool fb_line_changes[MLCD_YRES];
 static uint8_t vcom;
-static bool backlight_on = false;
+static uint8_t bl_mode = MLCD_BL_OFF;
+static uint8_t temp_bl_timeout = 3;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
+
+static app_timer_id_t mlcd_bl_timer_id;
 
 static uint8_t bit_reverse(uint8_t byte) {
     #if (__CORTEX_M >= 0x03)
@@ -29,6 +39,13 @@ static uint8_t bit_reverse(uint8_t byte) {
     #endif /* #if (__CORTEX_M >= 0x03) */
 }
 
+void mlcd_bl_timeout_handler(void * p_context) {
+    UNUSED_PARAMETER(p_context);
+		if (bl_mode == MLCD_BL_ON_TEMP) {
+				mlcd_backlight_off();
+		}
+}
+
 void mlcd_init(void)
 {
     nrf_gpio_cfg_output(LCD_ENABLE);
@@ -38,6 +55,16 @@ void mlcd_init(void)
     nrf_gpio_pin_clear(LCD_BACKLIGHT);
     nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
 	  vcom = VCOM_LO;
+}
+
+
+void mlcd_timers_init(void)
+{
+    uint32_t err_code;	 
+    err_code = app_timer_create(&mlcd_bl_timer_id,
+                                APP_TIMER_MODE_SINGLE_SHOT,
+                                mlcd_bl_timeout_handler);
+    APP_ERROR_CHECK(err_code);
 }
 
 void mlcd_display_off(void)
@@ -62,24 +89,63 @@ void mlcd_power_on(void)
 
 void mlcd_backlight_off(void)
 {
-	backlight_on = false;
+	app_timer_stop(mlcd_bl_timer_id);
+	bl_mode = MLCD_BL_OFF;
   nrf_gpio_pin_clear(LCD_BACKLIGHT);
 }
 
 void mlcd_backlight_on(void)
 {
-	backlight_on = true;
+	app_timer_stop(mlcd_bl_timer_id);
+	bl_mode = MLCD_BL_ON;
   nrf_gpio_pin_set(LCD_BACKLIGHT);
+}
+
+void mlcd_backlight_temp_on(void) {
+	if (bl_mode == MLCD_BL_ON) {
+			return;
+	}
+	app_timer_stop(mlcd_bl_timer_id);
+	bl_mode = MLCD_BL_ON_TEMP;
+  nrf_gpio_pin_set(LCD_BACKLIGHT);
+	app_timer_start(mlcd_bl_timer_id, temp_bl_timeout * TEMP_BL_TIMEOUT_UNIT, NULL);
+}
+
+void mlcd_backlight_temp_extend(void) {
+		if (bl_mode == MLCD_BL_ON_TEMP) {
+				mlcd_backlight_temp_on();
+		}
 }
 
 void mlcd_backlight_toggle(void)
 {
-	backlight_on = !backlight_on;
-	if (backlight_on) {
-		  nrf_gpio_pin_set(LCD_BACKLIGHT);
-	} else {
-		  nrf_gpio_pin_clear(LCD_BACKLIGHT);
+	switch (bl_mode) {
+			case MLCD_BL_OFF:
+					mlcd_backlight_on();
+					break;
+			case MLCD_BL_ON:
+					mlcd_backlight_off();
+					break;
+			case MLCD_BL_ON_TEMP:
+					mlcd_backlight_on();
+					break;
 	}
+}
+
+uint32_t mlcd_temp_backlight_timeout(void) {
+		return temp_bl_timeout;
+}
+
+void mlcd_temp_backlight_timeout_inc(void) {
+		if (temp_bl_timeout < 10) {
+				temp_bl_timeout++;
+		}
+}
+
+void mlcd_temp_backlight_timeout_dec(void) {
+		if (temp_bl_timeout > 1) {
+				temp_bl_timeout--;
+		}
 }
 
 void mlcd_switch_vcom() {

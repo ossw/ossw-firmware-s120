@@ -20,6 +20,8 @@
 
 void mlcd_init(void);
 
+void mlcd_timers_init(void);
+
 void mlcd_power_on(void);
 
 void mlcd_power_off(void);
@@ -33,6 +35,16 @@ void mlcd_backlight_on(void);
 void mlcd_backlight_off(void);
 
 void mlcd_backlight_toggle(void);
+
+void mlcd_backlight_temp_on(void);
+
+void mlcd_backlight_temp_extend(void);
+
+void mlcd_temp_backlight_timeout_inc(void);
+
+void mlcd_temp_backlight_timeout_dec(void);
+
+uint32_t mlcd_temp_backlight_timeout(void);
 
 void mlcd_colors_toggle(void);
 

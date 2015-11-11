@@ -29,6 +29,7 @@
 #include "command.h"
 #include "stopwatch.h"
 #include "fs.h"
+#include "accel.h"
 
 #ifdef OSSW_DEBUG
 		#include "app_uart.h"
@@ -172,6 +173,8 @@ int main(void)
 	  ext_ram_init();
 	  init_lcd_with_splash_screen();
 
+		accel_init();
+	
     // Initialize.
     timers_init();
 	  rtc_timer_init();
@@ -191,7 +194,9 @@ int main(void)
 		notifications_init();
 		
 		stopwatch_init();
-			
+		
+		mlcd_timers_init();
+		
     // Enter main loop.
     for (;;)
     {
