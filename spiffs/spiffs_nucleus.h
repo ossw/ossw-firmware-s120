@@ -653,6 +653,15 @@ s32_t spiffs_object_read(
     u32_t offset,
     u32_t len,
     u8_t *dst);
+		
+s32_t spiffs_object_read_notify(
+		spiffs_fd *fd, 
+		u32_t offset,
+		u32_t len, 
+    u8_t *dst,
+		s32_t chunk_len, 
+		void (*notify_handle)(void*, void*), 
+		void* notify_data);
 
 s32_t spiffs_object_truncate(
     spiffs_fd *fd,

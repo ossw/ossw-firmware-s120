@@ -353,6 +353,19 @@ spiffs_file SPIFFS_open_by_dirent(spiffs *fs, struct spiffs_dirent *e, spiffs_fl
 s32_t SPIFFS_read(spiffs *fs, spiffs_file fh, void *buf, s32_t len);
 
 /**
+ * Reads from given filehandle and nootifies givan handle about every chunk read.
+ * @param fs            the file system struct
+ * @param fh            the filehandle
+ * @param buf           where to put read chunk data
+ * @param chunk_no      number of chunks to read
+ * @param chunk_len     chunk length
+ * @param notify_handle function to invoke when chunk read
+ * @param notify_data   data passed to notify handler
+ * @returns number of bytes read, or -1 if error
+ */
+s32_t SPIFFS_read_notify(spiffs *fs, spiffs_file fh, void *buf, s32_t chunk_no, s32_t chunk_len, void (*notify_handle)(void*, void*), void* notify_data);
+
+/**
  * Writes to given filehandle.
  * @param fs            the file system struct
  * @param fh            the filehandle

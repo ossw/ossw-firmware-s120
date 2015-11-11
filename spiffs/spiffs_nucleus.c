@@ -1616,6 +1616,112 @@ s32_t spiffs_object_truncate(
   return res;
 }
 
+s32_t spiffs_object_read_notify(
+		spiffs_fd *fd, 
+		u32_t offset,
+		u32_t len,
+    u8_t *dst, 
+		s32_t chunk_len, 
+		void (*notify_handle)(void*, void*),
+		void* notify_data) {
+  s32_t res = SPIFFS_OK;
+  spiffs *fs = fd->fs;
+  spiffs_page_ix objix_pix;
+  spiffs_page_ix data_pix;
+  spiffs_span_ix data_spix = offset / SPIFFS_DATA_PAGE_SIZE(fs);
+  u32_t cur_offset = offset;
+  spiffs_span_ix cur_objix_spix;
+  spiffs_span_ix prev_objix_spix = (spiffs_span_ix)-1;
+  spiffs_page_object_ix_header *objix_hdr = (spiffs_page_object_ix_header *)fs->work;
+  spiffs_page_object_ix *objix = (spiffs_page_object_ix *)fs->work;
+			
+	u32_t chunk_offset = 0;
+
+  while (cur_offset < offset + len) {
+    cur_objix_spix = SPIFFS_OBJ_IX_ENTRY_SPAN_IX(fs, data_spix);
+    if (prev_objix_spix != cur_objix_spix) {
+      // load current object index (header) page
+      if (cur_objix_spix == 0) {
+        objix_pix = fd->objix_hdr_pix;
+      } else {
+        SPIFFS_DBG("read: find objix %04x:%04x\n", fd->obj_id, cur_objix_spix);
+        res = spiffs_obj_lu_find_id_and_span(fs, fd->obj_id | SPIFFS_OBJ_ID_IX_FLAG, cur_objix_spix, 0, &objix_pix);
+        SPIFFS_CHECK_RES(res);
+      }
+      SPIFFS_DBG("read: load objix page %04x:%04x for data spix:%04x\n", objix_pix, cur_objix_spix, data_spix);
+      res = _spiffs_rd(fs, SPIFFS_OP_T_OBJ_IX | SPIFFS_OP_C_READ,
+          fd->file_nbr, SPIFFS_PAGE_TO_PADDR(fs, objix_pix), SPIFFS_CFG_LOG_PAGE_SZ(fs), fs->work);
+      SPIFFS_CHECK_RES(res);
+      SPIFFS_VALIDATE_OBJIX(objix->p_hdr, fd->obj_id, cur_objix_spix);
+
+      fd->offset = cur_offset;
+      fd->cursor_objix_pix = objix_pix;
+      fd->cursor_objix_spix = cur_objix_spix;
+
+      prev_objix_spix = cur_objix_spix;
+    }
+
+    if (cur_objix_spix == 0) {
+      // get data page from object index header page
+      data_pix = ((spiffs_page_ix*)((u8_t *)objix_hdr + sizeof(spiffs_page_object_ix_header)))[data_spix];
+    } else {
+      // get data page from object index page
+      data_pix = ((spiffs_page_ix*)((u8_t *)objix + sizeof(spiffs_page_object_ix)))[SPIFFS_OBJ_IX_ENTRY(fs, data_spix)];
+    }
+
+    // all remaining data
+    u32_t len_to_read = offset + len - cur_offset;
+    // remaining data in page
+    len_to_read = MIN(len_to_read, SPIFFS_DATA_PAGE_SIZE(fs) - (cur_offset % SPIFFS_DATA_PAGE_SIZE(fs)));
+    // remaining data in file
+    len_to_read = MIN(len_to_read, fd->size);
+    SPIFFS_DBG("read: offset:%i rd:%i data spix:%04x is data_pix:%04x addr:%08x\n", cur_offset, len_to_read, data_spix, data_pix,
+        SPIFFS_PAGE_TO_PADDR(fs, data_pix) + sizeof(spiffs_page_header) + (cur_offset % SPIFFS_DATA_PAGE_SIZE(fs)));
+    if (len_to_read <= 0) {
+      res = SPIFFS_ERR_END_OF_OBJECT;
+      break;
+    }
+    res = spiffs_page_data_check(fs, fd, data_pix, data_spix);
+    SPIFFS_CHECK_RES(res);
+		//
+		u32_t total_len = len_to_read;
+		u32_t page_offset = 0;
+		while (len_to_read >= chunk_len - chunk_offset) {
+			u8_t read_len = chunk_len - chunk_offset;
+			res = _spiffs_rd(
+        fs, SPIFFS_OP_T_OBJ_DA | SPIFFS_OP_C_READ,
+        fd->file_nbr,
+        page_offset + SPIFFS_PAGE_TO_PADDR(fs, data_pix) + sizeof(spiffs_page_header) + (cur_offset % SPIFFS_DATA_PAGE_SIZE(fs)),
+        read_len,
+        dst + chunk_offset);
+				
+			//handle data
+			notify_handle(notify_data, dst);
+				
+			len_to_read -= read_len;
+			page_offset += read_len;
+			chunk_offset = 0;
+		}
+		if (len_to_read > 0) {
+				//handle patial chunk
+			res = _spiffs_rd(
+      fs, SPIFFS_OP_T_OBJ_DA | SPIFFS_OP_C_READ,
+      fd->file_nbr,
+      page_offset + SPIFFS_PAGE_TO_PADDR(fs, data_pix) + sizeof(spiffs_page_header) + (cur_offset % SPIFFS_DATA_PAGE_SIZE(fs)),
+      len_to_read,
+      dst);
+			chunk_offset = len_to_read;
+		}
+		
+    SPIFFS_CHECK_RES(res);
+    cur_offset += total_len;
+    fd->offset = cur_offset;
+    data_spix++;
+  }
+
+  return res;
+}
+
 s32_t spiffs_object_read(
     spiffs_fd *fd,
     u32_t offset,

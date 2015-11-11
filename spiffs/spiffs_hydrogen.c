@@ -334,6 +334,61 @@ s32_t SPIFFS_read(spiffs *fs, spiffs_file fh, void *buf, s32_t len) {
   return len;
 }
 
+s32_t SPIFFS_read_notify(spiffs *fs, spiffs_file fh, void *buf, s32_t chunk_no, s32_t chunk_len, void (*notify_handle)(void*, void*), void* notify_data) {
+  SPIFFS_API_CHECK_CFG(fs);
+  SPIFFS_API_CHECK_MOUNT(fs);
+  SPIFFS_LOCK(fs);
+
+  spiffs_fd *fd;
+  s32_t res;
+	s32_t len = chunk_no * chunk_len;
+
+  fh = SPIFFS_FH_UNOFFS(fs, fh);
+  res = spiffs_fd_get(fs, fh, &fd);
+  SPIFFS_API_CHECK_RES_UNLOCK(fs, res);
+
+  if ((fd->flags & SPIFFS_RDONLY) == 0) {
+    res = SPIFFS_ERR_NOT_READABLE;
+    SPIFFS_API_CHECK_RES_UNLOCK(fs, res);
+  }
+
+  if (fd->size == SPIFFS_UNDEFINED_LEN && len > 0) {
+    // special case for zero sized files
+    res = SPIFFS_ERR_END_OF_OBJECT;
+    SPIFFS_API_CHECK_RES_UNLOCK(fs, res);
+  }
+
+#if SPIFFS_CACHE_WR
+  spiffs_fflush_cache(fs, fh);
+#endif
+
+  if (fd->fdoffset + len >= fd->size) {
+    // reading beyond file size
+    s32_t avail = fd->size - fd->fdoffset;
+    if (avail <= 0) {
+      SPIFFS_API_CHECK_RES_UNLOCK(fs, SPIFFS_ERR_END_OF_OBJECT);
+    }
+    res = spiffs_object_read_notify(fd, fd->fdoffset, avail, buf, chunk_len, notify_handle, notify_data);
+    if (res == SPIFFS_ERR_END_OF_OBJECT) {
+      fd->fdoffset += avail;
+      SPIFFS_UNLOCK(fs);
+      return avail;
+    } else {
+      SPIFFS_API_CHECK_RES_UNLOCK(fs, res);
+      len = avail;
+    }
+  } else {
+    // reading within file size
+    res = spiffs_object_read_notify(fd, fd->fdoffset, len, buf, chunk_len, notify_handle, notify_data);
+    SPIFFS_API_CHECK_RES_UNLOCK(fs, res);
+  }
+  fd->fdoffset += len;
+
+  SPIFFS_UNLOCK(fs);
+
+  return len;
+}
+
 static s32_t spiffs_hydro_write(spiffs *fs, spiffs_fd *fd, void *buf, u32_t offset, s32_t len) {
   (void)fs;
   s32_t res = SPIFFS_OK;

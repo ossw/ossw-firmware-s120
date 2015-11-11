@@ -75,7 +75,7 @@ typedef uint8_t u8_t;
 // Always check header of each accessed page to ensure consistent state.
 // If enabled it will increase number of reads, will increase flash.
 #ifndef SPIFFS_PAGE_CHECK
-#define SPIFFS_PAGE_CHECK               1
+#define SPIFFS_PAGE_CHECK               0
 #endif
 
 // Define maximum number of gc runs to perform to reach desired free pages.

@@ -212,14 +212,14 @@ static void scr_watchset_list_draw() {
 }
 
 static void scr_watchset_list_redraw() {
-		if (data->show_file_no + 1 > data->last_fetched_file_no) {
-				scr_watchset_list_read_next_file_names();
-		}
-	
 		if (data->mode == MODE_SELECT) {
 				if (data->last_rendered_mode == MODE_SELECT && data->last_rendered_file_no == data->show_file_no) {
 						return;
 				}
+				if (data->show_file_no + 1 > data->last_fetched_file_no) {
+						scr_watchset_list_read_next_file_names();
+				}
+				
 		} else if (data->mode == data->last_rendered_mode) {
 				return;
 		}
