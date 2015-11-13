@@ -16,7 +16,11 @@
 #define MLCD_BL_ON 				0x1
 #define MLCD_BL_ON_TEMP 	0x10
 
-static bool fb_line_changes[MLCD_YRES];
+#define MLCD_IS_LINE_CHANGED(line_no) (fb_line_changes[line_no>>3]>>(line_no&0x7) & 0x1)
+#define MLCD_SET_LINE_CHANGED(line_no) (fb_line_changes[line_no>>3]|=1<<(line_no&0x7))
+#define MLCD_CLEAR_LINE_CHANGED(line_no) (fb_line_changes[line_no>>3]&=~(1<<(line_no&0x7)))
+
+static uint8_t fb_line_changes[MLCD_YRES/8];
 static uint8_t vcom;
 static uint8_t bl_mode = MLCD_BL_OFF;
 static uint8_t temp_bl_timeout = 3;
@@ -157,7 +161,7 @@ void mlcd_switch_vcom() {
 }
 
 void mlcd_fb_invalidate_all() {
-    memset(fb_line_changes, true, MLCD_YRES);
+    memset(fb_line_changes, 0xFF, MLCD_YRES/8);
 }
 
 void mlcd_fb_clear() {
@@ -179,7 +183,7 @@ void mlcd_fb_flush () {
   
 	  bool any_changes = false;
 		for (int line_no=0; line_no< MLCD_YRES; line_no++ ){
-				if(fb_line_changes[line_no]) {
+				if (MLCD_IS_LINE_CHANGED(line_no)) {
 					  any_changes = true;
 					  break;
 				}
@@ -197,7 +201,7 @@ void mlcd_fb_flush () {
   
     for (uint8_t line_no = 0; line_no < MLCD_YRES; line_no++) {
 			
-			  if (fb_line_changes[line_no]){
+			  if (MLCD_IS_LINE_CHANGED(line_no)){
 					  // line changed, send line update
             line_address = bit_reverse(MLCD_YRES - line_no);
             spi_master_tx_data_no_cs(MLCD_SPI, &line_address, 1);
@@ -217,7 +221,7 @@ void mlcd_fb_flush () {
 					
             spi_master_tx_data_no_cs(MLCD_SPI, &dummy, 1);
 						
-						fb_line_changes[line_no] = false;
+						MLCD_CLEAR_LINE_CHANGED(line_no);
 				}
 			
 				ext_ram_line_address += MLCD_LINE_BYTES;
@@ -249,7 +253,7 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
 			  uint_fast8_t width_left = width;
         uint8_t val = 0;
 			
-			  fb_line_changes[y_pos+y] = true;
+			  MLCD_SET_LINE_CHANGED(y_pos+y);
 			
 			  if (start_bit_off > 0 || width_left < 8 - start_bit_off) {
 					  ext_ram_read_data(ext_ram_address, &old_val, 1);
@@ -320,7 +324,7 @@ void mlcd_fb_draw_bitmap(const uint8_t *bitmap, uint_fast8_t x_pos, uint_fast8_t
         uint8_t val = 0;
 			  uint_fast8_t byte_no = 0;
 			
-			  fb_line_changes[y_pos+y] = true;
+			  MLCD_SET_LINE_CHANGED(y_pos+y);
 			
 			  if (start_bit_off > 0 || width_left < 8 - start_bit_off) {
 					  ext_ram_read_data(ext_ram_address, &old_val, 1);
@@ -385,7 +389,7 @@ static void mlcd_fb_draw_bitmap_from_file_handle(struct mlcd_fb_draw_bitmap_from
         uint8_t val = 0;
 			  uint_fast8_t byte_no = 0;
 			
-			  fb_line_changes[data->y] = true;
+			  MLCD_SET_LINE_CHANGED(data->y);
 			
 			  if (data->start_bit_off > 0 || width_left < 8 - data->start_bit_off) {
 					  ext_ram_read_data(data->ext_ram_address, &old_val, 1);
