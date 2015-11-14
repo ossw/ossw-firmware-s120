@@ -182,10 +182,10 @@ void accel_init(void) {
 		accel_write_register(0x25, 0x30);
 
 		//0x26: PULSE_TMLT Pulse Time Window 1 register
-		accel_write_register(0x26, 0x2);
+		accel_write_register(0x26, 0x3);
 
 		 //0x27: PULSE_LTCY Pulse Latency Timer register
-		accel_write_register(0x27, 0x1);
+		accel_write_register(0x27, 0xA);
 
 		//0x28 PULSE_WIND register (Read/Write)
 		accel_write_register(0x28, 0x5);
