@@ -204,6 +204,8 @@ int main(void)
 					  rtc_store_current_time();
 				}
 				
+				stopwatch_process();
+				
 				command_process();
 			  
 				scr_mngr_draw_screen();

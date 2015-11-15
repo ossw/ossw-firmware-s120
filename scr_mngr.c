@@ -33,6 +33,7 @@ static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
 	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 2 << 24 | 2 << 16 | 8 << 8 | 13,
 	  (uint32_t (*)(uint32_t, uint8_t))rtc_get_current_hour_24,
 	  0,
+		NULL,
     &hour_ctrl_data
 };
 
@@ -45,6 +46,7 @@ static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
 	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 2 << 24 | 2 << 16 | 8 << 8 | 13,
 	  (uint32_t (*)(uint32_t, uint8_t))rtc_get_current_minutes,
 	  0,
+		NULL,
     &minutes_ctrl_data
 };
 
@@ -80,6 +82,7 @@ static const SCR_CONTROL_PROGRESS_BAR_CONFIG battery_level_config = {
 		1<<16,
 	  battery_get_level,
 	  0,
+		NULL,
     &battery_level_ctrl_data
 };
 

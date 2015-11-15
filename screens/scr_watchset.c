@@ -4,7 +4,6 @@
 #include "../scr_mngr.h"
 #include "../scr_controls.h"
 #include "../mlcd_draw.h"
-#include "../rtc.h"
 #include "../mlcd.h"
 #include "../ext_ram.h"
 #include "../ext_flash.h"
@@ -12,10 +11,7 @@
 #include "../pawn/amxutil.h"
 #include "../i18n/i18n.h"
 #include "../ble/ble_peripheral.h"
-#include "../ble/ble_central.h"
-#include "../battery.h"
 #include "../spiffs/spiffs.h"
-#include "../stopwatch.h"
 #include "../fs.h"
 #include "../watchset.h"
 #include <stdlib.h> 
@@ -34,12 +30,16 @@
 		uint8_t switch_to_subscreen = 0;
 
 		spiffs_file watchset_fd;
+		bool disable_actions = false;
 		FUNCTION action_handlers[8];
 		uint32_t watchset_id;
 		void (* base_actions_handler)(uint32_t event_type, uint32_t event_param);
 //}
 
 static void scr_watch_set_handle_button_pressed(uint32_t button_id) {
+		if (disable_actions) {
+				return;
+		}
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 					  scr_watch_set_invoke_function(&action_handlers[0]);
@@ -88,6 +88,9 @@ void close() {
 }
 
 static void scr_watch_set_handle_button_long_pressed(uint32_t button_id) {
+		if (disable_actions) {
+				return;
+		}
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 					  scr_watch_set_invoke_function(&action_handlers[4]);
@@ -148,57 +151,12 @@ static inline void ws_data_read(uint8_t *data, uint32_t size) {
 		ws_data_ptr += size;
 }
 
-static uint32_t (* const internal_data_source_handles[])(void) = {
-		/* 0 */ battery_get_level,
-		/* 1 */ rtc_get_current_hour_24,
-		/* 2 */ rtc_get_current_hour_12,
-		/* 3 */ rtc_get_current_hour_12_designator,
-		/* 4 */ rtc_get_current_minutes,
-		/* 5 */ rtc_get_current_seconds,
-		/* 6 */ rtc_get_current_day_of_week,
-		/* 7 */ rtc_get_current_day_of_month,
-		/* 8 */ rtc_get_current_day_of_year,
-		/* 9 */ rtc_get_current_month,
-		/* 10 */rtc_get_current_year,
-		/* 11 */stopwatch_get_total_h,
-		/* 12 */stopwatch_get_total_m,
-		/* 13 */stopwatch_get_total_s,
-		/* 14 */stopwatch_get_total_cs,
-		/* 15 */stopwatch_get_total_ms,
-		/* 16 */stopwatch_get_current_lap_number,
-		/* 17 */stopwatch_get_current_lap_h,
-		/* 18 */stopwatch_get_current_lap_m,
-		/* 19 */stopwatch_get_current_lap_s,
-		/* 20 */stopwatch_get_current_lap_cs,
-		/* 21 */stopwatch_get_current_lap_ms,
-		/* 22 */stopwatch_get_last_lap_h,
-		/* 23 */stopwatch_get_last_lap_m,
-		/* 24 */stopwatch_get_last_lap_s,
-		/* 25 */stopwatch_get_last_lap_cs,
-		/* 26 */stopwatch_get_last_lap_ms
-
-};
-
-static uint32_t (* const sensor_data_source_handles[])(void) = {
-		/* 0 */ ble_central_heart_rate
-};
-
 static uint32_t pow(uint32_t x, uint8_t n) {
 	  uint32_t result = 1;
 	  for(uint32_t i = 0; i < n; i++) {
 			  result *= x;
 		}
 		return result;
-}
-
-static uint32_t internal_data_source_get_value(uint32_t data_source_id, uint8_t expected_range) {
-		uint32_t multiplier = pow(10, expected_range&0xF);
-	  return multiplier * internal_data_source_handles[data_source_id]();
-}
-
-static uint32_t sensor_data_source_get_value(uint32_t data_source_id, uint8_t expected_range) {
-		uint32_t multiplier = pow(10, expected_range&0xF);
-	  return multiplier * sensor_data_source_handles[data_source_id]();
 }
 
 static uint8_t calc_ext_property_size(uint8_t type, uint8_t range) {
@@ -263,14 +221,14 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id, ui
 		}
 }
 
-static void build_data_source(uint8_t type, uint8_t property, void **data_source, uint32_t* data_source_param) {
-	  switch (type) {
+static void build_data_source(uint8_t type, uint8_t property, void **data_source, uint32_t* data_source_param, void **data_converter) {
+	  switch (type&0x3) {
 			  case DATA_SOURCE_INTERNAL:
-			      *data_source = internal_data_source_get_value;
+			      *data_source = watchset_internal_data_source_get_value;
 				    *data_source_param = property;
 				    break;
 			  case DATA_SOURCE_SENSOR:
-			      *data_source = sensor_data_source_get_value;
+			      *data_source = watchset_sensor_data_source_get_value;
 				    *data_source_param = property;
 				    break;
 			  case DATA_SOURCE_EXTERNAL:
@@ -278,12 +236,14 @@ static void build_data_source(uint8_t type, uint8_t property, void **data_source
 				    *data_source_param = property;
 				    break;
 		}
+		uint8_t converter = type >> 2;
+		*data_converter = watchset_get_converter(converter);	
 }
 
-static void parse_data_source(void **data_source, uint32_t* data_source_param) {
+static void parse_data_source(void **data_source, uint32_t* data_source_param, void **data_converter) {
     uint8_t type = ws_data_get_next_byte();
     uint8_t property = ws_data_get_next_byte();
-	  build_data_source(type, property, data_source, data_source_param);
+	  build_data_source(type, property, data_source, data_source_param, data_converter);
 }
 
 void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t size) {
@@ -324,7 +284,7 @@ static void parse_and_draw_screen_control_number(bool force) {
 		config.x = x;
 		config.y = y;
 	
-	  build_data_source(data[7], data[8], (void **)&config.data_handle, &config.data_handle_param);
+	  build_data_source(data[7], data[8], (void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter);
 		uint16_t dataPtr = data[9] << 8 | data[10];
 		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
 	
@@ -408,7 +368,7 @@ static void parse_and_draw_screen_control_image_from_set(bool force) {
     //uint8_t res_source = data[4];
     uint8_t res_id = data[5];
 	
-	  build_data_source(data[6], data[7], (void **)&config.data_handle, &config.data_handle_param);
+	  build_data_source(data[6], data[7], (void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter);
 		uint16_t dataPtr = data[8]<<8 | data[9];
 		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
 	
@@ -454,7 +414,7 @@ static void* parse_screen_control_text(SCR_CONTROL_TEXT_CONFIG* config) {
 		config->height = height;
 		config->style = style;
 		//config->data = data;
-	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
+	  parse_data_source((void **)&config->data_handle, &config->data_handle_param, (void **)&config->converter);
 		uint16_t dataPtr = ws_data_get_next_short();
 		config->data->last_value = (char*)(screen_data_buffer + dataPtr);
 		return config;
@@ -480,7 +440,7 @@ static void parse_screen_control_progress(SCR_CONTROL_PROGRESS_BAR_CONFIG* confi
 		config->height = height;
 		config->style = style;
 		//config->data = data;
-	  parse_data_source((void **)&config->data_handle, &config->data_handle_param);
+	  parse_data_source((void **)&config->data_handle, &config->data_handle_param, (void **)&config->converter);
 		uint16_t dataPtr = ws_data_get_next_short();
 		config->data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
 }
@@ -545,8 +505,16 @@ static void parse_actions() {
 	
 	  for(int i=0; i<actions_no; i++) {
 			  uint8_t event = get_next_byte();
-			  action_handlers[event].id = get_next_byte();
-			  action_handlers[event].parameter = get_next_short();
+				if (event < 8) {
+						action_handlers[event].id = get_next_byte();
+						action_handlers[event].parameter = get_next_short();
+				} else if (event == 0xF0) {
+						// init screen action
+						FUNCTION action;
+						action.id = get_next_byte();
+						action.parameter = get_next_short();
+					  scr_watch_set_invoke_function(&action);
+				}
 		}
 }
 
@@ -657,7 +625,7 @@ static bool parse_external_properties() {
 }
 
 static void scr_watch_set_init(uint32_t param) {
-			
+		disable_actions = true;
 		if (param>>24 == 1) {
 				struct spiffs_dirent entry;
 				ext_ram_read_data(param&0xFFFFFF, (uint8_t*)&entry, sizeof(struct spiffs_dirent));
@@ -702,6 +670,7 @@ static void scr_watch_set_init(uint32_t param) {
 		ble_peripheral_set_watch_set_id(watchset_id);
 		
 		init_subscreen(current_subscreen);
+		disable_actions = false;
 }
 
 static void scr_watch_set_draw_screen() {
@@ -711,6 +680,7 @@ static void scr_watch_set_draw_screen() {
 
 static void scr_watch_set_refresh_screen() {
 	  if (current_subscreen != switch_to_subscreen) {
+				disable_actions = true;
 				clear_subscreen_data();
 	      mlcd_fb_clear();
 			  init_subscreen(switch_to_subscreen);
@@ -719,6 +689,7 @@ static void scr_watch_set_refresh_screen() {
 				draw_screen_controls(true);
 			
 			  current_subscreen = switch_to_subscreen;
+				disable_actions = false;
 		} else {
 	//			SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
 				draw_screen_controls(false);
@@ -763,37 +734,10 @@ void scr_watch_set_invoke_function(const FUNCTION* function) {
 }
 
 void scr_watch_set_invoke_internal_function(uint8_t function_id, uint16_t param) {
-	  switch(function_id) {
-			  case WATCH_SET_FUNC_TOGGLE_BACKLIGHT:
-				    mlcd_backlight_toggle();
-			      break;
-			  case WATCH_SET_FUNC_TOGGLE_COLORS:
-				    mlcd_colors_toggle();
-			      break;
-			  case WATCH_SET_FUNC_SHOW_SETTINGS:
-				    scr_mngr_show_screen(SCR_SETTINGS);
-			      break;
-				case WATCH_SET_FUNC_CLOSE:
-					  scr_mngr_show_screen(SCR_WATCHFACE);
-					  break;
-			  case WATCH_SET_FUNC_CHANGE_SCREEN:
-					  switch_to_subscreen = param;
-			      break;
-			  case WATCH_SET_FUNC_STOPWATCH_START:
-						stopwatch_fn_start();
-			      break;
-			  case WATCH_SET_FUNC_STOPWATCH_RESET:
-						stopwatch_fn_reset();
-			      break;
-			  case WATCH_SET_FUNC_STOPWATCH_STOP:
-						stopwatch_fn_stop();
-			      break;
-			  case WATCH_SET_FUNC_STOPWATCH_START_STOP:
-						stopwatch_fn_start_stop();
-			      break;
-			  case WATCH_SET_FUNC_STOPWATCH_NEXT_LAP:
-						stopwatch_fn_next_lap();
-			      break;
+		if (WATCH_SET_FUNC_CHANGE_SCREEN == function_id) {
+				switch_to_subscreen = param;
+		} else {
+				watchset_invoke_internal_function(function_id, param);
 		}
 }
 

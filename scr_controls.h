@@ -60,6 +60,7 @@ typedef struct
 	  uint32_t style;
 	  uint32_t (* data_handle)(uint32_t, uint8_t);
 	  uint32_t data_handle_param;
+	  uint32_t (* converter)(uint32_t);
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_NUMBER_CONFIG;	
 
@@ -72,6 +73,7 @@ typedef struct
 	  uint32_t style;
 	  uint32_t (* data_handle)(uint32_t);
 	  uint32_t data_handle_param;
+	  uint32_t (* converter)(uint32_t);
 	  TEXT_CONTROL_DATA* data;
 } SCR_CONTROL_TEXT_CONFIG;	
 
@@ -101,6 +103,7 @@ typedef struct
 		spiffs_file file;
 	  uint32_t (* data_handle)(uint32_t, uint8_t);
 	  uint32_t data_handle_param;
+	  uint32_t (* converter)(uint32_t);
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_IMAGE_FROM_SET_CONFIG;	
 
@@ -114,6 +117,7 @@ typedef struct
 	  uint32_t style;
 	  uint32_t (* data_handle)();
 	  uint32_t data_handle_param;
+	  uint32_t (* converter)(uint32_t);
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_PROGRESS_BAR_CONFIG;	
 

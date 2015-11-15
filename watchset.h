@@ -26,6 +26,10 @@
 #define WATCH_SET_FUNC_STOPWATCH_STOP         0x12
 #define WATCH_SET_FUNC_STOPWATCH_START_STOP   0x13
 #define WATCH_SET_FUNC_STOPWATCH_NEXT_LAP     0x14
+#define WATCH_SET_FUNC_STOPWATCH_RECALL_PREV_LAP 0x15
+#define WATCH_SET_FUNC_STOPWATCH_RECALL_NEXT_LAP 0x16
+#define WATCH_SET_FUNC_STOPWATCH_RECALL_LAST_LAP 0x17
+#define WATCH_SET_FUNC_STOPWATCH_RECALL_FIRST_LAP 0x18
 
 #define WATCH_SET_FUNC_CHANGE_SCREEN 0xF0
 #define WATCH_SET_FUNC_SHOW_SETTINGS 0xF1
@@ -70,5 +74,13 @@ void watchset_set_default_watch_face(struct spiffs_dirent* entry);
 spiffs_file watchset_get_dafault_watch_face_fd(void);
 
 void watchset_default_watch_face_handle_event(uint32_t event_type, uint32_t event_param);
+
+uint32_t watchset_internal_data_source_get_value(uint32_t data_source_id, uint8_t expected_range);
+
+uint32_t watchset_sensor_data_source_get_value(uint32_t data_source_id, uint8_t expected_range);
+
+void watchset_invoke_internal_function(uint8_t function_id, uint16_t param);
+
+void* watchset_get_converter(uint8_t key);
 
 #endif /* WATCHSET_H */
