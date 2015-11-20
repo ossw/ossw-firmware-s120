@@ -54,6 +54,7 @@
 #define DATA_SOURCE_INTERNAL 0
 #define DATA_SOURCE_EXTERNAL 1
 #define DATA_SOURCE_SENSOR   2
+#define DATA_SOURCE_STATIC   3
 
 #define DATA_SOURCE_BATTERY_LEVEL 0
 #define DATA_SOURCE_TIME_HOUR_24 1
@@ -78,6 +79,8 @@ void watchset_default_watch_face_handle_event(uint32_t event_type, uint32_t even
 uint32_t watchset_internal_data_source_get_value(uint32_t data_source_id, uint8_t expected_range);
 
 uint32_t watchset_sensor_data_source_get_value(uint32_t data_source_id, uint8_t expected_range);
+
+uint32_t watchset_static_data_source_get_value(uint32_t data_source_id, uint8_t expected_range);
 
 void watchset_invoke_internal_function(uint8_t function_id, uint16_t param);
 

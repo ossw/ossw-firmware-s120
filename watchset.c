@@ -177,3 +177,7 @@ uint32_t watchset_sensor_data_source_get_value(uint32_t data_source_id, uint8_t 
 		uint32_t multiplier = pow(10, expected_range&0xF);
 	  return multiplier * sensor_data_source_handles[data_source_id]();
 }
+
+uint32_t watchset_static_data_source_get_value(uint32_t data_source_id, uint8_t expected_range) {
+		return data_source_id;
+}

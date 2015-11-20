@@ -221,8 +221,16 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id, ui
 		}
 }
 
-static void build_data_source(uint8_t type, uint8_t property, void **data_source, uint32_t* data_source_param, void **data_converter) {
-	  switch (type&0x3) {
+static void parse_data_source(void **data_source, uint32_t* data_source_param, void **data_converter, uint8_t* data_cache) {
+    uint8_t type = ws_data_get_next_byte();
+    uint8_t property = ws_data_get_next_byte();
+		  switch (type&0x3F) {
+			  case DATA_SOURCE_STATIC:
+			      *data_source = watchset_static_data_source_get_value;
+						ws_data_read(data_cache, property);
+						data_cache[property] = 0;
+				    *data_source_param = (uint32_t)data_cache;
+				    break;
 			  case DATA_SOURCE_INTERNAL:
 			      *data_source = watchset_internal_data_source_get_value;
 				    *data_source_param = property;
@@ -236,14 +244,12 @@ static void build_data_source(uint8_t type, uint8_t property, void **data_source
 				    *data_source_param = property;
 				    break;
 		}
-		uint8_t converter = type >> 2;
-		*data_converter = watchset_get_converter(converter);	
-}
-
-static void parse_data_source(void **data_source, uint32_t* data_source_param, void **data_converter) {
-    uint8_t type = ws_data_get_next_byte();
-    uint8_t property = ws_data_get_next_byte();
-	  build_data_source(type, property, data_source, data_source_param, data_converter);
+		if (type & 0x80) {
+				uint8_t converter = ws_data_get_next_byte();
+				*data_converter = watchset_get_converter(converter);	
+		} else {
+				*data_converter = NULL;
+		}
 }
 
 void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t size) {
@@ -265,28 +271,19 @@ void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t 
 
 static void parse_and_draw_screen_control_number(bool force) {
 	
-    uint8_t data[11];
+    uint8_t data[9];
 		ws_data_read(data, sizeof(data));
 	
 		SCR_CONTROL_NUMBER_CONFIG config;
-    uint8_t range = data[0];
-    uint8_t x = data[1];
-    uint8_t y = data[2];
+		config.range = data[0];
+		config.x = data[1];
+		config.y = data[2];
     uint32_t style = data[3]<<24|data[4]<<16|data[5]<<8|data[6];
-	
-	
-	  //NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
-	  //memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
-	  
-	  //SCR_CONTROL_NUMBER_CONFIG* config = malloc(sizeof(SCR_CONTROL_NUMBER_CONFIG));
-	
-		config.range = range;
-		config.x = x;
-		config.y = y;
-	
-	  build_data_source(data[7], data[8], (void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter);
-		uint16_t dataPtr = data[9] << 8 | data[10];
+		uint16_t dataPtr = data[7] << 8 | data[8];
 		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
+		
+	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, NULL);
+
 	
 		uint8_t decimal_size = config.range&0xF;
 	  uint32_t value = config.data_handle(config.data_handle_param, decimal_size);
@@ -356,7 +353,7 @@ static void parse_and_draw_screen_control_static_image(bool force) {
 
 static void parse_and_draw_screen_control_image_from_set(bool force) {
 	
-    uint8_t data[10];
+    uint8_t data[8];
 		ws_data_read(data, sizeof(data));
 	
 		SCR_CONTROL_IMAGE_FROM_SET_CONFIG config;
@@ -367,10 +364,10 @@ static void parse_and_draw_screen_control_image_from_set(bool force) {
     uint8_t height = data[3];
     //uint8_t res_source = data[4];
     uint8_t res_id = data[5];
-	
-	  build_data_source(data[6], data[7], (void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter);
-		uint16_t dataPtr = data[8]<<8 | data[9];
+		uint16_t dataPtr = data[6]<<8 | data[7];
 		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
+	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, NULL);
+		
 	
 	  uint32_t value = config.data_handle(config.data_handle_param, 0);
 	
@@ -396,53 +393,39 @@ static void parse_and_draw_screen_control_image_from_set(bool force) {
 		SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
 }
 
-static void* parse_screen_control_text(SCR_CONTROL_TEXT_CONFIG* config) {
-    uint8_t x = ws_data_get_next_byte();
-    uint8_t y = ws_data_get_next_byte();
-    uint8_t width = ws_data_get_next_byte();
-    uint8_t height = ws_data_get_next_byte();
-    uint32_t style = ws_data_get_next_int();
+static void parse_and_draw_screen_control_text(bool force) {
 	
-	  //TEXT_CONTROL_DATA* data = malloc(sizeof(TEXT_CONTROL_DATA));
-	  //memset(data, 0, sizeof(TEXT_CONTROL_DATA));
-	  
-	  //SCR_CONTROL_TEXT_CONFIG* config = malloc(sizeof(SCR_CONTROL_TEXT_CONFIG));
+		SCR_CONTROL_TEXT_CONFIG config;
+		TEXT_CONTROL_DATA data;
+		config.data = &data;
 	
-		config->x = x;
-		config->y = y;
-		config->width = width;
-		config->height = height;
-		config->style = style;
-		//config->data = data;
-	  parse_data_source((void **)&config->data_handle, &config->data_handle_param, (void **)&config->converter);
+		config.x = ws_data_get_next_byte();;
+		config.y = ws_data_get_next_byte();
+		config.width = ws_data_get_next_byte();
+		config.height = ws_data_get_next_byte();
+		config.style = ws_data_get_next_int();
 		uint16_t dataPtr = ws_data_get_next_short();
-		config->data->last_value = (char*)(screen_data_buffer + dataPtr);
-		return config;
+		config.data->last_value = (char*)(screen_data_buffer + dataPtr);
+	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, (void *)config.data->last_value);
+	
+		scr_controls_draw_text_control(&config, force);
 }
 
-static void parse_screen_control_progress(SCR_CONTROL_PROGRESS_BAR_CONFIG* config) {
-    uint32_t max_value = ws_data_get_next_int();
-    uint8_t x = ws_data_get_next_byte();
-    uint8_t y = ws_data_get_next_byte();
-    uint8_t width = ws_data_get_next_byte();
-    uint8_t height = ws_data_get_next_byte();
-    uint32_t style = ws_data_get_next_int();
+static void parse_and_draw_screen_control_progress(bool force) {
 	
-	  //NUMBER_CONTROL_DATA* data = malloc(sizeof(NUMBER_CONTROL_DATA));
-	  //memset(data, 0, sizeof(NUMBER_CONTROL_DATA));
-	  
-	  //SCR_CONTROL_PROGRESS_BAR_CONFIG* config = malloc(sizeof(SCR_CONTROL_PROGRESS_BAR_CONFIG));
-	
-	  config->max = max_value;
-		config->x = x;
-		config->y = y;
-		config->width = width;
-		config->height = height;
-		config->style = style;
-		//config->data = data;
-	  parse_data_source((void **)&config->data_handle, &config->data_handle_param, (void **)&config->converter);
+		SCR_CONTROL_PROGRESS_BAR_CONFIG config;
+
+	  config.max = ws_data_get_next_int();
+		config.x = ws_data_get_next_byte();
+		config.y = ws_data_get_next_byte();
+		config.width = ws_data_get_next_byte();
+		config.height = ws_data_get_next_byte();
+		config.style = ws_data_get_next_int();
 		uint16_t dataPtr = ws_data_get_next_short();
-		config->data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
+		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
+	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, NULL);
+		
+		scr_controls_draw_progress_bar_control(&config, force);
 }
 
 static bool draw_screen_controls(bool force) {
@@ -463,18 +446,12 @@ static bool draw_screen_controls(bool force) {
 					    break;
 					case SCR_CONTROL_TEXT:
 					{
-							SCR_CONTROL_TEXT_CONFIG config;
-							TEXT_CONTROL_DATA data;
-							config.data = &data;
-						  parse_screen_control_text(&config);
-							scr_controls_draw_text_control(&config, force);
+						  parse_and_draw_screen_control_text(force);
 					}
 					    break;
 					case SCR_CONTROL_PROGRESS_BAR:
 					{
-							SCR_CONTROL_PROGRESS_BAR_CONFIG config;
-						  parse_screen_control_progress(&config);
-							scr_controls_draw_progress_bar_control(&config, force);
+						  parse_and_draw_screen_control_progress(force);
 					}
 					    break;
 					case SCR_CONTROL_STATIC_IMAGE:

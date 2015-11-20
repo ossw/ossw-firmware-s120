@@ -209,7 +209,7 @@ uint32_t u8_nextchar(const char *s, int *i)
 				}
         ch += (unsigned char)next_bytes[0];
         sz++;
-    } while (next_bytes[1] && !isutf(next_bytes[1]));
+    } while (next_bytes[0] && next_bytes[1] && !isutf(next_bytes[1]));
     ch -= offsetsFromUTF8[sz-1];
 
     return ch;
