@@ -159,7 +159,10 @@ void scr_controls_draw_static_image_control(SCR_CONTROL_STATIC_IMAGE_CONFIG* cfg
 		uint8_t header[4];
 		SPIFFS_read(&fs, cfg->file, header, 4);
 		
-		mlcd_fb_draw_bitmap_from_file(cfg->file, cfg->x, cfg->y, cfg->width, cfg->height, header[2]);
+		mlcd_fb_draw_bitmap_from_file(cfg->file, cfg->x, cfg->y, 
+				cfg->width != 0 ? cfg->width:header[2], 
+				cfg->height != 0 ? cfg->height:header[3],
+				header[2]);
 }
 
 void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG* cfg, bool force) {

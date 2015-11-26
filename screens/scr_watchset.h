@@ -5,14 +5,6 @@
 #include <stdint.h>
 #include "../watchset.h"
 
-typedef struct
-{
-	  uint8_t id;
-	  uint16_t parameter;
-} FUNCTION;
-
-void scr_watch_set_invoke_function(const FUNCTION* function);
-
 void scr_watch_set_invoke_internal_function(uint8_t function_id, uint16_t param);
 
 void scr_watch_set_invoke_external_function(uint8_t function_id);
