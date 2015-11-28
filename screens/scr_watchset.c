@@ -16,6 +16,13 @@
 #include "../watchset.h"
 #include <stdlib.h> 
 
+struct model_property {
+		int16_t value;
+		int16_t min;
+		int16_t max;
+		bool overflow;
+};
+
 //struct scr_watchset_data {
 		uint32_t screens_section_address;
 		uint32_t external_properties_section_address;
@@ -25,7 +32,7 @@
 		uint8_t* external_properties_data = NULL;
 		uint8_t* screen_data_buffer = NULL;
 		uint8_t* actions_data_buffer = NULL;
-		int32_t* model_data_buffer = NULL;
+		struct model_property* model_data_buffer = NULL;
 		uint32_t checkpoint;
 
 		uint8_t current_subscreen = 0;
@@ -146,7 +153,7 @@ static uint8_t calc_ext_property_size(uint8_t type, uint8_t range) {
 }
 
 static uint32_t model_data_source_get_property_value(uint32_t property_id, uint8_t expected_range) {	 
-		return model_data_buffer[property_id];
+		return model_data_buffer[property_id].value;
 }
 
 static uint32_t external_data_source_get_property_value(uint32_t property_id, uint8_t expected_range) {	  
@@ -228,6 +235,19 @@ static void parse_data_source(void **data_source, uint32_t* data_source_param, v
 				    *data_source_param = property;
 				    break;
 		}
+		if (type & 0x40) {
+				//parse index
+				uint32_t (* data_handle)(uint32_t);
+				uint32_t data_handle_param;
+				uint32_t (* converter)(uint32_t);
+				uint32_t static_data;
+				parse_data_source((void **)&data_handle, &data_handle_param, (void **)&converter, (void *)&static_data);
+				int index = data_handle(data_handle_param);
+				if (converter != NULL) {
+						index = converter(index);
+				}
+				*data_source_param = (*data_source_param) | index<<8;
+		} 
 		if (type & 0x80) {
 				uint8_t converter = ws_data_get_next_byte();
 				*data_converter = watchset_get_converter(converter);	
@@ -243,7 +263,7 @@ static int parse_data_source_value() {
 		int value = 0;
 	  switch (type&0x3F) {
 			  case DATA_SOURCE_STATIC:
-						get_next_byte();
+						//get_next_byte();
 			      value = get_next_int();
 				    break;
 			  case DATA_SOURCE_INTERNAL:
@@ -255,7 +275,13 @@ static int parse_data_source_value() {
 			  case DATA_SOURCE_EXTERNAL:
 			      value = external_data_source_get_property_value(property, 0);
 				    break;
+			  case DATA_SOURCE_MODEL:
+			      value = model_data_source_get_property_value(property, 0);
+				    break;
 		}
+		if (type & 0x40) {
+					parse_data_source_value();
+		} 
 		if (type & 0x80) {
 				uint32_t (* converter)(uint32_t) = (uint32_t (*)(uint32_t))watchset_get_converter(ws_data_get_next_byte());	
 				value = converter(value);
@@ -285,6 +311,9 @@ static int parse_data_source_value_from_array(uint8_t** data) {
 			      value = model_data_source_get_property_value(property, 0);
 				    break;
 		}
+		if (type & 0x40) {
+				parse_data_source_value_from_array(data);
+		}
 		if (type & 0x80) {
 				uint32_t (* converter)(uint32_t) = (uint32_t (*)(uint32_t))watchset_get_converter(*(*data++));	
 				value = converter(value);
@@ -309,7 +338,7 @@ void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t 
 		}
 }
 
-static void parse_and_draw_screen_control_number(bool force) {
+static bool parse_and_draw_screen_control_number(bool force) {
 	
     uint8_t data[9];
 		ws_data_read(data, sizeof(data));
@@ -329,7 +358,7 @@ static void parse_and_draw_screen_control_number(bool force) {
 	  uint32_t value = config.data_handle(config.data_handle_param, decimal_size);
 		
 		if (!force && config.data->last_value == value) {
-				return;
+				return false;
 		}
 				
 		if ((style>>30)==1) {
@@ -354,15 +383,16 @@ static void parse_and_draw_screen_control_number(bool force) {
 		if ((style>>30)==1) {
 				SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
 		}
+		return false;
 }
 
-static void parse_and_draw_screen_control_static_image(bool force) {
+static bool parse_and_draw_screen_control_static_image(bool force) {
 	
     uint8_t data[6];
 		ws_data_read(data, sizeof(data));
 	
 		if (!force) {
-				return;
+				return false;
 		}
 	
 		SCR_CONTROL_STATIC_IMAGE_CONFIG config;
@@ -389,9 +419,10 @@ static void parse_and_draw_screen_control_static_image(bool force) {
 		
 		scr_controls_draw_static_image_control(&config, force);
 		SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
+		return false;
 }
 
-static void parse_and_draw_screen_control_image_from_set(bool force) {
+static bool parse_and_draw_screen_control_image_from_set(bool force) {
 	
     uint8_t data[8];
 		ws_data_read(data, sizeof(data));
@@ -412,7 +443,7 @@ static void parse_and_draw_screen_control_image_from_set(bool force) {
 	  uint32_t value = config.data_handle(config.data_handle_param, 0);
 	
 		if (!force && config.data->last_value == value) {
-				return;
+				return false;
 		}
 		
 		checkpoint = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);
@@ -431,33 +462,44 @@ static void parse_and_draw_screen_control_image_from_set(bool force) {
 		
 		scr_controls_draw_image_from_set_control(&config, force);
 		SPIFFS_lseek(&fs, watchset_fd, checkpoint, SPIFFS_SEEK_SET);
+		return false;
 }
 
-static void parse_and_draw_choose_control_image_from_set(bool force) {
+static bool parse_and_draw_choose_control(bool force) {
 		
 	  uint32_t (* data_handle)(uint32_t);
 	  uint32_t data_handle_param;
 	  uint32_t (* converter)(uint32_t);
 		uint32_t static_data;
 		parse_data_source((void **)&data_handle, &data_handle_param, (void **)&converter, (void *)&static_data);
+		int data_offset = ws_data_get_next_short();
+		uint8_t* data_ptr = (uint8_t*)(screen_data_buffer + data_offset);
 		uint32_t value = data_handle(data_handle_param);
 		if (converter != NULL) {
 				value = converter(value);
 		}
+		
+		if (!force && *data_ptr != value) {
+				return true;
+		}
+		
 		uint8_t options_no = ws_data_get_next_byte();
 		for (int i=0; i<options_no; i++) {
 				uint8_t expected_value = ws_data_get_next_byte();
 				int block_size = ws_data_get_next_short();
 				if (value == expected_value) {
-						parse_screen_controls(force);
+						if (parse_screen_controls(force)) {
+								return true;
+						}
 				} else {
 						ws_data_skip(block_size);
 				}
 		}
-		
+		*data_ptr = value;
+		return false;
 }
 
-static void parse_and_draw_screen_control_text(bool force) {
+static bool parse_and_draw_screen_control_text(bool force) {
 	
 		SCR_CONTROL_TEXT_CONFIG config;
 		TEXT_CONTROL_DATA data;
@@ -473,9 +515,10 @@ static void parse_and_draw_screen_control_text(bool force) {
 	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, (void *)config.data->last_value);
 	
 		scr_controls_draw_text_control(&config, force);
+		return false;
 }
 
-static void parse_and_draw_screen_control_progress(bool force) {
+static bool parse_and_draw_screen_control_progress(bool force) {
 	
 		SCR_CONTROL_PROGRESS_BAR_CONFIG config;
 
@@ -490,6 +533,7 @@ static void parse_and_draw_screen_control_progress(bool force) {
 	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, NULL);
 		
 		scr_controls_draw_progress_bar_control(&config, force);
+		return false;
 }
 
 static bool parse_screen_controls(bool force) {
@@ -505,31 +549,43 @@ static bool parse_screen_controls(bool force) {
 			
 			  switch (control_type) {
 					case SCR_CONTROL_NUMBER:
-						  parse_and_draw_screen_control_number(force);
+						  if (parse_and_draw_screen_control_number(force)) {
+									return true;
+							}
 					    break;
 					case SCR_CONTROL_TEXT:
 					{
-						  parse_and_draw_screen_control_text(force);
+						  if (parse_and_draw_screen_control_text(force)){
+									return true;
+							}
 					}
 					    break;
 					case SCR_CONTROL_PROGRESS_BAR:
 					{
-						  parse_and_draw_screen_control_progress(force);
+						  if (parse_and_draw_screen_control_progress(force)) {
+									return true;
+							}
 					}
 					    break;
 					case SCR_CONTROL_STATIC_IMAGE:
 					{
-						  parse_and_draw_screen_control_static_image(force);
+						  if (parse_and_draw_screen_control_static_image(force)) {
+									return true;
+							}
 					}
 					    break;
 					case SCR_CONTROL_IMAGE_FROM_SET:
 					{
-						  parse_and_draw_screen_control_image_from_set(force);
+						  if (parse_and_draw_screen_control_image_from_set(force)) {
+									return true;
+							}
 					}
 					    break;
 					case 0xF0: //choose
 					{
-						  parse_and_draw_choose_control_image_from_set(force);
+						  if (parse_and_draw_choose_control(force)) {
+									return true;
+							}
 					}
 					    break;
 				}
@@ -542,7 +598,7 @@ static bool parse_screen_controls(bool force) {
 						printf("CTRL 0x%02x: 0x%08x\r\n", control_type, control_diff);
 				#endif*/
 		}
-		return true;
+		return false;
 }
 
 static bool draw_screen_controls(bool force) {
@@ -597,7 +653,7 @@ static bool parse_model() {
 		uint32_t size_left = get_next_short();
 		uint8_t variables_no = get_next_byte();
 	
-		model_data_buffer = malloc(4*variables_no);
+		model_data_buffer = malloc(sizeof(struct model_property)*variables_no);
 		if (model_data_buffer == NULL) {
 				close();
 				return false;
@@ -610,15 +666,19 @@ static bool parse_model() {
 				if (flags & 0x80) {
 						//read init value
 						int v = parse_data_source_value();
-						model_data_buffer[i] = v;
+						model_data_buffer[i].value = v;
 				}
-				//boolean overflow = (flags & 0x40) != 0;
+				model_data_buffer[i].overflow = (flags & 0x40) != 0;
 				if (flags & 0x20) {
-						int16_t max = get_next_short();
+						model_data_buffer[i].max = parse_data_source_value();
+				} else {
+						model_data_buffer[i].max = 32000;
 				}
 
 				if (flags & 0x10) {
-						int16_t min = get_next_short();
+						model_data_buffer[i].min = parse_data_source_value();
+				} else {
+						model_data_buffer[i].min = -32000;
 				}
 		}
 		return true;
@@ -635,6 +695,7 @@ static bool parse_screen() {
 									return false;
 							}
 					}
+							break;
 					case WATCH_SET_SCREEN_SECTION_CONTROLS:
 					{
 							uint32_t size_left = get_next_short();
@@ -810,7 +871,12 @@ static void scr_watch_set_refresh_screen() {
 				disable_actions = false;
 		} else {
 	//			SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
-				draw_screen_controls(false);
+				bool forceRedraw = draw_screen_controls(false);
+			
+				if (forceRedraw) {
+					mlcd_fb_clear();
+						draw_screen_controls(true);
+				}
 	  }
 }
 
@@ -830,6 +896,22 @@ void scr_watch_set_parse_choose_actions(uint8_t** data) {
 				}
 		}
 }
+				
+static void trim_model_property(uint8_t property_id) {
+		if (model_data_buffer[property_id].value > model_data_buffer[property_id].max) {
+				if (model_data_buffer[property_id].overflow) {
+						model_data_buffer[property_id].value = model_data_buffer[property_id].min;
+				} else {
+						model_data_buffer[property_id].value = model_data_buffer[property_id].max;	
+				}
+		} else if (model_data_buffer[property_id].value < model_data_buffer[property_id].min) {
+				if (model_data_buffer[property_id].overflow) {
+						model_data_buffer[property_id].value = model_data_buffer[property_id].max;
+				} else {
+						model_data_buffer[property_id].value = model_data_buffer[property_id].min;
+				}
+		}
+}
 
 static void scr_watch_set_parse_actions(uint8_t** data) {
 		uint8_t actions_no = *((*data)++);
@@ -846,21 +928,26 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 				} else if (action_id == WATCH_SET_FUNC_MODEL_SET) {
 						uint8_t property_id = *((*data)++);
 						int value = parse_data_source_value_from_array(data);
-						model_data_buffer[property_id] = value;
+						model_data_buffer[property_id].value = value;
+						trim_model_property(property_id);
 				} else if (action_id == WATCH_SET_FUNC_MODEL_ADD) {
 						uint8_t property_id = *((*data)++);
 						int value = parse_data_source_value_from_array(data);
-						model_data_buffer[property_id] += value;
+						model_data_buffer[property_id].value += value;
+						trim_model_property(property_id);
 				} else if (action_id == WATCH_SET_FUNC_MODEL_SUBTRACT) {
 						uint8_t property_id = *((*data)++);
 						int value = parse_data_source_value_from_array(data);
-						model_data_buffer[property_id] -= value;
+						model_data_buffer[property_id].value -= value;
+						trim_model_property(property_id);
 				} else if (action_id == WATCH_SET_FUNC_MODEL_INCREMENT) {
 						uint8_t property_id = *((*data)++);
-						model_data_buffer[property_id]++;
+						model_data_buffer[property_id].value++;
+						trim_model_property(property_id);
 				} else if (action_id == WATCH_SET_FUNC_MODEL_DECREMENT) {
 						uint8_t property_id = *((*data)++);
-						model_data_buffer[property_id]--;
+						model_data_buffer[property_id].value--;
+						trim_model_property(property_id);
 				} else {
 						scr_watch_set_invoke_internal_function(action_id, 0);
 				}

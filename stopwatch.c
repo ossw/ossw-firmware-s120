@@ -6,7 +6,7 @@
 #include "ext_ram.h"
 
 // interrupt is only to increase number of fps in main loop
-#define INTERRUPT_INTERVAL            APP_TIMER_TICKS(175, APP_TIMER_PRESCALER)
+#define INTERRUPT_INTERVAL            APP_TIMER_TICKS(325, APP_TIMER_PRESCALER)
 #define MS_COUNTER_UPDATE_INTERVAL    APP_TIMER_TICKS(120000, APP_TIMER_PRESCALER)
 
 #define STOPWATCH_RECALL_SIZE 200
@@ -19,7 +19,6 @@ static uint32_t ms_counter_last_ticks = 0;
 
 static uint32_t current_lap_start = 0;
 static uint8_t current_lap_no = 1;
-static uint8_t recall_lap_no = 1;
 static uint32_t last_lap_length = 0;
 static bool lock_next_lap = false;
 
@@ -162,7 +161,7 @@ uint32_t stopwatch_get_last_lap_time(void) {
 uint32_t stopwatch_get_total_time(void) {
 		return stopwatch_get_ms_counter_value();
 }
-
+/*
 void stopwatch_fn_recall_prev_lap(void) {
 		if (recall_lap_no > 1 && (current_lap_no - 2 < STOPWATCH_RECALL_SIZE || current_lap_no - recall_lap_no + 1 < STOPWATCH_RECALL_SIZE)) {
 				recall_lap_no--;
@@ -189,9 +188,9 @@ void stopwatch_fn_recall_last_lap(void) {
 
 uint32_t stopwatch_get_recall_lap_number(void) {
     return recall_lap_no;
-}
+}*/
 
-uint32_t stopwatch_get_recall_lap_time(void) {
+uint32_t stopwatch_get_recall_lap_time(uint16_t recall_lap_no) {
 		if (recall_lap_no == current_lap_no) {
 				return stopwatch_get_current_lap_time();
 		}
@@ -201,7 +200,7 @@ uint32_t stopwatch_get_recall_lap_time(void) {
     return stopwatch_get_n_lap_start(recall_lap_no+1) - stopwatch_get_n_lap_start(recall_lap_no);
 }
 
-uint32_t stopwatch_get_recall_lap_split(void) {
+uint32_t stopwatch_get_recall_lap_split(uint16_t recall_lap_no) {
 		if (recall_lap_no == current_lap_no) {
 				return current_lap_start;
 		}
@@ -215,6 +214,14 @@ void stopwatch_process(void) {
 		if (lock_next_lap) {
 				stopwatch_remember_n_lap_start(current_lap_no, current_lap_start);
 				lock_next_lap = false;
+		}
+}
+
+uint32_t stopwatch_get_state(void) {
+		if (ms_counter_active) {
+				return STOPWATCH_STATE_RUNNING;
+		} else {
+			return ms_counter == 0? STOPWATCH_STATE_EMPTY : STOPWATCH_STATE_PAUSED;
 		}
 }
 

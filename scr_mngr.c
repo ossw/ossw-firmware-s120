@@ -12,6 +12,7 @@
 #include "screens/scr_notifications.h"
 #include "screens/scr_alert_notification.h"
 #include "mlcd.h"
+#include "stopwatch.h"
 
 static uint8_t switch_to_screen = SCR_NOT_SET;
 static uint32_t switch_to_screen_param = 0;
@@ -170,6 +171,11 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 		scr_mngr_default_handle_event(event_type, event_param);
 		
 		if (event_type >= 0x10) {
+				if (event_type == SCR_EVENT_RTC_TIME_CHANGED && stopwatch_get_state() == STOPWATCH_STATE_RUNNING) {
+						// skip that refresh because stapwatch is refreshing the screen
+						return;
+				}
+					
 				scr_mngr_redraw();
 		}
 }

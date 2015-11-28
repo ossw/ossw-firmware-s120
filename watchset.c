@@ -9,7 +9,7 @@
 
 static spiffs_file default_watch_face_fd = -1;
 
-static uint32_t (* const internal_data_source_handles[])(void) = {
+static uint32_t (* const internal_data_source_handles[])() = {
 		/* 0 */ battery_get_level,
 		/* 1 */ rtc_get_current_hour_24,
 		/* 2 */ rtc_get_current_hour_12,
@@ -26,9 +26,8 @@ static uint32_t (* const internal_data_source_handles[])(void) = {
 		/* 13 */stopwatch_get_current_lap_time,
 		/* 14 */stopwatch_get_current_lap_split,
 		/* 15 */stopwatch_get_last_lap_time,
-		/* 16 */stopwatch_get_recall_lap_number,
-		/* 17 */stopwatch_get_recall_lap_time,
-		/* 18 */stopwatch_get_recall_lap_split
+		/* 16 */stopwatch_get_recall_lap_time,
+		/* 17 */stopwatch_get_recall_lap_split
 };
 
 static uint32_t (* const sensor_data_source_handles[])(void) = {
@@ -139,18 +138,6 @@ void watchset_invoke_internal_function(uint8_t function_id, uint16_t param) {
 			  case WATCH_SET_FUNC_STOPWATCH_STOP:
 						stopwatch_fn_stop();
 			      break;
-			  case WATCH_SET_FUNC_STOPWATCH_RECALL_FIRST_LAP:
-						stopwatch_fn_recall_first_lap();
-						break;
-			  case WATCH_SET_FUNC_STOPWATCH_RECALL_LAST_LAP:
-						stopwatch_fn_recall_last_lap();
-						break;
-			  case WATCH_SET_FUNC_STOPWATCH_RECALL_PREV_LAP:
-						stopwatch_fn_recall_prev_lap();
-						break;
-			  case WATCH_SET_FUNC_STOPWATCH_RECALL_NEXT_LAP:
-						stopwatch_fn_recall_next_lap();
-						break;
 			  case WATCH_SET_FUNC_STOPWATCH_START_STOP:
 						stopwatch_fn_start_stop();
 			      break;
@@ -170,7 +157,9 @@ static uint32_t pow(uint32_t x, uint8_t n) {
 
 uint32_t watchset_internal_data_source_get_value(uint32_t data_source_id, uint8_t expected_range) {
 		uint32_t multiplier = pow(10, expected_range&0xF);
-	  return multiplier * internal_data_source_handles[data_source_id]();
+		uint8_t data_id = data_source_id&0xFF;
+		uint16_t index = (data_source_id>>8)&0xFFFF;
+	  return multiplier * internal_data_source_handles[data_id](index);
 }
 
 uint32_t watchset_sensor_data_source_get_value(uint32_t data_source_id, uint8_t expected_range) {
