@@ -169,7 +169,12 @@ void mlcd_fb_clear() {
 	  mlcd_fb_invalidate_all();
 }
 
-void mlcd_fb_flush () {
+
+void mlcd_fb_flush (void) {
+		mlcd_fb_flush_with_param(false);
+}
+
+void mlcd_fb_flush_with_param(bool force_colors) {
 		if (toggle_colors) {
 				colors_inverted = !colors_inverted;
 				mlcd_fb_invalidate_all();
@@ -215,7 +220,7 @@ void mlcd_fb_flush () {
   					spi_master_tx_data_no_cs(EXT_RAM_SPI, command, 3);
 					  
 						/* send response from ram to mlcd */
-					  spi_master_rx_to_tx_no_cs(EXT_RAM_SPI, MLCD_SPI, MLCD_LINE_BYTES, colors_inverted);
+					  spi_master_rx_to_tx_no_cs(EXT_RAM_SPI, MLCD_SPI, MLCD_LINE_BYTES, colors_inverted && !force_colors);
 						/* disable ext ram */
 				    nrf_gpio_pin_set(EXT_RAM_SPI_SS);
 					
@@ -456,5 +461,5 @@ void mlcd_fb_draw_bitmap_from_file(spiffs_file file, uint_fast8_t x_pos, uint_fa
 		data.y = y_pos;
 		data.width = width;
 		
-		SPIFFS_read_notify(&fs, file, bitmap, height, data.byte_width, &mlcd_fb_draw_bitmap_from_file_handle, &data);
+		SPIFFS_read_notify(&fs, file, bitmap, height, data.byte_width, (void (*)(void*, void*))&mlcd_fb_draw_bitmap_from_file_handle, &data);
 }

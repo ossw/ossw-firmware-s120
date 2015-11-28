@@ -42,6 +42,10 @@
 #define SCR_ALERT_NOTIFICATION_STATE_SHOW  2
 #define SCR_ALERT_NOTIFICATION_STATE_CLOSE 3
 
+typedef struct {
+		bool force_colors;
+} scr_mngr_draw_ctx;
+
 void scr_mngr_init(void);
 
 void scr_mngr_draw_screen(void);

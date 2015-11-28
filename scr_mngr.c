@@ -220,41 +220,44 @@ void scr_mngr_redraw_notification_bar() {
 
 void scr_mngr_draw_screen(void) {
 
+		scr_mngr_draw_ctx draw_ctx;
+		draw_ctx.force_colors = false;
+	
 	  if (scr_alert_notification_state != SCR_ALERT_NOTIFICATION_STATE_NONE) {
 				if (scr_alert_notification_state == SCR_ALERT_NOTIFICATION_STATE_INIT) {
 						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_INIT_SCREEN, scr_alert_notification_address);
 					  // draw alert notification screen
 						mlcd_fb_clear();
-						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_DRAW_SCREEN, NULL);
+						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
 						scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_SHOW;
 				} else if (scr_alert_notification_state == SCR_ALERT_NOTIFICATION_STATE_SHOW) {
-						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_REFRESH_SCREEN, NULL);
+						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_REFRESH_SCREEN, (uint32_t)&draw_ctx);
 				} else if (scr_alert_notification_state == SCR_ALERT_NOTIFICATION_STATE_CLOSE) {
 						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_DESTROY_SCREEN, NULL);
 						scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_NONE;
 					  // draw sceen
 						mlcd_fb_clear();
-						scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, NULL);
+						scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
 				}
 		} else if (scr_notifications_state != SCR_NOTIFICATIONS_STATE_NONE) {
 				if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_INIT) {
 						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_INIT_SCREEN, NULL);
 					  // draw alert notification screen
 						mlcd_fb_clear();
-						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DRAW_SCREEN, NULL);
+						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
 						scr_notifications_state = SCR_NOTIFICATIONS_STATE_SHOW;
 				} else if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_SHOW) {
-						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_REFRESH_SCREEN, NULL);
+						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_REFRESH_SCREEN, (uint32_t)&draw_ctx);
 				} else if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_REDRAW) {
 						mlcd_fb_clear();
-						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DRAW_SCREEN, NULL);
+						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
 						scr_notifications_state = SCR_NOTIFICATIONS_STATE_SHOW;
 				} else if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_CLOSE) {
 						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_DESTROY_SCREEN, NULL);
 						scr_notifications_state = SCR_NOTIFICATIONS_STATE_NONE;
 					  // draw sceen
 						mlcd_fb_clear();
-						scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, NULL);
+						scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
 				}
 		} else {
 				if (switch_to_screen != SCR_NOT_SET) {
@@ -279,7 +282,7 @@ void scr_mngr_draw_screen(void) {
 								uint32_t start_draw_ticks;
 								app_timer_cnt_get(&start_draw_ticks);
 						#endif
-						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_DRAW_SCREEN, NULL);
+						scr_mngr_handle_event_internal(switch_to_screen, SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
 						#ifdef OSSW_DEBUG
 								uint32_t end_draw_ticks;
 								uint32_t total_diff;
@@ -297,7 +300,7 @@ void scr_mngr_draw_screen(void) {
 										uint32_t start_draw_ticks;
 										app_timer_cnt_get(&start_draw_ticks);
 								#endif
-								scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, NULL);
+								scr_mngr_handle_event(SCR_EVENT_REFRESH_SCREEN, (uint32_t)&draw_ctx);
 								#ifdef OSSW_DEBUG
 										uint32_t end_draw_ticks;
 										uint32_t total_diff;
@@ -309,7 +312,7 @@ void scr_mngr_draw_screen(void) {
 						}
 				}
 		}
-    mlcd_fb_flush();
+    mlcd_fb_flush_with_param(draw_ctx.force_colors);
 }
 
 void scr_mngr_show_alert_notification(uint32_t address) {

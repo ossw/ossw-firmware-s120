@@ -43,6 +43,7 @@ struct model_property {
 		uint16_t action_handlers[8];
 		uint32_t watchset_id;
 		void (* base_actions_handler)(uint32_t event_type, uint32_t event_param);
+		bool force_colors = false;
 //}
 
 static bool parse_screen_controls(bool force);
@@ -601,7 +602,8 @@ static bool parse_screen_controls(bool force) {
 		return false;
 }
 
-static bool draw_screen_controls(bool force) {
+static bool draw_screen_controls(bool force, scr_mngr_draw_ctx* ctx) {
+		ctx->force_colors = force_colors;
 		ws_data_ptr = EXT_RAM_DATA_CURRENT_SCREEN_CACHE;
 		return parse_screen_controls(force);
 }
@@ -684,8 +686,22 @@ static bool parse_model() {
 		return true;
 }
 
+static void parse_settings(void) {
+		uint16_t size = get_next_short();
+		uint8_t settings_no = get_next_byte();
+		for (int i=0; i<settings_no; i++) {
+				uint8_t setting_id = get_next_byte();
+				uint8_t setting_value = get_next_byte();
+				switch(setting_id) {
+						case WATCH_SET_SETTING_INVERTIBLE:
+								force_colors = !setting_value;
+				}
+		}
+}
+
 static bool parse_screen() {
 	  uint8_t section;
+		force_colors = false;
 	  do {
 				section = get_next_byte();
 				switch (section) {
@@ -730,6 +746,9 @@ static bool parse_screen() {
 							break;
 					case WATCH_SET_SCREEN_SECTION_BASE_ACTIONS:
 						  parse_base_actions();
+							break;
+					case WATCH_SET_SCREEN_SECTION_SETTINGS:
+							parse_settings();
 							break;
 				}
 	  } while (section != WATCH_SET_END_OF_DATA);
@@ -852,12 +871,12 @@ static void scr_watch_set_init(uint32_t param) {
 		disable_actions = false;
 }
 
-static void scr_watch_set_draw_screen() {
+static void scr_watch_set_draw_screen(scr_mngr_draw_ctx* ctx) {
 //		SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
-		draw_screen_controls(true);
+		draw_screen_controls(true, ctx);
 }
 
-static void scr_watch_set_refresh_screen() {
+static void scr_watch_set_refresh_screen(scr_mngr_draw_ctx* ctx) {
 	  if (current_subscreen != switch_to_subscreen) {
 				disable_actions = true;
 				clear_subscreen_data();
@@ -865,17 +884,17 @@ static void scr_watch_set_refresh_screen() {
 			  init_subscreen(switch_to_subscreen);
 			
 //				SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
-				draw_screen_controls(true);
+				draw_screen_controls(true, ctx);
 			
 			  current_subscreen = switch_to_subscreen;
 				disable_actions = false;
 		} else {
 	//			SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
-				bool forceRedraw = draw_screen_controls(false);
+				bool forceRedraw = draw_screen_controls(false, ctx);
 			
 				if (forceRedraw) {
 					mlcd_fb_clear();
-						draw_screen_controls(true);
+						draw_screen_controls(true, ctx);
 				}
 	  }
 }
@@ -1021,10 +1040,10 @@ void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 				    scr_watch_set_init(event_param);
 				    break;
 			  case SCR_EVENT_DRAW_SCREEN:
-				    scr_watch_set_draw_screen();
+				    scr_watch_set_draw_screen((scr_mngr_draw_ctx*)event_param);
 				    break;
         case SCR_EVENT_REFRESH_SCREEN:
-            scr_watch_set_refresh_screen();
+            scr_watch_set_refresh_screen((scr_mngr_draw_ctx*)event_param);
             break;
 			  case SCR_EVENT_BUTTON_PRESSED:
 				    scr_watch_set_handle_button_pressed(event_param);

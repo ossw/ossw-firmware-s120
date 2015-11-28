@@ -58,6 +58,8 @@ void mlcd_fb_draw_bitmap_from_file(spiffs_file file, uint_fast8_t x_pos, uint_fa
 
 void mlcd_fb_flush(void);
 
+void mlcd_fb_flush_with_param(bool force_colors);
+
 void mlcd_fb_clear(void);
 
 #endif /* MLCD_H */
