@@ -157,6 +157,10 @@ static uint32_t model_data_source_get_property_value(uint32_t property_id, uint8
 		return model_data_buffer[property_id].value;
 }
 
+static uint32_t pass_argument_data_source_get_property_value(uint32_t value, uint8_t expected_range) {	 
+		return value;
+}
+
 static uint32_t external_data_source_get_property_value(uint32_t property_id, uint8_t expected_range) {	  
 	  if (external_properties_data == NULL) {
 			  return NULL;
@@ -209,12 +213,13 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id, ui
 		}
 }
 
-static void parse_data_source(void **data_source, uint32_t* data_source_param, void **data_converter, uint8_t* data_cache) {
+static void parse_data_source(void **data_source, uint32_t* data_source_param, uint8_t* data_cache) {
     uint8_t type = ws_data_get_next_byte();
     uint8_t property = ws_data_get_next_byte();
 		  switch (type&0x3F) {
 			  case DATA_SOURCE_STATIC:
 			      *data_source = watchset_static_data_source_get_value;
+						// property = static data length
 						ws_data_read(data_cache, property);
 						data_cache[property] = 0;
 				    *data_source_param = (uint32_t)data_cache;
@@ -240,20 +245,20 @@ static void parse_data_source(void **data_source, uint32_t* data_source_param, v
 				//parse index
 				uint32_t (* data_handle)(uint32_t);
 				uint32_t data_handle_param;
-				uint32_t (* converter)(uint32_t);
 				uint32_t static_data;
-				parse_data_source((void **)&data_handle, &data_handle_param, (void **)&converter, (void *)&static_data);
+				parse_data_source((void **)&data_handle, &data_handle_param, (void *)&static_data);
 				int index = data_handle(data_handle_param);
-				if (converter != NULL) {
-						index = converter(index);
-				}
 				*data_source_param = (*data_source_param) | index<<8;
 		} 
 		if (type & 0x80) {
-				uint8_t converter = ws_data_get_next_byte();
-				*data_converter = watchset_get_converter(converter);	
-		} else {
-				*data_converter = NULL;
+				uint8_t converter_no = ws_data_get_next_byte();
+			  uint32_t value = ((uint32_t (*)(uint32_t, uint8_t))*data_source)(*data_source_param, 0);
+				for (int i = 0; i < converter_no; i++) {
+						uint8_t converter_id = ws_data_get_next_byte();
+						value = ((uint32_t (*)(uint32_t))watchset_get_converter(converter_id))(value);
+				}
+			  *data_source = pass_argument_data_source_get_property_value;
+				*data_source_param = value;
 		}
 }
 
@@ -282,10 +287,13 @@ static int parse_data_source_value() {
 		}
 		if (type & 0x40) {
 					parse_data_source_value();
-		} 
+		}
 		if (type & 0x80) {
-				uint32_t (* converter)(uint32_t) = (uint32_t (*)(uint32_t))watchset_get_converter(ws_data_get_next_byte());	
-				value = converter(value);
+				uint8_t converter_no = get_next_byte();
+				for (int i = 0; i < converter_no; i++) {
+						uint8_t converter_id = get_next_byte();
+						value = ((uint32_t (*)(uint32_t))watchset_get_converter(converter_id))(value);
+				}
 		}
 		return value;
 }
@@ -316,8 +324,11 @@ static int parse_data_source_value_from_array(uint8_t** data) {
 				parse_data_source_value_from_array(data);
 		}
 		if (type & 0x80) {
-				uint32_t (* converter)(uint32_t) = (uint32_t (*)(uint32_t))watchset_get_converter(*(*data++));	
-				value = converter(value);
+				uint8_t converter_no = *(*data++);
+				for (int i = 0; i < converter_no; i++) {
+						uint8_t converter_id = *(*data++);
+						value = ((uint32_t (*)(uint32_t))watchset_get_converter(converter_id))(value);
+				}
 		}
 		return value;
 }
@@ -352,7 +363,7 @@ static bool parse_and_draw_screen_control_number(bool force) {
 		uint16_t dataPtr = data[7] << 8 | data[8];
 		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
 		
-	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, NULL);
+	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, NULL);
 
 	
 		uint8_t decimal_size = config.range&0xF;
@@ -438,7 +449,7 @@ static bool parse_and_draw_screen_control_image_from_set(bool force) {
     uint8_t res_id = data[5];
 		uint16_t dataPtr = data[6]<<8 | data[7];
 		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
-	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, NULL);
+	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, NULL);
 		
 	
 	  uint32_t value = config.data_handle(config.data_handle_param, 0);
@@ -468,17 +479,13 @@ static bool parse_and_draw_screen_control_image_from_set(bool force) {
 
 static bool parse_and_draw_choose_control(bool force) {
 		
-	  uint32_t (* data_handle)(uint32_t);
+	  uint32_t (* data_handle)(uint32_t, uint8_t);
 	  uint32_t data_handle_param;
-	  uint32_t (* converter)(uint32_t);
 		uint32_t static_data;
-		parse_data_source((void **)&data_handle, &data_handle_param, (void **)&converter, (void *)&static_data);
+		parse_data_source((void **)&data_handle, &data_handle_param, (void *)&static_data);
 		int data_offset = ws_data_get_next_short();
 		uint8_t* data_ptr = (uint8_t*)(screen_data_buffer + data_offset);
-		uint32_t value = data_handle(data_handle_param);
-		if (converter != NULL) {
-				value = converter(value);
-		}
+		uint32_t value = data_handle(data_handle_param, 0);
 		
 		if (!force && *data_ptr != value) {
 				return true;
@@ -513,7 +520,7 @@ static bool parse_and_draw_screen_control_text(bool force) {
 		config.style = ws_data_get_next_int();
 		uint16_t dataPtr = ws_data_get_next_short();
 		config.data->last_value = (char*)(screen_data_buffer + dataPtr);
-	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, (void *)config.data->last_value);
+	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void *)config.data->last_value);
 	
 		scr_controls_draw_text_control(&config, force);
 		return false;
@@ -531,7 +538,7 @@ static bool parse_and_draw_screen_control_progress(bool force) {
 		config.style = ws_data_get_next_int();
 		uint16_t dataPtr = ws_data_get_next_short();
 		config.data = (NUMBER_CONTROL_DATA*)(screen_data_buffer + dataPtr);
-	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, (void **)&config.converter, NULL);
+	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, NULL);
 		
 		scr_controls_draw_progress_bar_control(&config, force);
 		return false;

@@ -105,9 +105,6 @@ static void draw_int_img_value(uint32_t value, uint32_t old_value, uint8_t digit
 void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force) {
 	  uint8_t decimal_size = cfg->range&0xF;
 	  uint32_t value = cfg->data_handle(cfg->data_handle_param, decimal_size);
-		if (cfg->converter != NULL) {
-				value = cfg->converter(value);
-		}
 		
 		if (!force && cfg->data->last_value == value) {
 				return;
@@ -168,9 +165,6 @@ void scr_controls_draw_static_image_control(SCR_CONTROL_STATIC_IMAGE_CONFIG* cfg
 void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG* cfg, bool force) {
 
 	  uint32_t value = cfg->data_handle(cfg->data_handle_param, 0);
-		if (cfg->converter != NULL) {
-				value = cfg->converter(value);
-		}
 	
 		if (!force && cfg->data->last_value == value) {
 				return;
@@ -217,9 +211,6 @@ void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force) {
 
 void scr_controls_draw_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force) {
 	  uint32_t value = cfg->data_handle(cfg->data_handle_param, 0);
-		if (cfg->converter != NULL) {
-				value = cfg->converter(value);
-		}
 
 	  bool horizontal = !((cfg->style>>24)&0x20);
 	  uint8_t border = (cfg->style>>16)&0xFF;

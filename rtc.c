@@ -45,6 +45,11 @@ uint32_t rtc_get_current_time(void) {
 	  return current_time;
 }
 
+uint32_t rtc_get_current_time_in_seconds(void) {
+    struct tm* time_struct = localtime(&current_time);
+	  return time_struct->tm_hour*3600 + time_struct->tm_min*60 + time_struct->tm_sec;
+}
+
 uint32_t rtc_get_current_hour_24(void) {
     struct tm* time_struct = localtime(&current_time);
 	  return time_struct->tm_hour;

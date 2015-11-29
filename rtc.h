@@ -15,6 +15,7 @@ void rtc_set_current_time(uint32_t);
 bool rtc_should_store_current_time(void);
 void rtc_store_current_time(void);
 
+uint32_t rtc_get_current_time_in_seconds(void);
 uint32_t rtc_get_current_hour_24(void);
 uint32_t rtc_get_current_hour_12(void);
 uint32_t rtc_get_current_hour_12_designator(void);
