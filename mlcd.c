@@ -140,16 +140,13 @@ uint32_t mlcd_temp_backlight_timeout(void) {
 		return temp_bl_timeout;
 }
 
-void mlcd_temp_backlight_timeout_inc(void) {
-		if (temp_bl_timeout < 10) {
-				temp_bl_timeout++;
+void mlcd_set_temp_backlight_timeout(int32_t timeout) {
+		if (timeout > 20) {
+				timeout = 20;
+		} else if (timeout < 1) {
+				timeout = 1;
 		}
-}
-
-void mlcd_temp_backlight_timeout_dec(void) {
-		if (temp_bl_timeout > 1) {
-				temp_bl_timeout--;
-		}
+		temp_bl_timeout = timeout;
 }
 
 void mlcd_switch_vcom() {

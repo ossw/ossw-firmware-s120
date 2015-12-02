@@ -186,7 +186,7 @@ void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG*
     uint8_t imageNo = value - firstImageId;
     uint32_t offset = (((imageWidth + 7) / 8) * imageHeight * imageNo);
 		SPIFFS_lseek(&fs, cfg->file, offset, SPIFFS_SEEK_CUR);
-		mlcd_fb_draw_bitmap_from_file(cfg->file, cfg->x, cfg->y, cfg->width, cfg->height, imageWidth);
+		mlcd_fb_draw_bitmap_from_file(cfg->file, cfg->x, cfg->y, cfg->width != 0?cfg->width:imageWidth, cfg->height != 0 ? cfg->height : imageHeight, imageWidth);
 		cfg->data->last_value = value;
 }
 

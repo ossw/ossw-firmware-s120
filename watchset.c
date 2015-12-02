@@ -101,6 +101,18 @@ static uint32_t watchset_converter_minutes_to_past_to_minutes(uint32_t v) {
 		return v;
 }
 
+static uint32_t watchset_converter_ones(uint32_t v) {
+		return v%10;
+}
+
+static uint32_t watchset_converter_tens(uint32_t v) {
+		return (v/10)%10;
+}
+
+static uint32_t watchset_converter_hundreds(uint32_t v) {
+		return (v/100)%10;
+}
+
 static uint32_t (* const data_converters[])(uint32_t) = {
 		/* 0 */ NULL,
 		/* 1 */ watchset_converter_ms_to_hours,
@@ -116,7 +128,10 @@ static uint32_t (* const data_converters[])(uint32_t) = {
 		/* 11 */watchset_converter_hour_24_to_hour_12,
 		/* 12 */watchset_converter_hour_24_to_hour_12_period,
 		/* 13 */watchset_converter_minutes_to_past_to_designator,
-		/* 14 */watchset_converter_minutes_to_past_to_minutes
+		/* 14 */watchset_converter_minutes_to_past_to_minutes,
+		/* 15 */watchset_converter_ones,
+		/* 16 */watchset_converter_tens,
+		/* 17 */watchset_converter_hundreds
 };
 
 void* watchset_get_converter(uint8_t key) {

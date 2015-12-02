@@ -492,15 +492,35 @@ static bool parse_and_draw_choose_control(bool force) {
 		}
 		
 		uint8_t options_no = ws_data_get_next_byte();
+		bool handled = false;
 		for (int i=0; i<options_no; i++) {
-				uint8_t expected_value = ws_data_get_next_byte();
+				uint8_t number_of_values = ws_data_get_next_byte();
+			
+				bool matched = false;
+				for( int v = 0; v<number_of_values; v++) {
+						uint8_t expected_value = ws_data_get_next_byte();
+						if (!matched && value == expected_value) {
+								matched = true;
+						}
+				}
 				int block_size = ws_data_get_next_short();
-				if (value == expected_value) {
+				if (matched && !handled) {
 						if (parse_screen_controls(force)) {
 								return true;
 						}
+						handled = true;
 				} else {
 						ws_data_skip(block_size);
+				}
+		}
+		int otherwise_block_size = ws_data_get_next_short();
+		if (otherwise_block_size != 0) {
+				if (handled) {
+								ws_data_skip(otherwise_block_size);
+				} else {
+						if (parse_screen_controls(force)) {
+								return true;
+						}
 				}
 		}
 		*data_ptr = value;
