@@ -191,7 +191,7 @@ void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG*
 }
 
 void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force) {
-	  char* value = (char*)cfg->data_handle(cfg->data_handle_param);
+	  char* value = (char*)cfg->data_handle(cfg->data_handle_param, 0);
 	
 	  uint8_t font_type = (cfg->style >> 24) & 0xFF;
 	  uint8_t alignment = (cfg->style >> 16) & 0xFF;

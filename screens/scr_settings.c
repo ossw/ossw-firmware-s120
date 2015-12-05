@@ -16,14 +16,16 @@ typedef struct
 	  void (*handler)();
 } MENU_OPTION;	
 
-//static void opt_handler_do_nothing() {};
-	
 static void opt_handler_change_date() {
     scr_mngr_show_screen(SCR_CHANGE_DATE);
 };
 	
 static void opt_handler_change_time() {
     scr_mngr_show_screen(SCR_CHANGE_TIME);
+};
+
+static void opt_handler_about() {
+    scr_mngr_show_screen(SCR_ABOUT);
 };
 
 void fs_reformat(void);
@@ -38,7 +40,8 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_TIME, opt_handler_change_time},
 		{MESSAGE_DISPLAY, mlcd_colors_toggle},
 		{MESSAGE_FORMAT, reformat},
-		{MESSAGE_RESTART, NVIC_SystemReset}
+		{MESSAGE_RESTART, NVIC_SystemReset},
+		{MESSAGE_ABOUT, opt_handler_about}
 };
 
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);
@@ -91,11 +94,12 @@ static void scr_settings_draw_options() {
 static void scr_settings_refresh_screen() {
 	  scr_mngr_redraw_notification_bar();
 	
-	  if (lastSelectedOption != selectedOption) {
+		int8_t curr_opt = selectedOption;
+	  if (lastSelectedOption != curr_opt) {
 				mlcd_clear_rect(0, 18, MLCD_XRES, MLCD_YRES-18);
 				scr_settings_draw_options();
 	  }
-		lastSelectedOption = selectedOption;
+		lastSelectedOption = curr_opt;
 }
 
 static void scr_settings_init() {

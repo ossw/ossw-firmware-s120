@@ -1,6 +1,7 @@
 #include <string.h>
 #include "scr_watchset.h"
 #include "nrf_delay.h"
+#include "time.h"
 #include "../scr_mngr.h"
 #include "../scr_controls.h"
 #include "../mlcd_draw.h"
@@ -298,14 +299,18 @@ static int parse_data_source_value() {
 		return value;
 }
 
-static int parse_data_source_value_from_array(uint8_t** data) {
-    uint8_t type = *((*data)++);
-    uint8_t property = *((*data)++);
+static uint32_t get_next_byte_from_array(uint8_t** data) {
+		return *((*data)++);
+}
+
+static int32_t parse_data_source_value_from_array(uint8_t** data) {
+    uint8_t type = get_next_byte_from_array(data);
+    uint8_t property = get_next_byte_from_array(data);
 	
-		int value = 0;
+		int32_t value = 0;
 	  switch (type&0x3F) {
 			  case DATA_SOURCE_STATIC:
-			      value = *((*data)++)<<24|*((*data)++)<<16|*((*data)++)<<8|*((*data)++);
+			      value = get_next_byte_from_array(data)<<24|get_next_byte_from_array(data)<<16|get_next_byte_from_array(data)<<8|get_next_byte_from_array(data);
 				    break;
 			  case DATA_SOURCE_INTERNAL:
 			      value = watchset_internal_data_source_get_value(property, 0);
@@ -324,9 +329,9 @@ static int parse_data_source_value_from_array(uint8_t** data) {
 				parse_data_source_value_from_array(data);
 		}
 		if (type & 0x80) {
-				uint8_t converter_no = *(*data++);
+				uint8_t converter_no = get_next_byte_from_array(data);
 				for (int i = 0; i < converter_no; i++) {
-						uint8_t converter_id = *(*data++);
+						uint8_t converter_id = get_next_byte_from_array(data);
 						value = ((uint32_t (*)(uint32_t))watchset_get_converter(converter_id))(value);
 				}
 		}
@@ -971,6 +976,37 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 				} else if (action_id == WATCH_SET_FUNC_CHANGE_SCREEN) {
 						uint16_t param = *((*data)++)<<8 | *((*data)++);
 						scr_watch_set_invoke_internal_function(action_id, param);
+				} else if (action_id == WATCH_SET_FUNC_SET_TIME) {
+						time_t t;
+						time(&t);
+						struct tm* time_struct = localtime(&t);
+
+						uint8_t field_no = *((*data)++);
+						for (int f = 0; f < field_no; f++) {
+								uint8_t field_id = (*((*data)++))&0xFF;
+								int32_t field_value = parse_data_source_value_from_array(data);
+								switch(field_id) {
+									case 0:
+										time_struct->tm_year = field_value - 1900;
+										break;
+									case 1:
+										time_struct->tm_mon = field_value - 1;
+										break;
+									case 2:
+										time_struct->tm_mday = field_value;
+										break;
+									case 3:
+										time_struct->tm_hour = field_value;
+										break;
+									case 4:
+										time_struct->tm_min = field_value;
+										break;
+									case 5:
+										time_struct->tm_sec = field_value;
+										break;
+								}
+						}
+						scr_watch_set_invoke_internal_function(action_id, mktime(time_struct));
 				} else if (action_id == WATCH_SET_FUNC_MODEL_SET) {
 						uint8_t property_id = *((*data)++);
 						int value = parse_data_source_value_from_array(data);
@@ -1009,9 +1045,9 @@ void scr_watch_set_invoke_function(int idx) {
 		scr_watch_set_parse_actions(&data);
 }
 
-void scr_watch_set_invoke_internal_function(uint8_t function_id, uint16_t param) {
+void scr_watch_set_invoke_internal_function(uint8_t function_id, uint32_t param) {
 		if (WATCH_SET_FUNC_CHANGE_SCREEN == function_id) {
-				switch_to_subscreen = param;
+				switch_to_subscreen = param&0xFF;
 		} else {
 				watchset_invoke_internal_function(function_id, param);
 		}

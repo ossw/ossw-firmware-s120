@@ -21,6 +21,7 @@
 #include "../ext_flash.h"
 #include "../scr_mngr.h"
 #include "../rtc.h"
+#include "../ossw.h"
 #include "../command.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
@@ -32,7 +33,6 @@
 
 #define DEVICE_NAME                      "OSSW"                                     /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                "OpenSource"                               /**< Manufacturer. Will be passed to Device Information Service. */
-#define FIRMWARE_VERSION                 "0.5.0-snapshot"                                    /**< Firmware version. */
 #define APP_ADV_INTERVAL                 600                                        /**< The advertising interval (in units of 0.625 ms.). */
 #define APP_ADV_TIMEOUT_IN_SECONDS       0		                                     /**< The advertising timeout in units of seconds. */
 

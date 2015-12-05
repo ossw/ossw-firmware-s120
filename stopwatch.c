@@ -6,7 +6,7 @@
 #include "ext_ram.h"
 
 // interrupt is only to increase number of fps in main loop
-#define INTERRUPT_INTERVAL            APP_TIMER_TICKS(325, APP_TIMER_PRESCALER)
+#define INTERRUPT_INTERVAL            APP_TIMER_TICKS(215, APP_TIMER_PRESCALER)
 #define MS_COUNTER_UPDATE_INTERVAL    APP_TIMER_TICKS(120000, APP_TIMER_PRESCALER)
 
 #define STOPWATCH_RECALL_SIZE 200

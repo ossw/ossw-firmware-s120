@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "../watchset.h"
 
-void scr_watch_set_invoke_internal_function(uint8_t function_id, uint16_t param);
+void scr_watch_set_invoke_internal_function(uint8_t function_id, uint32_t param);
 
 void scr_watch_set_invoke_external_function(uint8_t function_id);
 

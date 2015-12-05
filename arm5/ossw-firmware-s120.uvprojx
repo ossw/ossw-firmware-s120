@@ -418,6 +418,16 @@
               <FileType>5</FileType>
               <FilePath>..\board.h</FilePath>
             </File>
+            <File>
+              <FileName>ossw.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\ossw.h</FilePath>
+            </File>
+            <File>
+              <FileName>ossw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ossw.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -562,6 +572,16 @@
               <FileName>scr_watchset_list.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_watchset_list.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_about.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_about.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_status.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_status.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1137,6 +1157,16 @@
               <FileType>5</FileType>
               <FilePath>..\board.h</FilePath>
             </File>
+            <File>
+              <FileName>ossw.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\ossw.h</FilePath>
+            </File>
+            <File>
+              <FileName>ossw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ossw.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1281,6 +1311,16 @@
               <FileName>scr_watchset_list.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_watchset_list.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_about.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_about.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_status.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_status.c</FilePath>
             </File>
           </Files>
         </Group>

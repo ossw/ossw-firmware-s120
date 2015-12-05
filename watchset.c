@@ -6,6 +6,9 @@
 #include "rtc.h"
 #include "stopwatch.h"
 #include "ble/ble_central.h"
+#include "nrf_soc.h"
+#include "ossw.h"
+#include "ble_gap.h"
 
 static spiffs_file default_watch_face_fd = -1;
 
@@ -20,7 +23,7 @@ static uint32_t (* const internal_data_source_handles[])() = {
 		/* 7 */ rtc_get_current_day_of_week,
 		/* 8 */ rtc_get_current_day_of_month,
 		/* 9 */ rtc_get_current_day_of_year,
-		/* 10 */ rtc_get_current_month,
+		/* 10 */rtc_get_current_month,
 		/* 11 */rtc_get_current_year,
 		/* 12 */stopwatch_get_total_time,
 		/* 13 */stopwatch_get_current_lap_number,
@@ -28,7 +31,9 @@ static uint32_t (* const internal_data_source_handles[])() = {
 		/* 15 */stopwatch_get_current_lap_split,
 		/* 16 */stopwatch_get_last_lap_time,
 		/* 17 */stopwatch_get_recall_lap_time,
-		/* 18 */stopwatch_get_recall_lap_split
+		/* 18 */stopwatch_get_recall_lap_split,
+		/* 19 */(uint32_t (*)())ossw_firmware_version,
+		/* 20 */(uint32_t (*)())ossw_mac_address
 };
 
 static uint32_t (* const sensor_data_source_handles[])(void) = {
@@ -155,6 +160,9 @@ static void watchset_default_watch_face_handle_button_pressed(uint32_t button_id
         case SCR_EVENT_PARAM_BUTTON_SELECT:
             scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_APPLICATION);
             break;
+        case SCR_EVENT_PARAM_BUTTON_BACK:
+            scr_mngr_show_screen(SCR_STATUS);
+            break;
     }
 }
 
@@ -186,7 +194,7 @@ void watchset_default_watch_face_handle_event(uint32_t event_type, uint32_t even
 		}
 }
 
-void watchset_invoke_internal_function(uint8_t function_id, uint16_t param) {
+void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
 	  switch(function_id) {
 			  case WATCH_SET_FUNC_TOGGLE_BACKLIGHT:
 				    mlcd_backlight_toggle();
@@ -196,6 +204,12 @@ void watchset_invoke_internal_function(uint8_t function_id, uint16_t param) {
 			      break;
 			  case WATCH_SET_FUNC_SHOW_SETTINGS:
 				    scr_mngr_show_screen(SCR_SETTINGS);
+			      break;
+			  case WATCH_SET_FUNC_SHOW_NOTIFICATIONS:
+				    //scr_mngr_show_screen(SCR_SETTINGS);
+			      break;
+			  case WATCH_SET_FUNC_SHOW_STATUS:
+				    //scr_mngr_show_screen(SCR_SETTINGS);
 			      break;
 				case WATCH_SET_FUNC_CLOSE:
 					  scr_mngr_show_screen(SCR_WATCHFACE);
@@ -215,6 +229,15 @@ void watchset_invoke_internal_function(uint8_t function_id, uint16_t param) {
 			  case WATCH_SET_FUNC_STOPWATCH_NEXT_LAP:
 						stopwatch_fn_next_lap();
 			      break;
+			  case WATCH_SET_FUNC_FORMAT_DATA:
+						fs_reformat();
+			      break;
+			  case WATCH_SET_FUNC_RESTART:
+						NVIC_SystemReset();
+			      break;
+				case WATCH_SET_FUNC_SET_TIME:
+						rtc_set_current_time(param);
+						break;
 		}
 }
 

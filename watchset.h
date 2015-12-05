@@ -24,8 +24,11 @@
 
 #define WATCH_SET_FUNC_TOGGLE_BACKLIGHT 			0x1
 #define WATCH_SET_FUNC_TOGGLE_COLORS    			0x2
+#define WATCH_SET_FUNC_TEMPORATY_BACKLIGHT 		0x3
+#define WATCH_SET_FUNC_SET_TEMPORARY_BACKLIGHT_TIMEOUT 0x4
+#define WATCH_SET_FUNC_SET_TIME					 			0x5
 #define WATCH_SET_FUNC_FORMAT_DATA 						0xE
-#define WATCH_SET_FUNC_RESTART_WATCH 					0xF
+#define WATCH_SET_FUNC_RESTART			 					0xF
 
 #define WATCH_SET_FUNC_STOPWATCH_START        0x10
 #define WATCH_SET_FUNC_STOPWATCH_RESET        0x11
@@ -41,6 +44,8 @@
 		
 #define WATCH_SET_FUNC_CHANGE_SCREEN 0xE0
 #define WATCH_SET_FUNC_SHOW_SETTINGS 0xE1
+#define WATCH_SET_FUNC_SHOW_STATUS	 0xE2
+#define WATCH_SET_FUNC_SHOW_NOTIFICATIONS 0xE3
 
 #define WATCH_SET_FUNC_CLOSE 0xEE
 #define WATCH_SET_FUNC_EXTENSION 0xEF
@@ -94,7 +99,7 @@ uint32_t watchset_sensor_data_source_get_value(uint32_t data_source_id, uint8_t 
 
 uint32_t watchset_static_data_source_get_value(uint32_t data_source_id, uint8_t expected_range);
 
-void watchset_invoke_internal_function(uint8_t function_id, uint16_t param);
+void watchset_invoke_internal_function(uint8_t function_id, uint32_t param);
 
 void* watchset_get_converter(uint8_t key);
 

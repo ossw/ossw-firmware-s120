@@ -22,6 +22,7 @@
 #define MESSAGE_REMOVE 14
 #define MESSAGE_YES 15
 #define MESSAGE_NO 16
+#define MESSAGE_ABOUT 17
 
 typedef struct
 {

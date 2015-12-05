@@ -30,6 +30,7 @@
 #include "stopwatch.h"
 #include "fs.h"
 #include "accel.h"
+#include "watchset.h"
 
 #ifdef OSSW_DEBUG
 		#include "app_uart.h"
@@ -179,6 +180,7 @@ int main(void)
     timers_init();
 	  rtc_timer_init();
 		buttons_init();
+	  battery_init();
 	
     // Initialize the SoftDevice handler module.
     SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
@@ -189,7 +191,6 @@ int main(void)
 		fs_init();
 	
 		scr_mngr_init();
-	  battery_init();
 		vibration_init();
 		notifications_init();
 		

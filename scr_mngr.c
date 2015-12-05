@@ -11,6 +11,8 @@
 #include "screens/scr_watchset_list.h"
 #include "screens/scr_notifications.h"
 #include "screens/scr_alert_notification.h"
+#include "screens/scr_about.h"
+#include "screens/scr_status.h"
 #include "mlcd.h"
 #include "stopwatch.h"
 
@@ -145,6 +147,12 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 				    break;
 			  case SCR_SETTINGS:
 				    scr_settings_handle_event(event_type, event_param);
+				    break;
+			  case SCR_STATUS:
+				    scr_status_handle_event(event_type, event_param);
+				    break;
+			  case SCR_ABOUT:
+				    scr_about_handle_event(event_type, event_param);
 				    break;
 			  case SCR_ALERT_NOTIFICATION:
 				    scr_alert_notification_handle_event(event_type, event_param);

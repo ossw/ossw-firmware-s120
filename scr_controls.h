@@ -70,7 +70,7 @@ typedef struct
 	  uint8_t width;
 	  uint8_t height;
 	  uint32_t style;
-	  uint32_t (* data_handle)(uint32_t);
+	  uint32_t (* data_handle)(uint32_t, uint8_t);
 	  uint32_t data_handle_param;
 	  TEXT_CONTROL_DATA* data;
 } SCR_CONTROL_TEXT_CONFIG;	

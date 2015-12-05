@@ -18,7 +18,8 @@ static const I18N_MESSAGE messages_en[] = {
   /*   13 */{"No files found"},
   /*   14 */{"Remove?"},
   /*   15 */{"Yes"},
-  /*   16 */{"No"}
+  /*   16 */{"No"},
+  /*   17 */{"About"}
 };
 
 #endif

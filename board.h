@@ -70,6 +70,10 @@ extern uint32_t * p_spi1_base_address;
 #define ACCEL_INT1				 3u
 #define ACCEL_INT2				 2u
 
+#define BATTERY_LEVEL_ADC_PIN 	NRF_ADC_CONFIG_INPUT_6
+#define BATTERY_CHARGING_INT_PIN			25u
+#define BATTERY_FULLY_CHARGED_INT_PIN	24u
+
 #define RX_PIN_NUMBER  15
 #define TX_PIN_NUMBER  16
 
