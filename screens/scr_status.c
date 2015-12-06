@@ -8,6 +8,7 @@
 #include "../battery.h"
 #include "../scr_controls.h"
 #include "../ossw.h"
+#include "../fs.h"
 
 static NUMBER_CONTROL_DATA battery_level_ctrl_data;
 static uint8_t mode = 0;
@@ -53,6 +54,14 @@ static void scr_status_draw_battery_status() {
 		}
 }
 
+static void scr_status_init(void) {
+		spiffs_file fd = SPIFFS_open(&fs, "u/status", SPIFFS_RDONLY, 0);
+		if (fd >= 0) {
+				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
+				scr_mngr_show_screen_with_param(SCR_WATCH_SET, 2<<24 | fd);
+		}
+}
+
 static void scr_status_refresh_screen() {
 	  scr_controls_redraw(&controls_definition);
 	
@@ -76,6 +85,9 @@ static void scr_status_draw_screen() {
 
 void scr_status_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
+			  case SCR_EVENT_INIT_SCREEN:
+				    scr_status_init();
+				    break;
         case SCR_EVENT_DRAW_SCREEN:
             scr_status_draw_screen();
             break;

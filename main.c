@@ -31,6 +31,7 @@
 #include "fs.h"
 #include "accel.h"
 #include "watchset.h"
+#include "config.h"
 
 #ifdef OSSW_DEBUG
 		#include "app_uart.h"
@@ -189,7 +190,7 @@ int main(void)
 		nrf_delay_ms(500);
 	
 		fs_init();
-	
+		config_init();
 		scr_mngr_init();
 		vibration_init();
 		notifications_init();

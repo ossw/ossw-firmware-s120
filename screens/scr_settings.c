@@ -5,6 +5,7 @@
 #include "../mlcd_draw.h"
 #include "../mlcd.h"
 #include "../i18n/i18n.h"
+#include "../fs.h"
 #include "nrf_soc.h"
 
 static int8_t selectedOption = 0;
@@ -105,6 +106,12 @@ static void scr_settings_refresh_screen() {
 static void scr_settings_init() {
 		selectedOption = 0;
 		lastSelectedOption = 0xFF;
+	
+		spiffs_file fd = SPIFFS_open(&fs, "u/settings", SPIFFS_RDONLY, 0);
+		if (fd >= 0) {
+				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
+				scr_mngr_show_screen_with_param(SCR_WATCH_SET, 2<<24 | fd);
+		}
 }
 
 static void scr_settings_draw_screen() {

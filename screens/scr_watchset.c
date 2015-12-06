@@ -64,17 +64,11 @@ static void clear_subscreen_data() {
 		}
 }
 
-static bool is_default_watch_face() {
-		return watchset_get_dafault_watch_face_fd() == watchset_fd;
-}
-
 static void clean_before_exit() {
 		watchset_id = NULL;
 		ble_peripheral_set_watch_set_id(NULL);
 	
-		if (!is_default_watch_face()) {
-				SPIFFS_close(&fs, watchset_fd); 
-		}
+		SPIFFS_close(&fs, watchset_fd); 
 
 	  clear_subscreen_data();		
 		if (external_properties_data != NULL) {

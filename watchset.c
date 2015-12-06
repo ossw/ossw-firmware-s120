@@ -10,8 +10,6 @@
 #include "ossw.h"
 #include "ble_gap.h"
 
-static spiffs_file default_watch_face_fd = -1;
-
 static uint32_t (* const internal_data_source_handles[])() = {
 		/* 0 */ battery_get_level,
 		/* 1 */ rtc_get_current_time_in_seconds,
@@ -144,15 +142,6 @@ void* watchset_get_converter(uint8_t key) {
 				return NULL;
 		}
 		return data_converters[key];
-}
-
-void watchset_set_default_watch_face(struct spiffs_dirent* entry) {
-		SPIFFS_close(&fs, default_watch_face_fd); 
-		default_watch_face_fd = SPIFFS_open_by_dirent(&fs, entry, SPIFFS_RDONLY, 0);
-}
-
-spiffs_file watchset_get_dafault_watch_face_fd(void) {
-		return default_watch_face_fd;
 }
 
 static void watchset_default_watch_face_handle_button_pressed(uint32_t button_id) {
