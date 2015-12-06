@@ -8,7 +8,10 @@
 #include "ble/ble_central.h"
 #include "nrf_soc.h"
 #include "ossw.h"
+#include "config.h"
 #include "ble_gap.h"
+
+bool watch_face = false;
 
 static uint32_t (* const internal_data_source_handles[])() = {
 		/* 0 */ battery_get_level,
@@ -144,43 +147,44 @@ void* watchset_get_converter(uint8_t key) {
 		return data_converters[key];
 }
 
-static void watchset_default_watch_face_handle_button_pressed(uint32_t button_id) {
+static bool watchset_default_watch_face_handle_button_pressed(uint32_t button_id) {
     switch (button_id) {
         case SCR_EVENT_PARAM_BUTTON_SELECT:
             scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_APPLICATION);
-            break;
+            return true;
         case SCR_EVENT_PARAM_BUTTON_BACK:
             scr_mngr_show_screen(SCR_STATUS);
-            break;
+            return true;
     }
+		return false;
 }
 
-static void watchset_default_watch_face_handle_button_long_pressed(uint32_t button_id) {
+static bool watchset_default_watch_face_handle_button_long_pressed(uint32_t button_id) {
     switch (button_id) {
         case SCR_EVENT_PARAM_BUTTON_BACK:
             mlcd_backlight_toggle();
-            break;
+            return true;
         case SCR_EVENT_PARAM_BUTTON_SELECT:
             scr_mngr_show_screen(SCR_SETTINGS);
-            break;
+            return true;
         case SCR_EVENT_PARAM_BUTTON_UP:
             scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_WATCH_FACE);
-            break;
+            return true;
         case SCR_EVENT_PARAM_BUTTON_DOWN:
             scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_UTILITY);
-            break;
+            return true;
     }
+		return false;
 }
 
-void watchset_default_watch_face_handle_event(uint32_t event_type, uint32_t event_param) {
+bool watchset_default_watch_face_handle_event(uint32_t event_type, uint32_t event_param) {
 		switch(event_type) {
         case SCR_EVENT_BUTTON_PRESSED:
-            watchset_default_watch_face_handle_button_pressed(event_param);
-            break;
+            return watchset_default_watch_face_handle_button_pressed(event_param);
         case SCR_EVENT_BUTTON_LONG_PRESSED:
-            watchset_default_watch_face_handle_button_long_pressed(event_param);
-            break;
+            return watchset_default_watch_face_handle_button_long_pressed(event_param);
 		}
+		return false;
 }
 
 void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
@@ -198,9 +202,24 @@ void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
 				    //scr_mngr_show_screen(SCR_SETTINGS);
 			      break;
 			  case WATCH_SET_FUNC_SHOW_STATUS:
-				    //scr_mngr_show_screen(SCR_SETTINGS);
+				    scr_mngr_show_screen(SCR_STATUS);
+			      break;
+			  case WATCH_SET_FUNC_SHOW_WATCH_FACES:
+            scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_WATCH_FACE);
+			      break;
+			  case WATCH_SET_FUNC_SHOW_NEXT_WATCH_FACE:
+				    //TODO
+			      break;
+			  case WATCH_SET_FUNC_SHOW_APPLICATIONS:
+            scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_APPLICATION);
+			      break;
+			  case WATCH_SET_FUNC_SHOW_UTILS:
+            scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_UTILITY);
 			      break;
 				case WATCH_SET_FUNC_CLOSE:
+						if (watch_face) {
+								config_clear_dafault_watch_face();
+						}
 					  scr_mngr_show_screen(SCR_WATCHFACE);
 					  break;
 			  case WATCH_SET_FUNC_STOPWATCH_START:
@@ -252,4 +271,12 @@ uint32_t watchset_sensor_data_source_get_value(uint32_t data_source_id, uint8_t 
 
 uint32_t watchset_static_data_source_get_value(uint32_t data_source_id, uint8_t expected_range) {
 		return data_source_id;
+}
+
+void watchset_set_watch_face(bool flag) {
+		watch_face = flag;
+}
+
+bool watchset_is_watch_face(void) {
+		return watch_face;
 }

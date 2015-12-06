@@ -42,10 +42,14 @@
 #define WATCH_SET_FUNC_MODEL_INCREMENT 0xA3
 #define WATCH_SET_FUNC_MODEL_DECREMENT 0xA4
 		
-#define WATCH_SET_FUNC_CHANGE_SCREEN 0xE0
-#define WATCH_SET_FUNC_SHOW_SETTINGS 0xE1
-#define WATCH_SET_FUNC_SHOW_STATUS	 0xE2
-#define WATCH_SET_FUNC_SHOW_NOTIFICATIONS 0xE3
+#define WATCH_SET_FUNC_CHANGE_SCREEN 				0xE0
+#define WATCH_SET_FUNC_SHOW_SETTINGS 				0xE1
+#define WATCH_SET_FUNC_SHOW_STATUS	 				0xE2
+#define WATCH_SET_FUNC_SHOW_NOTIFICATIONS 	0xE3
+#define WATCH_SET_FUNC_SHOW_WATCH_FACES			0xE4
+#define WATCH_SET_FUNC_SHOW_APPLICATIONS		0xE5
+#define WATCH_SET_FUNC_SHOW_UTILS						0xE6
+#define WATCH_SET_FUNC_SHOW_NEXT_WATCH_FACE	0xE7
 
 #define WATCH_SET_FUNC_CLOSE 0xEE
 #define WATCH_SET_FUNC_EXTENSION 0xEF
@@ -91,7 +95,7 @@ void watchset_set_default_watch_face(struct spiffs_dirent* entry);
 
 spiffs_file watchset_get_dafault_watch_face_fd(void);
 
-void watchset_default_watch_face_handle_event(uint32_t event_type, uint32_t event_param);
+bool watchset_default_watch_face_handle_event(uint32_t event_type, uint32_t event_param);
 
 uint32_t watchset_internal_data_source_get_value(uint32_t data_source_id, uint8_t expected_range);
 
@@ -102,5 +106,9 @@ uint32_t watchset_static_data_source_get_value(uint32_t data_source_id, uint8_t 
 void watchset_invoke_internal_function(uint8_t function_id, uint32_t param);
 
 void* watchset_get_converter(uint8_t key);
+
+void watchset_set_watch_face(bool flag);
+
+bool watchset_is_watch_face(void);
 
 #endif /* WATCHSET_H */

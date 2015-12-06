@@ -15,6 +15,7 @@
 #include "../spiffs/spiffs.h"
 #include "../fs.h"
 #include "../watchset.h"
+#include "../config.h"
 #include <stdlib.h> 
 
 struct model_property {
@@ -43,7 +44,7 @@ struct model_property {
 		bool disable_actions = false;
 		uint16_t action_handlers[8];
 		uint32_t watchset_id;
-		void (* base_actions_handler)(uint32_t event_type, uint32_t event_param);
+		bool (* base_actions_handler)(uint32_t event_type, uint32_t event_param);
 		bool force_colors = false;
 //}
 
@@ -77,30 +78,37 @@ static void clean_before_exit() {
 		}
 }
 
-void close() {
+void close(void) {
 		clean_before_exit();
 		scr_mngr_show_screen(SCR_WATCHFACE);
 }
 
-static uint8_t get_next_byte() {
+void handle_error(void) {
+		if (watchset_is_watch_face()) {
+				config_clear_dafault_watch_face();
+		}
+		close();
+}
+
+static uint8_t get_next_byte(void) {
     uint8_t data;
 		SPIFFS_read(&fs, watchset_fd, &data, 1);
 	  return data;
 }
 
-static uint16_t get_next_short() {
+static uint16_t get_next_short(void) {
     uint8_t data[2];
 		SPIFFS_read(&fs, watchset_fd, data, 2);
 	  return data[0] << 8 | data[1];
 }
 
-static uint32_t get_next_int() {
+static uint32_t get_next_int(void) {
     uint8_t data[4];
 		SPIFFS_read(&fs, watchset_fd, data, 4);
 	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
 }
 
-static uint8_t ws_data_get_next_byte() {
+static uint8_t ws_data_get_next_byte(void) {
     uint8_t data;
 		ext_ram_read_data(ws_data_ptr, &data, 1);
 		ws_data_ptr++;
@@ -640,7 +648,7 @@ static bool parse_actions() {
 		size -= events_no*3+1;
 		actions_data_buffer = malloc(size);
 		if (actions_data_buffer == NULL) {
-				close();
+				handle_error();
 				return false;
 		}
 
@@ -683,7 +691,7 @@ static bool parse_model() {
 	
 		model_data_buffer = malloc(sizeof(struct model_property)*variables_no);
 		if (model_data_buffer == NULL) {
-				close();
+				handle_error();
 				return false;
 		}
 	
@@ -765,7 +773,7 @@ static bool parse_screen() {
 						  uint16_t buffer_size = get_next_short();
 							screen_data_buffer = calloc(buffer_size, 1);
 							if (screen_data_buffer == NULL) {
-									close();
+									handle_error();
 									return false;
 							}
 					}
@@ -840,15 +848,18 @@ static bool parse_external_properties() {
 
 static void scr_watch_set_init(uint32_t param) {
 		disable_actions = true;
-		if (param>>24 == 1) {
+		uint8_t mode = (param>>24)&0xF;
+		
+		watchset_set_watch_face(param & (1<<28));
+		if (mode == 1) {
 				struct spiffs_dirent entry;
 				ext_ram_read_data(param&0xFFFFFF, (uint8_t*)&entry, sizeof(struct spiffs_dirent));
 				watchset_fd = SPIFFS_open_by_dirent(&fs, &entry, SPIFFS_RDONLY, 0);
-		} else if (param>>24 == 2) {
+		} else if (mode == 2) {
 				watchset_fd = param & 0xFFFF;
 		}
 		if (watchset_fd < 0) {
-			  close();
+			  handle_error();
 			  return;
 		}
 	
@@ -857,12 +868,12 @@ static void scr_watch_set_init(uint32_t param) {
 	
 	  int magic_number = get_next_short();
 		if (magic_number != 0x0553) {
-			  close();
+			  handle_error();
 			  return;
 		}
 	  int api_version = get_next_short();
 		if (api_version != 1) {
-			  close();
+			  handle_error();
 			  return;
 		}
 	  watchset_id = get_next_int();
@@ -886,7 +897,7 @@ static void scr_watch_set_init(uint32_t param) {
 				SPIFFS_lseek(&fs, watchset_fd, section_size, SPIFFS_SEEK_CUR);
 	  };
 		if (!parse_external_properties()){
-				close();
+				handle_error();
 			  return;
 		}
 		
@@ -1030,13 +1041,14 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 		}
 }
 
-void scr_watch_set_invoke_function(int idx) {
+bool scr_watch_set_invoke_function(int idx) {
 		if (action_handlers[idx] == 0xFFFF) {
 				// handler not set
-				return;
+				return false;
 		}
 		uint8_t* data = actions_data_buffer + action_handlers[idx];
 		scr_watch_set_parse_actions(&data);
+		return true;
 }
 
 void scr_watch_set_invoke_internal_function(uint8_t function_id, uint32_t param) {
@@ -1051,71 +1063,70 @@ void scr_watch_set_invoke_external_function(uint8_t function_id) {
 	  ble_peripheral_invoke_external_function(function_id);
 }
 
-static void scr_watch_set_handle_button_pressed(uint32_t button_id) {
+static bool scr_watch_set_handle_button_pressed(uint32_t button_id) {
 		if (disable_actions) {
-				return;
+				return true;
 		}
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_UP:
-					  scr_watch_set_invoke_function(0);
-				    break;
+					  return scr_watch_set_invoke_function(0);
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
-					  scr_watch_set_invoke_function(1);
-				    break;
+					  return scr_watch_set_invoke_function(1);
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
-					  scr_watch_set_invoke_function(2);
-				    break;
+					  return scr_watch_set_invoke_function(2);
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
-					  scr_watch_set_invoke_function(3);
-				    break;
+					  return scr_watch_set_invoke_function(3);
 		}
+		return false;
 }
 
-static void scr_watch_set_handle_button_long_pressed(uint32_t button_id) {
+static bool scr_watch_set_handle_button_long_pressed(uint32_t button_id) {
 		if (disable_actions) {
-				return;
+				return true;
 		}
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_UP:
-					  scr_watch_set_invoke_function(4);
-				    break;
+					  return scr_watch_set_invoke_function(4);
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
-					  scr_watch_set_invoke_function(5);
-				    break;
+					  return scr_watch_set_invoke_function(5);
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
-					  scr_watch_set_invoke_function(6);
-				    break;
+					  return scr_watch_set_invoke_function(6);
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
-					  scr_watch_set_invoke_function(7);
-				    break;
+					  return scr_watch_set_invoke_function(7);
 		}
+		return false;
 }
 
-void scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
+bool scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_watch_set_init(event_param);
-				    break;
+				    return true;
 			  case SCR_EVENT_DRAW_SCREEN:
 				    scr_watch_set_draw_screen((scr_mngr_draw_ctx*)event_param);
-				    break;
+				    return true;
         case SCR_EVENT_REFRESH_SCREEN:
             scr_watch_set_refresh_screen((scr_mngr_draw_ctx*)event_param);
-            break;
+            return true;
 			  case SCR_EVENT_BUTTON_PRESSED:
-				    scr_watch_set_handle_button_pressed(event_param);
-				    break;
+				    if (scr_watch_set_handle_button_pressed(event_param)) {
+								return true;
+						}
+						break;
 			  case SCR_EVENT_BUTTON_LONG_PRESSED:
-				    scr_watch_set_handle_button_long_pressed(event_param);
-				    break;
+				    if (scr_watch_set_handle_button_long_pressed(event_param)) {
+								return true;
+						}
+						break;
 				case SCR_EVENT_APP_CONNECTION_CONFIRMED:
 						ble_peripheral_set_watch_set_id(watchset_id);
-						break;
+						return true;
 			  case SCR_EVENT_DESTROY_SCREEN:
 						clean_before_exit();
-				    break;
+				    return true;
 		}
 		if (base_actions_handler != NULL) {
-				base_actions_handler(event_type, event_param);
+				return base_actions_handler(event_type, event_param);
 		}
+		return false;
 }

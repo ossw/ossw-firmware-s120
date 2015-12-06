@@ -6,6 +6,7 @@
 #include "../fs.h"
 #include "../mlcd_draw.h"
 #include "../i18n/i18n.h"
+#include "../config.h"
 
 
 #define MODE_SELECT 0
@@ -147,7 +148,7 @@ static void scr_watchset_list_handle_button_pressed(uint32_t button_id) {
 								if (data->type == WATCH_SET_TYPE_WATCH_FACE) {
 										struct spiffs_dirent entry;
 										ext_ram_read_data(ptr, (uint8_t*)&entry, sizeof(struct spiffs_dirent));
-										config_set_default_watch_face(entry.name);
+										config_set_default_watch_face((char *)entry.name);
 										scr_mngr_show_screen(SCR_WATCHFACE);
 								} else {
 										scr_mngr_show_screen_with_param(SCR_WATCH_SET, (1<<24) | ptr);

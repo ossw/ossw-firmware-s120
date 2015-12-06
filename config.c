@@ -46,3 +46,8 @@ spiffs_file config_get_dafault_watch_face_fd(void) {
 		}
 		return SPIFFS_open(&fs, buf, SPIFFS_RDONLY, 0);
 }
+
+void config_clear_dafault_watch_face(void) {
+		uint8_t data = 0;
+		ext_ram_write_data(EXT_RAM_CONFIG + OFFSET_DEFAULT_WATCH_FACE, &data, 1);
+}

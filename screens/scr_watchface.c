@@ -7,6 +7,7 @@
 #include "../vibration.h"
 #include "../watchset.h"
 #include "../fs.h"
+#include "../config.h"
 #include "nrf_delay.h"
 		
 static NUMBER_CONTROL_DATA hour_ctrl_data;
@@ -66,7 +67,7 @@ static void scr_watchface_init() {
 	  spiffs_file fd = config_get_dafault_watch_face_fd();
 		if (fd >= 0) {
 				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
-				scr_mngr_show_screen_with_param(SCR_WATCH_SET, 2<<24 | fd);
+				scr_mngr_show_screen_with_param(SCR_WATCH_SET, 1<<28 | 2<<24 | fd);
 		}
 }
 
@@ -74,17 +75,17 @@ static void scr_watchface_draw() {
 	  scr_controls_draw(&controls_definition);
 }
 
-void scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
+bool scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
     switch(event_type) {
         case SCR_EVENT_INIT_SCREEN:
             scr_watchface_init();
-            break;
+            return true;
         case SCR_EVENT_DRAW_SCREEN:
             scr_watchface_draw();
-            break;
+            return true;
         case SCR_EVENT_REFRESH_SCREEN:
             scr_watchface_refresh_time();
-            break;
+            return true;
     }
-		watchset_default_watch_face_handle_event(event_type, event_param);
+		return watchset_default_watch_face_handle_event(event_type, event_param);
 }
