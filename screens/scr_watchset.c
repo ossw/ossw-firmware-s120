@@ -38,14 +38,15 @@ struct model_property {
 		uint32_t checkpoint;
 
 		uint8_t current_subscreen = 0;
-		uint8_t switch_to_subscreen = 0;
 
 		spiffs_file watchset_fd;
-		bool disable_actions = false;
 		uint16_t action_handlers[8];
 		uint32_t watchset_id;
 		bool (* base_actions_handler)(uint32_t event_type, uint32_t event_param);
 		bool force_colors = false;
+		
+		uint8_t operation = 0;
+		uint32_t operation_param = 0;
 //}
 
 static bool parse_screen_controls(bool force);
@@ -305,39 +306,66 @@ static uint32_t get_next_byte_from_array(uint8_t** data) {
 		return *((*data)++);
 }
 
-static int32_t parse_data_source_value_from_array(uint8_t** data) {
+static void parse_data_source_value_from_array(uint8_t** data, void* buf) {
     uint8_t type = get_next_byte_from_array(data);
     uint8_t property = get_next_byte_from_array(data);
 	
-		int32_t value = 0;
 	  switch (type&0x3F) {
 			  case DATA_SOURCE_STATIC:
-			      value = get_next_byte_from_array(data)<<24|get_next_byte_from_array(data)<<16|get_next_byte_from_array(data)<<8|get_next_byte_from_array(data);
+			      *((uint32_t*)buf) = get_next_byte_from_array(data)<<24|get_next_byte_from_array(data)<<16|get_next_byte_from_array(data)<<8|get_next_byte_from_array(data);
 				    break;
 			  case DATA_SOURCE_INTERNAL:
-			      value = watchset_internal_data_source_get_value(property, 0);
+			     *((uint32_t*)buf) = watchset_internal_data_source_get_value(property, 0);
 				    break;
 			  case DATA_SOURCE_SENSOR:
-			      value = watchset_sensor_data_source_get_value(property, 0);
+			      *((uint32_t*)buf) = watchset_sensor_data_source_get_value(property, 0);
 				    break;
 			  case DATA_SOURCE_EXTERNAL:
-			      value = external_data_source_get_property_value(property, 0);
+			      *((uint32_t*)buf) = external_data_source_get_property_value(property, 0);
 				    break;
 			  case DATA_SOURCE_MODEL:
-			      value = model_data_source_get_property_value(property, 0);
+			      *((uint32_t*)buf) = model_data_source_get_property_value(property, 0);
 				    break;
 		}
 		if (type & 0x40) {
-				parse_data_source_value_from_array(data);
+				// index
+				uint32_t value;
+				parse_data_source_value_from_array(data, &value);
 		}
 		if (type & 0x80) {
+				// converter
 				uint8_t converter_no = get_next_byte_from_array(data);
 				for (int i = 0; i < converter_no; i++) {
 						uint8_t converter_id = get_next_byte_from_array(data);
-						value = ((uint32_t (*)(uint32_t))watchset_get_converter(converter_id))(value);
+						*((uint32_t*)buf) = ((uint32_t (*)(uint32_t))watchset_get_converter(converter_id))(*((uint32_t*)buf));
 				}
 		}
-		return value;
+}
+
+static void parse_data_source_text_value_from_array(uint8_t** data, void* buf) {
+    uint8_t type = get_next_byte_from_array(data);
+    uint8_t property = get_next_byte_from_array(data);
+	
+	  switch (type&0x3F) {
+			  case DATA_SOURCE_STATIC:
+						memcpy(buf, *data, property);
+						((uint8_t*)buf)[property] = 0;
+			      break;
+		}
+		if (type & 0x40) {
+				// index
+				uint32_t value;
+				parse_data_source_value_from_array(data, &value);
+				// skip index
+		}
+		if (type & 0x80) {
+				// converter
+				uint8_t converter_no = get_next_byte_from_array(data);
+				for (int i = 0; i < converter_no; i++) {
+						uint8_t converter_id = get_next_byte_from_array(data);
+						// skip converter
+				}
+		}
 }
 
 void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t size) {
@@ -847,7 +875,6 @@ static bool parse_external_properties() {
 }
 
 static void scr_watch_set_init(uint32_t param) {
-		disable_actions = true;
 		uint8_t mode = (param>>24)&0xF;
 		
 		watchset_set_watch_face(param & (1<<28));
@@ -864,7 +891,6 @@ static void scr_watch_set_init(uint32_t param) {
 		}
 	
 	  current_subscreen = 0;
-	  switch_to_subscreen = 0;
 	
 	  int magic_number = get_next_short();
 		if (magic_number != 0x0553) {
@@ -905,7 +931,6 @@ static void scr_watch_set_init(uint32_t param) {
 		ble_peripheral_set_watch_set_id(watchset_id);
 		
 		init_subscreen(current_subscreen);
-		disable_actions = false;
 }
 
 static void scr_watch_set_draw_screen(scr_mngr_draw_ctx* ctx) {
@@ -913,24 +938,51 @@ static void scr_watch_set_draw_screen(scr_mngr_draw_ctx* ctx) {
 		draw_screen_controls(true, ctx);
 }
 
+static void scr_watch_set_open_other(scr_mngr_draw_ctx* ctx) {
+		char path[32];
+		path[0] = operation == WATCH_SET_OPERATION_OPEN_APPLICATION ? 'a' : 'u';
+		path[1] = '/';
+	
+		uint8_t ** data_ptr = (uint8_t **)&operation_param;
+		parse_data_source_text_value_from_array(data_ptr, path+2);
+	
+		clean_before_exit();
+	
+		spiffs_file fd = SPIFFS_open(&fs, path, SPIFFS_RDONLY, 0);
+		if (fd >= 0) {
+				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
+				scr_watch_set_init(2<<24 | fd);
+		} else {
+				scr_mngr_show_screen(SCR_WATCHFACE);
+		}
+		
+		operation = NULL;
+		operation_param = NULL;
+		
+	  mlcd_fb_clear();
+		draw_screen_controls(true, ctx);
+}
+
 static void scr_watch_set_refresh_screen(scr_mngr_draw_ctx* ctx) {
-	  if (current_subscreen != switch_to_subscreen) {
-				disable_actions = true;
+	  if (operation == WATCH_SET_OPERATION_SWITCH_TO_SUBSCREEN && current_subscreen != operation_param) {
 				clear_subscreen_data();
 	      mlcd_fb_clear();
-			  init_subscreen(switch_to_subscreen);
+			  init_subscreen(operation_param);
 			
 //				SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
 				draw_screen_controls(true, ctx);
 			
-			  current_subscreen = switch_to_subscreen;
-				disable_actions = false;
+			  current_subscreen = operation_param;
+			
+				operation = NULL;
+				operation_param = NULL;
+		} else if (operation == WATCH_SET_OPERATION_OPEN_APPLICATION || operation == WATCH_SET_OPERATION_OPEN_UTILITY) {
+				scr_watch_set_open_other(ctx);
 		} else {
-	//			SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
 				bool forceRedraw = draw_screen_controls(false, ctx);
 			
 				if (forceRedraw) {
-					mlcd_fb_clear();
+						mlcd_fb_clear();
 						draw_screen_controls(true, ctx);
 				}
 	  }
@@ -939,7 +991,8 @@ static void scr_watch_set_refresh_screen(scr_mngr_draw_ctx* ctx) {
 static void scr_watch_set_parse_actions(uint8_t** data);
 	
 void scr_watch_set_parse_choose_actions(uint8_t** data) {
-		int value = parse_data_source_value_from_array(data);
+		int value;
+		parse_data_source_value_from_array(data, &value);
 		uint8_t options_no = *((*data)++);
 		for (int i=0; i<options_no; i++) {
 				uint8_t expected_value = *((*data)++);
@@ -980,7 +1033,8 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 						scr_watch_set_invoke_external_function(param);
 				} else if (action_id == WATCH_SET_FUNC_CHANGE_SCREEN) {
 						uint16_t param = *((*data)++)<<8 | *((*data)++);
-						scr_watch_set_invoke_internal_function(action_id, param);
+						operation = WATCH_SET_OPERATION_SWITCH_TO_SUBSCREEN;
+						operation_param = param&0xFF;
 				} else if (action_id == WATCH_SET_FUNC_SET_TIME) {
 						time_t t;
 						time(&t);
@@ -989,7 +1043,8 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 						uint8_t field_no = *((*data)++);
 						for (int f = 0; f < field_no; f++) {
 								uint8_t field_id = (*((*data)++))&0xFF;
-								int32_t field_value = parse_data_source_value_from_array(data);
+								int32_t field_value;
+								parse_data_source_value_from_array(data, &field_value);
 								switch(field_id) {
 									case 0:
 										time_struct->tm_year = field_value - 1900;
@@ -1011,20 +1066,23 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 										break;
 								}
 						}
-						scr_watch_set_invoke_internal_function(action_id, mktime(time_struct));
+						watchset_invoke_internal_function(action_id, mktime(time_struct));
 				} else if (action_id == WATCH_SET_FUNC_MODEL_SET) {
 						uint8_t property_id = *((*data)++);
-						int value = parse_data_source_value_from_array(data);
+						int value;
+						parse_data_source_value_from_array(data, &value);
 						model_data_buffer[property_id].value = value;
 						trim_model_property(property_id);
 				} else if (action_id == WATCH_SET_FUNC_MODEL_ADD) {
 						uint8_t property_id = *((*data)++);
-						int value = parse_data_source_value_from_array(data);
+						int value;
+						parse_data_source_value_from_array(data, &value);
 						model_data_buffer[property_id].value += value;
 						trim_model_property(property_id);
 				} else if (action_id == WATCH_SET_FUNC_MODEL_SUBTRACT) {
 						uint8_t property_id = *((*data)++);
-						int value = parse_data_source_value_from_array(data);
+						int value;
+						parse_data_source_value_from_array(data, &value);
 						model_data_buffer[property_id].value -= value;
 						trim_model_property(property_id);
 				} else if (action_id == WATCH_SET_FUNC_MODEL_INCREMENT) {
@@ -1035,8 +1093,16 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 						uint8_t property_id = *((*data)++);
 						model_data_buffer[property_id].value--;
 						trim_model_property(property_id);
+				} else if (action_id == WATCH_SET_FUNC_SHOW_NEXT_WATCH_FACE) {
+						operation = WATCH_SET_OPERATION_NEXT_WATCH_FACE;
+				} else if (action_id == WATCH_SET_FUNC_SHOW_APPLICATION) {
+						operation = WATCH_SET_OPERATION_OPEN_APPLICATION;
+						operation_param = (uint32_t)*data;
+				} else if (action_id == WATCH_SET_FUNC_SHOW_UTILITY) {
+						operation = WATCH_SET_OPERATION_OPEN_UTILITY;
+						operation_param = (uint32_t)*data;
 				} else {
-						scr_watch_set_invoke_internal_function(action_id, 0);
+						watchset_invoke_internal_function(action_id, 0);
 				}
 		}
 }
@@ -1051,20 +1117,12 @@ bool scr_watch_set_invoke_function(int idx) {
 		return true;
 }
 
-void scr_watch_set_invoke_internal_function(uint8_t function_id, uint32_t param) {
-		if (WATCH_SET_FUNC_CHANGE_SCREEN == function_id) {
-				switch_to_subscreen = param&0xFF;
-		} else {
-				watchset_invoke_internal_function(function_id, param);
-		}
-}
-
 void scr_watch_set_invoke_external_function(uint8_t function_id) {
 	  ble_peripheral_invoke_external_function(function_id);
 }
 
 static bool scr_watch_set_handle_button_pressed(uint32_t button_id) {
-		if (disable_actions) {
+		if (operation != 0) {
 				return true;
 		}
 	  switch (button_id) {
@@ -1081,7 +1139,7 @@ static bool scr_watch_set_handle_button_pressed(uint32_t button_id) {
 }
 
 static bool scr_watch_set_handle_button_long_pressed(uint32_t button_id) {
-		if (disable_actions) {
+		if (operation != 0) {
 				return true;
 		}
 	  switch (button_id) {
