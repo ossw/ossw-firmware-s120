@@ -523,6 +523,11 @@
               <FileType>1</FileType>
               <FilePath>..\accel.c</FilePath>
             </File>
+            <File>
+              <FileName>config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\config.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1261,6 +1266,11 @@
               <FileName>accel.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\accel.c</FilePath>
+            </File>
+            <File>
+              <FileName>config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\config.c</FilePath>
             </File>
           </Files>
         </Group>
