@@ -38,7 +38,11 @@ void config_set_default_watch_face(char* file_name) {
 		ext_ram_write_data(EXT_RAM_CONFIG + OFFSET_DEFAULT_WATCH_FACE, (uint8_t*)file_name, SPIFFS_OBJ_NAME_LEN);
 }
 
-spiffs_file config_get_dafault_watch_face_fd(void) {
+void config_get_default_watch_face(char* file_name) {
+		ext_ram_read_data(EXT_RAM_CONFIG + OFFSET_DEFAULT_WATCH_FACE, (uint8_t*)file_name, SPIFFS_OBJ_NAME_LEN);
+}
+
+spiffs_file config_get_default_watch_face_fd(void) {
 		char buf[32];
 		ext_ram_read_data(EXT_RAM_CONFIG + OFFSET_DEFAULT_WATCH_FACE, (uint8_t*)buf, SPIFFS_OBJ_NAME_LEN);
 		if (buf[0] == 0) {

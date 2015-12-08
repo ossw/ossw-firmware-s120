@@ -11,6 +11,8 @@ void config_clear_dafault_watch_face(void);
 
 void config_set_default_watch_face(char* file_name);
 
-spiffs_file config_get_dafault_watch_face_fd(void);
+spiffs_file config_get_default_watch_face_fd(void);
+
+void config_get_default_watch_face(char* file_name);
 	
 #endif /* CONFIGUTARION_H */

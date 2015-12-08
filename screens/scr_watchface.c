@@ -64,7 +64,7 @@ static void scr_watchface_refresh_time() {
 }
 
 static void scr_watchface_init() {
-	  spiffs_file fd = config_get_dafault_watch_face_fd();
+	  spiffs_file fd = config_get_default_watch_face_fd();
 		if (fd >= 0) {
 				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
 				scr_mngr_show_screen_with_param(SCR_WATCH_SET, 1<<28 | 2<<24 | fd);

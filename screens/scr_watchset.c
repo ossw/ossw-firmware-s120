@@ -938,23 +938,17 @@ static void scr_watch_set_draw_screen(scr_mngr_draw_ctx* ctx) {
 		draw_screen_controls(true, ctx);
 }
 
-static void scr_watch_set_open_other(scr_mngr_draw_ctx* ctx) {
-		char path[32];
-		path[0] = operation == WATCH_SET_OPERATION_OPEN_APPLICATION ? 'a' : 'u';
-		path[1] = '/';
-	
-		uint8_t ** data_ptr = (uint8_t **)&operation_param;
-		parse_data_source_text_value_from_array(data_ptr, path+2);
-	
+static void scr_watch_set_open(scr_mngr_draw_ctx* ctx, char* file_name, bool watch_face) {
 		clean_before_exit();
 	
-		spiffs_file fd = SPIFFS_open(&fs, path, SPIFFS_RDONLY, 0);
+		spiffs_file fd = SPIFFS_open(&fs, file_name, SPIFFS_RDONLY, 0);
 		if (fd >= 0) {
 				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
-				scr_watch_set_init(2<<24 | fd);
+				scr_watch_set_init(watch_face<<28 | 2<<24 | fd);
 		} else {
 				scr_mngr_show_screen(SCR_WATCHFACE);
 		}
+		
 		
 		operation = NULL;
 		operation_param = NULL;
@@ -963,22 +957,77 @@ static void scr_watch_set_open_other(scr_mngr_draw_ctx* ctx) {
 		draw_screen_controls(true, ctx);
 }
 
+static void scr_watch_set_open_other(scr_mngr_draw_ctx* ctx) {
+		char path[32];
+		path[0] = operation == WATCH_SET_OPERATION_OPEN_APPLICATION ? 'a' : 'u';
+		path[1] = '/';
+	
+		uint8_t ** data_ptr = (uint8_t **)&operation_param;
+		parse_data_source_text_value_from_array(data_ptr, path+2);
+	
+		scr_watch_set_open(ctx, path, false);
+}
+
+static void scr_watch_set_next_watch_face(scr_mngr_draw_ctx* ctx) {
+		char file_name[32];
+		config_get_default_watch_face(file_name);
+		char dir[] = "f/";
+	
+		spiffs_DIR d;
+		struct spiffs_dirent e;
+		spiffs_file fd = SPIFFS_open(&fs, file_name, SPIFFS_RDONLY, 0);
+		if (fd >= 0) {
+				SPIFFS_close(&fs, fd);
+				SPIFFS_opendir(&fs, "/", &d);
+				while (SPIFFS_readdir(&d, &e) != 0) {
+					if (0 == strcmp(file_name, (char *)e.name)) {
+							while (SPIFFS_readdir(&d, &e) != 0) {
+									// file found
+									if	(strncmp(dir, (char*)e.name, 2) == 0) {
+											config_set_default_watch_face((char*)e.name);
+											
+											scr_watch_set_open(ctx, (char*)e.name, true);
+											SPIFFS_closedir(&d);
+											return;
+									}
+							}
+							break;
+					}
+				}
+		}
+		SPIFFS_closedir(&d);
+		
+		SPIFFS_opendir(&fs, "/", &d);
+		memset(&e, 0, sizeof(struct spiffs_dirent));
+		while (SPIFFS_readdir(&d, &e) != 0) {
+				// file found
+				if	(strncmp(dir, (char*)e.name, 2) == 0) {
+						config_set_default_watch_face((char*)e.name);
+						scr_watch_set_open(ctx, (char*)e.name, true);
+						break;
+				}
+		}
+		SPIFFS_closedir(&d);
+}
+
 static void scr_watch_set_refresh_screen(scr_mngr_draw_ctx* ctx) {
 	  if (operation == WATCH_SET_OPERATION_SWITCH_TO_SUBSCREEN && current_subscreen != operation_param) {
 				clear_subscreen_data();
 	      mlcd_fb_clear();
 			  init_subscreen(operation_param);
 			
-//				SPIFFS_lseek(&fs, watchset_fd, current_screen_controls_address, SPIFFS_SEEK_SET);
 				draw_screen_controls(true, ctx);
-			
 			  current_subscreen = operation_param;
 			
 				operation = NULL;
 				operation_param = NULL;
 		} else if (operation == WATCH_SET_OPERATION_OPEN_APPLICATION || operation == WATCH_SET_OPERATION_OPEN_UTILITY) {
 				scr_watch_set_open_other(ctx);
-		} else {
+		} else if (operation == WATCH_SET_OPERATION_NEXT_WATCH_FACE) {
+				scr_watch_set_next_watch_face(ctx);
+				operation = NULL;
+				operation_param = NULL;
+		}  else {
 				bool forceRedraw = draw_screen_controls(false, ctx);
 			
 				if (forceRedraw) {

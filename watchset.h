@@ -118,4 +118,6 @@ void watchset_set_watch_face(bool flag);
 
 bool watchset_is_watch_face(void);
 
+void watchset_next_watch_face(void);
+
 #endif /* WATCHSET_H */
