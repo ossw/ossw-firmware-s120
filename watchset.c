@@ -12,6 +12,8 @@
 #include "ble_gap.h"
 
 bool watch_face = false;
+uint8_t operation = 0;
+uint32_t operation_param = 0;
 
 static uint32_t (* const internal_data_source_handles[])() = {
 		/* 0 */ battery_get_level,
@@ -155,6 +157,9 @@ static bool watchset_default_watch_face_handle_button_pressed(uint32_t button_id
         case SCR_EVENT_PARAM_BUTTON_BACK:
             scr_mngr_show_screen(SCR_STATUS);
             return true;
+        case SCR_EVENT_PARAM_BUTTON_DOWN:
+						watchset_async_operation(WATCH_SET_OPERATION_NEXT_WATCH_FACE, 0);
+						return true;
     }
 		return false;
 }
@@ -279,4 +284,98 @@ void watchset_set_watch_face(bool flag) {
 
 bool watchset_is_watch_face(void) {
 		return watch_face;
+}
+
+static void watchset_open(char* file_name, bool watch_face) {
+		spiffs_file fd = SPIFFS_open(&fs, file_name, SPIFFS_RDONLY, 0);
+		if (fd >= 0) {
+				scr_mngr_show_screen_with_param(SCR_WATCH_SET, watch_face<<28 | 2<<24 | fd);
+		} else {
+				scr_mngr_show_screen(SCR_WATCHFACE);
+		}
+}
+
+static uint32_t get_next_byte_from_array(uint8_t** data) {
+		return *((*data)++);
+}
+
+static void parse_data_source_text_value_from_array(uint8_t** data, void* buf) {
+    uint8_t type = get_next_byte_from_array(data);
+    uint8_t property = get_next_byte_from_array(data);
+	
+	  switch (type&0x3F) {
+			  case DATA_SOURCE_STATIC:
+						memcpy(buf, *data, property);
+						((uint8_t*)buf)[property] = 0;
+			      break;
+		}
+}
+
+static void watchset_open_other(void) {
+		char path[32];
+		path[0] = operation == WATCH_SET_OPERATION_OPEN_APPLICATION ? 'a' : 'u';
+		path[1] = '/';
+	
+		uint8_t ** data_ptr = (uint8_t **)&operation_param;
+		parse_data_source_text_value_from_array(data_ptr, path+2);
+	
+		watchset_open(path, false);
+}
+
+static void watchset_next_watch_face(void) {
+		char file_name[32];
+		config_get_default_watch_face(file_name);
+		char dir[] = "f/";
+	
+		spiffs_DIR d;
+		struct spiffs_dirent e;
+		spiffs_file fd = SPIFFS_open(&fs, file_name, SPIFFS_RDONLY, 0);
+		if (fd >= 0) {
+				SPIFFS_close(&fs, fd);
+				SPIFFS_opendir(&fs, "/", &d);
+				while (SPIFFS_readdir(&d, &e) != 0) {
+					if (0 == strcmp(file_name, (char *)e.name)) {
+							while (SPIFFS_readdir(&d, &e) != 0) {
+									// file found
+									if	(strncmp(dir, (char*)e.name, 2) == 0) {
+											config_set_default_watch_face((char*)e.name);
+											
+											watchset_open((char*)e.name, true);
+											SPIFFS_closedir(&d);
+											return;
+									}
+							}
+							break;
+					}
+				}
+				SPIFFS_closedir(&d);
+		}
+		
+		SPIFFS_opendir(&fs, "/", &d);
+		memset(&e, 0, sizeof(struct spiffs_dirent));
+		while (SPIFFS_readdir(&d, &e) != 0) {
+				// file found
+				if	(strncmp(dir, (char*)e.name, 2) == 0) {
+						config_set_default_watch_face((char*)e.name);
+						watchset_open((char*)e.name, true);
+						break;
+				}
+		}
+		SPIFFS_closedir(&d);
+}
+
+void watchset_async_operation(uint8_t op, uint32_t param) {
+		operation = op;
+		operation_param = param;
+}
+
+void watchset_process_async_operation(void) {
+		if (operation != NULL) {
+				if (operation == WATCH_SET_OPERATION_OPEN_APPLICATION || operation == WATCH_SET_OPERATION_OPEN_UTILITY) {
+						watchset_open_other();
+				} else if (operation == WATCH_SET_OPERATION_NEXT_WATCH_FACE) {
+						watchset_next_watch_face();
+				}
+				operation = NULL;
+		}
 }

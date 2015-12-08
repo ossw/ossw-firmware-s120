@@ -44,9 +44,8 @@ struct model_property {
 		uint32_t watchset_id;
 		bool (* base_actions_handler)(uint32_t event_type, uint32_t event_param);
 		bool force_colors = false;
-		
-		uint8_t operation = 0;
-		uint32_t operation_param = 0;
+		uint8_t show_screen_param = 0xFF;
+		bool lock_actions = false;
 //}
 
 static bool parse_screen_controls(bool force);
@@ -341,7 +340,7 @@ static void parse_data_source_value_from_array(uint8_t** data, void* buf) {
 				}
 		}
 }
-
+/*
 static void parse_data_source_text_value_from_array(uint8_t** data, void* buf) {
     uint8_t type = get_next_byte_from_array(data);
     uint8_t property = get_next_byte_from_array(data);
@@ -367,7 +366,7 @@ static void parse_data_source_text_value_from_array(uint8_t** data, void* buf) {
 				}
 		}
 }
-
+*/
 void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t size) {
 	  if (external_properties_data == NULL) {
 			  return;
@@ -875,6 +874,7 @@ static bool parse_external_properties() {
 }
 
 static void scr_watch_set_init(uint32_t param) {
+		lock_actions = true;
 		uint8_t mode = (param>>24)&0xF;
 		
 		watchset_set_watch_face(param & (1<<28));
@@ -931,6 +931,7 @@ static void scr_watch_set_init(uint32_t param) {
 		ble_peripheral_set_watch_set_id(watchset_id);
 		
 		init_subscreen(current_subscreen);
+		lock_actions = false;
 }
 
 static void scr_watch_set_draw_screen(scr_mngr_draw_ctx* ctx) {
@@ -938,96 +939,19 @@ static void scr_watch_set_draw_screen(scr_mngr_draw_ctx* ctx) {
 		draw_screen_controls(true, ctx);
 }
 
-static void scr_watch_set_open(scr_mngr_draw_ctx* ctx, char* file_name, bool watch_face) {
-		clean_before_exit();
-	
-		spiffs_file fd = SPIFFS_open(&fs, file_name, SPIFFS_RDONLY, 0);
-		if (fd >= 0) {
-				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
-				scr_watch_set_init(watch_face<<28 | 2<<24 | fd);
-		} else {
-				scr_mngr_show_screen(SCR_WATCHFACE);
-		}
-		
-		
-		operation = NULL;
-		operation_param = NULL;
-		
-	  mlcd_fb_clear();
-		draw_screen_controls(true, ctx);
-}
-
-static void scr_watch_set_open_other(scr_mngr_draw_ctx* ctx) {
-		char path[32];
-		path[0] = operation == WATCH_SET_OPERATION_OPEN_APPLICATION ? 'a' : 'u';
-		path[1] = '/';
-	
-		uint8_t ** data_ptr = (uint8_t **)&operation_param;
-		parse_data_source_text_value_from_array(data_ptr, path+2);
-	
-		scr_watch_set_open(ctx, path, false);
-}
-
-static void scr_watch_set_next_watch_face(scr_mngr_draw_ctx* ctx) {
-		char file_name[32];
-		config_get_default_watch_face(file_name);
-		char dir[] = "f/";
-	
-		spiffs_DIR d;
-		struct spiffs_dirent e;
-		spiffs_file fd = SPIFFS_open(&fs, file_name, SPIFFS_RDONLY, 0);
-		if (fd >= 0) {
-				SPIFFS_close(&fs, fd);
-				SPIFFS_opendir(&fs, "/", &d);
-				while (SPIFFS_readdir(&d, &e) != 0) {
-					if (0 == strcmp(file_name, (char *)e.name)) {
-							while (SPIFFS_readdir(&d, &e) != 0) {
-									// file found
-									if	(strncmp(dir, (char*)e.name, 2) == 0) {
-											config_set_default_watch_face((char*)e.name);
-											
-											scr_watch_set_open(ctx, (char*)e.name, true);
-											SPIFFS_closedir(&d);
-											return;
-									}
-							}
-							break;
-					}
-				}
-		}
-		SPIFFS_closedir(&d);
-		
-		SPIFFS_opendir(&fs, "/", &d);
-		memset(&e, 0, sizeof(struct spiffs_dirent));
-		while (SPIFFS_readdir(&d, &e) != 0) {
-				// file found
-				if	(strncmp(dir, (char*)e.name, 2) == 0) {
-						config_set_default_watch_face((char*)e.name);
-						scr_watch_set_open(ctx, (char*)e.name, true);
-						break;
-				}
-		}
-		SPIFFS_closedir(&d);
-}
-
 static void scr_watch_set_refresh_screen(scr_mngr_draw_ctx* ctx) {
-	  if (operation == WATCH_SET_OPERATION_SWITCH_TO_SUBSCREEN && current_subscreen != operation_param) {
+	  if (show_screen_param != 0xFF && current_subscreen != show_screen_param) {
+				lock_actions = true;
 				clear_subscreen_data();
 	      mlcd_fb_clear();
-			  init_subscreen(operation_param);
+			  init_subscreen(show_screen_param);
 			
 				draw_screen_controls(true, ctx);
-			  current_subscreen = operation_param;
+			  current_subscreen = show_screen_param;
 			
-				operation = NULL;
-				operation_param = NULL;
-		} else if (operation == WATCH_SET_OPERATION_OPEN_APPLICATION || operation == WATCH_SET_OPERATION_OPEN_UTILITY) {
-				scr_watch_set_open_other(ctx);
-		} else if (operation == WATCH_SET_OPERATION_NEXT_WATCH_FACE) {
-				scr_watch_set_next_watch_face(ctx);
-				operation = NULL;
-				operation_param = NULL;
-		}  else {
+				show_screen_param = 0xFF;
+				lock_actions = false;
+		} else {
 				bool forceRedraw = draw_screen_controls(false, ctx);
 			
 				if (forceRedraw) {
@@ -1082,8 +1006,7 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 						scr_watch_set_invoke_external_function(param);
 				} else if (action_id == WATCH_SET_FUNC_CHANGE_SCREEN) {
 						uint16_t param = *((*data)++)<<8 | *((*data)++);
-						operation = WATCH_SET_OPERATION_SWITCH_TO_SUBSCREEN;
-						operation_param = param&0xFF;
+						show_screen_param = param&0xFF;
 				} else if (action_id == WATCH_SET_FUNC_SET_TIME) {
 						time_t t;
 						time(&t);
@@ -1143,13 +1066,11 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 						model_data_buffer[property_id].value--;
 						trim_model_property(property_id);
 				} else if (action_id == WATCH_SET_FUNC_SHOW_NEXT_WATCH_FACE) {
-						operation = WATCH_SET_OPERATION_NEXT_WATCH_FACE;
+						watchset_async_operation(WATCH_SET_OPERATION_NEXT_WATCH_FACE, 0);
 				} else if (action_id == WATCH_SET_FUNC_SHOW_APPLICATION) {
-						operation = WATCH_SET_OPERATION_OPEN_APPLICATION;
-						operation_param = (uint32_t)*data;
+						watchset_async_operation(WATCH_SET_OPERATION_OPEN_APPLICATION, (uint32_t)*data);
 				} else if (action_id == WATCH_SET_FUNC_SHOW_UTILITY) {
-						operation = WATCH_SET_OPERATION_OPEN_UTILITY;
-						operation_param = (uint32_t)*data;
+						watchset_async_operation(WATCH_SET_OPERATION_OPEN_UTILITY, (uint32_t)*data);
 				} else {
 						watchset_invoke_internal_function(action_id, 0);
 				}
@@ -1171,7 +1092,7 @@ void scr_watch_set_invoke_external_function(uint8_t function_id) {
 }
 
 static bool scr_watch_set_handle_button_pressed(uint32_t button_id) {
-		if (operation != 0) {
+		if (lock_actions) {
 				return true;
 		}
 	  switch (button_id) {
@@ -1188,7 +1109,7 @@ static bool scr_watch_set_handle_button_pressed(uint32_t button_id) {
 }
 
 static bool scr_watch_set_handle_button_long_pressed(uint32_t button_id) {
-		if (operation != 0) {
+		if (lock_actions) {
 				return true;
 		}
 	  switch (button_id) {

@@ -209,6 +209,8 @@ int main(void)
 				stopwatch_process();
 				
 				command_process();
+				
+				watchset_process_async_operation();
 			  
 				scr_mngr_draw_screen();
 				

@@ -93,10 +93,9 @@
 
 #define DATA_SOURCE_SENSOR_HR 0
 
-#define WATCH_SET_OPERATION_SWITCH_TO_SUBSCREEN 	0x1
-#define WATCH_SET_OPERATION_NEXT_WATCH_FACE 			0x2
-#define WATCH_SET_OPERATION_OPEN_APPLICATION			0x3
-#define WATCH_SET_OPERATION_OPEN_UTILITY					0x4
+#define WATCH_SET_OPERATION_NEXT_WATCH_FACE 			0x1
+#define WATCH_SET_OPERATION_OPEN_APPLICATION			0x2
+#define WATCH_SET_OPERATION_OPEN_UTILITY					0x3
 
 void watchset_set_default_watch_face(struct spiffs_dirent* entry);
 
@@ -119,5 +118,9 @@ void watchset_set_watch_face(bool flag);
 bool watchset_is_watch_face(void);
 
 void watchset_next_watch_face(void);
+
+void watchset_async_operation(uint8_t op, uint32_t param);
+
+void watchset_process_async_operation(void);
 
 #endif /* WATCHSET_H */
