@@ -10,6 +10,7 @@
 #include "ossw.h"
 #include "config.h"
 #include "ble_gap.h"
+#include "notifications.h"
 
 bool watch_face = false;
 uint8_t operation = 0;
@@ -151,6 +152,9 @@ void* watchset_get_converter(uint8_t key) {
 
 static bool watchset_default_watch_face_handle_button_pressed(uint32_t button_id) {
     switch (button_id) {
+        case SCR_EVENT_PARAM_BUTTON_UP:
+            notifications_invoke_function(NOTIFICATIONS_FUNCTION_RESEND);
+            return true;
         case SCR_EVENT_PARAM_BUTTON_SELECT:
             scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_APPLICATION);
             return true;
@@ -345,7 +349,11 @@ static void watchset_next_watch_face(void) {
 											return;
 									}
 							}
-							break;
+							// no more watchfaces, reset to default
+							config_clear_dafault_watch_face();
+							SPIFFS_closedir(&d);
+							scr_mngr_show_screen(SCR_WATCHFACE);
+							return;
 					}
 				}
 				SPIFFS_closedir(&d);
