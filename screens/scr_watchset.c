@@ -1065,12 +1065,8 @@ static void scr_watch_set_parse_actions(uint8_t** data) {
 						uint8_t property_id = *((*data)++);
 						model_data_buffer[property_id].value--;
 						trim_model_property(property_id);
-				} else if (action_id == WATCH_SET_FUNC_SHOW_NEXT_WATCH_FACE) {
-						watchset_async_operation(WATCH_SET_OPERATION_NEXT_WATCH_FACE, 0);
-				} else if (action_id == WATCH_SET_FUNC_SHOW_APPLICATION) {
-						watchset_async_operation(WATCH_SET_OPERATION_OPEN_APPLICATION, (uint32_t)*data);
-				} else if (action_id == WATCH_SET_FUNC_SHOW_UTILITY) {
-						watchset_async_operation(WATCH_SET_OPERATION_OPEN_UTILITY, (uint32_t)*data);
+				} else if (action_id == WATCH_SET_FUNC_SHOW_APPLICATION || action_id == WATCH_SET_FUNC_SHOW_UTILITY) {
+						watchset_invoke_internal_function(action_id,  (uint32_t)*data);
 				} else {
 						watchset_invoke_internal_function(action_id, 0);
 				}

@@ -208,7 +208,7 @@ void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
 				    scr_mngr_show_screen(SCR_SETTINGS);
 			      break;
 			  case WATCH_SET_FUNC_SHOW_NOTIFICATIONS:
-				    //scr_mngr_show_screen(SCR_SETTINGS);
+				    notifications_invoke_function(NOTIFICATIONS_FUNCTION_RESEND);
 			      break;
 			  case WATCH_SET_FUNC_SHOW_STATUS:
 				    scr_mngr_show_screen(SCR_STATUS);
@@ -217,8 +217,14 @@ void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
             scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_WATCH_FACE);
 			      break;
 			  case WATCH_SET_FUNC_SHOW_NEXT_WATCH_FACE:
-				    //TODO
-			      break;
+						watchset_async_operation(WATCH_SET_OPERATION_NEXT_WATCH_FACE, 0);
+			      break; 
+				case WATCH_SET_FUNC_SHOW_APPLICATION:
+						watchset_async_operation(WATCH_SET_OPERATION_OPEN_APPLICATION, param);
+						break;
+				case WATCH_SET_FUNC_SHOW_UTILITY:
+						watchset_async_operation(WATCH_SET_OPERATION_OPEN_UTILITY, param);
+						break;
 			  case WATCH_SET_FUNC_SHOW_APPLICATIONS:
             scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_APPLICATION);
 			      break;
