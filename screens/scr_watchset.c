@@ -46,6 +46,7 @@ struct model_property {
 		bool force_colors = false;
 		uint8_t show_screen_param = 0xFF;
 		bool lock_actions = false;
+		uint16_t ext_prop_offset;
 //}
 
 static bool parse_screen_controls(bool force);
@@ -164,7 +165,7 @@ static uint32_t pass_argument_data_source_get_property_value(uint32_t value, uin
 		return value;
 }
 
-static uint32_t external_data_source_get_property_value(uint32_t property_id, uint8_t expected_range) {	  
+static uint32_t external_data_source_get_property_value(uint32_t property_id, uint8_t expected_range, uint8_t* data, bool* has_changed) {	  
 	  if (external_properties_data == NULL) {
 			  return NULL;
 		}
@@ -176,24 +177,28 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id, ui
 		uint16_t offset = external_properties_data[property_id*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+2] << 8;
 		offset |= external_properties_data[property_id*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+3];
 		
+		
+		
 		uint8_t number_size;
 		switch(type) {
 			  case WATCH_SET_EXT_PROP_TYPE_NUMBER:
 				{
 						number_size = range>>5;
 				    uint32_t result;
+						uint8_t buffer[4];
+						ext_ram_read_data(ext_prop_offset + offset, buffer, number_size);
 				    switch (number_size) {
 							case 1:
-								  result = external_properties_data[offset];
+								  result = buffer[0];
 									break;
 							case 2:
-								  result = external_properties_data[offset] << 8 | 
-										external_properties_data[offset+1];
+								  result = buffer[0] << 8 | 
+										buffer[1];
 									break;
 							case 3:
-								  result = (external_properties_data[offset] << 16 | 
-										  external_properties_data[offset+1] << 8 | 
-									    external_properties_data[offset+2]);
+								  result = (buffer[0] << 16 | 
+										  buffer[1] << 8 | 
+									    buffer[2]);
 									break;
 						  default:
 										result = 0;
@@ -209,8 +214,10 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id, ui
 						}
 						return result;
 				}
-			  case WATCH_SET_EXT_PROP_TYPE_STRING:
-		        return (uint32_t)&external_properties_data[offset];
+			  case WATCH_SET_EXT_PROP_TYPE_STRING: {
+						ext_ram_read_text(ext_prop_offset + offset, data, range, has_changed);
+		        return NULL;
+				}
 			  default:
 				    return NULL;
 		}
@@ -237,7 +244,9 @@ static void parse_data_source(void **data_source, uint32_t* data_source_param, u
 				    break;
 			  case DATA_SOURCE_EXTERNAL:
 			      *data_source = external_data_source_get_property_value;
-				    *data_source_param = property;
+						*data_source_param = property;
+			      //*data_source = pass_argument_data_source_get_property_value;
+				    //*data_source_param = external_data_source_get_property_value(property, 0, data_cache);
 				    break;
 			  case DATA_SOURCE_MODEL:
 			      *data_source = model_data_source_get_property_value;
@@ -281,9 +290,9 @@ static int parse_data_source_value() {
 			  case DATA_SOURCE_SENSOR:
 			      value = watchset_sensor_data_source_get_value(property, 0);
 				    break;
-			  case DATA_SOURCE_EXTERNAL:
+			 /* case DATA_SOURCE_EXTERNAL:
 			      value = external_data_source_get_property_value(property, 0);
-				    break;
+				    break;*/
 			  case DATA_SOURCE_MODEL:
 			      value = model_data_source_get_property_value(property, 0);
 				    break;
@@ -319,9 +328,9 @@ static void parse_data_source_value_from_array(uint8_t** data, void* buf) {
 			  case DATA_SOURCE_SENSOR:
 			      *((uint32_t*)buf) = watchset_sensor_data_source_get_value(property, 0);
 				    break;
-			  case DATA_SOURCE_EXTERNAL:
+		/*	  case DATA_SOURCE_EXTERNAL:
 			      *((uint32_t*)buf) = external_data_source_get_property_value(property, 0);
-				    break;
+				    break;*/
 			  case DATA_SOURCE_MODEL:
 			      *((uint32_t*)buf) = model_data_source_get_property_value(property, 0);
 				    break;
@@ -375,13 +384,20 @@ void set_external_property_data(uint8_t property_id, uint8_t* data_ptr, uint8_t 
 			  return;
 		}
 		uint16_t offset = external_properties_data[property_id*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+2] << 8;
-		offset |= external_properties_data[property_id*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+3];
-		memcpy(&external_properties_data[offset], data_ptr, size);
 		uint8_t type = external_properties_data[property_id*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE];
+		offset |= external_properties_data[property_id*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+3];
+		
+		ext_ram_write_data(ext_prop_offset + offset, data_ptr, size);
+		if (type == WATCH_SET_EXT_PROP_TYPE_STRING) {
+			  // end of string char
+				uint8_t zero = 0;
+			  ext_ram_write_data(ext_prop_offset + offset + size, &zero, 1);
+		}
+/*		memcpy(&external_properties_data[offset], data_ptr, size);
 		if (type == WATCH_SET_EXT_PROP_TYPE_STRING) {
 			  // end of string char
 			  external_properties_data[offset + size] = 0;
-		}
+		}*/
 }
 
 static bool parse_and_draw_screen_control_number(bool force) {
@@ -401,7 +417,7 @@ static bool parse_and_draw_screen_control_number(bool force) {
 
 	
 		uint8_t decimal_size = config.range&0xF;
-	  uint32_t value = config.data_handle(config.data_handle_param, decimal_size);
+	  uint32_t value = config.data_handle(config.data_handle_param, decimal_size, NULL, NULL);
 		
 		if (!force && config.data->last_value == value) {
 				return false;
@@ -486,7 +502,7 @@ static bool parse_and_draw_screen_control_image_from_set(bool force) {
 	  parse_data_source((void **)&config.data_handle, &config.data_handle_param, NULL);
 		
 	
-	  uint32_t value = config.data_handle(config.data_handle_param, 0);
+	  uint32_t value = config.data_handle(config.data_handle_param, 0, NULL, NULL);
 	
 		if (!force && config.data->last_value == value) {
 				return false;
@@ -852,7 +868,7 @@ static bool parse_external_properties() {
 				return false;
 		}
 		
-		uint16_t ptr = header_size;
+		uint16_t ptr = 0;//header_size;
 	  for (int i=0; i<external_properties_no; i++) {
 			  uint8_t type = get_next_byte();
 			  uint8_t range = get_next_byte();
@@ -864,12 +880,14 @@ static bool parse_external_properties() {
 			
 			  ptr+=calc_ext_property_size(type, range);
 		}
-	  void* after_realloc = realloc(external_properties_data, ptr);
+		ext_prop_offset = EXT_RAM_DATA_CURRENT_SCREEN_CACHE + EXT_RAM_DATA_CURRENT_SCREEN_CACHE_SIZE - ptr;
+		ext_ram_fill(ext_prop_offset, 0, ptr);
+/*	  void* after_realloc = realloc(external_properties_data, ptr);
 		if (after_realloc == NULL) {
 				return false;
 		}
 		external_properties_data = after_realloc; 
-		memset(external_properties_data + header_size, 0, ptr - header_size);
+		memset(external_properties_data + header_size, 0, ptr - header_size);*/
 		return true;
 }
 

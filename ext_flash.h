@@ -12,6 +12,8 @@ uint8_t ext_flash_read_status(uint8_t *status);
 
 bool ext_flash_read_data(uint32_t ext_flash_address, uint8_t *buffer, uint32_t data_size);
 
+bool ext_flash_read_text(uint32_t ext_flash_address, uint8_t *buffer, uint32_t data_size, bool* has_changed);
+
 bool ext_flash_write_enable(void);
 
 bool ext_flash_wait_until_ready(void);

@@ -1,3 +1,5 @@
+#include <stdint.h>
+#include <string.h>
 #include "ext_flash.h"
 #include "spi.h"
 #include "nrf_delay.h"
@@ -5,7 +7,7 @@
 
 uint8_t ext_flash_read_status(uint8_t *status) {
     uint8_t command[] = {0x05};
-    return spi_master_rx_data(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 1, status, 1);
+    return spi_master_rx_data(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 1, status, 1, NULL);
 }
 
 bool ext_flash_read_data(uint32_t ext_flash_address, uint8_t *buffer, uint32_t data_size) {
@@ -13,8 +15,17 @@ bool ext_flash_read_data(uint32_t ext_flash_address, uint8_t *buffer, uint32_t d
     command[1] = ext_flash_address >> 16 & 0xFF;
     command[2] = ext_flash_address >> 8 & 0xFF;
     command[3] = ext_flash_address & 0xFF;
-    return spi_master_rx_data(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 4, buffer, data_size);
+    return spi_master_rx_data(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 4, buffer, data_size, NULL);
 }
+
+bool ext_flash_read_text(uint32_t ext_flash_address, uint8_t *buffer, uint32_t data_size, bool* has_changed) {
+    uint8_t command[] = {0x03, 0xFF, 0xFF, 0xFF};
+    command[1] = ext_flash_address >> 16 & 0xFF;
+    command[2] = ext_flash_address >> 8 & 0xFF;
+    command[3] = ext_flash_address & 0xFF;
+    return spi_master_rx_data(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 4, buffer, data_size, has_changed);
+}
+
 
 bool ext_flash_write_enable() {
     uint8_t command[] = {0x06};

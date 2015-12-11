@@ -58,7 +58,7 @@ typedef struct
 	  uint8_t x;
 	  uint8_t y;
 	  uint32_t style;
-	  uint32_t (* data_handle)(uint32_t, uint8_t);
+	  uint32_t (* data_handle)(uint32_t, uint8_t, uint8_t*, bool*);
 	  uint32_t data_handle_param;
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_NUMBER_CONFIG;	
@@ -70,7 +70,7 @@ typedef struct
 	  uint8_t width;
 	  uint8_t height;
 	  uint32_t style;
-	  uint32_t (* data_handle)(uint32_t, uint8_t);
+	  uint32_t (* data_handle)(uint32_t, uint8_t, uint8_t*, bool*);
 	  uint32_t data_handle_param;
 	  TEXT_CONTROL_DATA* data;
 } SCR_CONTROL_TEXT_CONFIG;	
@@ -99,7 +99,7 @@ typedef struct
 	  uint8_t width;
 	  uint8_t height;
 		spiffs_file file;
-	  uint32_t (* data_handle)(uint32_t, uint8_t);
+	  uint32_t (* data_handle)(uint32_t, uint8_t, uint8_t*, bool*);
 	  uint32_t data_handle_param;
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_IMAGE_FROM_SET_CONFIG;	
@@ -112,7 +112,7 @@ typedef struct
 	  uint8_t height;
 	  uint32_t max;
 	  uint32_t style;
-	  uint32_t (* data_handle)();
+	  uint32_t (* data_handle)(uint32_t, uint8_t, uint8_t*, bool*);
 	  uint32_t data_handle_param;
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_PROGRESS_BAR_CONFIG;	

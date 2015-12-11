@@ -24,6 +24,7 @@
 
 #define EXT_RAM_DATA_STOPWATCH_RECALL     0xCE0 // 0xCE0 - 0xFFF
 #define EXT_RAM_DATA_CURRENT_SCREEN_CACHE 0x1000 // 0x1000 - 0x17FF
+#define EXT_RAM_DATA_CURRENT_SCREEN_CACHE_SIZE 0x800
 
 #define EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS 0x1800
 #define EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS 0x1C00
@@ -33,6 +34,8 @@
 bool ext_ram_init(void);
 
 bool ext_ram_read_data(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data_size);
+
+bool ext_ram_read_text(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data_size, bool* has_changed);
 
 bool ext_ram_write_data(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data_size);
 

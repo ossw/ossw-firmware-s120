@@ -104,7 +104,7 @@ static void draw_int_img_value(uint32_t value, uint32_t old_value, uint8_t digit
 
 void scr_controls_draw_number_control(SCR_CONTROL_NUMBER_CONFIG* cfg, bool force) {
 	  uint8_t decimal_size = cfg->range&0xF;
-	  uint32_t value = cfg->data_handle(cfg->data_handle_param, decimal_size);
+	  uint32_t value = cfg->data_handle(cfg->data_handle_param, decimal_size, NULL, NULL);
 		
 		if (!force && cfg->data->last_value == value) {
 				return;
@@ -164,7 +164,7 @@ void scr_controls_draw_static_image_control(SCR_CONTROL_STATIC_IMAGE_CONFIG* cfg
 
 void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG* cfg, bool force) {
 
-	  uint32_t value = cfg->data_handle(cfg->data_handle_param, 0);
+	  uint32_t value = cfg->data_handle(cfg->data_handle_param, 0, NULL, NULL);
 	
 		if (!force && cfg->data->last_value == value) {
 				return;
@@ -191,26 +191,26 @@ void scr_controls_draw_image_from_set_control(SCR_CONTROL_IMAGE_FROM_SET_CONFIG*
 }
 
 void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force) {
-	  char* value = (char*)cfg->data_handle(cfg->data_handle_param, 0);
+		bool has_changed = force;
+	  cfg->data_handle(cfg->data_handle_param, 0, (uint8_t *)cfg->data->last_value, &has_changed);
+	
+		if (!has_changed) {
+				return;
+		}
 	
 	  uint8_t font_type = (cfg->style >> 24) & 0xFF;
 	  uint8_t alignment = (cfg->style >> 16) & 0xFF;
 	
 		if (force) {
-			  mlcd_draw_text(value, cfg->x, cfg->y,cfg->width, cfg->height, font_type, alignment);
+			  mlcd_draw_text(cfg->data->last_value, cfg->x, cfg->y,cfg->width, cfg->height, font_type, alignment);
 		} else {
-			  if (strcmp(value, cfg->data->last_value)!=0) {
-				    mlcd_clear_rect(cfg->x, cfg->y,cfg->width, cfg->height);
-			      mlcd_draw_text(value, cfg->x, cfg->y,cfg->width, cfg->height, font_type, alignment);
-				} else {
-					  return;
-				} 
+				mlcd_clear_rect(cfg->x, cfg->y,cfg->width, cfg->height);
+				mlcd_draw_text(cfg->data->last_value, cfg->x, cfg->y,cfg->width, cfg->height, font_type, alignment);
 		}
-		strcpy((void*)cfg->data->last_value, (void*)value);
 }
 
 void scr_controls_draw_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg, bool force) {
-	  uint32_t value = cfg->data_handle(cfg->data_handle_param, 0);
+	  uint32_t value = cfg->data_handle(cfg->data_handle_param, 0, NULL, NULL);
 
 	  bool horizontal = !((cfg->style>>24)&0x20);
 	  uint8_t border = (cfg->style>>16)&0xFF;

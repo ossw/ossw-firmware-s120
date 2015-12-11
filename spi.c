@@ -1,3 +1,5 @@
+#include <stdint.h>
+#include <string.h>
 #include "spi.h"
 #include "nrf_delay.h"
 #include "nrf_gpio.h"
@@ -270,10 +272,13 @@ bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base_address, uint32_t *dest_sp
     return true;
 }
 
-bool spi_master_rx_data_no_cs(uint32_t *spi_base_address, uint8_t* rx_data, uint32_t rx_data_size) {
+bool spi_master_rx_data_no_cs(uint32_t *spi_base_address, uint8_t* rx_data, uint32_t rx_data_size, bool stop_on_zero, bool* has_changed) {
     NRF_SPI_Type *spi_base = (NRF_SPI_Type *)spi_base_address;
 	  uint32_t number_of_rxd_bytes = 0;
     uint32_t counter = 0;
+	
+		bool perform_check = has_changed != NULL && *has_changed == false;
+	
     while(number_of_rxd_bytes < rx_data_size)
     {
         spi_base->TXD = 0;
@@ -295,7 +300,14 @@ bool spi_master_rx_data_no_cs(uint32_t *spi_base_address, uint8_t* rx_data, uint
             spi_base->EVENTS_READY = 0U;
         }
 
-        rx_data[number_of_rxd_bytes] = (uint8_t)spi_base->RXD;
+				uint8_t new_value = (uint8_t)spi_base->RXD;
+				if (perform_check && new_value != rx_data[number_of_rxd_bytes]) {
+						*has_changed = true;
+				}
+        rx_data[number_of_rxd_bytes] = new_value;
+				if (stop_on_zero && new_value == 0) {
+						return true;
+				}
         number_of_rxd_bytes++;
     };
     return true;
@@ -357,7 +369,7 @@ bool spi_master_tx(uint32_t *spi_base_address, uint32_t device, const uint8_t* c
     return success;
 }
 
-bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size)
+bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size, bool* has_changed)
 {
     bool success;
 
@@ -367,7 +379,7 @@ bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8
     success = spi_master_tx_data_no_cs(spi_base_address, command, command_size);
   
     if (success) {
-        success = spi_master_rx_data_no_cs(spi_base_address, rx_data, rx_data_size);
+        success = spi_master_rx_data_no_cs(spi_base_address, rx_data, rx_data_size, false, has_changed);
     }
 
     /* disable slave (slave select active low) */
@@ -375,3 +387,23 @@ bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8
 
     return success;
 }
+
+bool spi_master_rx_text(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size, bool* has_changed)
+{
+    bool success;
+
+    /* enable slave (slave select active low) */
+    nrf_gpio_pin_clear(device);
+  
+    success = spi_master_tx_data_no_cs(spi_base_address, command, command_size);
+  
+    if (success) {
+        success = spi_master_rx_data_no_cs(spi_base_address, rx_data, rx_data_size, true, has_changed);
+    }
+
+    /* disable slave (slave select active low) */
+    nrf_gpio_pin_set(device);
+
+    return success;
+}
+
