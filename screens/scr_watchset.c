@@ -285,7 +285,7 @@ static int parse_data_source_value() {
 			      value = get_next_int();
 				    break;
 			  case DATA_SOURCE_INTERNAL:
-			      value = watchset_internal_data_source_get_value(property, 0);
+			      value = watchset_internal_data_source_get_value(property, 0, NULL, NULL);
 				    break;
 			  case DATA_SOURCE_SENSOR:
 			      value = watchset_sensor_data_source_get_value(property, 0);
@@ -323,7 +323,7 @@ static void parse_data_source_value_from_array(uint8_t** data, void* buf) {
 			      *((uint32_t*)buf) = get_next_byte_from_array(data)<<24|get_next_byte_from_array(data)<<16|get_next_byte_from_array(data)<<8|get_next_byte_from_array(data);
 				    break;
 			  case DATA_SOURCE_INTERNAL:
-			     *((uint32_t*)buf) = watchset_internal_data_source_get_value(property, 0);
+			     *((uint32_t*)buf) = watchset_internal_data_source_get_value(property, 0, buf, NULL);
 				    break;
 			  case DATA_SOURCE_SENSOR:
 			      *((uint32_t*)buf) = watchset_sensor_data_source_get_value(property, 0);

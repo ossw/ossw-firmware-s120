@@ -103,7 +103,7 @@ spiffs_file watchset_get_dafault_watch_face_fd(void);
 
 bool watchset_default_watch_face_handle_event(uint32_t event_type, uint32_t event_param);
 
-uint32_t watchset_internal_data_source_get_value(uint32_t data_source_id, uint8_t expected_range);
+uint32_t watchset_internal_data_source_get_value(uint32_t data_source_id, uint8_t expected_range, uint8_t* data, bool* has_changed);
 
 uint32_t watchset_sensor_data_source_get_value(uint32_t data_source_id, uint8_t expected_range);
 
