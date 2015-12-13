@@ -16,18 +16,19 @@
 
 static uint32_t m_address;
 
-static void scr_alert_notification_handle_button_pressed(uint32_t button_id) {
+static bool scr_alert_notification_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
 						notifications_invoke_function(NOTIFICATIONS_FUNCTION_ALERT_DISMISS);
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 						notifications_invoke_function(NOTIFICATIONS_FUNCTION_ALERT_OPTION_1);
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 						notifications_invoke_function(NOTIFICATIONS_FUNCTION_ALERT_OPTION_2);
-				    break;
+				    return true;
 		}
+		return false;
 }
 
 static uint8_t get_next_byte(uint32_t *ptr) {
@@ -94,21 +95,19 @@ static void scr_alert_notification_draw_screen() {
 static void scr_alert_notification_refresh_screen() {
 }
 
-void scr_alert_notification_handle_event(uint32_t event_type, uint32_t event_param) {
+bool scr_alert_notification_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_alert_notification_init(event_param);
-				    break;
+				    return true;
         case SCR_EVENT_DRAW_SCREEN:
             scr_alert_notification_draw_screen();
-            break;
+				    return true;
         case SCR_EVENT_REFRESH_SCREEN:
             scr_alert_notification_refresh_screen();
-            break;
+				    return true;
 			  case SCR_EVENT_BUTTON_PRESSED:
-				    scr_alert_notification_handle_button_pressed(event_param);
-				    break;
-			  case SCR_EVENT_DESTROY_SCREEN:
-				    break;
+				    return scr_alert_notification_handle_button_pressed(event_param);
 		}
+		return false;
 }

@@ -15,6 +15,8 @@
 #include "screens/scr_status.h"
 #include "mlcd.h"
 #include "stopwatch.h"
+#include "config.h"
+#include "watchset.h"
 
 static uint8_t switch_to_screen = SCR_NOT_SET;
 static uint32_t switch_to_screen_param = 0;
@@ -34,7 +36,7 @@ static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
 	  2,
 	  2,
 	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 2 << 24 | 2 << 16 | 8 << 8 | 13,
-	  (uint32_t (*)(uint32_t, uint8_t))rtc_get_current_hour_24,
+	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_hour_24,
 	  0,
     &hour_ctrl_data
 };
@@ -46,7 +48,7 @@ static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
 	  26,
 	  2,
 	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 2 << 24 | 2 << 16 | 8 << 8 | 13,
-	  (uint32_t (*)(uint32_t, uint8_t))rtc_get_current_minutes,
+	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_minutes,
 	  0,
     &minutes_ctrl_data
 };
@@ -81,7 +83,7 @@ static const SCR_CONTROL_PROGRESS_BAR_CONFIG battery_level_config = {
 	  11,
 	  100,
 		1<<16,
-	  battery_get_level,
+	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))battery_get_level,
 	  0,
     &battery_level_ctrl_data
 };
@@ -104,63 +106,59 @@ void scr_mngr_init(void) {
 	  scr_mngr_show_screen(SCR_CHOOSE_MODE);
 }
 
-static void scr_mngr_default_handle_button_long_pressed(uint32_t button_id) {
-    switch (button_id) {
-        case SCR_EVENT_PARAM_BUTTON_BACK:
-            mlcd_backlight_toggle();
-    }
-}
-
-static void scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
-	  switch(event_type) {
-			  case SCR_EVENT_RTC_TIME_CHANGED:
-				    mlcd_switch_vcom();
-				    break;
-        case SCR_EVENT_BUTTON_LONG_PRESSED:
-            scr_mngr_default_handle_button_long_pressed(event_param);
-            break;
+bool scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
+		if (SCR_EVENT_RTC_TIME_CHANGED == event_type) {
+				mlcd_switch_vcom();
+				return true;
 		}
+		
+		int idx = config_get_handler_index_from_event(event_type, event_param);
+		if (idx < 0) {
+				return false;
+		}
+		default_action action = config_get_default_global_actions()[idx];
+		if (action.action_id != 0) {
+				watchset_invoke_internal_function(action.action_id, action.parameter);
+				return true;
+		}
+		return false;
 }
 
 void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_type, uint32_t event_param) {
 		bool handled = false;
 	  switch (screen_id) {
 			  case SCR_CHOOSE_MODE:
-				    scr_choosemode_handle_event(event_type, event_param);
+				    handled = scr_choosemode_handle_event(event_type, event_param);
 				    break;
 			  case SCR_WATCHFACE:
-				    if (scr_watchface_handle_event(event_type, event_param)) {
-								handled = true;
-						}
+				    handled = scr_watchface_handle_event(event_type, event_param);
 				    break;
 			  case SCR_CHANGE_DATE:
-				    scr_changedate_handle_event(event_type, event_param);
+				    handled = scr_changedate_handle_event(event_type, event_param);
 				    break;
 			  case SCR_CHANGE_TIME:
-				    scr_changetime_handle_event(event_type, event_param);
+				    handled = scr_changetime_handle_event(event_type, event_param);
 				    break;
 			  case SCR_SETTINGS:
-				    scr_settings_handle_event(event_type, event_param);
+				    handled = scr_settings_handle_event(event_type, event_param);
 				    break;
 			  case SCR_STATUS:
-				    scr_status_handle_event(event_type, event_param);
+				    handled = scr_status_handle_event(event_type, event_param);
 				    break;
 			  case SCR_ABOUT:
-				    scr_about_handle_event(event_type, event_param);
+				    handled = scr_about_handle_event(event_type, event_param);
 				    break;
 			  case SCR_ALERT_NOTIFICATION:
-				    scr_alert_notification_handle_event(event_type, event_param);
+				    handled = scr_alert_notification_handle_event(event_type, event_param);
 				    break;
 			  case SCR_NOTIFICATIONS:
-				    scr_notifications_handle_event(event_type, event_param);
+				    handled = scr_notifications_handle_event(event_type, event_param);
 				    break;
 			  case SCR_WATCH_SET:
-				    if (scr_watch_set_handle_event(event_type, event_param)) {
-								handled = true;
-						}
+				    handled = scr_watch_set_handle_event(event_type, event_param);
 				    break;
 			  case SCR_WATCH_SET_LIST:
-				    scr_watchset_list_handle_event(event_type, event_param);
+				    handled = scr_watchset_list_handle_event(event_type, event_param);
 				    break;
 				case SCR_NOT_SET:
 					  return;
@@ -219,7 +217,6 @@ void scr_mngr_redraw_notification_bar() {
 }
 
 void scr_mngr_draw_screen(void) {
-
 		scr_mngr_draw_ctx draw_ctx;
 		draw_ctx.force_colors = false;
 	

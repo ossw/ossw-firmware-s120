@@ -4,6 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void scr_status_handle_event(uint32_t event_type, uint32_t event_param);
+bool scr_status_handle_event(uint32_t event_type, uint32_t event_param);
 
 #endif /* SCR_STATUS_H */

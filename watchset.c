@@ -149,7 +149,7 @@ void* watchset_get_converter(uint8_t key) {
 		}
 		return data_converters[key];
 }
-
+/*
 static bool watchset_default_watch_face_handle_button_pressed(uint32_t button_id) {
     switch (button_id) {
         case SCR_EVENT_PARAM_BUTTON_UP:
@@ -184,14 +184,17 @@ static bool watchset_default_watch_face_handle_button_long_pressed(uint32_t butt
             return true;
     }
 		return false;
-}
+}*/
 
 bool watchset_default_watch_face_handle_event(uint32_t event_type, uint32_t event_param) {
-		switch(event_type) {
-        case SCR_EVENT_BUTTON_PRESSED:
-            return watchset_default_watch_face_handle_button_pressed(event_param);
-        case SCR_EVENT_BUTTON_LONG_PRESSED:
-            return watchset_default_watch_face_handle_button_long_pressed(event_param);
+		int idx = config_get_handler_index_from_event(event_type, event_param);
+		if (idx < 0) {
+				return false;
+		}
+		default_action action = config_get_default_watchface_actions()[idx];
+		if (action.action_id != 0) {
+				watchset_invoke_internal_function(action.action_id, action.parameter);
+				return true;
 		}
 		return false;
 }
@@ -204,6 +207,9 @@ void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
 			  case WATCH_SET_FUNC_TOGGLE_COLORS:
 				    mlcd_colors_toggle();
 			      break;
+				case WATCH_SET_FUNC_TEMPORARY_BACKLIGHT:
+						mlcd_backlight_temp_on();
+						break;
 			  case WATCH_SET_FUNC_SHOW_SETTINGS:
 				    scr_mngr_show_screen(SCR_SETTINGS);
 			      break;
@@ -276,7 +282,7 @@ uint32_t watchset_internal_data_source_get_value(uint32_t data_source_id, uint8_
 		uint8_t data_id = data_source_id&0xFF;
 		uint16_t index = (data_source_id>>8)&0xFFFF;
 		if (data_source_id == 19 || data_source_id == 20) {
-				strcpy(data, (char*)internal_data_source_handles[data_id](index));
+				strcpy((char*)data, (char*)internal_data_source_handles[data_id](index));
 				return NULL;
 		} else {
 				uint32_t multiplier = pow(10, expected_range&0xF);

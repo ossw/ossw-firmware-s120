@@ -40,7 +40,7 @@ struct model_property {
 		uint8_t current_subscreen = 0;
 
 		spiffs_file watchset_fd;
-		uint16_t action_handlers[8];
+		uint16_t action_handlers[9];
 		uint32_t watchset_id;
 		bool (* base_actions_handler)(uint32_t event_type, uint32_t event_param);
 		bool force_colors = false;
@@ -176,8 +176,6 @@ static uint32_t external_data_source_get_property_value(uint32_t property_id, ui
 		uint8_t range = external_properties_data[property_id*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+1];
 		uint16_t offset = external_properties_data[property_id*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+2] << 8;
 		offset |= external_properties_data[property_id*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+3];
-		
-		
 		
 		uint8_t number_size;
 		switch(type) {
@@ -694,12 +692,11 @@ static bool parse_actions() {
 				handle_error();
 				return false;
 		}
-
 	
 		for (int i=0; i<events_no; i++) {
 				 uint8_t event = get_next_byte();
 				 uint16_t offset = get_next_short();
-				if (event < 8) {
+				if (event < 9) {
 						action_handlers[event] = offset;
 				} else if (event == 0xF0) {
 						// init screen action
@@ -847,7 +844,7 @@ static bool init_subscreen(uint8_t screen_id) {
 	  }
 		
 		// reset action handlers
-		memset(action_handlers, 0xFF, 8 * sizeof(uint16_t));
+		memset(action_handlers, 0xFF, 9 * sizeof(uint16_t));
 		base_actions_handler = 0;
 		
 		// jump to screen offset
@@ -1160,6 +1157,8 @@ bool scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param) {
 								return true;
 						}
 						break;
+				case SCR_EVENT_WRIST_SHAKE:
+						return scr_watch_set_invoke_function(8);
 				case SCR_EVENT_APP_CONNECTION_CONFIRMED:
 						ble_peripheral_set_watch_set_id(watchset_id);
 						return true;

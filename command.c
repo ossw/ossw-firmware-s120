@@ -7,8 +7,11 @@
 #include "screens/scr_watchset.h"
 #include "ext_ram.h"
 #include "nrf_soc.h"
+#include "config.h"
 #include "fs.h"
 
+#define COMMAND_SET_DEFAULT_GLOBAL_ACTIONS 0x10
+#define COMMAND_SET_DEFAULT_WATCH_FACE_ACTIONS 0x11
 #define COMMAND_OPEN_FILE_STREAM 0x20
 #define COMMAND_APPEND_DATA_TO_FILE_STREAM 0x21
 #define COMMAND_CLOSE_FILE_STREAM 0x22
@@ -107,6 +110,12 @@ void command_process(void) {
 							// file close error
 							respCode = (SPIFFS_errno(&fs)*-1)-9999;
 					}
+					break;
+			case COMMAND_SET_DEFAULT_GLOBAL_ACTIONS:
+					config_set_default_global_actions((default_action*)&data_buf[1]);
+					break;
+			case COMMAND_SET_DEFAULT_WATCH_FACE_ACTIONS:
+					config_set_default_watchface_actions((default_action*)&data_buf[1]);
 					break;
 			case COMMAND_SET_EXT_PROPERTY_VALUE:
 			    // set ext param

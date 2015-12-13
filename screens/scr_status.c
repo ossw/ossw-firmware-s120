@@ -20,7 +20,7 @@ static const SCR_CONTROL_PROGRESS_BAR_CONFIG battery_level_config = {
 	  32,
 	  100,
 		2<<16,
-	  battery_get_level,
+	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))battery_get_level,
 	  0,
     &battery_level_ctrl_data
 };
@@ -34,12 +34,13 @@ static const SCR_CONTROLS_DEFINITION controls_definition = {
 	  (SCR_CONTROL_DEFINITION*)controls
 };
 
-static void scr_status_handle_button_pressed(uint32_t button_id) {
+static bool scr_status_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
 					  scr_mngr_show_screen(SCR_WATCHFACE);
-				    break;
+				    return true;
 		}
+		return false;
 }
 
 static void scr_status_draw_battery_status() {
@@ -83,19 +84,19 @@ static void scr_status_draw_screen() {
 	  scr_controls_draw(&controls_definition);
 }
 
-void scr_status_handle_event(uint32_t event_type, uint32_t event_param) {
+bool scr_status_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_status_init();
-				    break;
+				    return true;
         case SCR_EVENT_DRAW_SCREEN:
             scr_status_draw_screen();
-            break;
+            return true;
         case SCR_EVENT_REFRESH_SCREEN:
             scr_status_refresh_screen();
-            break;
+            return true;
 			  case SCR_EVENT_BUTTON_PRESSED:
-				    scr_status_handle_button_pressed(event_param);
-				    break;
+				    return scr_status_handle_button_pressed(event_param);
 		}
+		return false;
 }

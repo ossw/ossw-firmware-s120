@@ -126,7 +126,7 @@ static void scr_watchset_list_remove_file(void) {
 		}
 }
 
-static void scr_watchset_list_handle_button_pressed(uint32_t button_id) {
+static bool scr_watchset_list_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
 						if (data->mode == MODE_REMOVE) {
@@ -134,14 +134,14 @@ static void scr_watchset_list_handle_button_pressed(uint32_t button_id) {
 						} else {
 								scr_mngr_show_screen(SCR_WATCHFACE);
 						}
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 						if (data->mode == MODE_SELECT) {
 								data->show_file_no++;
 						} else if (data->mode == MODE_REMOVE) {
 								data->mode = MODE_SELECT;
 						}
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
 						if (data->mode == MODE_SELECT) {
 								uint32_t ptr = EXT_RAM_DATA_CURRENT_SCREEN_CACHE + (ENTRY_BUF_SIZE*data->show_file_no);
@@ -154,7 +154,7 @@ static void scr_watchset_list_handle_button_pressed(uint32_t button_id) {
 										scr_mngr_show_screen_with_param(SCR_WATCH_SET, (1<<24) | ptr);
 								}
 						}
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 						if (data->mode == MODE_SELECT) {
 								if (data->show_file_no > 0 ) {
@@ -163,18 +163,20 @@ static void scr_watchset_list_handle_button_pressed(uint32_t button_id) {
 						} else if (data->mode == MODE_REMOVE) {
 								scr_watchset_list_remove_file();
 						}
-				    break;
+				    return true;
 		}
+		return false;
 }
 
-static void scr_watchset_list_handle_button_long_pressed(uint32_t button_id) {
+static bool scr_watchset_list_handle_button_long_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 						if (data->mode == MODE_SELECT) {
 								data->mode = MODE_REMOVE;
 						}
-				    break;
+				    return true;
 		}
+		return false;
 }
 
 static void scr_watchset_list_draw_current_mode() {
@@ -229,25 +231,24 @@ static void scr_watchset_list_redraw() {
 		scr_watchset_list_draw_current_mode();
 }
 
-void scr_watchset_list_handle_event(uint32_t event_type, uint32_t event_param) {
+bool scr_watchset_list_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_watchset_list_init(event_param);
-				    break;
+				    return true;
 			  case SCR_EVENT_DRAW_SCREEN:
 				    scr_watchset_list_draw();
-				    break;
+				    return true;
 			  case SCR_EVENT_REFRESH_SCREEN:
 				    scr_watchset_list_redraw();
-				    break;
+				    return true;
 			  case SCR_EVENT_BUTTON_PRESSED:
-				    scr_watchset_list_handle_button_pressed(event_param);
-				    break;
+				    return scr_watchset_list_handle_button_pressed(event_param);
 			  case SCR_EVENT_BUTTON_LONG_PRESSED:
-				    scr_watchset_list_handle_button_long_pressed(event_param);
-				    break;
+				    return scr_watchset_list_handle_button_long_pressed(event_param);
 			  case SCR_EVENT_DESTROY_SCREEN:
 						scr_watchset_list_clenup();
-				    break;
+				    return true;
 		}
+		return false;
 }

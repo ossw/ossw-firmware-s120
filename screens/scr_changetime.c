@@ -110,21 +110,22 @@ static void scr_changetime_handle_button_back(void) {
 		}
 }
 
-static void scr_changetime_handle_button_pressed(uint32_t button_id) {
+static bool scr_changetime_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 					  scr_changetime_handle_button_up();
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 					  scr_changetime_handle_button_down();
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
 					  scr_changetime_handle_button_select();
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
 					  scr_changetime_handle_button_back();
-				    break;
+				    return true;
 		}
+		return false;
 }
 
 static void scr_changetime_init() {
@@ -138,16 +139,16 @@ static void scr_changetime_init() {
 	  change_mode = MODE_HOUR;
 }
 
-void scr_changetime_handle_event(uint32_t event_type, uint32_t event_param) {
+bool scr_changetime_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_changetime_init();
-				    break;
+				    return true;
 			  case SCR_EVENT_DRAW_SCREEN:
 						scr_changetime_draw_all();
-				    break;
+				    return true;
 			  case SCR_EVENT_BUTTON_PRESSED:
-				    scr_changetime_handle_button_pressed(event_param);
-				    break;
+				    return scr_changetime_handle_button_pressed(event_param);
 		}
+		return false;
 }

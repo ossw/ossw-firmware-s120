@@ -9,6 +9,7 @@
 #include "nrf_delay.h"
 #include "app_timer.h"
 #include "mlcd.h"
+#include "scr_mngr.h"
 #include "ble/ble_peripheral.h"
 
 #define DEFAULT_I2C_ADDR 0x1D
@@ -45,7 +46,8 @@ static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t 
 		//		if (pulse_src>>6&0x1) {
 		//				mlcd_backlight_toggle();
 	//			}
-				mlcd_backlight_temp_on();
+				//mlcd_backlight_temp_on();
+				scr_mngr_handle_event(SCR_EVENT_WRIST_SHAKE, 0);
 				#ifdef OSSW_DEBUG
 			printf("PULSE_SRC: [x:%d, y:%d, z:%d, dbl: %d]\r\n", (pulse_src>>4&0x1)*(pulse_src&0x1?-1:1), (pulse_src>>5&0x1)*(pulse_src>>1&0x1?-1:1), (pulse_src>>6&0x1)*(pulse_src>>2&0x1?-1:1), pulse_src>>3&0x1);
 				#endif

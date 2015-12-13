@@ -47,27 +47,28 @@ static const MENU_OPTION settings_menu[] = {
 
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);
 
-static void scr_settings_handle_button_pressed(uint32_t button_id) {
+static bool scr_settings_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
 					  scr_mngr_show_screen(SCR_WATCHFACE);
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 					  selectedOption--;
 				    if (selectedOption < 0) {
 								selectedOption = 0;
 						}
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 					  selectedOption++;
 				    if (selectedOption >= SIZE_OF_MENU) {
 								selectedOption = SIZE_OF_MENU-1;
 						}
-				    break;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
 					  settings_menu[selectedOption].handler();
-				    break;
+				    return true;
 		}
+		return false;
 }
 
 static void draw_option(const char *text, uint_fast8_t *yPos) {
@@ -119,19 +120,19 @@ static void scr_settings_draw_screen() {
 		scr_settings_draw_options();
 }
 
-void scr_settings_handle_event(uint32_t event_type, uint32_t event_param) {
+bool scr_settings_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_settings_init();
-				    break;
+				    return true;
         case SCR_EVENT_DRAW_SCREEN:
             scr_settings_draw_screen();
-            break;
+            return true;
         case SCR_EVENT_REFRESH_SCREEN:
             scr_settings_refresh_screen();
-            break;
+            return true;
 			  case SCR_EVENT_BUTTON_PRESSED:
-				    scr_settings_handle_button_pressed(event_param);
-				    break;
+				    return scr_settings_handle_button_pressed(event_param);
 		}
+		return false;
 }
