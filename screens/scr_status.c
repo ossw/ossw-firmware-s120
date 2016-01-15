@@ -75,13 +75,25 @@ static void scr_status_refresh_screen() {
 
 static void scr_status_draw_screen() {
 	
-		mlcd_draw_rect(109, 60, 6, 12);
-		mode = battery_is_charging()? (battery_is_full() ? 2 : 1) : 0;
-		scr_status_draw_battery_status();
+	mlcd_draw_rect(109, 60, 6, 12);
+	mode = battery_is_charging()? (battery_is_full() ? 2 : 1) : 0;
+	scr_status_draw_battery_status();
+							
+  	mlcd_draw_text(ossw_mac_address(), 0, 115, MLCD_XRES, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_CENTER);
 	
-  	mlcd_draw_text(ossw_mac_address(), 0, 135, MLCD_XRES, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_CENTER);
-	
-	  scr_controls_draw(&controls_definition);
+		// Check hardware ID, how compatible with other SoftDevices
+		// ex. 004D is for 2nd rev, WLCSP, 256kB/16kB 
+		const char hex_str[]= "0123456789ABCDEF";
+		char id[10]= "HWID: xxxx";
+		unsigned char* pHwid = (unsigned char *)(0x1000005c); //HWID register address
+		uint16_t hwid = (uint16_t) *pHwid;
+		for (int i=0; i<4; i++) {
+			id[9-i] = hex_str[hwid & 0x000F];
+			hwid = hwid >> 4;
+		}
+		mlcd_draw_text(id, 0, 135, MLCD_XRES, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_CENTER);
+		
+	scr_controls_draw(&controls_definition);
 }
 
 bool scr_status_handle_event(uint32_t event_type, uint32_t event_param) {
