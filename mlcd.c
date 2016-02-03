@@ -10,7 +10,7 @@
 #include "fs.h"
 #include "nordic_common.h"
 
-#define TEMP_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
+#define TEMP_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(2000, APP_TIMER_PRESCALER)
 
 #define MLCD_BL_OFF 			0x0
 #define MLCD_BL_ON 				0x1

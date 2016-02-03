@@ -343,7 +343,7 @@ static void watchset_open_other(void) {
 		watchset_open(path, false);
 }
 
-static void watchset_next_watch_face(void) {
+void watchset_next_watch_face(void) {
 		char file_name[32];
 		config_get_default_watch_face(file_name);
 		char dir[] = "f/";
