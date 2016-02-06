@@ -537,11 +537,6 @@
               <FilePath>..\config.c</FilePath>
             </File>
             <File>
-              <FileName>graph.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\graph.h</FilePath>
-            </File>
-            <File>
               <FileName>graph.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\graph.c</FilePath>
@@ -1297,11 +1292,6 @@
               <FileName>config.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\config.c</FilePath>
-            </File>
-            <File>
-              <FileName>graph.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\graph.h</FilePath>
             </File>
             <File>
               <FileName>graph.c</FileName>

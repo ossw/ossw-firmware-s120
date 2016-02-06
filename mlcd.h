@@ -62,4 +62,6 @@ void mlcd_fb_flush_with_param(bool force_colors);
 
 void mlcd_fb_clear(void);
 
+void mlcd_set_line_changed(uint_fast8_t y);
+
 #endif /* MLCD_H */

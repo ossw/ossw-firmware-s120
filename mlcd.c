@@ -167,7 +167,7 @@ void mlcd_fb_clear() {
 }
 
 
-void mlcd_fb_flush (void) {
+void mlcd_fb_flush(void) {
 		mlcd_fb_flush_with_param(false);
 }
 
@@ -255,17 +255,17 @@ void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_
 			  uint_fast8_t width_left = width;
         uint8_t val = 0;
 			
-			  MLCD_SET_LINE_CHANGED(y_pos+y);
+			  MLCD_SET_LINE_CHANGED((y_pos+y));
 			
 			  if (start_bit_off > 0 || width_left < 8 - start_bit_off) {
 					  ext_ram_read_data(ext_ram_address, &old_val, 1);
 							
 						if ( start_bit_off > 0 ){
-								val = old_val & (0xFF << 8 - start_bit_off);
+								val = old_val & (0xFF << (8 - start_bit_off));
 						}
 						
 						if ( width_left < 8 - start_bit_off) {
-								val |= old_val & (0xFF >> width_left + start_bit_off);
+								val |= old_val & (0xFF >> (width_left + start_bit_off));
 						}
 			  }
 					  
@@ -326,17 +326,17 @@ void mlcd_fb_draw_bitmap(const uint8_t *bitmap, uint_fast8_t x_pos, uint_fast8_t
         uint8_t val = 0;
 			  uint_fast8_t byte_no = 0;
 			
-			  MLCD_SET_LINE_CHANGED(y_pos+y);
+			  MLCD_SET_LINE_CHANGED((y_pos+y));
 			
 			  if (start_bit_off > 0 || width_left < 8 - start_bit_off) {
 					  ext_ram_read_data(ext_ram_address, &old_val, 1);
 							
 						if ( start_bit_off > 0 ){
-								val = old_val & (0xFF << 8 - start_bit_off);
+								val = old_val & (0xFF << (8 - start_bit_off));
 						}
 						
 						if ( width_left < 8 - start_bit_off) {
-								val |= old_val & (0xFF >> width_left + start_bit_off);
+								val |= old_val & (0xFF >> (width_left + start_bit_off));
 						}
 			  }
 					  
@@ -397,11 +397,11 @@ static void mlcd_fb_draw_bitmap_from_file_handle(struct mlcd_fb_draw_bitmap_from
 					  ext_ram_read_data(data->ext_ram_address, &old_val, 1);
 							
 						if ( data->start_bit_off > 0 ){
-								val = old_val & (0xFF << 8 - data->start_bit_off);
+								val = old_val & (0xFF << (8 - data->start_bit_off));
 						}
 						
 						if ( width_left < 8 - data->start_bit_off) {
-								val |= old_val & (0xFF >> width_left + data->start_bit_off);
+								val |= old_val & (0xFF >> (width_left + data->start_bit_off));
 						}
 			  }
 					  
@@ -459,4 +459,8 @@ void mlcd_fb_draw_bitmap_from_file(spiffs_file file, uint_fast8_t x_pos, uint_fa
 		data.width = width;
 		
 		SPIFFS_read_notify(&fs, file, bitmap, height, data.byte_width, (void (*)(void*, void*))&mlcd_fb_draw_bitmap_from_file_handle, &data);
+}
+
+void mlcd_set_line_changed(uint_fast8_t y) {
+		MLCD_SET_LINE_CHANGED(y);
 }

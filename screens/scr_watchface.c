@@ -8,6 +8,7 @@
 #include "../watchset.h"
 #include "../fs.h"
 #include "../config.h"
+#include "../graph.h"
 #include "nrf_delay.h"
 		
 static NUMBER_CONTROL_DATA hour_ctrl_data;
@@ -59,8 +60,24 @@ static const SCR_CONTROLS_DEFINITION controls_definition = {
 	  (SCR_CONTROL_DEFINITION*)controls
 };
 
+static uint8_t h, m, s;
+
 static void scr_watchface_refresh_time() {
-	  scr_controls_redraw(&controls_definition);
+	  //scr_controls_redraw(&controls_definition);
+
+		lineHand(s, 70, 20);
+		s = rtc_get_current_seconds();
+		if (s == 0) {
+				triangleHand(m, 60, 15, 10); 
+				m = rtc_get_current_minutes();
+				if (m % 12 == 0) {
+						rectHand(h, 50, 10, 10);
+						h = 5 * rtc_get_current_hour_12() + m / 12;
+						rectHand(h, 50, 10, 10);
+				}
+				triangleHand(m, 60, 15, 10);
+		}
+		lineHand(s, 70, 20);
 }
 
 static void scr_watchface_init() {
@@ -72,7 +89,16 @@ static void scr_watchface_init() {
 }
 
 static void scr_watchface_draw() {
-	  scr_controls_draw(&controls_definition);
+	  //scr_controls_draw(&controls_definition);
+		// seconds
+		s = rtc_get_current_seconds();
+		lineHand(s, 70, 20);
+		// minutes
+		m = rtc_get_current_minutes();
+		triangleHand(m, 60, 15, 10); 
+		// hours
+		h = 5*rtc_get_current_hour_12() + m/12;
+		rectHand(h, 50, 5, 10);
 }
 
 bool scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
