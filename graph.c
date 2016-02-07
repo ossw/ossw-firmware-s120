@@ -24,15 +24,13 @@ void pixel(uint_fast8_t x, uint_fast8_t y) {
 }
 
 // plot a horizontal line
-void hLine(uint_fast8_t x1, uint_fast8_t y, uint_fast8_t x2) {
-		if (x1 > x2)
-				SWAP(x1, x2);
-    if (x1 > MLCD_XRES || y > MLCD_YRES)
+void hLine(uint_fast8_t y, uint_fast8_t x1, uint_fast8_t x2) {
+    if ((x1 > MLCD_XRES && x2 > MLCD_XRES) || y > MLCD_YRES)
 				return;
-		if (x2 > MLCD_XRES)
-				x2 = MLCD_XRES;
 		x1 = MLCD_XRES - x1;
 		x2 = MLCD_XRES - x2;
+		if (x1 > x2)
+				SWAP(x1, x2);
 		mlcd_set_line_changed(y);
 		uint_fast8_t leftByte = x1 >> 3;
 		uint_fast8_t rightByte = x2 >> 3;
@@ -43,13 +41,13 @@ void hLine(uint_fast8_t x1, uint_fast8_t y, uint_fast8_t x2) {
 		
 		uint_fast8_t leftBits = x1 & 0x7;
 		if (leftBits > 0) {
-				buff[0] ^=  0xFF << leftBits;
+				buff[0] ^=  0xFF >> leftBits;
 				leftByte = 1;
 		} else
 				leftByte = 0;
 		uint_fast8_t rightBits = x2 & 0x7;
-		if (leftBits > 0) {
-				buff[sizeByte-1] ^=  0xFF >> rightBits;
+		if (rightBits > 0) {
+				buff[sizeByte-1] ^=  0xFF << (8 - rightBits);
 				rightByte = sizeByte-1;
 		} else
 				rightByte = sizeByte;
@@ -158,12 +156,109 @@ void tetragon(uint_fast8_t x0, uint_fast8_t y0, uint_fast8_t x1, uint_fast8_t y1
 		lineBresenham(x3, y3, x0, y0);
 }
 
-void polygon(int_fast8_t size, uint_fast8_t p[]) {
+void polygon(int_fast8_t size, uint_fast8_t x[], uint_fast8_t y[]) {
 		--size;
-		for (int_fast8_t i = 0; i < size<<1; i+=2) {
-				lineBresenham(p[i], p[i+1], p[i+2], p[i+3]);
+		for (int_fast8_t i = 0; i < size; i++) {
+				lineBresenham(x[i], y[i], x[i+1], y[i+1]);
 		}
-}	
+		lineBresenham(x[size], y[size], x[0], y[0]);
+}
+
+static void fillBorder(uint_fast8_t border[], uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2)
+{
+    int dy = y2 - y1;
+    int dx = x2 - x1;
+    int_fast8_t stepx, stepy;
+
+    if (dy < 0) { dy = -dy;  stepy = -1; } else { stepy = 1; }
+    if (dx < 0) { dx = -dx;  stepx = -1; } else { stepx = 1; }
+    dy <<= 1;
+    dx <<= 1;
+
+    border[y1] = x1;
+    if (dx > dy) {
+        int fraction = dy - (dx >> 1);
+        while (x1 != x2) {
+						if (fraction >= 0) {
+								y1 += stepy;
+								fraction -= dx;
+						}
+						x1 += stepx;
+						fraction += dy;
+						border[y1] = x1;
+        }
+    } else {
+        int fraction = dx - (dy >> 1);
+        while (y1 != y2) {
+						if (fraction >= 0) {
+								x1 += stepx;
+								fraction -= dy;
+						}
+						y1 += stepy;
+						fraction += dx;
+						border[y1] = x1;
+        }
+		}
+}
+
+void fillConvex(int_fast8_t size, int_fast16_t x[], int_fast16_t y[]) {
+		if (size < 3)
+				return;
+		int_fast8_t last = size - 1;
+		int_fast16_t dir = SIGN(y[0] - y[last]);
+		int_fast16_t newDir;
+		uint_fast8_t l1, l2, r1, r2;
+		for (int_fast8_t i = 0; i < last; i++) {
+				newDir = SIGN(y[i+1] - y[i]);
+				if (dir == newDir)
+						continue;
+				if (dir == 1) {
+						r2 = i;
+						if (newDir == -1)
+								l1 = i;
+				} else if (dir == -1) {
+						l2 = i;
+						if (newDir == 1)
+								r1 = i;
+				} else
+						r1 = i;
+				dir = newDir;
+		}
+		newDir = SIGN(y[0] - y[last]);
+		if (dir != newDir) {
+				if (dir == 1) {
+						r2 = last;
+						if (newDir == -1)
+								l1 = last;
+				} else if (dir == -1) {
+						l2 = last;
+						if (newDir == 1)
+								r1 = last;
+				} else
+						r1 = last;
+		}
+		uint_fast8_t l[MLCD_YRES], r[MLCD_YRES];
+		uint_fast8_t curr = l1, next;
+		do {
+				next = curr + 1;
+				if (next >= size)
+						next = 0;
+				fillBorder(l, x[curr], y[curr], x[next], y[next]);
+				curr = next;
+		} while (next != l2);
+		curr = r1;
+		do {
+				next = curr + 1;
+				if (next >= size)
+						next = 0;
+				fillBorder(r, x[curr], y[curr], x[next], y[next]);
+				curr = next;
+		} while (next != r2);
+
+		for (uint_fast8_t line = y[l2]; line < y[l1]; line++) {
+				hLine(line, l[line], r[line]);
+		}
+}
 
 void lineHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail) {
 		float angle = tick * PI_2 / 60;

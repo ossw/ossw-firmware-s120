@@ -68,14 +68,14 @@ static void scr_watchface_refresh_time() {
 		lineHand(s, 70, 20);
 		s = rtc_get_current_seconds();
 		if (s == 0) {
-				triangleHand(m, 60, 15, 10); 
+				triangleHand(m, 60, 15, 6); 
 				m = rtc_get_current_minutes();
 				if (m % 12 == 0) {
-						rectHand(h, 50, 10, 10);
+						rectHand(h, 50, 10, 6);
 						h = 5 * rtc_get_current_hour_12() + m / 12;
-						rectHand(h, 50, 10, 10);
+						rectHand(h, 50, 10, 6);
 				}
-				triangleHand(m, 60, 15, 10);
+				triangleHand(m, 60, 15, 6);
 		}
 		lineHand(s, 70, 20);
 }
@@ -89,16 +89,24 @@ static void scr_watchface_init() {
 }
 
 static void scr_watchface_draw() {
+		// test drawings
+		lineBresenham(10, 10, 30, 30);
+		lineBresenham(10, 10, 30, 10);
+		lineBresenham(10, 10, 10, 30);
+		hLine(5, 10, 30);
+//		int_fast16_t x[] = {110, 120, 130, 140, 125};
+//		int_fast16_t y[] = {20, 10, 10, 20, 30};
+//		fillConvex(5, x, y);
 	  //scr_controls_draw(&controls_definition);
 		// seconds
 		s = rtc_get_current_seconds();
 		lineHand(s, 70, 20);
 		// minutes
 		m = rtc_get_current_minutes();
-		triangleHand(m, 60, 15, 10); 
+		triangleHand(m, 60, 15, 6); 
 		// hours
 		h = 5*rtc_get_current_hour_12() + m/12;
-		rectHand(h, 50, 5, 10);
+		rectHand(h, 50, 5, 6);
 }
 
 bool scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
