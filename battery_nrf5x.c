@@ -3,7 +3,7 @@
 #include "mlcd.h"
 #include "nrf_adc.h"
 #include "nrf_drv_gpiote.h"
-#include "board.h"
+#include "target.h"
 #include "scr_mngr.h"
 
 #define NRF_ADC_CONFIG { NRF_ADC_CONFIG_RES_8BIT,               \

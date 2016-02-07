@@ -1,9 +1,9 @@
 #include "config.h"
 #include "fs.h"
 #include "ext_ram.h"
-#include "app_button.h"
 #include "watchset.h"
 #include "scr_mngr.h"
+#include "buttons.h"
 
 #define CUSTOM_WATCHSET_NUMBER 5
 
@@ -74,7 +74,7 @@ void config_init(void) {
 		uint8_t buf[5];
 		ext_ram_read_data(EXT_RAM_CONFIG + OFFSET_MAGIC, buf, 5);
 		bool force_reset;
-		app_button_is_pushed(3, &force_reset); // force reset if back button is pressed
+		button_is_pushed(3, &force_reset); // force reset if back button is pressed
 	
 		if (force_reset || buf[0] != buf[2] || buf[0] != 0x05 || buf[1] != buf[3] || buf[1] != 0x5E) {
 				// set up clear config

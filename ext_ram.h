@@ -30,15 +30,14 @@
 #define EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS 0x1C00
 // last address 0x2000
 
-
 bool ext_ram_init(void);
 
-bool ext_ram_read_data(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data_size);
+bool ext_ram_read_data(uint32_t ext_ram_address, uint8_t *buffer, uint32_t data_size);
 
-bool ext_ram_read_text(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data_size, bool* has_changed);
+bool ext_ram_read_text(uint32_t ext_ram_address, uint8_t *buffer, uint32_t data_size, bool* has_changed);
 
-bool ext_ram_write_data(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data_size);
+bool ext_ram_write_data(uint32_t ext_ram_address, uint8_t *buffer, uint32_t data_size);
 
-bool ext_ram_fill(uint16_t ext_ram_address, uint8_t value, uint32_t data_size);
+bool ext_ram_fill(uint32_t ext_ram_address, uint8_t value, uint32_t data_size);
 
 #endif /* EXT_RAM_H */

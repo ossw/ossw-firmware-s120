@@ -1,8 +1,12 @@
 #include "rtc.h"
 #include "scr_mngr.h"
 #include "nordic_common.h"
+#include "app_timer.h"
 #include "time.h"
 #include "ext_ram.h"
+#include "target.h"
+
+#define RTC_INTERVAL                      APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
 
 static app_timer_id_t      m_rtc_timer_id;
 

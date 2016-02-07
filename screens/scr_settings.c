@@ -6,7 +6,7 @@
 #include "../mlcd.h"
 #include "../i18n/i18n.h"
 #include "../fs.h"
-#include "nrf_soc.h"
+#include "../mcu.h"
 
 static int8_t selectedOption = 0;
 static int8_t lastSelectedOption = 0xFF;
@@ -41,7 +41,7 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_TIME, opt_handler_change_time},
 		{MESSAGE_DISPLAY, mlcd_colors_toggle},
 		{MESSAGE_FORMAT, reformat},
-		{MESSAGE_RESTART, NVIC_SystemReset},
+		{MESSAGE_RESTART, mcu_reset},
 		{MESSAGE_ABOUT, opt_handler_about}
 };
 

@@ -1,6 +1,5 @@
 #include <string.h>
 #include "scr_alert_notification.h"
-#include "nrf_delay.h"
 #include "../scr_mngr.h"
 #include "../scr_controls.h"
 #include "../notifications.h"

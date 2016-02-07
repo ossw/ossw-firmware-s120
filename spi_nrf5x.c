@@ -3,118 +3,9 @@
 #include "spi.h"
 #include "nrf_delay.h"
 #include "nrf_gpio.h"
-#include "common.h"
-#include "board.h"
+#include "target.h"
 
-uint32_t * p_spi0_base_address;
-uint32_t * p_spi1_base_address;
-
-/**
- * @brief Function for initializing given SPI master with given configuration.
- *
- * After initializing the given SPI master with given configuration, this function also test if the
- * SPI slave is responding with the configurations by transmitting few test bytes. If the slave did not
- * respond then error is returned and contents of the rx_data are invalid.
- *
- * @param module_number SPI master number (SPIModuleNumber) to initialize.
- * @param mode SPI master mode (mode 0, 1, 2 or 3 from SPIMode)
- * @param lsb_first true if lsb is first bit to shift in/out as serial data on MISO/MOSI pins.
- * @return
- * @retval pointer to direct physical address of the requested SPI module if init was successful
- * @retval 0, if either init failed or slave did not respond to the test transfer
- */
-static uint32_t* spi_master_init(SPIModuleNumber module_number, SPIMode mode, bool lsb_first)
-{
-    uint32_t config_mode;
-
-    NRF_SPI_Type *spi_base_address = (SPI0 == module_number)? NRF_SPI0 : (NRF_SPI_Type *)NRF_SPI1;
-
-    if(SPI0 == module_number)
-    {
-        /* Configure GPIO pins used for pselsck, pselmosi, pselmiso and pselss for SPI0 */
-        nrf_gpio_cfg_output(SPI0_SCK);
-        nrf_gpio_cfg_output(SPI0_MOSI);
-        nrf_gpio_cfg_input(SPI0_MISO, NRF_GPIO_PIN_NOPULL);
-        nrf_gpio_cfg_output(SPI0_SS0);
-        nrf_gpio_cfg_output(SPI0_SS1);
-
-        /* Configure pins, frequency and mode */
-        spi_base_address->PSELSCK  = SPI0_SCK;
-        spi_base_address->PSELMOSI = SPI0_MOSI;
-        spi_base_address->PSELMISO = SPI0_MISO;
-        nrf_gpio_pin_set(SPI0_SS0); /* disable Set slave select (inactive high) */
-        nrf_gpio_pin_set(SPI0_SS1); /* disable Set slave select (inactive high) */
-    }
-    else
-    {
-        // Configure GPIO pins used for pselsck, pselmosi, pselmiso and pselss for SPI1
-        nrf_gpio_cfg_output(SPI1_SCK);
-        nrf_gpio_cfg_output(SPI1_MOSI);
-        nrf_gpio_cfg_input(SPI1_MISO, NRF_GPIO_PIN_NOPULL);
-        nrf_gpio_cfg_output(SPI1_SS0);
-
-        // Configure pins, frequency and mode 
-        spi_base_address->PSELSCK  = SPI1_SCK;
-        spi_base_address->PSELMOSI = SPI1_MOSI;
-        spi_base_address->PSELMISO = SPI1_MISO;
-        nrf_gpio_pin_clear(SPI1_SS0);         // disable Set slave select (inactive low)
-    }
-
-    spi_base_address->FREQUENCY = (uint32_t) SPI_OPERATING_FREQUENCY;
-
-    /*lint -e845 -save // A zero has been given as right argument to operator '!'" */
-    /** @snippet [SPI Select mode] */
-    switch (mode )
-    {
-       
-        case SPI_MODE0:
-            config_mode = (SPI_CONFIG_CPHA_Leading << SPI_CONFIG_CPHA_Pos) | (SPI_CONFIG_CPOL_ActiveHigh << SPI_CONFIG_CPOL_Pos);
-            break;
-        case SPI_MODE1:
-            config_mode = (SPI_CONFIG_CPHA_Trailing << SPI_CONFIG_CPHA_Pos) | (SPI_CONFIG_CPOL_ActiveHigh << SPI_CONFIG_CPOL_Pos);
-            break;
-        case SPI_MODE2:
-            config_mode = (SPI_CONFIG_CPHA_Leading << SPI_CONFIG_CPHA_Pos) | (SPI_CONFIG_CPOL_ActiveLow << SPI_CONFIG_CPOL_Pos);
-            break;
-        case SPI_MODE3:
-            config_mode = (SPI_CONFIG_CPHA_Trailing << SPI_CONFIG_CPHA_Pos) | (SPI_CONFIG_CPOL_ActiveLow << SPI_CONFIG_CPOL_Pos);
-            break;
-        default:
-            config_mode = 0;
-            break;
-    
-    }
-    /** @snippet [SPI Select mode] */
-    /*lint -restore */
-
-    /*lint -e845 -save // A zero has been given as right argument to operator '!'" */
-    /** @snippet [SPI Select endianess] */
-    if (lsb_first)
-    {
-        spi_base_address->CONFIG = (config_mode | (SPI_CONFIG_ORDER_LsbFirst << SPI_CONFIG_ORDER_Pos));
-    }
-    else
-    {
-        spi_base_address->CONFIG = (config_mode | (SPI_CONFIG_ORDER_MsbFirst << SPI_CONFIG_ORDER_Pos));
-    }
-    /** @snippet [SPI Select endianess] */
-    /*lint -restore */
-
-    spi_base_address->EVENTS_READY = 0U;
-
-    /* Enable */
-    spi_base_address->ENABLE = (SPI_ENABLE_ENABLE_Enabled << SPI_ENABLE_ENABLE_Pos);
-
-    return (uint32_t *)spi_base_address;
-}
-
-void spi_init(void)
-{
-    p_spi0_base_address = spi_master_init(SPI0, SPI_MODE0, false);
-    p_spi1_base_address = spi_master_init(SPI1, SPI_MODE0, false);
-}
-
-bool spi_master_tx_rx(uint32_t *spi_base_address, uint32_t device, uint16_t transfer_size, const uint8_t *tx_data, uint8_t *rx_data)
+bool spi_master_tx_rx(void *spi_base_address, uint32_t device, uint16_t transfer_size, const uint8_t *tx_data, uint8_t *rx_data)
 {
     uint32_t counter = 0;
     uint16_t number_of_txd_bytes = 0;
@@ -156,7 +47,7 @@ bool spi_master_tx_rx(uint32_t *spi_base_address, uint32_t device, uint16_t tran
     return true;
 }
 
-bool spi_master_tx_data_no_cs(uint32_t *spi_base_address, const uint8_t* tx_data, uint32_t tx_data_size) {
+bool spi_master_tx_data_no_cs(void *spi_base_address, const uint8_t* tx_data, uint32_t tx_data_size) {
     NRF_SPI_Type *spi_base = (NRF_SPI_Type *)spi_base_address;
 	  uint32_t number_of_txd_bytes = 0;
     uint32_t counter = 0;
@@ -187,7 +78,7 @@ bool spi_master_tx_data_no_cs(uint32_t *spi_base_address, const uint8_t* tx_data
     return true;
 }
 
-bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base_address, uint32_t *dest_spi_base_address, uint32_t data_size, bool revert) {
+bool spi_master_rx_to_tx_no_cs(void *src_spi_base_address, uint32_t *dest_spi_base_address, uint32_t data_size, bool revert) {
     NRF_SPI_Type *src_spi_base = (NRF_SPI_Type *)src_spi_base_address;
     NRF_SPI_Type *dest_spi_base = (NRF_SPI_Type *)dest_spi_base_address;
 	  uint32_t number_of_rxd_bytes = 0;
@@ -272,7 +163,7 @@ bool spi_master_rx_to_tx_no_cs(uint32_t *src_spi_base_address, uint32_t *dest_sp
     return true;
 }
 
-bool spi_master_rx_data_no_cs(uint32_t *spi_base_address, uint8_t* rx_data, uint32_t rx_data_size, bool stop_on_zero, bool* has_changed) {
+bool spi_master_rx_data_no_cs(void *spi_base_address, uint8_t* rx_data, uint32_t rx_data_size, bool stop_on_zero, bool* has_changed) {
     NRF_SPI_Type *spi_base = (NRF_SPI_Type *)spi_base_address;
 	  uint32_t number_of_rxd_bytes = 0;
     uint32_t counter = 0;
@@ -313,7 +204,7 @@ bool spi_master_rx_data_no_cs(uint32_t *spi_base_address, uint8_t* rx_data, uint
     return true;
 }
 
-bool spi_master_tx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, const uint8_t* tx_data, uint32_t tx_data_size)
+bool spi_master_tx_data(void *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, const uint8_t* tx_data, uint32_t tx_data_size)
 {
     bool success;
 
@@ -332,7 +223,7 @@ bool spi_master_tx_data(uint32_t *spi_base_address, uint32_t device, const uint8
     return success;
 }
 
-bool spi_master_tx_value(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t value, uint32_t tx_data_size)
+bool spi_master_tx_value(void *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t value, uint32_t tx_data_size)
 {
     bool success;
 
@@ -354,7 +245,7 @@ bool spi_master_tx_value(uint32_t *spi_base_address, uint32_t device, const uint
     return success;
 }
 
-bool spi_master_tx(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size)
+bool spi_master_tx(void *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size)
 {
     bool success;
 
@@ -369,7 +260,7 @@ bool spi_master_tx(uint32_t *spi_base_address, uint32_t device, const uint8_t* c
     return success;
 }
 
-bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size, bool* has_changed)
+bool spi_master_rx_data(void *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size, bool* has_changed)
 {
     bool success;
 
@@ -388,7 +279,7 @@ bool spi_master_rx_data(uint32_t *spi_base_address, uint32_t device, const uint8
     return success;
 }
 
-bool spi_master_rx_text(uint32_t *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size, bool* has_changed)
+bool spi_master_rx_text(void *spi_base_address, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size, bool* has_changed)
 {
     bool success;
 

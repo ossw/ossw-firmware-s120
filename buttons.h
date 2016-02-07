@@ -3,12 +3,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "app_timer.h"
-
-#define APP_TIMER_PRESCALER              0
-#define BUTTON_DETECTION_DELAY           APP_TIMER_TICKS(1, APP_TIMER_PRESCALER)
-#define BUTTON_LONG_PRESS_DELAY          APP_TIMER_TICKS(450, APP_TIMER_PRESCALER)
 
 void buttons_init(void);
+
+void button_is_pushed(uint8_t pin_no, bool *p_is_pushed);
 
 #endif /* BUTTONS_H */

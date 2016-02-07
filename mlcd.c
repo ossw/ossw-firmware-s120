@@ -1,16 +1,12 @@
 #include "mlcd.h"
 #include "spi.h"
 #include "ext_ram.h"
-#include "nrf_gpio.h"
-#include "common.h"
-#include "board.h"
-#include "app_timer.h"
+#include "target.h"
 #include <inttypes.h>
 #include <string.h>
 #include "fs.h"
-#include "nordic_common.h"
-
-#define TEMP_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
+#include "gpio.h"
+#include "timer.h"
 
 #define MLCD_BL_OFF 			0x0
 #define MLCD_BL_ON 				0x1
@@ -27,7 +23,7 @@ static uint8_t temp_bl_timeout = 3;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
 
-static app_timer_id_t mlcd_bl_timer_id;
+static timer_id_t mlcd_bl_timer_id;
 
 static uint8_t bit_reverse(uint8_t byte) {
     #if (__CORTEX_M >= 0x03)
@@ -44,7 +40,6 @@ static uint8_t bit_reverse(uint8_t byte) {
 }
 
 void mlcd_bl_timeout_handler(void * p_context) {
-    UNUSED_PARAMETER(p_context);
 		if (bl_mode == MLCD_BL_ON_TEMP) {
 				mlcd_backlight_off();
 		}
@@ -52,67 +47,59 @@ void mlcd_bl_timeout_handler(void * p_context) {
 
 void mlcd_init(void)
 {
-    nrf_gpio_cfg_output(LCD_ENABLE);
-    nrf_gpio_cfg_output(LCD_BACKLIGHT);
-    nrf_gpio_cfg_output(LCD_VOLTAGE_REG);
-    nrf_gpio_pin_clear(LCD_ENABLE);
-    nrf_gpio_pin_clear(LCD_BACKLIGHT);
-    nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
 	  vcom = VCOM_LO;
 }
 
 
 void mlcd_timers_init(void)
 {
-    uint32_t err_code;	 
-    err_code = app_timer_create(&mlcd_bl_timer_id,
-                                APP_TIMER_MODE_SINGLE_SHOT,
+		timer_create(&mlcd_bl_timer_id,
+                                TIMER_TYPE_SINGLE_SHOT,
                                 mlcd_bl_timeout_handler);
-    APP_ERROR_CHECK(err_code);
 }
 
 void mlcd_display_off(void)
 {
-  nrf_gpio_pin_clear(LCD_ENABLE);
+  gpio_pin_clear(LCD_ENABLE);
 }
 
 void mlcd_display_on(void)
 {
-  nrf_gpio_pin_set(LCD_ENABLE);
+  gpio_pin_set(LCD_ENABLE);
 }
 
 void mlcd_power_off(void)
 {
-  nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
+  gpio_pin_clear(LCD_VOLTAGE_REG);
 }
 
 void mlcd_power_on(void)
 {
-  nrf_gpio_pin_set(LCD_VOLTAGE_REG);
+  gpio_pin_set(LCD_VOLTAGE_REG);
 }
 
 void mlcd_backlight_off(void)
 {
-	app_timer_stop(mlcd_bl_timer_id);
+	timer_stop(mlcd_bl_timer_id);
 	bl_mode = MLCD_BL_OFF;
-  nrf_gpio_pin_clear(LCD_BACKLIGHT);
+  gpio_pin_clear(LCD_BACKLIGHT);
 }
 
 void mlcd_backlight_on(void)
 {
-	app_timer_stop(mlcd_bl_timer_id);
+	timer_stop(mlcd_bl_timer_id);
 	bl_mode = MLCD_BL_ON;
-  nrf_gpio_pin_set(LCD_BACKLIGHT);
+  gpio_pin_set(LCD_BACKLIGHT);
 }
 
 void mlcd_backlight_temp_on(void) {
 	if (bl_mode == MLCD_BL_ON) {
 			return;
 	}
-	app_timer_stop(mlcd_bl_timer_id);
+	timer_stop(mlcd_bl_timer_id);
 	bl_mode = MLCD_BL_ON_TEMP;
-  nrf_gpio_pin_set(LCD_BACKLIGHT);
-	app_timer_start(mlcd_bl_timer_id, temp_bl_timeout * TEMP_BL_TIMEOUT_UNIT, NULL);
+  gpio_pin_set(LCD_BACKLIGHT);
+	timer_start(mlcd_bl_timer_id, temp_bl_timeout * 1000);
 }
 
 void mlcd_backlight_temp_extend(void) {
@@ -197,7 +184,7 @@ void mlcd_fb_flush_with_param(bool force_colors) {
 		}
 	
     /* enable slave (slave select active HIGH) */
-    nrf_gpio_pin_set(MLCD_SPI_SS);
+    gpio_pin_set(MLCD_SPI_SS);
   
     spi_master_tx_data_no_cs(MLCD_SPI, &command, 1);
   
@@ -208,18 +195,24 @@ void mlcd_fb_flush_with_param(bool force_colors) {
             line_address = bit_reverse(MLCD_YRES - line_no);
             spi_master_tx_data_no_cs(MLCD_SPI, &line_address, 1);
 					
+				#ifdef MLCD_DIRECT_SPI_TO_SPI_TRANSFER
 						/* enable ext ram */
 	          uint8_t command[] = {EXT_RAM_READ_COMMAND, 0xFF, 0xFF};
             command[1] = ext_ram_line_address >> 8 & 0xFF;
             command[2] = ext_ram_line_address & 0xFF;
 						
-						nrf_gpio_pin_clear(EXT_RAM_SPI_SS);
+						gpio_pin_clear(EXT_RAM_SPI_SS);
   					spi_master_tx_data_no_cs(EXT_RAM_SPI, command, 3);
 					  
 						/* send response from ram to mlcd */
 					  spi_master_rx_to_tx_no_cs(EXT_RAM_SPI, MLCD_SPI, MLCD_LINE_BYTES, colors_inverted && !force_colors);
 						/* disable ext ram */
-				    nrf_gpio_pin_set(EXT_RAM_SPI_SS);
+				    gpio_pin_set(EXT_RAM_SPI_SS);
+				#else
+						uint8_t tmp_buff[MLCD_LINE_BYTES];
+						ext_ram_read_data(ext_ram_line_address, tmp_buff, MLCD_LINE_BYTES);
+					  spi_master_tx_data_no_cs(MLCD_SPI, tmp_buff, MLCD_LINE_BYTES);
+				#endif
 					
             spi_master_tx_data_no_cs(MLCD_SPI, &dummy, 1);
 						
@@ -231,7 +224,7 @@ void mlcd_fb_flush_with_param(bool force_colors) {
     spi_master_tx_data_no_cs(MLCD_SPI, &dummy, 1);
 
     /* disable slave (slave select active HIGH) */
-    nrf_gpio_pin_clear(MLCD_SPI_SS);
+    gpio_pin_clear(MLCD_SPI_SS);
 }
 
 void mlcd_colors_toggle(void) {

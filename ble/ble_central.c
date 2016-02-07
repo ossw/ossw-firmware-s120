@@ -8,7 +8,7 @@
 #include "softdevice_handler.h"
 #include "app_util.h"
 #include "app_error.h"
-#include "../board.h"
+#include "../target.h"
 #include "nrf_gpio.h"
 #include "pstorage.h"
 #include "device_manager.h"

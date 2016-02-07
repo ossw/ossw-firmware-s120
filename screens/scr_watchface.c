@@ -8,7 +8,6 @@
 #include "../watchset.h"
 #include "../fs.h"
 #include "../config.h"
-#include "nrf_delay.h"
 		
 static NUMBER_CONTROL_DATA hour_ctrl_data;
 		

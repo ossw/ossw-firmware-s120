@@ -2,12 +2,12 @@
 #include <string.h>
 #include "ext_flash.h"
 #include "spi.h"
-#include "nrf_delay.h"
-#include "board.h"
+#include "mcu.h"
+#include "target.h"
 
 uint8_t ext_flash_read_status(uint8_t *status) {
     uint8_t command[] = {0x05};
-    return spi_master_rx_data(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 1, status, 1, NULL);
+    return spi_master_rx_data(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 1, status, 1, NULL);
 }
 
 bool ext_flash_read_data(uint32_t ext_flash_address, uint8_t *buffer, uint32_t data_size) {
@@ -15,7 +15,7 @@ bool ext_flash_read_data(uint32_t ext_flash_address, uint8_t *buffer, uint32_t d
     command[1] = ext_flash_address >> 16 & 0xFF;
     command[2] = ext_flash_address >> 8 & 0xFF;
     command[3] = ext_flash_address & 0xFF;
-    return spi_master_rx_data(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 4, buffer, data_size, NULL);
+    return spi_master_rx_data(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 4, buffer, data_size, NULL);
 }
 
 bool ext_flash_read_text(uint32_t ext_flash_address, uint8_t *buffer, uint32_t data_size, bool* has_changed) {
@@ -23,13 +23,13 @@ bool ext_flash_read_text(uint32_t ext_flash_address, uint8_t *buffer, uint32_t d
     command[1] = ext_flash_address >> 16 & 0xFF;
     command[2] = ext_flash_address >> 8 & 0xFF;
     command[3] = ext_flash_address & 0xFF;
-    return spi_master_rx_data(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 4, buffer, data_size, has_changed);
+    return spi_master_rx_data(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 4, buffer, data_size, has_changed);
 }
 
 
 bool ext_flash_write_enable() {
     uint8_t command[] = {0x06};
-    return spi_master_tx(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 1);
+    return spi_master_tx(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 1);
 }
 
 bool ext_flash_wait_until_ready() {
@@ -41,7 +41,7 @@ bool ext_flash_wait_until_ready() {
     // first wait 10us, second 100us, third and following 1000us
     uint32_t wait_time = 10;
     do {
-        nrf_delay_us(wait_time); //wait 1 ms
+        mcu_delay_us(wait_time); //wait 1 ms
         ext_flash_read_status(&status);
         if (wait_time < 1000) {
             wait_time *= 10;
@@ -71,7 +71,7 @@ bool ext_flash_erase_sector(uint32_t page_address) {
         uint8_t command[] = {0x20, 0xFF, 0xFF, 0x00};
         command[1] = page_address >> 16 & 0xFF;
         command[2] = page_address >> 8 & 0xF0;
-        success = spi_master_tx(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 4);
+        success = spi_master_tx(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 4);
     }
     if (success) {
         success = ext_flash_wait_until_ready();
@@ -83,7 +83,7 @@ bool ext_flash_erase_chip() {
     bool success = ext_flash_write_enable();
     if (success) {
         uint8_t command[] = {0xC7};
-        success = spi_master_tx(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 1);
+        success = spi_master_tx(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 1);
     }
     if (success) {
         success = ext_flash_wait_until_ready();
@@ -98,7 +98,7 @@ bool ext_flash_write_page(int32_t ext_flash_address, uint8_t *buffer, uint32_t d
         command[1] = ext_flash_address >> 16 & 0xFF;
         command[2] = ext_flash_address >> 8 & 0xFF;
         command[3] = ext_flash_address & 0xFF;
-        success = spi_master_tx_data(p_spi0_base_address, EXT_FLASH_SPI_SS, command, 4, buffer, data_size);
+        success = spi_master_tx_data(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 4, buffer, data_size);
     }
     if (success) {
         success = ext_flash_wait_until_ready();

@@ -1,0 +1,863 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_projx.xsd">
+
+  <SchemaVersion>2.1</SchemaVersion>
+
+  <Header>### uVision Project, (C) Keil Software</Header>
+
+  <Targets>
+    <Target>
+      <TargetName>smaq-efm32</TargetName>
+      <ToolsetNumber>0x4</ToolsetNumber>
+      <ToolsetName>ARM-ADS</ToolsetName>
+      <TargetOption>
+        <TargetCommonOption>
+          <Device>EFM32GG330F512</Device>
+          <Vendor>Silicon Labs</Vendor>
+          <PackID>Keil.EFM32GGxxx_DFP.2.2.0</PackID>
+          <PackURL>http://www.keil.com/pack/</PackURL>
+          <Cpu>IROM(0x00000000,0x80000) IRAM(0x20000000,0x20000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
+          <FlashUtilSpec></FlashUtilSpec>
+          <StartupFile></StartupFile>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC8000 -FN1 -FF0EFM32GG -FS00 -FL080000 -FP0($$Device:EFM32GG330F512$Flash\EFM32GG.FLM))</FlashDriverDll>
+          <DeviceId>0</DeviceId>
+          <RegisterFile>$$Device:EFM32GG330F512$Device\EFM32GG\Include\em_device.h</RegisterFile>
+          <MemoryEnv></MemoryEnv>
+          <Cmp></Cmp>
+          <Asm></Asm>
+          <Linker></Linker>
+          <OHString></OHString>
+          <InfinionOptionDll></InfinionOptionDll>
+          <SLE66CMisc></SLE66CMisc>
+          <SLE66AMisc></SLE66AMisc>
+          <SLE66LinkerMisc></SLE66LinkerMisc>
+          <SFDFile>$$Device:EFM32GG330F512$SVD\EFM32GG\EFM32GG330F512.svd</SFDFile>
+          <bCustSvd>0</bCustSvd>
+          <UseEnv>0</UseEnv>
+          <BinPath></BinPath>
+          <IncludePath>..\;..\..\..\CMSIS\Include;..\..\..\Device\EnergyMicro\EFM32GG\Include;..\..\..\emlib\inc;..\..\..\kits\common\drivers;..\..\..\kits\common\bsp;..\..\..\kits\EFM32GG_DK3750\config</IncludePath>
+          <LibPath></LibPath>
+          <RegisterFilePath></RegisterFilePath>
+          <DBRegisterFilePath></DBRegisterFilePath>
+          <TargetStatus>
+            <Error>0</Error>
+            <ExitCodeStop>0</ExitCodeStop>
+            <ButtonStop>0</ButtonStop>
+            <NotGenerated>0</NotGenerated>
+            <InvalidFlash>1</InvalidFlash>
+          </TargetStatus>
+          <OutputDirectory>.\obj\</OutputDirectory>
+          <OutputName>ossw-smaq-efm32</OutputName>
+          <CreateExecutable>1</CreateExecutable>
+          <CreateLib>0</CreateLib>
+          <CreateHexFile>0</CreateHexFile>
+          <DebugInformation>1</DebugInformation>
+          <BrowseInformation>0</BrowseInformation>
+          <ListingPath>.\lst\</ListingPath>
+          <HexFormatSelection>1</HexFormatSelection>
+          <Merge32K>0</Merge32K>
+          <CreateBatchFile>0</CreateBatchFile>
+          <BeforeCompile>
+            <RunUserProg1>0</RunUserProg1>
+            <RunUserProg2>0</RunUserProg2>
+            <UserProg1Name></UserProg1Name>
+            <UserProg2Name></UserProg2Name>
+            <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
+            <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+            <nStopU1X>0</nStopU1X>
+            <nStopU2X>0</nStopU2X>
+          </BeforeCompile>
+          <BeforeMake>
+            <RunUserProg1>0</RunUserProg1>
+            <RunUserProg2>0</RunUserProg2>
+            <UserProg1Name></UserProg1Name>
+            <UserProg2Name></UserProg2Name>
+            <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
+            <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+            <nStopB1X>0</nStopB1X>
+            <nStopB2X>0</nStopB2X>
+          </BeforeMake>
+          <AfterMake>
+            <RunUserProg1>1</RunUserProg1>
+            <RunUserProg2>0</RunUserProg2>
+            <UserProg1Name>fromelf.exe --bin --output obj\ossw-smaq-efm32.bin obj\ossw-smaq-efm32.axf</UserProg1Name>
+            <UserProg2Name></UserProg2Name>
+            <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
+            <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+          </AfterMake>
+          <SelectedForBatchBuild>0</SelectedForBatchBuild>
+          <SVCSIdString></SVCSIdString>
+        </TargetCommonOption>
+        <CommonProperty>
+          <UseCPPCompiler>0</UseCPPCompiler>
+          <RVCTCodeConst>0</RVCTCodeConst>
+          <RVCTZI>0</RVCTZI>
+          <RVCTOtherData>0</RVCTOtherData>
+          <ModuleSelection>0</ModuleSelection>
+          <IncludeInBuild>1</IncludeInBuild>
+          <AlwaysBuild>0</AlwaysBuild>
+          <GenerateAssemblyFile>0</GenerateAssemblyFile>
+          <AssembleAssemblyFile>0</AssembleAssemblyFile>
+          <PublicsOnly>0</PublicsOnly>
+          <StopOnExitCode>3</StopOnExitCode>
+          <CustomArgument></CustomArgument>
+          <IncludeLibraryModules></IncludeLibraryModules>
+          <ComprImg>1</ComprImg>
+        </CommonProperty>
+        <DllOption>
+          <SimDllName>SARMCM3.DLL</SimDllName>
+          <SimDllArguments>  -MPU</SimDllArguments>
+          <SimDlgDll>DCM.DLL</SimDlgDll>
+          <SimDlgDllArguments>-pCM3</SimDlgDllArguments>
+          <TargetDllName>SARMCM3.DLL</TargetDllName>
+          <TargetDllArguments> -MPU</TargetDllArguments>
+          <TargetDlgDll>TCM.DLL</TargetDlgDll>
+          <TargetDlgDllArguments>-pCM3</TargetDlgDllArguments>
+        </DllOption>
+        <DebugOption>
+          <OPTHX>
+            <HexSelection>1</HexSelection>
+            <HexRangeLowAddress>0</HexRangeLowAddress>
+            <HexRangeHighAddress>0</HexRangeHighAddress>
+            <HexOffset>0</HexOffset>
+            <Oh166RecLen>16</Oh166RecLen>
+          </OPTHX>
+          <Simulator>
+            <UseSimulator>0</UseSimulator>
+            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
+            <RunToMain>1</RunToMain>
+            <RestoreBreakpoints>1</RestoreBreakpoints>
+            <RestoreWatchpoints>1</RestoreWatchpoints>
+            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
+            <RestoreFunctions>1</RestoreFunctions>
+            <RestoreToolbox>1</RestoreToolbox>
+            <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
+            <RestoreSysVw>1</RestoreSysVw>
+          </Simulator>
+          <Target>
+            <UseTarget>1</UseTarget>
+            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
+            <RunToMain>0</RunToMain>
+            <RestoreBreakpoints>1</RestoreBreakpoints>
+            <RestoreWatchpoints>1</RestoreWatchpoints>
+            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
+            <RestoreFunctions>0</RestoreFunctions>
+            <RestoreToolbox>1</RestoreToolbox>
+            <RestoreTracepoints>0</RestoreTracepoints>
+            <RestoreSysVw>1</RestoreSysVw>
+          </Target>
+          <RunDebugAfterBuild>0</RunDebugAfterBuild>
+          <TargetSelection>11</TargetSelection>
+          <SimDlls>
+            <CpuDll></CpuDll>
+            <CpuDllArguments></CpuDllArguments>
+            <PeripheralDll></PeripheralDll>
+            <PeripheralDllArguments></PeripheralDllArguments>
+            <InitializationFile></InitializationFile>
+          </SimDlls>
+          <TargetDlls>
+            <CpuDll></CpuDll>
+            <CpuDllArguments></CpuDllArguments>
+            <PeripheralDll></PeripheralDll>
+            <PeripheralDllArguments></PeripheralDllArguments>
+            <InitializationFile></InitializationFile>
+            <Driver>STLink\ST-LINKIII-KEIL_SWO.dll</Driver>
+          </TargetDlls>
+        </DebugOption>
+        <Utilities>
+          <Flash1>
+            <UseTargetDll>1</UseTargetDll>
+            <UseExternalTool>0</UseExternalTool>
+            <RunIndependent>0</RunIndependent>
+            <UpdateFlashBeforeDebugging>0</UpdateFlashBeforeDebugging>
+            <Capability>1</Capability>
+            <DriverSelection>4103</DriverSelection>
+          </Flash1>
+          <bUseTDR>0</bUseTDR>
+          <Flash2>STLink\ST-LINKIII-KEIL_SWO.dll</Flash2>
+          <Flash3>"" ()</Flash3>
+          <Flash4></Flash4>
+          <pFcarmOut></pFcarmOut>
+          <pFcarmGrp></pFcarmGrp>
+          <pFcArmRoot></pFcArmRoot>
+          <FcArmLst>0</FcArmLst>
+        </Utilities>
+        <TargetArmAds>
+          <ArmAdsMisc>
+            <GenerateListings>0</GenerateListings>
+            <asHll>1</asHll>
+            <asAsm>1</asAsm>
+            <asMacX>1</asMacX>
+            <asSyms>1</asSyms>
+            <asFals>1</asFals>
+            <asDbgD>1</asDbgD>
+            <asForm>1</asForm>
+            <ldLst>0</ldLst>
+            <ldmm>1</ldmm>
+            <ldXref>1</ldXref>
+            <BigEnd>0</BigEnd>
+            <AdsALst>1</AdsALst>
+            <AdsACrf>1</AdsACrf>
+            <AdsANop>0</AdsANop>
+            <AdsANot>0</AdsANot>
+            <AdsLLst>1</AdsLLst>
+            <AdsLmap>1</AdsLmap>
+            <AdsLcgr>1</AdsLcgr>
+            <AdsLsym>1</AdsLsym>
+            <AdsLszi>1</AdsLszi>
+            <AdsLtoi>1</AdsLtoi>
+            <AdsLsun>1</AdsLsun>
+            <AdsLven>1</AdsLven>
+            <AdsLsxf>1</AdsLsxf>
+            <RvctClst>0</RvctClst>
+            <GenPPlst>0</GenPPlst>
+            <AdsCpuType>"Cortex-M3"</AdsCpuType>
+            <RvctDeviceName></RvctDeviceName>
+            <mOS>0</mOS>
+            <uocRom>0</uocRom>
+            <uocRam>0</uocRam>
+            <hadIROM>1</hadIROM>
+            <hadIRAM>1</hadIRAM>
+            <hadXRAM>0</hadXRAM>
+            <uocXRam>0</uocXRam>
+            <RvdsVP>0</RvdsVP>
+            <hadIRAM2>0</hadIRAM2>
+            <hadIROM2>0</hadIROM2>
+            <StupSel>8</StupSel>
+            <useUlib>1</useUlib>
+            <EndSel>0</EndSel>
+            <uLtcg>0</uLtcg>
+            <RoSelD>3</RoSelD>
+            <RwSelD>3</RwSelD>
+            <CodeSel>0</CodeSel>
+            <OptFeed>0</OptFeed>
+            <NoZi1>0</NoZi1>
+            <NoZi2>0</NoZi2>
+            <NoZi3>0</NoZi3>
+            <NoZi4>0</NoZi4>
+            <NoZi5>0</NoZi5>
+            <Ro1Chk>0</Ro1Chk>
+            <Ro2Chk>0</Ro2Chk>
+            <Ro3Chk>0</Ro3Chk>
+            <Ir1Chk>1</Ir1Chk>
+            <Ir2Chk>0</Ir2Chk>
+            <Ra1Chk>0</Ra1Chk>
+            <Ra2Chk>0</Ra2Chk>
+            <Ra3Chk>0</Ra3Chk>
+            <Im1Chk>1</Im1Chk>
+            <Im2Chk>0</Im2Chk>
+            <OnChipMemories>
+              <Ocm1>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </Ocm1>
+              <Ocm2>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </Ocm2>
+              <Ocm3>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </Ocm3>
+              <Ocm4>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </Ocm4>
+              <Ocm5>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </Ocm5>
+              <Ocm6>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </Ocm6>
+              <IRAM>
+                <Type>0</Type>
+                <StartAddress>0x20000000</StartAddress>
+                <Size>0x20000</Size>
+              </IRAM>
+              <IROM>
+                <Type>1</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x80000</Size>
+              </IROM>
+              <XRAM>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </XRAM>
+              <OCR_RVCT1>
+                <Type>1</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </OCR_RVCT1>
+              <OCR_RVCT2>
+                <Type>1</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </OCR_RVCT2>
+              <OCR_RVCT3>
+                <Type>1</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </OCR_RVCT3>
+              <OCR_RVCT4>
+                <Type>1</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x5ff00</Size>
+              </OCR_RVCT4>
+              <OCR_RVCT5>
+                <Type>1</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </OCR_RVCT5>
+              <OCR_RVCT6>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </OCR_RVCT6>
+              <OCR_RVCT7>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </OCR_RVCT7>
+              <OCR_RVCT8>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </OCR_RVCT8>
+              <OCR_RVCT9>
+                <Type>0</Type>
+                <StartAddress>0x20000000</StartAddress>
+                <Size>0x20000</Size>
+              </OCR_RVCT9>
+              <OCR_RVCT10>
+                <Type>0</Type>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
+              </OCR_RVCT10>
+            </OnChipMemories>
+            <RvctStartVector></RvctStartVector>
+          </ArmAdsMisc>
+          <Cads>
+            <interw>1</interw>
+            <Optim>1</Optim>
+            <oTime>1</oTime>
+            <SplitLS>0</SplitLS>
+            <OneElfS>0</OneElfS>
+            <Strict>0</Strict>
+            <EnumInt>0</EnumInt>
+            <PlainCh>0</PlainCh>
+            <Ropi>0</Ropi>
+            <Rwpi>0</Rwpi>
+            <wLevel>0</wLevel>
+            <uThumb>0</uThumb>
+            <uSurpInc>0</uSurpInc>
+            <uC99>0</uC99>
+            <useXO>0</useXO>
+            <VariousControls>
+              <MiscControls>--c99</MiscControls>
+              <Define>EFM32GG330F512 TARGET_SMAQ_EFM32</Define>
+              <Undefine></Undefine>
+              <IncludePath>..\;..\..\..\CMSIS\Include;..\..\..\Device\EnergyMicro\EFM32GG\Include;..\..\..\emlib\inc;..\..\..\kits\common\drivers;..\..\..\kits\common\bsp;..\..\..\kits\EFM32GG_DK3750\config</IncludePath>
+            </VariousControls>
+          </Cads>
+          <Aads>
+            <interw>1</interw>
+            <Ropi>0</Ropi>
+            <Rwpi>0</Rwpi>
+            <thumb>0</thumb>
+            <SplitLS>0</SplitLS>
+            <SwStkChk>0</SwStkChk>
+            <NoWarn>0</NoWarn>
+            <uSurpInc>0</uSurpInc>
+            <useXO>0</useXO>
+            <VariousControls>
+              <MiscControls></MiscControls>
+              <Define></Define>
+              <Undefine></Undefine>
+              <IncludePath>..\;..\..\..\CMSIS\Include;..\..\..\Device\EnergyMicro\EFM32GG\Include;..\..\..\emlib\inc;..\..\..\kits\common\drivers;..\..\..\kits\common\bsp;..\..\..\kits\EFM32GG_DK3750\config</IncludePath>
+            </VariousControls>
+          </Aads>
+          <LDads>
+            <umfTarg>1</umfTarg>
+            <Ropi>0</Ropi>
+            <Rwpi>0</Rwpi>
+            <noStLib>0</noStLib>
+            <RepFail>1</RepFail>
+            <useFile>0</useFile>
+            <TextAddressRange>0x00000000</TextAddressRange>
+            <DataAddressRange>0x10000000</DataAddressRange>
+            <pXoBase></pXoBase>
+            <ScatterFile></ScatterFile>
+            <IncludeLibs></IncludeLibs>
+            <IncludeLibsPath></IncludeLibsPath>
+            <Misc></Misc>
+            <LinkerInputFile></LinkerInputFile>
+            <DisabledWarnings></DisabledWarnings>
+          </LDads>
+        </TargetArmAds>
+      </TargetOption>
+      <Groups>
+        <Group>
+          <GroupName>Source</GroupName>
+          <Files>
+            <File>
+              <FileName>smaq_efm32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\target\smaq\smaq_efm32.c</FilePath>
+            </File>
+            <File>
+              <FileName>smaq_efm32.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\target\smaq\smaq_efm32.h</FilePath>
+            </File>
+            <File>
+              <FileName>ossw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\ossw.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Libraries</GroupName>
+          <Files>
+            <File>
+              <FileName>mcu_efm32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mcu_efm32.c</FilePath>
+            </File>
+            <File>
+              <FileName>utf8.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\utf8.c</FilePath>
+            </File>
+            <File>
+              <FileName>mlcd_draw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mlcd_draw.c</FilePath>
+            </File>
+            <File>
+              <FileName>notifications.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\notifications.c</FilePath>
+            </File>
+            <File>
+              <FileName>command.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\command.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer_efm32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\timer_efm32.c</FilePath>
+            </File>
+            <File>
+              <FileName>buttons_efm32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\buttons_efm32.c</FilePath>
+            </File>
+            <File>
+              <FileName>ext_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\ext_flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>fs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\fs.c</FilePath>
+            </File>
+            <File>
+              <FileName>gpio_efm32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\gpio_efm32.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc_efm32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\rtc_efm32.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_controls.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\scr_controls.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_mngr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\scr_mngr.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi_efm32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\spi_efm32.c</FilePath>
+            </File>
+            <File>
+              <FileName>stopwatch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\stopwatch.c</FilePath>
+            </File>
+            <File>
+              <FileName>vibration.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\vibration.c</FilePath>
+            </File>
+            <File>
+              <FileName>watchset.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\watchset.c</FilePath>
+            </File>
+            <File>
+              <FileName>config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\config.c</FilePath>
+            </File>
+            <File>
+              <FileName>battery_efm32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\battery_efm32.c</FilePath>
+            </File>
+            <File>
+              <FileName>ble_peripheral_efm32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\ble\ble_peripheral_efm32.c</FilePath>
+            </File>
+            <File>
+              <FileName>ext_ram_fake.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\ext_ram_fake.c</FilePath>
+            </File>
+            <File>
+              <FileName>mlcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mlcd.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Screens</GroupName>
+          <Files>
+            <File>
+              <FileName>scr_about.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_about.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_alert_notification.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_alert_notification.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_changedate.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_changedate.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_changetime.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_changetime.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_choosemode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_choosemode.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_notifications.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_notifications.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_settings.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_settings.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_status.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_status.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_watchface.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchset.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_watchset.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_watchset_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\screens\scr_watchset_list.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Fonts</GroupName>
+          <Files>
+            <File>
+              <FileName>big_bold.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\fonts\big_bold.h</FilePath>
+            </File>
+            <File>
+              <FileName>big_regular.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\fonts\big_regular.h</FilePath>
+            </File>
+            <File>
+              <FileName>font.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\fonts\font.h</FilePath>
+            </File>
+            <File>
+              <FileName>normal_bold.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\fonts\normal_bold.h</FilePath>
+            </File>
+            <File>
+              <FileName>normal_regular.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\fonts\normal_regular.h</FilePath>
+            </File>
+            <File>
+              <FileName>option_big.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\fonts\option_big.h</FilePath>
+            </File>
+            <File>
+              <FileName>option_normal.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\fonts\option_normal.h</FilePath>
+            </File>
+            <File>
+              <FileName>small_bold.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\fonts\small_bold.h</FilePath>
+            </File>
+            <File>
+              <FileName>small_regular.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\fonts\small_regular.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>i18n</GroupName>
+          <Files>
+            <File>
+              <FileName>i18n.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\i18n\i18n.c</FilePath>
+            </File>
+            <File>
+              <FileName>messages_en.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\i18n\messages_en.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>spiffs</GroupName>
+          <Files>
+            <File>
+              <FileName>spiffs_check.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\spiffs\spiffs_check.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_gc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\spiffs\spiffs_gc.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_hydrogen.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\spiffs\spiffs_hydrogen.c</FilePath>
+            </File>
+            <File>
+              <FileName>spiffs_nucleus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\spiffs\spiffs_nucleus.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>::CMSIS</GroupName>
+        </Group>
+        <Group>
+          <GroupName>::Device</GroupName>
+        </Group>
+      </Groups>
+    </Target>
+  </Targets>
+
+  <RTE>
+    <apis/>
+    <components>
+      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="3.40.0" condition="CMSIS Core">
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="4.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="4.0.0" condition="EFM32GG CMSIS Device">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emdrv" Csub="GPIOINT" Cvendor="Keil" Cversion="4.0.0" condition="emdrv GPIOINT">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emdrv" Csub="RTCDRV" Cvendor="Keil" Cversion="4.0.0" condition="emdrv RTCDRV">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emdrv" Csub="SLEEP" Cvendor="Keil" Cversion="4.0.0" condition="emdrv SLEEP">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="CMU" Cvendor="Keil" Cversion="4.0.0" condition="emlib EMU">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="DMA" Cvendor="Keil" Cversion="4.0.0" condition="emlib CMU">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="EBI" Cvendor="Keil" Cversion="4.0.0" condition="emlib Framework">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="EMU" Cvendor="Keil" Cversion="4.0.0" condition="emlib CMU">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="Framework" Cvendor="Keil" Cversion="4.0.0" condition="EFM32GG Device">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="GPIO" Cvendor="Keil" Cversion="4.0.0" condition="emlib Framework">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="INT" Cvendor="Keil" Cversion="4.0.0" condition="emlib Framework">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="RMU" Cvendor="Keil" Cversion="4.0.0" condition="emlib Framework">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="RTC" Cvendor="Keil" Cversion="4.0.0" condition="emlib Framework">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="SYSTEM" Cvendor="Keil" Cversion="4.0.0" condition="emlib Framework">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Device" Cgroup="emlib" Csub="USART" Cvendor="Keil" Cversion="4.0.0" condition="emlib CMU">
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </component>
+    </components>
+    <files>
+      <file attr="config" category="header" name="RTE_Driver\Config\RTE_Device.h" version="2.00">
+        <instance index="0">RTE\Device\EFM32GG330F512\RTE_Device.h</instance>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="4.0.0" condition="EFM32GG CMSIS Device"/>
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="emdrv\config\rtcdrv_config.h" version="3.20.0">
+        <instance index="0">RTE\Device\EFM32GG330F512\rtcdrv_config.h</instance>
+        <component Cclass="Device" Cgroup="emdrv" Csub="RTCDRV" Cvendor="Keil" Cversion="4.0.0" condition="emdrv RTCDRV"/>
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="emdrv\config\spidrv_config.h" version="3.20.0">
+        <instance index="0" removed="1">RTE\Device\EFM32GG330F512\spidrv_config.h</instance>
+        <component Cclass="Device" Cgroup="emdrv" Csub="SPIDRV" Cvendor="Keil" Cversion="4.0.0" condition="emdrv SPIDRV"/>
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos/>
+      </file>
+      <file attr="config" category="source" condition="ARMCC" name="Device\EFM32GG\Source\ARM\startup_efm32gg.s" version="4.0.0">
+        <instance index="0">RTE\Device\EFM32GG330F512\startup_efm32gg.s</instance>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="4.0.0" condition="EFM32GG CMSIS Device"/>
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="source" name="Device\EFM32GG\Source\system_efm32gg.c" version="4.0.0">
+        <instance index="0">RTE\Device\EFM32GG330F512\system_efm32gg.c</instance>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="4.0.0" condition="EFM32GG CMSIS Device"/>
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos>
+          <targetInfo name="smaq-efm32"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="RTE_Driver\Config\RTE_Device.h" version="2.00">
+        <instance index="0" removed="1">RTE\Device\EFM32GG990F1024\RTE_Device.h</instance>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="4.0.0" condition="EFM32GG CMSIS Device"/>
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos/>
+      </file>
+      <file attr="config" category="source" condition="ARMCC" name="Device\EFM32GG\Source\ARM\startup_efm32gg.s" version="4.0.0">
+        <instance index="0" removed="1">RTE\Device\EFM32GG990F1024\startup_efm32gg.s</instance>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="4.0.0" condition="EFM32GG CMSIS Device"/>
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos/>
+      </file>
+      <file attr="config" category="source" name="Device\EFM32GG\Source\system_efm32gg.c" version="4.0.0">
+        <instance index="0" removed="1">RTE\Device\EFM32GG990F1024\system_efm32gg.c</instance>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="4.0.0" condition="EFM32GG CMSIS Device"/>
+        <package name="EFM32GGxxx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="2.2.0"/>
+        <targetInfos/>
+      </file>
+    </files>
+  </RTE>
+
+</Project>

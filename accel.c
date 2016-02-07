@@ -4,7 +4,7 @@
 //#include "nrf_drv_twi.h"
 //#include "app_util_platform.h"
 #include "twi_master.h"
-#include "board.h"
+#include "target.h"
 #include "mlcd.h"
 #include "nrf_delay.h"
 #include "app_timer.h"

@@ -1,2 +1,6 @@
-arm5/_build
-ossw-firmware-s120.uvguix.*
+_build
+ossw-weloop.uvguix.*
+arm5/smaq/smaq-efm32/obj
+arm5/smaq/smaq-efm32/DebugConfig
+arm5/smaq/smaq-efm32/lst
+ossw-smaq-efm32.uvguix.*

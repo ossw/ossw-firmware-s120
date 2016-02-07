@@ -15,7 +15,7 @@
 #include "softdevice_handler.h"
 #include "nrf_delay.h"
 #include "../battery.h"
-#include "../board.h"
+#include "../target.h"
 #include "../mlcd.h"
 #include "../ext_ram.h"
 #include "../ext_flash.h"

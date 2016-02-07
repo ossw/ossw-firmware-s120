@@ -1,10 +1,14 @@
 #include "buttons.h"
 #include "scr_mngr.h"
 #include "app_button.h"
-#include "board.h"
+#include "target.h"
+#include "app_timer.h"
+
+#define APP_TIMER_PRESCALER              0
+#define BUTTON_DETECTION_DELAY           APP_TIMER_TICKS(1, APP_TIMER_PRESCALER)
+#define BUTTON_LONG_PRESS_DELAY          APP_TIMER_TICKS(450, APP_TIMER_PRESCALER)
 
 static app_timer_id_t         m_button_long_press_timer_id;
-
 
 static void button_handler(uint8_t pin_no, uint8_t button_action);
 
@@ -87,4 +91,8 @@ void buttons_init(void) {
     APP_ERROR_CHECK(err_code);
 	
 		app_button_enable();
+}
+
+void button_is_pushed(uint8_t pin_no, bool *p_is_pushed) {
+		app_button_is_pushed(pin_no, p_is_pushed);
 }

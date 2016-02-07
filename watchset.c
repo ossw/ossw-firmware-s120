@@ -5,12 +5,11 @@
 #include "battery.h"
 #include "rtc.h"
 #include "stopwatch.h"
-#include "ble/ble_central.h"
-#include "nrf_soc.h"
+//#include "ble/ble_central.h"
 #include "ossw.h"
 #include "config.h"
-#include "ble_gap.h"
 #include "notifications.h"
+#include "mcu.h"
 
 bool watch_face = false;
 uint8_t operation = 0;
@@ -41,7 +40,7 @@ static uint32_t (* const internal_data_source_handles[])() = {
 };
 
 static uint32_t (* const sensor_data_source_handles[])(void) = {
-		/* 0 */ ble_central_heart_rate
+		/* 0 */ NULL//ble_central_heart_rate
 };
 
 static uint32_t watchset_converter_ms_to_hours(uint32_t v) {
@@ -262,7 +261,7 @@ void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
 						fs_reformat();
 			      break;
 			  case WATCH_SET_FUNC_RESTART:
-						NVIC_SystemReset();
+						mcu_reset();
 			      break;
 				case WATCH_SET_FUNC_SET_TIME:
 						rtc_set_current_time(param);

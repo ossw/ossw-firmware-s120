@@ -1,12 +1,10 @@
 #include "command.h"
-#include "nordic_common.h"
 #include "ble/ble_peripheral.h"
 #include "spiffs/spiffs.h"
 #include "scr_mngr.h"
 #include "notifications.h"
 #include "screens/scr_watchset.h"
 #include "ext_ram.h"
-#include "nrf_soc.h"
 #include "config.h"
 #include "fs.h"
 
@@ -82,8 +80,6 @@ void command_process(void) {
 		
 		uint8_t respCode = 0;
 	
-	//	sd_nvic_critical_region_enter();
-		
 		switch (data_buf[0]) {
 			case COMMAND_OPEN_FILE_STREAM:
 			{
@@ -145,7 +141,6 @@ void command_process(void) {
 		}
 		
 		handle_data = false;
-	//	sd_nvic_critical_region_exit();
 		ble_peripheral_confirm_command_processed(respCode);
 }
 

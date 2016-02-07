@@ -1,6 +1,5 @@
 #include <string.h>
 #include "scr_watchset.h"
-#include "nrf_delay.h"
 #include "time.h"
 #include "../scr_mngr.h"
 #include "../scr_controls.h"

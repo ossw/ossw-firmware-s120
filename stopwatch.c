@@ -1,17 +1,16 @@
 #include "stopwatch.h"
-#include "nordic_common.h"
-#include "app_timer.h"
-#include "board.h"
+#include "timer.h"
+#include "target.h"
 #include "scr_mngr.h"
 #include "ext_ram.h"
 
 // interrupt is only to increase number of fps in main loop
-#define INTERRUPT_INTERVAL            APP_TIMER_TICKS(215, APP_TIMER_PRESCALER)
-#define MS_COUNTER_UPDATE_INTERVAL    APP_TIMER_TICKS(120000, APP_TIMER_PRESCALER)
+#define INTERRUPT_INTERVAL            215
+#define MS_COUNTER_UPDATE_INTERVAL    120000
 
 #define STOPWATCH_RECALL_SIZE 200
 
-static app_timer_id_t stopwatch_timer_id;
+static timer_id_t stopwatch_timer_id;
 
 static volatile uint32_t ms_counter = 0;
 static bool ms_counter_active = false;
@@ -23,16 +22,14 @@ static uint32_t last_lap_length = 0;
 static bool lock_next_lap = false;
 
 static void stopwatch_timeout_handler(void * p_context) {
-    UNUSED_PARAMETER(p_context);
-
 		if (ms_counter_active) {
 				uint32_t current_ticks;
 				uint32_t diff;
-				app_timer_cnt_get(&current_ticks);
-				app_timer_cnt_diff_compute(current_ticks, ms_counter_last_ticks, &diff);
+				timer_cnt_get(&current_ticks);
+				timer_cnt_ms_diff_compute(current_ticks, ms_counter_last_ticks, &diff);
 
 				if (diff >= MS_COUNTER_UPDATE_INTERVAL) {
-						ms_counter += 1000*diff/APP_TIMER_CLOCK_FREQ;
+						ms_counter += diff;
 						ms_counter_last_ticks = current_ticks;
 				}
 		}
@@ -40,11 +37,9 @@ static void stopwatch_timeout_handler(void * p_context) {
 }
 
 void stopwatch_init(void) {
-    uint32_t err_code;	 
-    err_code = app_timer_create(&stopwatch_timer_id,
-                                APP_TIMER_MODE_REPEATED,
+    timer_create(&stopwatch_timer_id,
+                                TIMER_TYPE_PERIODIC,
                                 stopwatch_timeout_handler);
-    APP_ERROR_CHECK(err_code);
 }
 
 static uint32_t stopwatch_get_ms_counter_value() {
@@ -53,7 +48,7 @@ static uint32_t stopwatch_get_ms_counter_value() {
 		do {
 				ms_count1 = ms_counter;
 				if (ms_counter_active) {
-						app_timer_cnt_get(&curr_ticks);
+						timer_cnt_get(&curr_ticks);
 						start_ticks = ms_counter_last_ticks;
 				} else {
 						return ms_count1;
@@ -62,18 +57,17 @@ static uint32_t stopwatch_get_ms_counter_value() {
 		} while (ms_count1 != ms_count2); // should not happen more that once every 120s
 		
 		uint32_t diff;
-		app_timer_cnt_diff_compute(curr_ticks, start_ticks, &diff);
-		return ms_count1 + (1000*diff/APP_TIMER_CLOCK_FREQ);
+		timer_cnt_ms_diff_compute(curr_ticks, start_ticks, &diff);
+		return ms_count1 + diff;
 }
 
 void stopwatch_fn_start(void) {
 		if (ms_counter_active) {
 				return;
 		}
-		app_timer_cnt_get(&ms_counter_last_ticks);
+		timer_cnt_get(&ms_counter_last_ticks);
 		ms_counter_active = true;
-    uint32_t err_code = app_timer_start(stopwatch_timer_id, INTERRUPT_INTERVAL, NULL);
-    APP_ERROR_CHECK(err_code);
+    timer_start(stopwatch_timer_id, INTERRUPT_INTERVAL);
 }
 
 void stopwatch_fn_stop(void) {
@@ -81,15 +75,14 @@ void stopwatch_fn_stop(void) {
 				return;
 		}
 		
-    uint32_t err_code = app_timer_stop(stopwatch_timer_id);
-    APP_ERROR_CHECK(err_code);
+    timer_stop(stopwatch_timer_id);
 		
 		uint32_t current_ticks;
 		uint32_t diff;
 		ms_counter_active = false;
-		app_timer_cnt_get(&current_ticks);
-		app_timer_cnt_diff_compute(current_ticks, ms_counter_last_ticks, &diff);
-		ms_counter += 1000*diff/APP_TIMER_CLOCK_FREQ;
+		timer_cnt_get(&current_ticks);
+		timer_cnt_ms_diff_compute(current_ticks, ms_counter_last_ticks, &diff);
+		ms_counter += diff;
 }
 
 void stopwatch_fn_start_stop(void) {
@@ -101,7 +94,7 @@ void stopwatch_fn_start_stop(void) {
 }
 
 void stopwatch_fn_reset(void) {
-		app_timer_cnt_get(&ms_counter_last_ticks);
+		timer_cnt_get(&ms_counter_last_ticks);
 		ms_counter = 0;
 		current_lap_start = 0; 
 		current_lap_no = 1;
