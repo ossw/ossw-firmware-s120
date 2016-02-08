@@ -9,11 +9,11 @@
 
 // each line is 18 bytes long
 #define LINE_OFFSET(y) (y << 1) + (y << 4)
-#define PLOT8(x0, y0, x, y)\
-{   pixel( x + x0,  y + y0);\
-    pixel( y + x0,  x + y0);\
-    pixel(-x + x0,  y + y0);\
-    pixel(-y + x0,  x + y0);\
+#define PLOT8(x0, y0, x, y) {\
+		pixel( x + x0,  y + y0);\
+		pixel( y + x0,  x + y0);\
+		pixel(-x + x0,  y + y0);\
+		pixel(-y + x0,  x + y0);\
     pixel(-x + x0, -y + y0);\
     pixel(-y + x0, -x + y0);\
     pixel( x + x0, -y + y0);\
@@ -185,11 +185,11 @@ void polygon(int_fast8_t size, uint_fast8_t x[], uint_fast8_t y[]) {
 		lineBresenham(x[size], y[size], x[0], y[0]);
 }
 
-static void fillBorder(uint_fast8_t border[], uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2)
+static void fillBorder(uint8_t border[], uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2, bool right)
 {
     int dy = y2 - y1;
     int dx = x2 - x1;
-    int_fast8_t stepx, stepy;
+    int8_t stepx, stepy;
 
     if (dy < 0) { dy = -dy;  stepy = -1; } else { stepy = 1; }
     if (dx < 0) { dx = -dx;  stepx = -1; } else { stepx = 1; }
@@ -225,46 +225,44 @@ static void fillBorder(uint_fast8_t border[], uint_fast8_t x1, uint_fast8_t y1, 
 void fillConvex(int_fast8_t size, int_fast16_t x[], int_fast16_t y[]) {
 		if (size < 3)
 				return;
-		int_fast8_t last = size - 1;
-		int_fast16_t dir = SIGN(y[0] - y[last]);
-		int_fast16_t newDir;
-		uint_fast8_t l1, l2, r1, r2;
+		int8_t last = size - 1;
+		int16_t dir = SIGN(y[0] - y[last]);
+		int16_t newDir;
+		uint8_t l1, l2, r1, r2;
 		for (int_fast8_t i = 0; i < last; i++) {
 				newDir = SIGN(y[i+1] - y[i]);
 				if (dir == newDir)
 						continue;
-				if (dir == 1) {
+
+				if (dir == 1)
 						r2 = i;
-						if (newDir == -1)
-								l1 = i;
-				} else if (dir == -1) {
+				else if (dir == -1)
 						l2 = i;
-						if (newDir == 1)
-								r1 = i;
-				} else
+				if (newDir == 1)
 						r1 = i;
+				else if (newDir == -1)
+						l1 = i;
+
 				dir = newDir;
 		}
 		newDir = SIGN(y[0] - y[last]);
 		if (dir != newDir) {
-				if (dir == 1) {
+				if (dir == 1)
 						r2 = last;
-						if (newDir == -1)
-								l1 = last;
-				} else if (dir == -1) {
+				else if (dir == -1)
 						l2 = last;
-						if (newDir == 1)
-								r1 = last;
-				} else
+				if (newDir == 1)
 						r1 = last;
+				else if (newDir == -1)
+						l1 = last;
 		}
-		uint_fast8_t l[MLCD_YRES], r[MLCD_YRES];
-		uint_fast8_t curr = l1, next;
+		uint8_t l[MLCD_YRES], r[MLCD_YRES];
+		uint8_t curr = l1, next;
 		do {
 				next = curr + 1;
 				if (next >= size)
 						next = 0;
-				fillBorder(l, x[curr], y[curr], x[next], y[next]);
+				fillBorder(l, x[curr], y[curr], x[next], y[next], false);
 				curr = next;
 		} while (next != l2);
 		curr = r1;
@@ -272,7 +270,7 @@ void fillConvex(int_fast8_t size, int_fast16_t x[], int_fast16_t y[]) {
 				next = curr + 1;
 				if (next >= size)
 						next = 0;
-				fillBorder(r, x[curr], y[curr], x[next], y[next]);
+				fillBorder(r, x[curr], y[curr], x[next], y[next], true);
 				curr = next;
 		} while (next != r2);
 
@@ -281,9 +279,15 @@ void fillConvex(int_fast8_t size, int_fast16_t x[], int_fast16_t y[]) {
 		}
 }
 
-void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r) {	
-		uint_fast8_t x = 0, y = r;
-		int d = 1;
+void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r) {
+		if (r == 0)
+				return;
+		pixel(xc,  yc + r);
+		pixel(xc,  yc - r);
+		pixel(xc + r,  yc);
+		pixel(xc - r,  yc);
+		uint_fast8_t x = 1, y = r;
+		int d = - r;
 		while (x < y) {
 				if (d >= 0)
 						d -= y--;
@@ -296,10 +300,10 @@ void lineHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail) {
 		float angle = tick * PI_2 / 60;
 		float sa = sin(angle);
 		float ca = cos(angle);
-		uint_fast8_t x0 = CENTER_X + length * sa;
-		uint_fast8_t y0 = CENTER_Y - length * ca;
-		uint_fast8_t x1 = CENTER_X - tail * sa;
-		uint_fast8_t y1 = CENTER_Y + tail * ca;
+		uint_fast8_t x0 = CENTER_X + (0.5 + length * sa);
+		uint_fast8_t y0 = CENTER_Y + (0.5  - length * ca);
+		uint_fast8_t x1 = CENTER_X + (0.5  - tail * sa);
+		uint_fast8_t y1 = CENTER_Y + (0.5  + tail * ca);
 		lineBresenham(x0, y0, x1, y1);
 }
 
@@ -309,16 +313,16 @@ void triangleHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail, uin
 		float ca = cos(angle);
 		float shiftX = thickness * ca;
 		float shiftY = thickness * sa;
-		uint_fast8_t x0 = CENTER_X + length * sa ;
-		uint_fast8_t y0 = CENTER_Y - length * ca;
-		uint_fast8_t x1 = CENTER_X - tail * sa + 0.5 * shiftX;
-		uint_fast8_t y1 = CENTER_Y + tail * ca + 0.5 * shiftY;
-		uint_fast8_t x2 = x1 - shiftX;
-		uint_fast8_t y2 = y1 - shiftY;
-//		int_fast16_t x[3]; x[0] = x0; x[1] = x1; x[2] = x2;
-//		int_fast16_t y[3]; y[0] = y0; y[1] = y1; y[2] = y2;
-//		fillConvex(3, x, y);
-		triangle(x0, y0, x1, y1, x2, y2);
+		uint_fast8_t x0 = CENTER_X + (0.5  + length * sa);
+		uint_fast8_t y0 = CENTER_Y + (0.5  - length * ca);
+		uint_fast8_t x1 = CENTER_X + (0.5  - tail * sa + 0.5 * shiftX);
+		uint_fast8_t y1 = CENTER_Y + (0.5  + tail * ca + 0.5 * shiftY);
+		uint_fast8_t x2 = x1 + (0.5  - shiftX);
+		uint_fast8_t y2 = y1 + (0.5  - shiftY);
+		int_fast16_t x[3]; x[0] = x0; x[1] = x1; x[2] = x2;
+		int_fast16_t y[3]; y[0] = y0; y[1] = y1; y[2] = y2;
+		fillConvex(3, x, y);
+//		triangle(x0, y0, x1, y1, x2, y2);
 }
 
 void rectHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail, uint_fast8_t thickness) {
@@ -327,16 +331,16 @@ void rectHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail, uint_fa
 		float ca = cos(angle);
 		float shiftX = thickness * ca;
 		float shiftY = thickness * sa;
-		uint_fast8_t x0 = CENTER_X + length * sa - 0.5 * shiftX;
-		uint_fast8_t y0 = CENTER_Y - length * ca - 0.5 * shiftY;
-		uint_fast8_t x1 = x0 + shiftX;
-		uint_fast8_t y1 = y0 + shiftY;
-		uint_fast8_t x2 = CENTER_X - tail * sa + 0.5 * shiftX;
-		uint_fast8_t y2 = CENTER_Y + tail * ca + 0.5 * shiftY;
-		uint_fast8_t x3 = x2 - shiftX;
-		uint_fast8_t y3 = y2 - shiftY;
-//		int_fast16_t x[4]; x[0] = x0; x[1] = x1; x[2] = x2; x[3] = x3;
-//		int_fast16_t y[4]; y[0] = y0; y[1] = y1; y[2] = y2; y[3] = y3;
-//		fillConvex(4, x, y);
-		tetragon(x0, y0, x1, y1, x2, y2, x3, y3);
+		uint_fast8_t x0 = CENTER_X + (0.5  + length * sa - 0.5 * shiftX);
+		uint_fast8_t y0 = CENTER_Y + (0.5  - length * ca - 0.5 * shiftY);
+		uint_fast8_t x1 = x0 + (0.5  + shiftX);
+		uint_fast8_t y1 = y0 + (0.5  + shiftY);
+		uint_fast8_t x2 = CENTER_X + (0.5  - tail * sa + 0.5 * shiftX);
+		uint_fast8_t y2 = CENTER_Y + (0.5  + tail * ca + 0.5 * shiftY);
+		uint_fast8_t x3 = x2 + (0.5  - shiftX);
+		uint_fast8_t y3 = y2 + (0.5  - shiftY);
+		int_fast16_t x[4]; x[0] = x0; x[1] = x1; x[2] = x2; x[3] = x3;
+		int_fast16_t y[4]; y[0] = y0; y[1] = y1; y[2] = y2; y[3] = y3;
+		fillConvex(4, x, y);
+//		tetragon(x0, y0, x1, y1, x2, y2, x3, y3);
 }
