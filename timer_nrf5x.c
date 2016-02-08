@@ -7,14 +7,18 @@ void timer_init() {
 }
 
 void timer_create(timer_id_t* id, timer_type_t type, void* handler) {
-    int err_code = app_timer_create((app_timer_id_t*)&id,
+    int err_code = app_timer_create((app_timer_id_t*)id,
                                 (app_timer_mode_t)type,
                                 (app_timer_timeout_handler_t)handler);
     APP_ERROR_CHECK(err_code);
 }
 
 void timer_start(timer_id_t id, uint32_t timeout) {
-		app_timer_start((app_timer_id_t)id, APP_TIMER_TICKS(timeout, APP_TIMER_PRESCALER), NULL);	
+		timer_start_with_param(id, timeout, NULL);
+}
+
+void timer_start_with_param(timer_id_t id, uint32_t timeout, void* param) {
+		app_timer_start((app_timer_id_t)id, APP_TIMER_TICKS(timeout, APP_TIMER_PRESCALER), param);	
 }
 	
 void timer_stop(timer_id_t id) {
@@ -26,8 +30,7 @@ void timer_cnt_get(uint32_t* result) {
 }
 
 void timer_cnt_ms_diff_compute(uint32_t current, uint32_t last, uint32_t* result) {
-		app_timer_cnt_diff_compute(current, last, result);
+			uint32_t v;
+			app_timer_cnt_diff_compute(current, last, &v);
+			*result = 1000*v/APP_TIMER_CLOCK_FREQ;
 }
-
-
-//1000*diff/APP_TIMER_CLOCK_FREQ

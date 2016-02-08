@@ -5,7 +5,7 @@
 #include "battery.h"
 #include "rtc.h"
 #include "stopwatch.h"
-//#include "ble/ble_central.h"
+#include "ble/ble_central.h"
 #include "ossw.h"
 #include "config.h"
 #include "notifications.h"
@@ -40,7 +40,7 @@ static uint32_t (* const internal_data_source_handles[])() = {
 };
 
 static uint32_t (* const sensor_data_source_handles[])(void) = {
-		/* 0 */ NULL//ble_central_heart_rate
+		/* 0 */ ble_central_heart_rate
 };
 
 static uint32_t watchset_converter_ms_to_hours(uint32_t v) {

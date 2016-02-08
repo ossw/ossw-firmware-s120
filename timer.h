@@ -15,6 +15,8 @@ void timer_init(void);
 void timer_create(timer_id_t*, timer_type_t, void* handler);
 
 void timer_start(timer_id_t, uint32_t timeout);
+
+void timer_start_with_param(timer_id_t id, uint32_t timeout, void* param);
 	
 void timer_stop(timer_id_t);
 

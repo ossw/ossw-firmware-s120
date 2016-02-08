@@ -13,20 +13,24 @@ typedef struct {
 } timer_definition;
 
 void timer_init() {
-		RTCDRV_Init();
+		//RTCDRV_Init();
 }
 
 void timer_create(timer_id_t* id, timer_type_t type, void* handler) {
     timer_definition* def = (timer_definition*)malloc(sizeof(timer_definition));
-		RTCDRV_AllocateTimer(&def->id);
+		Ecode_t code = RTCDRV_AllocateTimer(&def->id);
 		def->type = (RTCDRV_TimerType_t)type;
 		def->cb = (RTCDRV_Callback_t)handler;
 		*id = (timer_id_t)def;
 }
 
 void timer_start(timer_id_t id, uint32_t timeout) {
+		timer_start_with_param(id, timeout, NULL);
+}
+
+void timer_start_with_param(timer_id_t id, uint32_t timeout, void* param) {
 		timer_definition* def = (timer_definition*)id;
-		RTCDRV_StartTimer(def->id, def->type, timeout, def->cb, NULL);	
+		RTCDRV_StartTimer(def->id, def->type, timeout, def->cb, param);	
 }
 	
 void timer_stop(timer_id_t id) {

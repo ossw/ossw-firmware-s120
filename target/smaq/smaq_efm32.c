@@ -13,145 +13,96 @@
 #include "em_gpio.h"
 #include "em_chip.h" 
 #include "em_usart.h" 
+#include "rtcdriver.h" 
 #include "gpiointerrupt.h" 
 #include "sleep.h" 
 
 void smaq_clocks_init(void) {
 		SystemCoreClockUpdate();
 
-		CMU_OscillatorEnable(cmuOsc_HFXO,true,true);   
-		CMU_OscillatorEnable(cmuOsc_LFXO,true,true); 				// enable XTAL osc and wait for it to stabilize
-	//	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);  			// select HF XTAL osc as system clock source (24MHz)
-		CMU_ClockEnable(cmuClock_HFPER, true);						// Enable HF peripheral clock
-		CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_CORELEDIV2);  	// select HFCORECLK/2 as clock source to LFB
-		CMU_ClockEnable(cmuClock_CORELE, true);                  	// enable the Low Energy Peripheral Interface clock
+	//	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+	RTCDRV_Init();
+		//CMU_OscillatorEnable(cmuOsc_HFXO,true,true); 	
+		//CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);  			// select HF XTAL osc as system clock source (24MHz)
+	//	CMU_ClockEnable(cmuClock_HFPER, true);						// Enable HF peripheral clock
+	  
+		//CMU_OscillatorEnable(cmuOsc_LFXO,true,true); 	
+//	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_CORELEDIV2);
+	
+		CMU_ClockEnable(cmuClock_CORELE, true);         // enable the Low Energy Peripheral Interface clock
 		CMU_ClockEnable(cmuClock_GPIO, true);						// Enable clock for GPIO
 		CMU_ClockEnable(cmuClock_USART0, true);					// Enable clock for USART0
 		CMU_ClockEnable(cmuClock_USART1, true);					// Enable clock for USART1
-		CMU_ClockEnable(cmuClock_USART2, true);						// Enable clock for USART2
-		CMU_ClockEnable(cmuClock_TIMER0, true);	
+		CMU_ClockEnable(cmuClock_USART2, true);					// Enable clock for USART2
 }
 
 void smaq_gpio_init(void) {
-		// $[Port A Configuration]
 	
-	GPIO->P[0].MODEL = (GPIO->P[0].MODEL & ~_GPIO_P_MODEL_MODE1_MASK)
-			| GPIO_P_MODEL_MODE1_INPUTPULL;
-	GPIO->P[0].DOUT |= (1 << 1);
+	//button down
+	GPIO_PinModeSet(gpioPortA, 1, gpioModeInputPull, 0);
 	
-	/* Pin PA5 is configured to Push-pull */
-	GPIO->P[0].MODEL = (GPIO->P[0].MODEL & ~_GPIO_P_MODEL_MODE5_MASK)
-			| GPIO_P_MODEL_MODE5_PUSHPULL;
-	GPIO->P[0].DOUT |= (1 << 5);
+	//CS for ext flash
+	GPIO_PinModeSet(gpioPortA, 5, gpioModePushPull, 1);
 	
-	GPIO->P[0].MODEL = (GPIO->P[0].MODEL & ~_GPIO_P_MODEL_MODE6_MASK)
-			| GPIO_P_MODEL_MODE6_INPUTPULL;
-	GPIO->P[0].DOUT |= (1 << 6);
+	//back button
+	GPIO_PinModeSet(gpioPortA, 6, gpioModeInputPull, 0);
 	
-	// [Port A Configuration]$
+	//vibration motor
+	GPIO_PinModeSet(gpioPortA, 8, gpioModePushPull, 0);
+	
+	//lcd backlight
+	GPIO_PinModeSet(gpioPortA, 10, gpioModePushPull, 0);
+	
+	//SPI2 TX
+	GPIO_PinModeSet(gpioPortC, 2, gpioModePushPull, 0);
+	
+	//SPI2 RX
+	GPIO_PinModeSet(gpioPortC, 3, gpioModeInput, 0);
+	
+	//SPI2 CLK
+	GPIO_PinModeSet(gpioPortC, 4, gpioModePushPull, 0);
+	
+	//up button
+	GPIO_PinModeSet(gpioPortC, 10, gpioModeInputPull, 0);
+	
+	//SPI1 TX
+	GPIO_PinModeSet(gpioPortD, 0, gpioModePushPull, 0);
+	
+	//SPI1 CLK
+	GPIO_PinModeSet(gpioPortD, 2, gpioModePushPull, 0);
+	
+	//CS for MLCD
+	GPIO_PinModeSet(gpioPortD, 3, gpioModePushPull, 0);
+	
+	//NRF data interrupt
+	GPIO_PinModeSet(gpioPortD, 5, gpioModeInputPull, 0);
+	
+	//MLCD ON/OFF
+	GPIO_PinModeSet(gpioPortD, 6, gpioModePushPull, 0);
+	
+//	// $[Port E Configuration]
 
-	// $[Port B Configuration]
-	// [Port B Configuration]$
-
-	// $[Port C Configuration]
-
-	/* Pin PC2 is configured to Push-pull */
-	GPIO->P[2].MODEL = (GPIO->P[2].MODEL & ~_GPIO_P_MODEL_MODE2_MASK)
-			| GPIO_P_MODEL_MODE2_PUSHPULL;
-
-	/* Pin PC3 is configured to Input enabled */
-	GPIO->P[2].MODEL = (GPIO->P[2].MODEL & ~_GPIO_P_MODEL_MODE3_MASK)
-			| GPIO_P_MODEL_MODE3_INPUT;
-
-	/* Pin PC4 is configured to Push-pull */
-	GPIO->P[2].MODEL = (GPIO->P[2].MODEL & ~_GPIO_P_MODEL_MODE4_MASK)
-			| GPIO_P_MODEL_MODE4_PUSHPULL;
-
-	/* Pin PC5 is configured to Push-pull */
-	GPIO->P[2].MODEL = (GPIO->P[2].MODEL & ~_GPIO_P_MODEL_MODE5_MASK)
-			| GPIO_P_MODEL_MODE5_PUSHPULL;
-			
-	GPIO->P[2].MODEH = (GPIO->P[2].MODEH & ~_GPIO_P_MODEH_MODE10_MASK)
-			| GPIO_P_MODEH_MODE10_INPUTPULL;
-	GPIO->P[2].DOUT |= (1 << 10);
-	// [Port C Configuration]$
-
-	// $[Port D Configuration]
-
-	/* Pin PD0 is configured to Push-pull */
-	GPIO->P[3].MODEL = (GPIO->P[3].MODEL & ~_GPIO_P_MODEL_MODE0_MASK)
-			| GPIO_P_MODEL_MODE0_PUSHPULL;
-
-	/* Pin PD1 is configured to Input enabled */
-	GPIO->P[3].MODEL = (GPIO->P[3].MODEL & ~_GPIO_P_MODEL_MODE1_MASK)
-			| GPIO_P_MODEL_MODE1_INPUT;
-
-	/* Pin PD2 is configured to Push-pull */
-	GPIO->P[3].MODEL = (GPIO->P[3].MODEL & ~_GPIO_P_MODEL_MODE2_MASK)
-			| GPIO_P_MODEL_MODE2_PUSHPULL;
-
-	/* Pin PD3 is configured to Push-pull */
-	GPIO->P[3].MODEL = (GPIO->P[3].MODEL & ~_GPIO_P_MODEL_MODE3_MASK)
-			| GPIO_P_MODEL_MODE3_PUSHPULL;
-
-	/* Pin PD5 is configured to Input enabled with pull-up */
-	GPIO->P[3].DOUT |= (1 << 5);
-	GPIO->P[3].MODEL = (GPIO->P[3].MODEL & ~_GPIO_P_MODEL_MODE5_MASK)
-			| GPIO_P_MODEL_MODE5_INPUTPULL;
-			
-	/* Pin PD6 is configured to Push-pull */
-	GPIO->P[3].MODEL = (GPIO->P[3].MODEL & ~_GPIO_P_MODEL_MODE6_MASK)
-			| GPIO_P_MODEL_MODE6_PUSHPULL;
-	// [Port D Configuration]$
-
-	// $[Port E Configuration]
-
-	/* Pin PE10 is configured to Push-pull */
-	GPIO->P[4].MODEH = (GPIO->P[4].MODEH & ~_GPIO_P_MODEH_MODE10_MASK)
-			| GPIO_P_MODEH_MODE10_PUSHPULL;
-
-	/* Pin PE11 is configured to Input enabled */
-	GPIO->P[4].MODEH = (GPIO->P[4].MODEH & ~_GPIO_P_MODEH_MODE11_MASK)
-			| GPIO_P_MODEH_MODE11_INPUT;
-
-	/* Pin PE12 is configured to Push-pull */
-	GPIO->P[4].MODEH = (GPIO->P[4].MODEH & ~_GPIO_P_MODEH_MODE12_MASK)
-			| GPIO_P_MODEH_MODE12_PUSHPULL;
-
-	/* Pin PE13 is configured to Push-pull */
-	GPIO->P[4].MODEH = (GPIO->P[4].MODEH & ~_GPIO_P_MODEH_MODE13_MASK)
-			| GPIO_P_MODEH_MODE13_PUSHPULL;
-	GPIO->P[4].DOUT |= (1 << 13);
-	// [Port E Configuration]$
-
-	// $[Port F Configuration]
-	GPIO->P[5].MODEH = (GPIO->P[5].MODEH & ~_GPIO_P_MODEH_MODE12_MASK)
-			| GPIO_P_MODEH_MODE12_INPUTPULL;
-	GPIO->P[5].DOUT |= (1 << 12);
-	// [Port F Configuration]$
+	//SPI0 TX
+	GPIO_PinModeSet(gpioPortE, 10, gpioModePushPull, 0);
+	
+	//SPI0 RX
+	GPIO_PinModeSet(gpioPortE, 11, gpioModeInput, 0);
+	
+	//SPI0 CLK
+	GPIO_PinModeSet(gpioPortE, 12, gpioModePushPull, 0);
+	
+	//CS for NRF
+	GPIO_PinModeSet(gpioPortE, 13, gpioModePushPull, 1);
+	
+	//select button
+	GPIO_PinModeSet(gpioPortF, 12, gpioModeInputPull, 0);
 
 	// $[Route Configuration]
 
-	/* Module PCNT0 is configured to location 2 */
-	PCNT0->ROUTE = (PCNT0->ROUTE & ~_PCNT_ROUTE_LOCATION_MASK)
-			| PCNT_ROUTE_LOCATION_LOC2;
-
-	/* Enable signals CLK, CS, RX, TX */
-	USART0->ROUTE |= USART_ROUTE_CLKPEN  | USART_ROUTE_RXPEN
-			| USART_ROUTE_TXPEN;
-
-	/* Module USART1 is configured to location 1 */
-	USART1->ROUTE = (USART1->ROUTE & ~_USART_ROUTE_LOCATION_MASK)
-			| USART_ROUTE_LOCATION_LOC1;
-
-	/* Enable signals CLK, TX */
-	USART1->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN;
-
-	USART1->CMD = USART_CMD_RXDIS;
 	
 	/* Enable signals CLK, CS, RX, TX */
-	USART2->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_RXPEN
-			| USART_ROUTE_TXPEN;
+//	USART2->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_RXPEN
+//			| USART_ROUTE_TXPEN;
 	// [Route Configuration]$
 	
 	gpio_pin_clear(MLCD_SPI_SS);
@@ -159,19 +110,11 @@ void smaq_gpio_init(void) {
 	gpio_pin_clear(VIBRATION_MOTOR);
 	gpio_pin_clear(LCD_BACKLIGHT);
 	
-  GPIO_IntConfig(gpioPortA, 1, false, true, true);
+  GPIO_IntConfig(gpioPortA, 1, true, true, true);
   //GPIO_IntConfig(gpioPortD, 5, false, true, true);
-  GPIO_IntConfig(gpioPortA, 6, false, true, true);
-  GPIO_IntConfig(gpioPortC, 10, false, true, true);
-  GPIO_IntConfig(gpioPortF, 12, false, true, true);
-
-	/*
-    nrf_gpio_cfg_output(LCD_ENABLE);
-    nrf_gpio_cfg_output(LCD_BACKLIGHT);
-    nrf_gpio_cfg_output(LCD_VOLTAGE_REG);
-    nrf_gpio_pin_clear(LCD_ENABLE);
-    nrf_gpio_pin_clear(LCD_BACKLIGHT);
-    nrf_gpio_pin_clear(LCD_VOLTAGE_REG);*/
+  GPIO_IntConfig(gpioPortA, 6, true, true, true);
+  GPIO_IntConfig(gpioPortC, 10, true, true, true);
+  GPIO_IntConfig(gpioPortF, 12, true, true, true);
 }
 
 void smaq_spi_init(void) {
@@ -224,6 +167,23 @@ void smaq_spi_init(void) {
 		initprs.txTriggerEnable = 0;
 		initprs.prsTriggerChannel = usartPrsTriggerCh0;
 		USART_InitPrsTrigger(USART2, &initprs);	
+		
+		
+	/* Module PCNT0 is configured to location 2 */
+//	PCNT0->ROUTE = (PCNT0->ROUTE & ~_PCNT_ROUTE_LOCATION_MASK)
+//			| PCNT_ROUTE_LOCATION_LOC2;
+
+	/* Enable signals CLK, CS, RX, TX */
+	USART0->ROUTE |= USART_ROUTE_CLKPEN  | USART_ROUTE_RXPEN
+			| USART_ROUTE_TXPEN;
+
+	/* Module USART1 is configured to location 1 */
+	USART1->ROUTE = (USART1->ROUTE & ~_USART_ROUTE_LOCATION_MASK)
+			| USART_ROUTE_LOCATION_LOC1;
+
+	/* Enable signals CLK, TX */
+	USART1->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN;
+	USART1->CMD = USART_CMD_RXDIS;
 }
 
 static void before_sleep() {
@@ -236,17 +196,19 @@ static void after_wakeup() {
  */
 int main(void)
 {
+	  /* Chip revision alignment and errata fixes */
+		CHIP_Init();
 	
 #ifdef OSSW_DEBUG
 		init_uart();
 #endif
 	
 	  smaq_clocks_init();
-	  smaq_spi_init();
 	  smaq_gpio_init();
+	  smaq_spi_init();
 	
-		SLEEP_Init(	before_sleep, after_wakeup);
-	
+		SLEEP_Init((SLEEP_CbFuncPtr_t)before_sleep, (SLEEP_CbFuncPtr_t)after_wakeup);
+
 		GPIOINT_Init();
 	
     mlcd_init();

@@ -26,13 +26,13 @@
  ******************************************************************************/
 
 /// @brief Define the number of timers the application needs.
-#define EMDRV_RTCDRV_NUM_TIMERS     (4)
+#define EMDRV_RTCDRV_NUM_TIMERS     (14)
 
 /// @brief Define to include wallclock functionality.
-//#define EMDRV_RTCDRV_WALLCLOCK_CONFIG
+#define EMDRV_RTCDRV_WALLCLOCK_CONFIG
 
 /// @brief Define to enable integration with SLEEP driver.
-//#define EMDRV_RTCDRV_SLEEPDRV_INTEGRATION
+#define EMDRV_RTCDRV_SLEEPDRV_INTEGRATION
 
 /** @} (end addtogroup RTCDRV) */
 /** @} (end addtogroup EM_Drivers) */

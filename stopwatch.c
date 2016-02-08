@@ -154,34 +154,6 @@ uint32_t stopwatch_get_last_lap_time(void) {
 uint32_t stopwatch_get_total_time(void) {
 		return stopwatch_get_ms_counter_value();
 }
-/*
-void stopwatch_fn_recall_prev_lap(void) {
-		if (recall_lap_no > 1 && (current_lap_no - 2 < STOPWATCH_RECALL_SIZE || current_lap_no - recall_lap_no + 1 < STOPWATCH_RECALL_SIZE)) {
-				recall_lap_no--;
-		}
-}
-
-void stopwatch_fn_recall_next_lap(void) {
-		if (recall_lap_no < current_lap_no) {
-				recall_lap_no++;
-		}
-}
-
-void stopwatch_fn_recall_first_lap(void) {
-		if (current_lap_no > STOPWATCH_RECALL_SIZE + 1) {
-				recall_lap_no = current_lap_no - STOPWATCH_RECALL_SIZE + 1;
-		} else {
-				recall_lap_no = 1;
-		}
-}
-
-void stopwatch_fn_recall_last_lap(void) {
-		recall_lap_no = current_lap_no;
-}
-
-uint32_t stopwatch_get_recall_lap_number(void) {
-    return recall_lap_no;
-}*/
 
 uint32_t stopwatch_get_recall_lap_time(uint16_t recall_lap_no) {
 		if (recall_lap_no == current_lap_no) {

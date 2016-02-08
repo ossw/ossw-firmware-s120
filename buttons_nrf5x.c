@@ -2,13 +2,10 @@
 #include "scr_mngr.h"
 #include "app_button.h"
 #include "target.h"
+#include "timer.h"
 #include "app_timer.h"
 
-#define APP_TIMER_PRESCALER              0
-#define BUTTON_DETECTION_DELAY           APP_TIMER_TICKS(1, APP_TIMER_PRESCALER)
-#define BUTTON_LONG_PRESS_DELAY          APP_TIMER_TICKS(450, APP_TIMER_PRESCALER)
-
-static app_timer_id_t         m_button_long_press_timer_id;
+static timer_id_t         m_button_long_press_timer_id;
 
 static void button_handler(uint8_t pin_no, uint8_t button_action);
 
@@ -25,18 +22,11 @@ static const uint8_t BUTTONS_NO = sizeof(buttons)/sizeof(buttons[0]);
 static uint32_t long_press_handled = 0;
 
 static void button_handler(uint8_t pin_no, uint8_t button_action) {
-    uint32_t err_code;
-	
 	  if (APP_BUTTON_PUSH == button_action){
 			long_press_handled &= ~(1<<pin_no);
-		  err_code = app_timer_start(m_button_long_press_timer_id,
+		  timer_start_with_param(m_button_long_press_timer_id,
                                BUTTON_LONG_PRESS_DELAY,
                                (void *)((uint32_t)pin_no));
-      if (err_code != NRF_SUCCESS)
-      {
-          // The impact in app_button of the app_timer queue running full is losing a button press.
-          // The current implementation ensures that the system will continue working as normal. 
-      }
    } else {
 			if (!(long_press_handled & (1<<pin_no))) {
 					for (uint32_t i = 0; i < BUTTONS_NO; i++)
@@ -45,7 +35,7 @@ static void button_handler(uint8_t pin_no, uint8_t button_action) {
 
 							if (pin_no == p_btn->pin_no)
 							{
-									app_timer_stop(m_button_long_press_timer_id);
+									timer_stop(m_button_long_press_timer_id);
 									scr_mngr_handle_event(SCR_EVENT_BUTTON_PRESSED, 1<<i);
 							}
 					}
@@ -82,13 +72,12 @@ static void button_long_press_timeout_handler(void * p_context) {
 
 void buttons_init(void) {
     uint32_t err_code;
-	  err_code = app_button_init(buttons, BUTTONS_NO, BUTTON_DETECTION_DELAY);
+	  err_code = app_button_init(buttons, BUTTONS_NO, APP_TIMER_TICKS(BUTTON_DETECTION_DELAY, APP_TIMER_PRESCALER));
 		APP_ERROR_CHECK(err_code);
 	
-	  err_code = app_timer_create(&m_button_long_press_timer_id,
-                                APP_TIMER_MODE_SINGLE_SHOT,
+	  timer_create(&m_button_long_press_timer_id,
+                                TIMER_TYPE_SINGLE_SHOT,
                                 button_long_press_timeout_handler);
-    APP_ERROR_CHECK(err_code);
 	
 		app_button_enable();
 }
