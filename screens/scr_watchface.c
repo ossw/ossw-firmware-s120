@@ -90,13 +90,22 @@ static void scr_watchface_init() {
 
 static void scr_watchface_draw() {
 		// test drawings
-		lineBresenham(10, 10, 30, 30);
-		lineBresenham(10, 10, 30, 10);
-		lineBresenham(10, 10, 10, 30);
-		hLine(5, 10, 30);
-//		int_fast16_t x[] = {110, 120, 130, 140, 125};
-//		int_fast16_t y[] = {20, 10, 10, 20, 30};
-//		fillConvex(5, x, y);
+//		lineBresenham(10, 10, 30, 30);
+//		lineBresenham(0, 4, 0, 30);
+//		lineBresenham(0, 2, 30, 2);
+//		lineBresenham(0, 3, 30, 3);
+//		pixel(0, 0);
+//		pixel(0, 1);
+//		pixel(0, 2);
+//		hLine(0, 1, 30);
+//		hLine(1, 2, 30);
+		int_fast16_t x[] = {110, 120, 130, 140, 125};
+		int_fast16_t y[] = {20, 10, 10, 20, 30};
+		fillConvex(5, x, y);
+//		int_fast16_t x1[] = {20, 22, 18};
+//		int_fast16_t y1[] = {10, 30, 30};
+//		fillConvex(3, x1, y1);
+		circle(72, 84, 71);
 	  //scr_controls_draw(&controls_definition);
 		// seconds
 		s = rtc_get_current_seconds();

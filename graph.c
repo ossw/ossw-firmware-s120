@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include<stdint.h>
 #include <math.h>
 #include "graph.h"
 #include "mlcd.h"
@@ -9,12 +9,21 @@
 
 // each line is 18 bytes long
 #define LINE_OFFSET(y) (y << 1) + (y << 4)
+#define PLOT8(x0, y0, x, y)\
+{   pixel( x + x0,  y + y0);\
+    pixel( y + x0,  x + y0);\
+    pixel(-x + x0,  y + y0);\
+    pixel(-y + x0,  x + y0);\
+    pixel(-x + x0, -y + y0);\
+    pixel(-y + x0, -x + y0);\
+    pixel( x + x0, -y + y0);\
+    pixel( y + x0, -x + y0); }
 
 // plot a XOR pixel
 void pixel(uint_fast8_t x, uint_fast8_t y) {
     if (x > MLCD_XRES || y > MLCD_YRES)
 			return;
-		x = MLCD_XRES - x;
+		x = MLCD_XRES - x - 1;
 		mlcd_set_line_changed(y);
     uint16_t ext_ram_address = EXT_RAM_DATA_FRAME_BUFFER + (x >> 3) + LINE_OFFSET(y);
     uint8_t old_val = 0;
@@ -27,8 +36,8 @@ void pixel(uint_fast8_t x, uint_fast8_t y) {
 void hLine(uint_fast8_t y, uint_fast8_t x1, uint_fast8_t x2) {
     if ((x1 > MLCD_XRES && x2 > MLCD_XRES) || y > MLCD_YRES)
 				return;
-		x1 = MLCD_XRES - x1;
-		x2 = MLCD_XRES - x2;
+		x1 = MLCD_XRES - x1 - 1;
+		x2 = MLCD_XRES - x2 - 1;
 		if (x1 > x2)
 				SWAP(x1, x2);
 		mlcd_set_line_changed(y);
@@ -39,19 +48,31 @@ void hLine(uint_fast8_t y, uint_fast8_t x1, uint_fast8_t x2) {
     uint16_t ext_ram_address = EXT_RAM_DATA_FRAME_BUFFER + leftByte + LINE_OFFSET(y);
     ext_ram_read_data(ext_ram_address, buff, sizeByte);
 		
+		uint_fast8_t fullFirst = 0, fullLast = sizeByte;
+		uint_fast8_t maskFirst = 0, maskLast = 0;
+		
 		uint_fast8_t leftBits = x1 & 0x7;
 		if (leftBits > 0) {
-				buff[0] ^=  0xFF >> leftBits;
-				leftByte = 1;
-		} else
-				leftByte = 0;
+				maskFirst = 0xFF >> leftBits;
+				fullFirst++;
+		}
 		uint_fast8_t rightBits = x2 & 0x7;
-		if (rightBits > 0) {
-				buff[sizeByte-1] ^=  0xFF << (8 - rightBits);
-				rightByte = sizeByte-1;
-		} else
-				rightByte = sizeByte;
-		for (uint_fast8_t b = leftByte; b < rightByte; b++) {
+		if (rightBits < 7) {
+				maskLast = 0xFF << (7 - rightBits);
+				fullLast--;
+		}
+		if (sizeByte == 1 && leftBits > 0 && rightBits < 7) {
+				maskFirst &= maskLast;
+				buff[0] ^=  maskFirst;
+		} else {
+				if (leftBits > 0) {
+						buff[0] ^=  maskFirst;
+				}
+				if (rightBits < 7) {
+						buff[sizeByte-1] ^= maskLast;
+				}
+		}
+		for (uint_fast8_t b = fullFirst; b < fullLast; b++) {
 				buff[b] ^=  0xFF;
 		}
 		
@@ -260,6 +281,17 @@ void fillConvex(int_fast8_t size, int_fast16_t x[], int_fast16_t y[]) {
 		}
 }
 
+void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r) {	
+		uint_fast8_t x = 0, y = r;
+		int d = 1;
+		while (x < y) {
+				if (d >= 0)
+						d -= y--;
+				PLOT8(xc, yc, x, y);
+				d += x++;
+		}
+}
+
 void lineHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail) {
 		float angle = tick * PI_2 / 60;
 		float sa = sin(angle);
@@ -283,6 +315,9 @@ void triangleHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail, uin
 		uint_fast8_t y1 = CENTER_Y + tail * ca + 0.5 * shiftY;
 		uint_fast8_t x2 = x1 - shiftX;
 		uint_fast8_t y2 = y1 - shiftY;
+//		int_fast16_t x[3]; x[0] = x0; x[1] = x1; x[2] = x2;
+//		int_fast16_t y[3]; y[0] = y0; y[1] = y1; y[2] = y2;
+//		fillConvex(3, x, y);
 		triangle(x0, y0, x1, y1, x2, y2);
 }
 
@@ -300,5 +335,8 @@ void rectHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail, uint_fa
 		uint_fast8_t y2 = CENTER_Y + tail * ca + 0.5 * shiftY;
 		uint_fast8_t x3 = x2 - shiftX;
 		uint_fast8_t y3 = y2 - shiftY;
+//		int_fast16_t x[4]; x[0] = x0; x[1] = x1; x[2] = x2; x[3] = x3;
+//		int_fast16_t y[4]; y[0] = y0; y[1] = y1; y[2] = y2; y[3] = y3;
+//		fillConvex(4, x, y);
 		tetragon(x0, y0, x1, y1, x2, y2, x3, y3);
 }
