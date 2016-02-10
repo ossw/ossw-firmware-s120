@@ -9,6 +9,7 @@
 
 // each line is 18 bytes long
 #define LINE_OFFSET(y) (y << 1) + (y << 4)
+#define GRAD_TO_RAD(grad) grad*PI/180.0
 #define PLOT8(x0, y0, x, y) {\
 		pixel( x + x0,  y + y0);\
 		pixel( y + x0,  x + y0);\
@@ -187,12 +188,17 @@ void polygon(int_fast8_t size, uint_fast8_t x[], uint_fast8_t y[]) {
 
 static void fillBorder(uint8_t border[], uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2, bool right)
 {
+		if (x2 < x1) {
+				SWAP(x1, x2);
+				SWAP(y1, y2);
+		}
     int dy = y2 - y1;
     int dx = x2 - x1;
-    int8_t stepx, stepy;
+    int8_t stepy;
 
-    if (dy < 0) { dy = -dy;  stepy = -1; } else { stepy = 1; }
-    if (dx < 0) { dx = -dx;  stepx = -1; } else { stepx = 1; }
+    if (dy < 0) { dy = -dy;  stepy = -1; }
+		else { stepy = 1; }
+    
     dy <<= 1;
     dx <<= 1;
 
@@ -200,19 +206,26 @@ static void fillBorder(uint8_t border[], uint_fast8_t x1, uint_fast8_t y1, uint_
     if (dx > dy) {
         int fraction = dy - (dx >> 1);
         while (x1 != x2) {
+						x1++;
 						if (fraction >= 0) {
-								y1 += stepy;
+								if (right) {
+										border[y1] = x1;
+										y1 += stepy;
+								} else {
+										y1 += stepy;
+										border[y1] = x1;
+								}
 								fraction -= dx;
 						}
-						x1 += stepx;
 						fraction += dy;
-						border[y1] = x1;
         }
+				if (right)
+						border[y1] = x1;
     } else {
         int fraction = dx - (dy >> 1);
         while (y1 != y2) {
 						if (fraction >= 0) {
-								x1 += stepx;
+								x1++;
 								fraction -= dy;
 						}
 						y1 += stepy;
@@ -222,7 +235,7 @@ static void fillBorder(uint8_t border[], uint_fast8_t x1, uint_fast8_t y1, uint_
 		}
 }
 
-void fillConvex(int_fast8_t size, int_fast16_t x[], int_fast16_t y[]) {
+void fillConvex(int_fast8_t size, int16_t x[], int16_t y[]) {
 		if (size < 3)
 				return;
 		int8_t last = size - 1;
@@ -258,11 +271,12 @@ void fillConvex(int_fast8_t size, int_fast16_t x[], int_fast16_t y[]) {
 		}
 		uint8_t l[MLCD_YRES], r[MLCD_YRES];
 		uint8_t curr = l1, next;
+		bool clockwize = (x[1]-x[0])*(y[2]-y[1]) - (x[2]-x[1])*(y[1]-y[0]) > 0;
 		do {
 				next = curr + 1;
 				if (next >= size)
 						next = 0;
-				fillBorder(l, x[curr], y[curr], x[next], y[next], false);
+				fillBorder(l, x[curr], y[curr], x[next], y[next], !clockwize);
 				curr = next;
 		} while (next != l2);
 		curr = r1;
@@ -270,7 +284,7 @@ void fillConvex(int_fast8_t size, int_fast16_t x[], int_fast16_t y[]) {
 				next = curr + 1;
 				if (next >= size)
 						next = 0;
-				fillBorder(r, x[curr], y[curr], x[next], y[next], true);
+				fillBorder(r, x[curr], y[curr], x[next], y[next], clockwize);
 				curr = next;
 		} while (next != r2);
 
@@ -279,68 +293,74 @@ void fillConvex(int_fast8_t size, int_fast16_t x[], int_fast16_t y[]) {
 		}
 }
 
-void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r) {
-		if (r == 0)
-				return;
+void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
+{
+    uint8_t x = r, y = 0;
+    int cd2 = 0;  //current distance squared - radius squared
+    if (!r)
+			return; 
 		pixel(xc,  yc + r);
 		pixel(xc,  yc - r);
 		pixel(xc + r,  yc);
 		pixel(xc - r,  yc);
-		uint_fast8_t x = 1, y = r;
-		int d = - r;
-		while (x < y) {
-				if (d >= 0)
-						d -= y--;
+    while (x > y + 2) {
+        cd2 -= (--x) - (++y);
+        if (cd2 < 0)
+						cd2 += x++;
 				PLOT8(xc, yc, x, y);
-				d += x++;
-		}
+    } 
+    --x; ++y;
+		pixel(xc + x,  yc + y);
+		pixel(xc - x,  yc + y);
+		pixel(xc + x,  yc - y);
+		pixel(xc - x,  yc - y);
 }
 
-void lineHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail) {
-		float angle = tick * PI_2 / 60;
+void radialLine(int16_t deg, int16_t r1, int16_t r2) {
+		float angle = GRAD_TO_RAD(deg);
 		float sa = sin(angle);
 		float ca = cos(angle);
-		uint_fast8_t x0 = CENTER_X + (0.5 + length * sa);
-		uint_fast8_t y0 = CENTER_Y + (0.5  - length * ca);
-		uint_fast8_t x1 = CENTER_X + (0.5  - tail * sa);
-		uint_fast8_t y1 = CENTER_Y + (0.5  + tail * ca);
+		int16_t x0 = CENTER_X + r1 * sa;
+		int16_t y0 = CENTER_Y - r1 * ca;
+		int16_t x1 = CENTER_X + r2 * sa;
+		int16_t y1 = CENTER_Y - r2 * ca;
 		lineBresenham(x0, y0, x1, y1);
 }
 
-void triangleHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail, uint_fast8_t thickness) {
-		float angle = tick * PI_2 / 60;
+void radialTriangle(int16_t deg, int16_t r1, int16_t r2, uint_fast8_t thickness) {
+		float angle = GRAD_TO_RAD(deg);
 		float sa = sin(angle);
 		float ca = cos(angle);
-		float shiftX = thickness * ca;
-		float shiftY = thickness * sa;
-		uint_fast8_t x0 = CENTER_X + (0.5  + length * sa);
-		uint_fast8_t y0 = CENTER_Y + (0.5  - length * ca);
-		uint_fast8_t x1 = CENTER_X + (0.5  - tail * sa + 0.5 * shiftX);
-		uint_fast8_t y1 = CENTER_Y + (0.5  + tail * ca + 0.5 * shiftY);
-		uint_fast8_t x2 = x1 + (0.5  - shiftX);
-		uint_fast8_t y2 = y1 + (0.5  - shiftY);
-		int_fast16_t x[3]; x[0] = x0; x[1] = x1; x[2] = x2;
-		int_fast16_t y[3]; y[0] = y0; y[1] = y1; y[2] = y2;
+		float shiftX = 0.5 * thickness * ca;
+		float shiftY = 0.5 * thickness * sa;
+		int16_t x0 = CENTER_X + r1 * sa;
+		int16_t y0 = CENTER_Y - r1 * ca;
+		int16_t x1 = CENTER_X + r2 * sa + shiftX;
+		int16_t y1 = CENTER_Y - r2 * ca + shiftY;
+		int16_t x2 = CENTER_X + r2 * sa - shiftX;
+		int16_t y2 = CENTER_Y - r2 * ca - shiftY;
+		int16_t x[3] = {x0, x1, x2};
+		int16_t y[3] = {y0, y1, y2};
 		fillConvex(3, x, y);
 //		triangle(x0, y0, x1, y1, x2, y2);
 }
 
-void rectHand(uint_fast8_t tick, uint_fast8_t length, uint_fast8_t tail, uint_fast8_t thickness) {
-		float angle = tick * PI_2 / 60;
+void radialRect(int16_t deg, int16_t r1, int16_t r2, uint_fast8_t thickness) {
+		float angle = GRAD_TO_RAD(deg);
 		float sa = sin(angle);
 		float ca = cos(angle);
-		float shiftX = thickness * ca;
-		float shiftY = thickness * sa;
-		uint_fast8_t x0 = CENTER_X + (0.5  + length * sa - 0.5 * shiftX);
-		uint_fast8_t y0 = CENTER_Y + (0.5  - length * ca - 0.5 * shiftY);
-		uint_fast8_t x1 = x0 + (0.5  + shiftX);
-		uint_fast8_t y1 = y0 + (0.5  + shiftY);
-		uint_fast8_t x2 = CENTER_X + (0.5  - tail * sa + 0.5 * shiftX);
-		uint_fast8_t y2 = CENTER_Y + (0.5  + tail * ca + 0.5 * shiftY);
-		uint_fast8_t x3 = x2 + (0.5  - shiftX);
-		uint_fast8_t y3 = y2 + (0.5  - shiftY);
-		int_fast16_t x[4]; x[0] = x0; x[1] = x1; x[2] = x2; x[3] = x3;
-		int_fast16_t y[4]; y[0] = y0; y[1] = y1; y[2] = y2; y[3] = y3;
+		float shiftX = 0.5 * thickness * ca;
+		float shiftY = 0.5 * thickness * sa;
+		int16_t x0 = CENTER_X + r1 * sa - shiftX;
+		int16_t y0 = CENTER_Y - r1 * ca - shiftY;
+		int16_t x1 = CENTER_X + r1 * sa + shiftX;
+		int16_t y1 = CENTER_Y - r1 * ca + shiftY;
+		int16_t x2 = CENTER_X + r2 * sa + shiftX;
+		int16_t y2 = CENTER_Y - r2 * ca + shiftY;
+		int16_t x3 = CENTER_X + r2 * sa - shiftX;
+		int16_t y3 = CENTER_Y - r2 * ca - shiftY;
+		int16_t x[4] = {x0, x1, x2, x3};
+		int16_t y[4] = {y0, y1, y2, y3};
 		fillConvex(4, x, y);
 //		tetragon(x0, y0, x1, y1, x2, y2, x3, y3);
 }

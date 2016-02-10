@@ -65,19 +65,19 @@ static uint8_t h, m, s;
 static void scr_watchface_refresh_time() {
 	  //scr_controls_redraw(&controls_definition);
 
-		lineHand(s, 70, 20);
+		radialLine(6*s, 70, -20);
 		s = rtc_get_current_seconds();
 		if (s == 0) {
-				triangleHand(m, 60, 15, 6); 
+				radialTriangle(6*m, 60, -15, 6);
 				m = rtc_get_current_minutes();
 				if (m % 12 == 0) {
-						rectHand(h, 50, 10, 6);
-						h = 5 * rtc_get_current_hour_12() + m / 12;
-						rectHand(h, 50, 10, 6);
+						radialRect(h, 40, -3, 6);
+						h = 30 * rtc_get_current_hour_12() + (m >> 1);
+						radialRect(h, 40, -3, 6);
 				}
-				triangleHand(m, 60, 15, 6);
+				radialTriangle(6*m, 60, -15, 6);
 		}
-		lineHand(s, 70, 20);
+		radialLine(6*s, 70, -20);
 }
 
 static void scr_watchface_init() {
@@ -111,15 +111,18 @@ static void scr_watchface_draw() {
 //		int_fast16_t y1[] = {10, 30, 30};
 //		fillConvex(3, x1, y1);
 	  //scr_controls_draw(&controls_definition);
+		for (int deg = 0; deg < 360; deg += 30)
+				radialRect(deg, 65, 70, 3);
+		
 		// seconds
 		s = rtc_get_current_seconds();
-		lineHand(s, 70, 20);
+		radialLine(6*s, 70, -20);
 		// minutes
 		m = rtc_get_current_minutes();
-		triangleHand(m, 60, 15, 6); 
+		radialTriangle(6*m, 60, -15, 6); 
 		// hours
-		h = 5*rtc_get_current_hour_12() + m/12;
-		rectHand(h, 50, 5, 6);
+		h = 30 * rtc_get_current_hour_12() + (m >> 1);
+		radialRect(h, 40, -3, 6);
 }
 
 bool scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {
