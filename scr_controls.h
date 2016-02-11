@@ -11,6 +11,8 @@
 #define SCR_CONTROL_TEXT  									 4
 #define SCR_CONTROL_STATIC_IMAGE  					 5
 #define SCR_CONTROL_IMAGE_FROM_SET 					 6
+#define SCR_CONTROL_TEXT_FROM_SET 					 7
+#define SCR_CONTROL_WATCH_HAND 							 8
 
 #define NUMBER_RANGE_0__9     0x10
 #define NUMBER_RANGE_0__19    0x20
@@ -116,6 +118,20 @@ typedef struct
 	  uint32_t data_handle_param;
 	  NUMBER_CONTROL_DATA* data;
 } SCR_CONTROL_PROGRESS_BAR_CONFIG;	
+
+typedef struct
+{
+	  uint8_t cx;
+	  uint8_t cy;
+	  uint16_t deg;
+	  uint8_t radius1;
+	  uint8_t radius2;
+	  uint8_t width;
+	  uint32_t style;
+	  uint32_t (* data_handle)(uint32_t, uint8_t, uint8_t*, bool*);
+	  uint32_t data_handle_param;
+	  NUMBER_CONTROL_DATA* data;
+} SCR_CONTROL_WATCH_HAND_CONFIG;
 
 typedef struct
 {

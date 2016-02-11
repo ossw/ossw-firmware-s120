@@ -67,7 +67,7 @@
 STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                     /** When having DFU Service support in application the Service Changed Characteristic should always be present. */
 #endif // BLE_DFU_APP_SUPPORT
 
-#define DISCONNECTION_ALERT							 0x0060DB77
+#define DISCONNECTION_ALERT							 0x0060AB6E
 static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;   /**< Handle of the current connection. */
 static ble_bas_t                         m_bas;                                     /**< Structure used to identify the battery service. */
 static ble_ossw_t                        m_ossw;   

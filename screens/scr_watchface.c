@@ -60,24 +60,24 @@ static const SCR_CONTROLS_DEFINITION controls_definition = {
 	  (SCR_CONTROL_DEFINITION*)controls
 };
 
-static uint8_t h, m, s;
+static uint16_t h, m, s;
 
 static void scr_watchface_refresh_time() {
 	  //scr_controls_redraw(&controls_definition);
 
-		radialLine(6*s, 70, -20);
+		radialLine(CENTER_X, CENTER_Y, 6*s, 70, -20);
 		s = rtc_get_current_seconds();
 		if (s == 0) {
-				radialTriangle(6*m, 60, -15, 6);
+				radialTriangle(CENTER_X, CENTER_Y, 6*m, 60, -15, 7);
 				m = rtc_get_current_minutes();
 				if (m % 12 == 0) {
-						radialRect(h, 40, -3, 6);
+						radialRect(CENTER_X, CENTER_Y, h, 40, -3, 7);
 						h = 30 * rtc_get_current_hour_12() + (m >> 1);
-						radialRect(h, 40, -3, 6);
+						radialRect(CENTER_X, CENTER_Y, h, 40, -3, 7);
 				}
-				radialTriangle(6*m, 60, -15, 6);
+				radialTriangle(CENTER_X, CENTER_Y, 6*m, 60, -15, 7);
 		}
-		radialLine(6*s, 70, -20);
+		radialLine(CENTER_X, CENTER_Y, 6*s, 70, -20);
 }
 
 static void scr_watchface_init() {
@@ -89,40 +89,19 @@ static void scr_watchface_init() {
 }
 
 static void scr_watchface_draw() {
-		// test drawings
-//		lineBresenham(10, 10, 12, 30);
-//		lineBresenham(7, 30, 9, 10);
-//		lineBresenham(16, 10, 14, 30);
-//		lineBresenham(19, 30, 17, 10);
-//		pixel(0, 0);
-//		pixel(0, 1);
-//		pixel(0, 2);
-//		hLine(0, 1, 11);
-//		hLine(1, 2, 11);
-//		hLine(2, 3, 11);
-//		hLine(3, 4, 11);
-//		hLine(4, 5, 11);
-//		hLine(5, 6, 11);
-//		int_fast16_t x[] = {110, 120, 130, 140, 125};
-//		int_fast16_t y[] = {20, 10, 10, 20, 30};
-//		fillConvex(5, x, y);
-		circle(72, 84, 71);
-//		int_fast16_t x1[] = {20, 22, 18};
-//		int_fast16_t y1[] = {10, 30, 30};
-//		fillConvex(3, x1, y1);
 	  //scr_controls_draw(&controls_definition);
+	
 		for (int deg = 0; deg < 360; deg += 30)
-				radialRect(deg, 65, 70, 3);
-		
+				radialRect(CENTER_X, CENTER_Y, deg, 60, 70, 3);
 		// seconds
 		s = rtc_get_current_seconds();
-		radialLine(6*s, 70, -20);
+		radialLine(CENTER_X, CENTER_Y, 6*s, 70, -20);
 		// minutes
 		m = rtc_get_current_minutes();
-		radialTriangle(6*m, 60, -15, 6); 
+		radialTriangle(CENTER_X, CENTER_Y, 6*m, 60, -15, 7); 
 		// hours
-		h = 30 * rtc_get_current_hour_12() + (m >> 1);
-		radialRect(h, 40, -3, 6);
+		h = 30 * rtc_get_current_hour_12() + (m / 12 * 6);
+		radialRect(CENTER_X, CENTER_Y, h, 40, -3, 7);
 }
 
 bool scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {

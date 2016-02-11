@@ -9,7 +9,6 @@
 
 // each line is 18 bytes long
 #define LINE_OFFSET(y) (y << 1) + (y << 4)
-#define GRAD_TO_RAD(grad) grad*PI/180.0
 #define PLOT8(x0, y0, x, y) {\
 		pixel( x + x0,  y + y0);\
 		pixel( y + x0,  x + y0);\
@@ -288,7 +287,7 @@ void fillConvex(int_fast8_t size, int16_t x[], int16_t y[]) {
 				curr = next;
 		} while (next != r2);
 
-		for (uint_fast8_t line = y[l2]; line < y[l1]; line++) {
+		for (uint_fast8_t line = y[l2]; line <= y[l1]; line++) {
 				hLine(line, l[line], r[line]);
 		}
 }
@@ -316,49 +315,74 @@ void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
 		pixel(xc - x,  yc - y);
 }
 
-void radialLine(int16_t deg, int16_t r1, int16_t r2) {
-		float angle = GRAD_TO_RAD(deg);
+void fillCircle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
+{
+    uint8_t x = r, y = 0;
+    int cd2 = 0;
+    if (!r)
+			return; 
+		hLine(yc,  xc - r, xc + r);
+    while (x > y + 2) {
+        cd2 -= (--x) - (++y);
+        if (cd2 < 0) {
+						cd2 += x++;
+				} else {
+						hLine(yc - x, xc - y, xc + y);
+						hLine(yc + x, xc - y, xc + y);
+				}
+				hLine(yc - y, xc - x, xc + x);
+				hLine(yc + y, xc - x, xc + x);
+    } 
+    --x; ++y;
+		hLine(yc - y, xc - x, xc + x);
+		hLine(yc + y, xc - x, xc + x);
+}
+
+void radialLine(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2) {
+		float angle = DEG_TO_RAD(deg);
 		float sa = sin(angle);
 		float ca = cos(angle);
-		int16_t x0 = CENTER_X + r1 * sa;
-		int16_t y0 = CENTER_Y - r1 * ca;
-		int16_t x1 = CENTER_X + r2 * sa;
-		int16_t y1 = CENTER_Y - r2 * ca;
+		int16_t x0 = cx + r1 * sa + 0.5;
+		int16_t y0 = cy - r1 * ca + 0.5;
+		int16_t x1 = cx + r2 * sa + 0.5;
+		int16_t y1 = cy - r2 * ca + 0.5;
 		lineBresenham(x0, y0, x1, y1);
 }
 
-void radialTriangle(int16_t deg, int16_t r1, int16_t r2, uint_fast8_t thickness) {
-		float angle = GRAD_TO_RAD(deg);
+void radialTriangle(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2, uint_fast8_t thickness) {
+		float angle = DEG_TO_RAD(deg);
 		float sa = sin(angle);
 		float ca = cos(angle);
+		thickness--;
 		float shiftX = 0.5 * thickness * ca;
 		float shiftY = 0.5 * thickness * sa;
-		int16_t x0 = CENTER_X + r1 * sa;
-		int16_t y0 = CENTER_Y - r1 * ca;
-		int16_t x1 = CENTER_X + r2 * sa + shiftX;
-		int16_t y1 = CENTER_Y - r2 * ca + shiftY;
-		int16_t x2 = CENTER_X + r2 * sa - shiftX;
-		int16_t y2 = CENTER_Y - r2 * ca - shiftY;
+		int16_t x0 = cx + r1 * sa + 0.5;
+		int16_t y0 = cy - r1 * ca + 0.5;
+		int16_t x1 = cx + r2 * sa + shiftX + 0.5;
+		int16_t y1 = cy - r2 * ca + shiftY + 0.5;
+		int16_t x2 = cx + r2 * sa - shiftX + 0.5;
+		int16_t y2 = cy - r2 * ca - shiftY + 0.5;
 		int16_t x[3] = {x0, x1, x2};
 		int16_t y[3] = {y0, y1, y2};
 		fillConvex(3, x, y);
 //		triangle(x0, y0, x1, y1, x2, y2);
 }
 
-void radialRect(int16_t deg, int16_t r1, int16_t r2, uint_fast8_t thickness) {
-		float angle = GRAD_TO_RAD(deg);
+void radialRect(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2, uint_fast8_t thickness) {
+		float angle = DEG_TO_RAD(deg);
 		float sa = sin(angle);
 		float ca = cos(angle);
+		thickness--;
 		float shiftX = 0.5 * thickness * ca;
 		float shiftY = 0.5 * thickness * sa;
-		int16_t x0 = CENTER_X + r1 * sa - shiftX;
-		int16_t y0 = CENTER_Y - r1 * ca - shiftY;
-		int16_t x1 = CENTER_X + r1 * sa + shiftX;
-		int16_t y1 = CENTER_Y - r1 * ca + shiftY;
-		int16_t x2 = CENTER_X + r2 * sa + shiftX;
-		int16_t y2 = CENTER_Y - r2 * ca + shiftY;
-		int16_t x3 = CENTER_X + r2 * sa - shiftX;
-		int16_t y3 = CENTER_Y - r2 * ca - shiftY;
+		int16_t x0 = cx + r1 * sa - shiftX + 0.5;
+		int16_t y0 = cy - r1 * ca - shiftY + 0.5;
+		int16_t x1 = cx + r1 * sa + shiftX + 0.5;
+		int16_t y1 = cy - r1 * ca + shiftY + 0.5;
+		int16_t x2 = cx + r2 * sa + shiftX + 0.5;
+		int16_t y2 = cy - r2 * ca + shiftY + 0.5;
+		int16_t x3 = cx + r2 * sa - shiftX + 0.5;
+		int16_t y3 = cy - r2 * ca - shiftY + 0.5;
 		int16_t x[4] = {x0, x1, x2, x3};
 		int16_t y[4] = {y0, y1, y2, y3};
 		fillConvex(4, x, y);
