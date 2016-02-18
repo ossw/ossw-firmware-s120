@@ -19,7 +19,8 @@ static const I18N_MESSAGE messages_en[] = {
   /*   14 */{"Remove?"},
   /*   15 */{"Yes"},
   /*   16 */{"No"},
-  /*   17 */{"About"}
+  /*   17 */{"About"},
+  /*   18 */{"Alarm"}
 };
 
 #endif

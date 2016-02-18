@@ -25,8 +25,12 @@ static void opt_handler_change_time() {
     scr_mngr_show_screen(SCR_CHANGE_TIME);
 };
 
-static void opt_handler_about() {
-    scr_mngr_show_screen(SCR_ABOUT);
+//static void opt_handler_about() {
+//    scr_mngr_show_screen(SCR_ABOUT);
+//};
+
+static void opt_handler_set_alarm() {
+   scr_mngr_show_screen(SCR_SET_ALARM);
 };
 
 void fs_reformat(void);
@@ -42,7 +46,7 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_DISPLAY, mlcd_colors_toggle},
 		{MESSAGE_FORMAT, reformat},
 		{MESSAGE_RESTART, NVIC_SystemReset},
-		{MESSAGE_ABOUT, opt_handler_about}
+		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm}
 };
 
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);

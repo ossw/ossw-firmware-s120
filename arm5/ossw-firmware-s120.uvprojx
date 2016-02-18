@@ -339,7 +339,7 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20002800</StartAddress>
-                <Size>0x1800</Size>
+                <Size>0x1810</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
@@ -351,7 +351,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
+            <Optim>2</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -600,6 +600,11 @@
               <FileName>scr_status.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_status.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_setalarm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_setalarm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1357,6 +1362,11 @@
               <FileName>scr_status.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_status.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_setalarm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_setalarm.c</FilePath>
             </File>
           </Files>
         </Group>

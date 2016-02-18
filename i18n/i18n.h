@@ -23,6 +23,7 @@
 #define MESSAGE_YES 15
 #define MESSAGE_NO 16
 #define MESSAGE_ABOUT 17
+#define MESSAGE_ALARM_CLOCK 18
 
 typedef struct
 {

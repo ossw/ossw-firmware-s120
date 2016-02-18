@@ -116,54 +116,6 @@ void lineBresenham(uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8
     }
 }
 
-// THE EXTREMELY FAST LINE ALGORITHM Variation E (Addition Fixed Point PreCalc Small Display)
-// Small Display (256x256) resolution.
-void lineEFLA(uint_fast8_t x, uint_fast8_t y, uint_fast8_t x2, uint_fast8_t y2) {
-  bool yLonger = false;
-	int shortLen = y2-y;
-	int longLen = x2-x;
-	if (abs(shortLen)>abs(longLen)) {
-		int swap = shortLen;
-		shortLen = longLen;
-		longLen = swap;				
-		yLonger = true;
-	}
-	int decInc;
-	if (longLen == 0) decInc = 0;
-	else decInc = (shortLen << 8) / longLen;
-
-	if (yLonger) {
-		if (longLen > 0) {
-			longLen += y;
-			for (int j = 0x80+(x<<8); y<=longLen; ++y) {
-				pixel(j >> 8,y);	
-				j += decInc;
-			}
-			return;
-		}
-		longLen += y;
-		for (int j = 0x80+(x<<8); y>=longLen; --y) {
-			pixel(j >> 8,y);	
-			j -= decInc;
-		}
-		return;	
-	}
-
-	if (longLen>0) {
-		longLen+=x;
-		for (int j=0x80+(y<<8);x<=longLen;++x) {
-			pixel(x,j >> 8);
-			j+=decInc;
-		}
-		return;
-	}
-	longLen+=x;
-	for (int j=0x80+(y<<8);x>=longLen;--x) {
-		pixel(x,j >> 8);
-		j-=decInc;
-	}
-}
-
 void triangle(uint_fast8_t x0, uint_fast8_t y0, uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2) {
 		lineBresenham(x0, y0, x1, y1);
 		lineBresenham(x1, y1, x2, y2);
@@ -308,11 +260,12 @@ void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
 						cd2 += x++;
 				PLOT8(xc, yc, x, y);
     } 
-    --x; ++y;
-		pixel(xc + x,  yc + y);
-		pixel(xc - x,  yc + y);
-		pixel(xc + x,  yc - y);
-		pixel(xc - x,  yc - y);
+    if (--x == ++y) {
+				pixel(xc + x,  yc + y);
+				pixel(xc - x,  yc + y);
+				pixel(xc + x,  yc - y);
+				pixel(xc - x,  yc - y);
+		}
 }
 
 void fillCircle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
@@ -327,15 +280,18 @@ void fillCircle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
         if (cd2 < 0) {
 						cd2 += x++;
 				} else {
-						hLine(yc - x, xc - y, xc + y);
-						hLine(yc + x, xc - y, xc + y);
+						hLine(yc - x - 1, xc - y + 1, xc + y - 1);
+						hLine(yc + x + 1, xc - y + 1, xc + y - 1);
 				}
 				hLine(yc - y, xc - x, xc + x);
 				hLine(yc + y, xc - x, xc + x);
     } 
-    --x; ++y;
-		hLine(yc - y, xc - x, xc + x);
-		hLine(yc + y, xc - x, xc + x);
+		hLine(yc - x, xc - y, xc + y);
+		hLine(yc + x, xc - y, xc + y);
+    if (--x == ++y) {
+				hLine(yc - y, xc - x, xc + x);
+				hLine(yc + y, xc - x, xc + x);
+		}
 }
 
 void radialLine(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2) {

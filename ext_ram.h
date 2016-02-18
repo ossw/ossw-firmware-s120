@@ -19,6 +19,7 @@
 
 #define EXT_RAM_DATA_FRAME_BUFFER    0x0 // 0x0000 - 0x0BCF
 #define EXT_RAM_DATA_RTC             0xBD0 // 0x0BD0 - 0x0BD3
+#define EXT_RAM_DATA_ALARM					0x0BE0 // 0x0BE0 - 0x0BE2
 
 #define EXT_RAM_CONFIG								0xC00 // 0xC00 - 0xCDF
 

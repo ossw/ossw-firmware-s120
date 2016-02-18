@@ -78,7 +78,7 @@ static void scr_status_draw_screen() {
 		mode = battery_is_charging()? (battery_is_full() ? 2 : 1) : 0;
 		scr_status_draw_battery_status();
 							
-		mlcd_draw_text(ossw_mac_address(), 0, 115, MLCD_XRES, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_CENTER);
+		mlcd_draw_text(ossw_mac_address(), 0, 110, MLCD_XRES, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_CENTER);
 	
 		// Check hardware ID, how compatible with other SoftDevices
 		// ex. 004D is for 2nd rev, WLCSP, 256kB/16kB 
@@ -90,7 +90,8 @@ static void scr_status_draw_screen() {
 				id[9-i] = hex_str[hwid & 0x000F];
 				hwid = hwid >> 4;
 		}
-		mlcd_draw_text(id, 0, 135, MLCD_XRES, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_CENTER);
+		mlcd_draw_text(id, 0, 130, MLCD_XRES, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_CENTER);
+  	mlcd_draw_text(ossw_firmware_version(), 0, 150, MLCD_XRES, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_CENTER);
 		
 		scr_controls_draw(&controls_definition);
 }

@@ -32,6 +32,7 @@
 #include "accel.h"
 #include "watchset.h"
 #include "config.h"
+#include "screens\scr_setalarm.h"
 
 #ifdef OSSW_DEBUG
 		#include "app_uart.h"
@@ -180,6 +181,7 @@ int main(void)
     // Initialize.
     timers_init();
 	  rtc_timer_init();
+		alarm_clock_init();
 		buttons_init();
 	  battery_init();
 	

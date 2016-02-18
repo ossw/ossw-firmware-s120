@@ -17,6 +17,8 @@
 #define SCR_ALERT_NOTIFICATION         0xA0
 #define SCR_NOTIFICATIONS              0xA1
 
+#define SCR_SET_ALARM                  0xA2
+
 #define SCR_NOT_SET                    0x00
 
 #define SCR_EVENT_INIT_SCREEN          0x01
