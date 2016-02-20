@@ -79,8 +79,7 @@ void hLine(uint_fast8_t y, uint_fast8_t x1, uint_fast8_t x2) {
 		ext_ram_write_data(ext_ram_address, buff, sizeByte);
 }
 
-void lineBresenham(uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2)
-{
+void lineBresenham(uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2) {
     int dy = y2 - y1;
     int dx = x2 - x1;
     int_fast8_t stepx, stepy;
@@ -137,8 +136,7 @@ void polygon(int_fast8_t size, uint_fast8_t x[], uint_fast8_t y[]) {
 		lineBresenham(x[size], y[size], x[0], y[0]);
 }
 
-static void fillBorder(uint8_t border[], uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2, bool right)
-{
+static void fillBorder(uint8_t border[], uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2, bool right) {
 		if (x2 < x1) {
 				SWAP(x1, x2);
 				SWAP(y1, y2);
@@ -244,8 +242,7 @@ void fillConvex(int_fast8_t size, int16_t x[], int16_t y[]) {
 		}
 }
 
-void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
-{
+void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r) {
     uint8_t x = r, y = 0;
     int cd2 = 0;  //current distance squared - radius squared
     if (!r)
@@ -268,8 +265,7 @@ void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
 		}
 }
 
-void fillCircle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
-{
+void fillCircle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r) {
     uint8_t x = r, y = 0;
     int cd2 = 0;
     if (!r)
@@ -291,6 +287,13 @@ void fillCircle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r)
     if (--x == ++y) {
 				hLine(yc - y, xc - x, xc + x);
 				hLine(yc + y, xc - x, xc + x);
+		}
+}
+
+void fillRectangle(uint_fast8_t x, uint_fast8_t y, uint_fast8_t w, uint_fast8_t h) {
+		uint_fast8_t x1 = x + w;
+		for (uint_fast8_t i = 0; i < h; i++) {
+				hLine(y++, x, x1);
 		}
 }
 

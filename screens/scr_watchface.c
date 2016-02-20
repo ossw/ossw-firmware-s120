@@ -69,12 +69,10 @@ static void scr_watchface_refresh_time() {
 		s = rtc_get_current_seconds();
 		if (s == 0) {
 				radialTriangle(CENTER_X, CENTER_Y, 6*m, 60, -15, 7);
+				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), 40, -3, 7);
 				m = rtc_get_current_minutes();
-				if (m % 12 == 0) {
-						radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), 40, -3, 7);
-						h = rtc_get_current_hour_12();
-						radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), 40, -3, 7);
-				}
+				h = rtc_get_current_hour_12();
+				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), 40, -3, 7);
 				radialTriangle(CENTER_X, CENTER_Y, 6*m, 60, -15, 7);
 		}
 		radialLine(CENTER_X, CENTER_Y, 6*s, 70, -20);
@@ -103,7 +101,7 @@ static void scr_watchface_draw() {
 		radialTriangle(CENTER_X, CENTER_Y, 6*m, 60, -15, 7); 
 		// hours
 		h = rtc_get_current_hour_12();
-		radialRect(CENTER_X, CENTER_Y, 30*h+(m/12*6), 40, -3, 7);
+		radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), 40, -3, 7);
 }
 
 bool scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {

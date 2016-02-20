@@ -20,6 +20,7 @@ void tetragon(uint_fast8_t x0, uint_fast8_t y0, uint_fast8_t x1, uint_fast8_t y1
 void fillConvex(int_fast8_t size, int16_t x[], int16_t y[]);
 void circle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r);
 void fillCircle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r);
+void fillRectangle(uint_fast8_t x, uint_fast8_t y, uint_fast8_t w, uint_fast8_t h);
 
 void radialLine(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2);
 void radialTriangle(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2, uint_fast8_t thickness);

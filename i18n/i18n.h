@@ -24,6 +24,7 @@
 #define MESSAGE_NO 16
 #define MESSAGE_ABOUT 17
 #define MESSAGE_ALARM_CLOCK 18
+#define MESSAGE_SUNDAY_1 19
 
 typedef struct
 {

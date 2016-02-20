@@ -10,7 +10,7 @@
 #include "fs.h"
 #include "nordic_common.h"
 
-#define TEMP_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(2000, APP_TIMER_PRESCALER)
+#define TEMP_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
 
 #define MLCD_BL_OFF 			0x0
 #define MLCD_BL_ON 				0x1
@@ -23,7 +23,7 @@
 static uint8_t fb_line_changes[MLCD_YRES/8];
 static uint8_t vcom;
 static uint8_t bl_mode = MLCD_BL_OFF;
-static uint8_t temp_bl_timeout = 3;
+static uint8_t temp_bl_timeout = 5;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
 
