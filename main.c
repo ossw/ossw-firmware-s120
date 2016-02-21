@@ -32,7 +32,7 @@
 #include "accel.h"
 #include "watchset.h"
 #include "config.h"
-#include "screens\scr_setalarm.h"
+#include "alarm.h"
 
 #ifdef OSSW_DEBUG
 		#include "app_uart.h"

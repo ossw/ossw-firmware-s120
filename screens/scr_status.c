@@ -9,6 +9,7 @@
 #include "../scr_controls.h"
 #include "../ossw.h"
 #include "../fs.h"
+#include "../watchset.h"
 
 static NUMBER_CONTROL_DATA battery_level_ctrl_data;
 static uint8_t mode = 0;
@@ -37,7 +38,7 @@ static const SCR_CONTROLS_DEFINITION controls_definition = {
 static bool scr_status_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
-					  scr_mngr_show_screen(SCR_WATCHFACE);
+					  scr_mngr_show_screen(SCR_WATCHFACE_ANALOG);
 				    return true;
 		}
 		return false;
@@ -108,7 +109,8 @@ bool scr_status_handle_event(uint32_t event_type, uint32_t event_param) {
             scr_status_refresh_screen();
             return true;
 			  case SCR_EVENT_BUTTON_PRESSED:
-				    return scr_status_handle_button_pressed(event_param);
+				    if (scr_status_handle_button_pressed(event_param))
+								return true;
 		}
-		return false;
+		return watchset_default_watch_face_handle_event(event_type, event_param);
 }

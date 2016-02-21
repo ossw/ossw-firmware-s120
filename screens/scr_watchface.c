@@ -9,73 +9,58 @@
 #include "../fs.h"
 #include "../config.h"
 #include "../graph.h"
-#include "nrf_delay.h"
 		
-//static NUMBER_CONTROL_DATA hour_ctrl_data;
-//		
-//static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
-//		NUMBER_RANGE_0__99,
-//	  4,
-//	  4,
-//	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 4 << 24 | 8 << 16 | 66 << 8 | 76,
-//	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_hour_24,
-//	  0,
-//    &hour_ctrl_data
-//};
+static NUMBER_CONTROL_DATA hour_ctrl_data;
+		
+static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
+		NUMBER_RANGE_0__99,
+	  4,
+	  4,
+	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 4 << 24 | 8 << 16 | 66 << 8 | 76,
+	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_hour_24,
+	  0,
+    &hour_ctrl_data
+};
 
-//static NUMBER_CONTROL_DATA minutes_ctrl_data;
+static NUMBER_CONTROL_DATA minutes_ctrl_data;
 
-//static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
-//		NUMBER_RANGE_0__99,
-//	  4,
-//	  85,
-//	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 4 << 24 | 6 << 16 | 66 << 8 | 76,
-//	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_minutes,
-//	  0,
-//    &minutes_ctrl_data
-//};
+static const SCR_CONTROL_NUMBER_CONFIG minutes_config = {
+		NUMBER_RANGE_0__99,
+	  4,
+	  85,
+	  NUMBER_FORMAT_FLAG_ZERO_PADDED | 4 << 24 | 6 << 16 | 66 << 8 | 76,
+	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_minutes,
+	  0,
+    &minutes_ctrl_data
+};
 
-//static NUMBER_CONTROL_DATA seconds_ctrl_data;
+static NUMBER_CONTROL_DATA seconds_ctrl_data;
 
-//static const SCR_CONTROL_PROGRESS_BAR_CONFIG seconds_config = {
-//	  0,
-//	  MLCD_YRES - 3,
-//	  MLCD_XRES,
-//	  2,
-//	  60,
-//		0,
-//	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_seconds,
-//	  0,
-//    &seconds_ctrl_data
-//};
+static const SCR_CONTROL_PROGRESS_BAR_CONFIG seconds_config = {
+	  0,
+	  MLCD_YRES - 3,
+	  MLCD_XRES,
+	  2,
+	  60,
+		0,
+	  (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_seconds,
+	  0,
+    &seconds_ctrl_data
+};
 
-//static const SCR_CONTROL_DEFINITION controls[] = {
-//	  {SCR_CONTROL_NUMBER, (void*)&hour_config},
-//		{SCR_CONTROL_NUMBER, (void*)&minutes_config},
-//		{SCR_CONTROL_PROGRESS_BAR, (void*)&seconds_config}
-//};
+static const SCR_CONTROL_DEFINITION controls[] = {
+	  {SCR_CONTROL_NUMBER, (void*)&hour_config},
+		{SCR_CONTROL_NUMBER, (void*)&minutes_config},
+		{SCR_CONTROL_PROGRESS_BAR, (void*)&seconds_config}
+};
 
-//static const SCR_CONTROLS_DEFINITION controls_definition = {
-//	  sizeof(controls)/sizeof(SCR_CONTROL_DEFINITION),
-//	  (SCR_CONTROL_DEFINITION*)controls
-//};
-
-static uint8_t h, m, s;
+static const SCR_CONTROLS_DEFINITION controls_definition = {
+	  sizeof(controls)/sizeof(SCR_CONTROL_DEFINITION),
+	  (SCR_CONTROL_DEFINITION*)controls
+};
 
 static void scr_watchface_refresh_time() {
-	  //scr_controls_redraw(&controls_definition);
-
-		radialLine(CENTER_X, CENTER_Y, 6*s, 70, -20);
-		s = rtc_get_current_seconds();
-		if (s == 0) {
-				radialTriangle(CENTER_X, CENTER_Y, 6*m, 60, -15, 7);
-				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), 40, -3, 7);
-				m = rtc_get_current_minutes();
-				h = rtc_get_current_hour_12();
-				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), 40, -3, 7);
-				radialTriangle(CENTER_X, CENTER_Y, 6*m, 60, -15, 7);
-		}
-		radialLine(CENTER_X, CENTER_Y, 6*s, 70, -20);
+	  scr_controls_redraw(&controls_definition);
 }
 
 static void scr_watchface_init() {
@@ -87,21 +72,7 @@ static void scr_watchface_init() {
 }
 
 static void scr_watchface_draw() {
-	  //scr_controls_draw(&controls_definition);
-//		for (int i=1; i<11; i++)
-//				fillCircle(i*(i+2), i+1, i);
-//		fillCircle(CENTER_X, CENTER_Y, 71);
-		for (int deg = 0; deg < 360; deg += 30)
-				radialRect(CENTER_X, CENTER_Y, deg, 60, 70, 3);
-		// seconds
-		s = rtc_get_current_seconds();
-		radialLine(CENTER_X, CENTER_Y, 6*s, 70, -20);
-		// minutes
-		m = rtc_get_current_minutes();
-		radialTriangle(CENTER_X, CENTER_Y, 6*m, 60, -15, 7); 
-		// hours
-		h = rtc_get_current_hour_12();
-		radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), 40, -3, 7);
+	  scr_controls_draw(&controls_definition);
 }
 
 bool scr_watchface_handle_event(uint32_t event_type, uint32_t event_param) {

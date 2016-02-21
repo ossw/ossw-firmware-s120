@@ -13,11 +13,11 @@
 #define SCR_WATCH_SET_LIST             0x07
 #define SCR_ABOUT			                 0x08
 #define SCR_STATUS				             0x09
+#define SCR_WATCHFACE_ANALOG           0x0A
+#define SCR_SET_ALARM                  0x0B
 
 #define SCR_ALERT_NOTIFICATION         0xA0
 #define SCR_NOTIFICATIONS              0xA1
-
-#define SCR_SET_ALARM                  0xA2
 
 #define SCR_NOT_SET                    0x00
 
