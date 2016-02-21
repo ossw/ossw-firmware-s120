@@ -163,11 +163,13 @@ static bool scr_changetime_handle_button_pressed(uint32_t event_type, uint32_t b
 					  scr_changetime_handle_button_down();
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
-//						if (event_type == SCR_EVENT_BUTTON_LONG_PRESSED)
-//						else
-								scr_changetime_handle_button_select();
+						if (event_type == SCR_EVENT_BUTTON_LONG_PRESSED)
+								change_mode = MODE_MINUTES + 7;
+						scr_changetime_handle_button_select();
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
+						if (event_type == SCR_EVENT_BUTTON_LONG_PRESSED)
+								change_mode = MODE_ACTIVATE;
 					  scr_changetime_handle_button_back();
 				    return true;
 		}
@@ -188,6 +190,7 @@ bool scr_set_alarm_handle_event(uint32_t event_type, uint32_t event_param) {
 						scr_changetime_draw_all();
 				    return true;
 			  case SCR_EVENT_BUTTON_PRESSED:
+			  case SCR_EVENT_BUTTON_LONG_PRESSED:
 				    return scr_changetime_handle_button_pressed(event_type, event_param);
 		}
 		return false;
