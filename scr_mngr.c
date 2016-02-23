@@ -21,8 +21,8 @@
 #include "config.h"
 #include "watchset.h"
 
-static uint8_t switch_to_screen = SCR_NOT_SET;
 static uint32_t switch_to_screen_param = 0;
+static uint8_t switch_to_screen = SCR_NOT_SET;
 static uint8_t current_screen = SCR_NOT_SET;
 
 static uint8_t scr_notifications_state = SCR_NOTIFICATIONS_STATE_NONE;

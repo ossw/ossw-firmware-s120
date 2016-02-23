@@ -61,24 +61,45 @@ void pack_dialog_option(bool (*dialog_callback)(uint32_t), uint8_t font,
 		uint16_t len_op3 = strlen(op3)+1;
 		uint16_t len_op4 = strlen(op4)+1;
 		uint16_t offset = sizeof(dialog_callback) + sizeof(font) + 5 * sizeof(len_title);
-		uint16_t buffer_size = offset + len_title + len_op1 + len_op2 + len_op3 + len_op4;
+		uint16_t buffer_size = offset;
+		if (len_title > 1)
+				buffer_size += len_title;
+		if (len_op1 > 1)
+				buffer_size += len_op1;
+		if (len_op2 > 1)
+				buffer_size += len_op2;
+		if (len_op3 > 1)
+				buffer_size += len_op3;
+		if (len_op4 > 1)
+				buffer_size += len_op4;
 		uint8_t buffer[buffer_size];
+		memset(buffer, 0, buffer_size);
 		memcpy(buffer, &dialog_callback, sizeof(dialog_callback));
 		buffer[4] = font;
-		memcpy(&buffer[5], &offset, sizeof(offset));
-		memcpy(&buffer[offset], title, len_title);
-		offset+=len_title;
-		memcpy(&buffer[7], &offset, sizeof(offset));
-		memcpy(&buffer[offset], op1, len_op1);
-		offset+=len_op1;
-		memcpy(&buffer[9], &offset, sizeof(offset));
-		memcpy(&buffer[offset], op2, len_op2);
-		offset+=len_op2;
-		memcpy(&buffer[11], &offset, sizeof(offset));
-		memcpy(&buffer[offset], op3, len_op3);
-		offset+=len_op3;
-		memcpy(&buffer[13], &offset, sizeof(offset));
-		memcpy(&buffer[offset], op4, len_op4);
+		if (len_title > 1) {
+				memcpy(&buffer[5], &offset, sizeof(offset));
+				memcpy(&buffer[offset], title, len_title);
+				offset+=len_title;
+		}
+		if (len_op1 > 1) {
+				memcpy(&buffer[7], &offset, sizeof(offset));
+				memcpy(&buffer[offset], op1, len_op1);
+				offset+=len_op1;
+		}
+		if (len_op2 > 1) {
+				memcpy(&buffer[9], &offset, sizeof(offset));
+				memcpy(&buffer[offset], op2, len_op2);
+				offset+=len_op2;
+		}
+		if (len_op3 > 1) {
+				memcpy(&buffer[11], &offset, sizeof(offset));
+				memcpy(&buffer[offset], op3, len_op3);
+				offset+=len_op3;
+		}
+		if (len_op4 > 1) {
+				memcpy(&buffer[13], &offset, sizeof(offset));
+				memcpy(&buffer[offset], op4, len_op4);
+		}
 		
 		ext_ram_write_data(EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS, buffer, buffer_size);
 }
@@ -86,7 +107,7 @@ void pack_dialog_option(bool (*dialog_callback)(uint32_t), uint8_t font,
 static void alarm_clock_handler(void * p_context) {
 		vibration_vibrate(ALARM_VIBRATION, 20000);
 		pack_dialog_option(&button_handler, FONT_NORMAL_REGULAR, I18N_TRANSLATE(MESSAGE_ALARM_CLOCK),
-				I18N_TRANSLATE(MESSAGE_ALARM_SNOOZE), I18N_TRANSLATE(MESSAGE_ALARM_DISMISS), NULL, NULL);
+				I18N_TRANSLATE(MESSAGE_ALARM_SNOOZE), I18N_TRANSLATE(MESSAGE_ALARM_DISMISS), "\0", "\0");
 		scr_mngr_show_screen_with_param(SCR_DIALOG_OPTION, EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS);
 		// schedule next alarm
 		uint8_t alarm_options;
