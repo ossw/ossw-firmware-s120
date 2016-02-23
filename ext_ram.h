@@ -42,4 +42,10 @@ bool ext_ram_write_data(uint16_t ext_ram_address, uint8_t *buffer, uint32_t data
 
 bool ext_ram_fill(uint16_t ext_ram_address, uint8_t value, uint32_t data_size);
 
+uint8_t get_next_byte(uint16_t *ptr);
+
+uint16_t get_next_short(uint16_t *ptr);
+
+uint32_t get_next_int(uint16_t *ptr);
+
 #endif /* EXT_RAM_H */

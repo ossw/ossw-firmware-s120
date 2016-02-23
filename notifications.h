@@ -58,6 +58,6 @@ void notifications_next(uint16_t notification_id);
 
 void notifications_dismiss_all(void);
 
-uint32_t notifications_get_current_data(void);
+uint16_t notifications_get_current_data(void);
 
 #endif /* NOTIFICATIONS_H */

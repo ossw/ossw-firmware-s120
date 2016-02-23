@@ -18,37 +18,11 @@ static void notifications_alert_timeout_handler(void * p_context) {
 }
 
 void notifications_init(void) {
-	  
     uint32_t err_code;	 
-		
     err_code = app_timer_create(&m_notifications_alert_timer_id,
                                 APP_TIMER_MODE_SINGLE_SHOT,
                                 notifications_alert_timeout_handler);
     APP_ERROR_CHECK(err_code);
-}
-
-static uint8_t get_next_byte(uint16_t *ptr) {
-    uint8_t data;
-	  ext_ram_read_data(*ptr, &data, 1);
-	  //ext_flash_read_data(*ptr, &data, 1);
-	  (*ptr)++;
-	  return data;
-}
-
-static uint16_t get_next_short(uint16_t *ptr) {
-    uint8_t data[2];
-	  ext_ram_read_data(*ptr, data, 2);
-	  //ext_flash_read_data(*ptr, &data, 1);
-	  (*ptr)+=2;		
-	  return data[0] << 8 | data[1];
-}
-
-static uint32_t get_next_int(uint16_t *ptr) {
-    uint8_t data[4];
-	  ext_ram_read_data(*ptr, data, 4);
-	  //ext_flash_read_data(*ptr, &data, 1);
-	  (*ptr)+=4;
-	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
 }
 
 void copy_notification_info_data(uint16_t address, uint16_t size) {
@@ -181,6 +155,6 @@ void notifications_next(uint16_t notification_id) {
 		ble_peripheral_invoke_notification_function_with_data(NOTIFICATIONS_NEXT, data, 2);
 }
 
-uint32_t notifications_get_current_data(void) {
+uint16_t notifications_get_current_data(void) {
 		return EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS;
 }

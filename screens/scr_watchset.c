@@ -91,19 +91,19 @@ void handle_error(void) {
 		close();
 }
 
-static uint8_t get_next_byte(void) {
+static uint8_t get_flash_next_byte(void) {
     uint8_t data;
 		SPIFFS_read(&fs, watchset_fd, &data, 1);
 	  return data;
 }
 
-static uint16_t get_next_short(void) {
+static uint16_t get_flash_next_short(void) {
     uint8_t data[2];
 		SPIFFS_read(&fs, watchset_fd, data, 2);
 	  return data[0] << 8 | data[1];
 }
 
-static uint32_t get_next_int(void) {
+static uint32_t get_flash_next_int(void) {
     uint8_t data[4];
 		SPIFFS_read(&fs, watchset_fd, data, 4);
 	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
@@ -273,14 +273,14 @@ static void parse_data_source(void **data_source, uint32_t* data_source_param, u
 }
 
 static int parse_data_source_value() {
-    uint8_t type = get_next_byte();
-    uint8_t property = get_next_byte();
+    uint8_t type = get_flash_next_byte();
+    uint8_t property = get_flash_next_byte();
 	
 		int value = 0;
 	  switch (type&0x3F) {
 			  case DATA_SOURCE_STATIC:
 						//get_next_byte();
-			      value = get_next_int();
+			      value = get_flash_next_int();
 				    break;
 			  case DATA_SOURCE_INTERNAL:
 			      value = watchset_internal_data_source_get_value(property, 0, NULL, NULL);
@@ -299,9 +299,9 @@ static int parse_data_source_value() {
 					parse_data_source_value();
 		}
 		if (type & 0x80) {
-				uint8_t converter_no = get_next_byte();
+				uint8_t converter_no = get_flash_next_byte();
 				for (int i = 0; i < converter_no; i++) {
-						uint8_t converter_id = get_next_byte();
+						uint8_t converter_id = get_flash_next_byte();
 						value = ((uint32_t (*)(uint32_t))watchset_get_converter(converter_id))(value);
 				}
 		}
@@ -684,8 +684,8 @@ static bool draw_screen_controls(bool force, scr_mngr_draw_ctx* ctx) {
 }
 
 static bool parse_actions() {
-		uint16_t size = get_next_short();
-		uint8_t events_no = get_next_byte();
+		uint16_t size = get_flash_next_short();
+		uint8_t events_no = get_flash_next_byte();
 		size -= events_no*3+1;
 		actions_data_buffer = malloc(size);
 		if (actions_data_buffer == NULL) {
@@ -694,22 +694,22 @@ static bool parse_actions() {
 		}
 	
 		for (int i=0; i<events_no; i++) {
-				 uint8_t event = get_next_byte();
-				 uint16_t offset = get_next_short();
+				 uint8_t event = get_flash_next_byte();
+				 uint16_t offset = get_flash_next_short();
 				if (event < 9) {
 						action_handlers[event] = offset;
 				} else if (event == 0xF0) {
 						// init screen action
 			/*			FUNCTION action;
-						action.id = get_next_byte();
-						action.parameter = get_next_short();
+						action.id = get_flash_next_byte();
+						action.parameter = get_flash_next_short();
 					  scr_watch_set_invoke_function(&action);*/
 				}
 			
 		}
 		SPIFFS_read(&fs, watchset_fd, actions_data_buffer, size);
 	/*
-	  uint8_t actions_no = get_next_byte();
+	  uint8_t actions_no = get_flash_next_byte();
 	
 	  for(int i=0; i<actions_no; i++) {
 			
@@ -718,7 +718,7 @@ static bool parse_actions() {
 }
 
 static void parse_base_actions() {
-		uint8_t base_actions_id = get_next_byte();
+		uint8_t base_actions_id = get_flash_next_byte();
 		switch(base_actions_id) {
 				case WATCH_SET_BASE_ACTIONS_WATCH_FACE:
 						base_actions_handler = &watchset_default_watch_face_handle_event;
@@ -726,8 +726,8 @@ static void parse_base_actions() {
 }
 
 static bool parse_model() {
-		uint32_t size_left = get_next_short();
-		uint8_t variables_no = get_next_byte();
+		uint32_t size_left = get_flash_next_short();
+		uint8_t variables_no = get_flash_next_byte();
 	
 		model_data_buffer = malloc(sizeof(struct model_property)*variables_no);
 		if (model_data_buffer == NULL) {
@@ -736,8 +736,8 @@ static bool parse_model() {
 		}
 	
 		for (int i=0; i<variables_no; i++) {
-				uint8_t type = get_next_byte();//type
-				uint8_t flags = get_next_byte();//flags
+				uint8_t type = get_flash_next_byte();//type
+				uint8_t flags = get_flash_next_byte();//flags
 
 				if (flags & 0x80) {
 						//read init value
@@ -761,11 +761,11 @@ static bool parse_model() {
 }
 
 static void parse_settings(void) {
-		uint16_t size = get_next_short();
-		uint8_t settings_no = get_next_byte();
+		uint16_t size = get_flash_next_short();
+		uint8_t settings_no = get_flash_next_byte();
 		for (int i=0; i<settings_no; i++) {
-				uint8_t setting_id = get_next_byte();
-				uint8_t setting_value = get_next_byte();
+				uint8_t setting_id = get_flash_next_byte();
+				uint8_t setting_value = get_flash_next_byte();
 				switch(setting_id) {
 						case WATCH_SET_SETTING_INVERTIBLE:
 								force_colors = !setting_value;
@@ -777,7 +777,7 @@ static bool parse_screen() {
 	  uint8_t section;
 		force_colors = false;
 	  do {
-				section = get_next_byte();
+				section = get_flash_next_byte();
 				switch (section) {
 					case WATCH_SET_SCREEN_SECTION_MODEL:
 					{
@@ -788,7 +788,7 @@ static bool parse_screen() {
 							break;
 					case WATCH_SET_SCREEN_SECTION_CONTROLS:
 					{
-							uint32_t size_left = get_next_short();
+							uint32_t size_left = get_flash_next_short();
 							uint32_t dest_addr = EXT_RAM_DATA_CURRENT_SCREEN_CACHE;
 						
 							uint8_t buff[128];
@@ -810,7 +810,7 @@ static bool parse_screen() {
 							break;
 					case WATCH_SET_SCREEN_SECTION_MEMORY:
 					{
-						  uint16_t buffer_size = get_next_short();
+						  uint16_t buffer_size = get_flash_next_short();
 							screen_data_buffer = calloc(buffer_size, 1);
 							if (screen_data_buffer == NULL) {
 									handle_error();
@@ -837,7 +837,7 @@ static bool init_subscreen(uint8_t screen_id) {
 		
 		SPIFFS_lseek(&fs, watchset_fd, screens_section_address, SPIFFS_SEEK_SET);
 	  //uint32_t read_address = screens_section_address;
-	  uint8_t screens_no = get_next_byte();
+	  uint8_t screens_no = get_flash_next_byte();
 	
 	  if (screen_id >= screens_no) {
 		    return false;
@@ -849,7 +849,7 @@ static bool init_subscreen(uint8_t screen_id) {
 		
 		// jump to screen offset
 		SPIFFS_lseek(&fs, watchset_fd, 2 * screen_id, SPIFFS_SEEK_CUR);
-		uint16_t screen_offset = get_next_short();
+		uint16_t screen_offset = get_flash_next_short();
 		
 		SPIFFS_lseek(&fs, watchset_fd, screens_section_address + screen_offset, SPIFFS_SEEK_SET);
 		return parse_screen();
@@ -857,7 +857,7 @@ static bool init_subscreen(uint8_t screen_id) {
 
 static bool parse_external_properties() {
 		SPIFFS_lseek(&fs, watchset_fd, external_properties_section_address, SPIFFS_SEEK_SET);
-	  external_properties_no = get_next_byte();
+	  external_properties_no = get_flash_next_byte();
 	
 	  uint16_t header_size = external_properties_no*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE;
 	  external_properties_data = malloc(header_size);
@@ -867,8 +867,8 @@ static bool parse_external_properties() {
 		
 		uint16_t ptr = 0;//header_size;
 	  for (int i=0; i<external_properties_no; i++) {
-			  uint8_t type = get_next_byte();
-			  uint8_t range = get_next_byte();
+			  uint8_t type = get_flash_next_byte();
+			  uint8_t range = get_flash_next_byte();
 			  
 			  external_properties_data[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE] = type;
 			  external_properties_data[i*WATCH_SET_EXT_PROP_DESCRIPTOR_SIZE+1] = range;
@@ -907,21 +907,21 @@ static void scr_watch_set_init(uint32_t param) {
 	
 	  current_subscreen = 0;
 	
-	  int magic_number = get_next_short();
+	  int magic_number = get_flash_next_short();
 		if (magic_number != 0x0553) {
 			  handle_error();
 			  return;
 		}
-	  int api_version = get_next_short();
+	  int api_version = get_flash_next_short();
 		if (api_version != 1) {
 			  handle_error();
 			  return;
 		}
-	  watchset_id = get_next_int();
+	  watchset_id = get_flash_next_int();
 	
 	  uint8_t section;
-	  while ((section = get_next_byte())!= WATCH_SET_END_OF_DATA){
-				uint16_t section_size = get_next_short();
+	  while ((section = get_flash_next_byte())!= WATCH_SET_END_OF_DATA){
+				uint16_t section_size = get_flash_next_short();
 				switch (section) {
 						case WATCH_SET_SECTION_SCREENS:
 								screens_section_address = SPIFFS_lseek(&fs, watchset_fd, 0, SPIFFS_SEEK_CUR);

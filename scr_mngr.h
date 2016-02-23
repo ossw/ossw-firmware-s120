@@ -15,6 +15,7 @@
 #define SCR_STATUS				             0x09
 #define SCR_WATCHFACE_ANALOG           0x0A
 #define SCR_SET_ALARM                  0x0B
+#define SCR_DIALOG_OPTION              0x0C
 
 #define SCR_ALERT_NOTIFICATION         0xA0
 #define SCR_NOTIFICATIONS              0xA1

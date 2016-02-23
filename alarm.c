@@ -1,7 +1,10 @@
 #include "alarm.h"
 #include "vibration.h"
 #include "ext_ram.h"
+#include "i18n\i18n.h"
 #include "rtc.h"
+#include "mlcd_draw.h"
+#include "scr_mngr.h"
 
 #define ALARM_VIBRATION		0x0060E738
 
@@ -46,8 +49,46 @@ void alarm_clock_reschedule(uint8_t alarm_options, int8_t alarm_hour, int8_t ala
     APP_ERROR_CHECK(err_code);
 }
 
+bool button_handler(uint32_t button_id) {
+		return true;
+}
+
+void pack_dialog_option(bool (*dialog_callback)(uint32_t), uint8_t font,
+		const char * title, const char *op1, const char *op2, const char *op3, const char *op4) {
+		uint16_t len_title = strlen(title)+1;
+		uint16_t len_op1 = strlen(op1)+1;
+		uint16_t len_op2 = strlen(op2)+1;
+		uint16_t len_op3 = strlen(op3)+1;
+		uint16_t len_op4 = strlen(op4)+1;
+		uint16_t offset = sizeof(dialog_callback) + sizeof(font) + 5 * sizeof(len_title);
+		uint16_t buffer_size = offset + len_title + len_op1 + len_op2 + len_op3 + len_op4;
+		uint8_t buffer[buffer_size];
+		memcpy(buffer, &dialog_callback, sizeof(dialog_callback));
+		buffer[4] = font;
+		memcpy(&buffer[5], &offset, sizeof(offset));
+		memcpy(&buffer[offset], title, len_title);
+		offset+=len_title;
+		memcpy(&buffer[7], &offset, sizeof(offset));
+		memcpy(&buffer[offset], op1, len_op1);
+		offset+=len_op1;
+		memcpy(&buffer[9], &offset, sizeof(offset));
+		memcpy(&buffer[offset], op2, len_op2);
+		offset+=len_op2;
+		memcpy(&buffer[11], &offset, sizeof(offset));
+		memcpy(&buffer[offset], op3, len_op3);
+		offset+=len_op3;
+		memcpy(&buffer[13], &offset, sizeof(offset));
+		memcpy(&buffer[offset], op4, len_op4);
+		
+		ext_ram_write_data(EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS, buffer, buffer_size);
+}
+
 static void alarm_clock_handler(void * p_context) {
 		vibration_vibrate(ALARM_VIBRATION, 20000);
+		pack_dialog_option(&button_handler, FONT_NORMAL_REGULAR, I18N_TRANSLATE(MESSAGE_ALARM_CLOCK),
+				I18N_TRANSLATE(MESSAGE_ALARM_SNOOZE), I18N_TRANSLATE(MESSAGE_ALARM_DISMISS), NULL, NULL);
+		scr_mngr_show_screen_with_param(SCR_DIALOG_OPTION, EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS);
+		// schedule next alarm
 		uint8_t alarm_options;
 		int8_t 	alarm_hour, alarm_minute;
 		load_alarm_clock(&alarm_options, &alarm_hour, &alarm_minute);

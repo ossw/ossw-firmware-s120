@@ -1,6 +1,5 @@
 #include <string.h>
 #include "scr_choosemode.h"
-#include "nrf_delay.h"
 #include "../scr_mngr.h"
 #include "../mlcd_draw.h"
 #include "../rtc.h"

@@ -30,7 +30,7 @@ static void opt_handler_change_time() {
 //};
 
 static void opt_handler_set_alarm() {
-   scr_mngr_show_screen(SCR_SET_ALARM);
+		scr_mngr_show_screen(SCR_SET_ALARM);
 };
 
 void fs_reformat(void);

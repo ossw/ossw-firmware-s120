@@ -36,3 +36,24 @@ bool ext_ram_fill(uint16_t ext_ram_address, uint8_t value, uint32_t data_size){
     command[2] = ext_ram_address & 0xFF;
 		return spi_master_tx_value(EXT_RAM_SPI, EXT_RAM_SPI_SS, command, 3, value, data_size);
 }
+
+uint8_t get_next_byte(uint16_t *ptr) {
+    uint8_t data;
+	  ext_ram_read_data(*ptr, &data, 1);
+	  (*ptr)++;
+	  return data;
+}
+
+uint16_t get_next_short(uint16_t *ptr) {
+    uint8_t data[2];
+	  ext_ram_read_data(*ptr, data, 2);
+	  (*ptr)+=2;		
+	  return data[0] << 8 | data[1];
+}
+
+uint32_t get_next_int(uint16_t *ptr) {
+    uint8_t data[4];
+	  ext_ram_read_data(*ptr, data, 4);
+	  (*ptr)+=4;		
+	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
+}

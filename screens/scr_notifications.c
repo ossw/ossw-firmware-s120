@@ -1,6 +1,5 @@
 #include <string.h>
 #include "scr_notifications.h"
-#include "nrf_delay.h"
 #include "../scr_mngr.h"
 #include "../scr_controls.h"
 #include "../notifications.h"
@@ -19,20 +18,6 @@
 #define SIZE_SUMMARY2_Y MLCD_YRES/2-2*MARGIN_SUMMARY
 #define SUMMARY2_Y MLCD_YRES/4+MARGIN_SUMMARY
 
-static uint8_t get_next_byte(uint32_t *ptr) {
-    uint8_t data;
-	  ext_ram_read_data(*ptr, &data, 1);
-	  (*ptr)++;
-	  return data;
-}
-
-static uint16_t get_next_short(uint32_t *ptr) {
-    uint8_t data[2];
-	  ext_ram_read_data(*ptr, data, 2);
-	  (*ptr)+=2;		
-	  return data[0] << 8 | data[1];
-}
-
 static bool scr_notifications_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
@@ -40,7 +25,7 @@ static bool scr_notifications_handle_button_pressed(uint32_t button_id) {
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 				{
-						uint32_t read_address = notifications_get_current_data();
+						uint16_t read_address = notifications_get_current_data();
 						uint8_t notification_type = get_next_byte(&read_address);
 	
 						if (notification_type != NOTIFICATIONS_CATEGORY_SUMMARY) {
@@ -55,7 +40,7 @@ static bool scr_notifications_handle_button_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 				{
 					
-						uint32_t read_address = notifications_get_current_data();
+						uint16_t read_address = notifications_get_current_data();
 						uint8_t notification_type = get_next_byte(&read_address);
 	
 						if (notification_type == NOTIFICATIONS_CATEGORY_SUMMARY) {
@@ -76,7 +61,7 @@ static bool scr_notifications_handle_button_pressed(uint32_t button_id) {
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
 				{
-						uint32_t read_address = notifications_get_current_data();
+						uint16_t read_address = notifications_get_current_data();
 						uint8_t notification_type = get_next_byte(&read_address);
 	
 						if (notification_type != NOTIFICATIONS_CATEGORY_SUMMARY) {
@@ -93,7 +78,7 @@ static bool scr_notifications_handle_button_long_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 				{
-						uint32_t read_address = notifications_get_current_data();
+						uint16_t read_address = notifications_get_current_data();
 						uint8_t notification_type = get_next_byte(&read_address);
 						if (notification_type != NOTIFICATIONS_CATEGORY_SUMMARY) {
 								uint16_t notification_id = get_next_short(&read_address);
@@ -109,7 +94,7 @@ static void scr_notifications_init() {
 }
 
 static void scr_notifications_draw_screen() {
-		uint32_t read_address = notifications_get_current_data();
+		uint16_t read_address = notifications_get_current_data();
     uint8_t notification_type = get_next_byte(&read_address);
 	
 		switch(notification_type) {
