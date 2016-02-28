@@ -33,6 +33,7 @@
 #include "watchset.h"
 #include "config.h"
 #include "alarm.h"
+#include "app_scheduler.h"
 
 #ifdef OSSW_DEBUG
 		#include "app_uart.h"
@@ -146,6 +147,7 @@ static uint_fast8_t splashscreen_draw_func(uint_fast8_t x, uint_fast8_t y)
 
 static void timers_init(void)
 {
+		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
     // Initialize timer module.
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, false);
 }
@@ -180,7 +182,7 @@ int main(void)
 	
     // Initialize.
     timers_init();
-	  rtc_timer_init();
+		rtc_timer_init();
 		alarm_clock_init();
 		buttons_init();
 	  battery_init();
@@ -207,7 +209,8 @@ int main(void)
 			  if (rtc_should_store_current_time()) {
 					  rtc_store_current_time();
 				}
-				
+				app_sched_execute();
+
 				stopwatch_process();
 				
 				command_process();

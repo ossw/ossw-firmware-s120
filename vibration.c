@@ -1,6 +1,7 @@
 #include "vibration.h"
 #include "nordic_common.h"
 #include "app_timer.h"
+#include "app_scheduler.h"
 #include "board.h"
 #include "nrf_gpio.h"
 
@@ -39,12 +40,17 @@ static void vibration_pattern_change_handler(void * p_context) {
 		vibration_next_step();
 }
 
-static void vibration_timeout_handler(void * p_context) {
-    UNUSED_PARAMETER(p_context);
+void vibration_timeout_event(void * p_event_data, uint16_t event_size) {
     uint32_t err_code;	 
 	  err_code = app_timer_stop(m_vibration_pattern_timer_id);
     APP_ERROR_CHECK(err_code);
 	  vibration_motor_off();
+}
+
+static void vibration_timeout_handler(void * p_context) {
+    UNUSED_PARAMETER(p_context);
+		uint32_t err_code = app_sched_event_put(NULL, NULL, vibration_timeout_event);
+		APP_ERROR_CHECK(err_code);
 }
 
 void vibration_init(void) {

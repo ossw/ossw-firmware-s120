@@ -1,6 +1,7 @@
 #include "notifications.h"
 #include "nordic_common.h"
 #include "app_timer.h"
+#include "app_scheduler.h"
 #include "scr_mngr.h"
 #include "vibration.h"
 #include "ble/ble_peripheral.h"
@@ -10,11 +11,16 @@
 static app_timer_id_t      m_notifications_alert_timer_id;
 static uint16_t m_current_alert_notification_id = 0;
 
-static void notifications_alert_timeout_handler(void * p_context) {
-    UNUSED_PARAMETER(p_context);
+void notification_timeout_event(void * p_event_data, uint16_t event_size) {
 	  vibration_stop();
 	  scr_mngr_close_alert_notification();
 		m_current_alert_notification_id = 0;
+}
+
+static void notifications_alert_timeout_handler(void * p_context) {
+    UNUSED_PARAMETER(p_context);
+		uint32_t err_code = app_sched_event_put(NULL, NULL, notification_timeout_event);
+		APP_ERROR_CHECK(err_code);
 }
 
 void notifications_init(void) {

@@ -46,7 +46,7 @@ static void scr_dialog_draw_screen() {
 		}
 }
 
-void pack_dialog_option(bool (*dialog_callback)(uint32_t), uint8_t font,
+void pack_dialog_option(bool (*d_callback)(uint32_t), uint8_t font,
 		const char * title, const char *op1, const char *op2, const char *op3, const char *op4) {
 		uint8_t len_title = strlen(title)+1;
 		uint8_t len_op1 = strlen(op1)+1;
@@ -68,8 +68,8 @@ void pack_dialog_option(bool (*dialog_callback)(uint32_t), uint8_t font,
 		uint8_t buffer[buffer_size];
 		memset(buffer, 0, buffer_size);
 		uint8_t bindex = 0;
-		//memcpy(buffer, &dialog_callback, sizeof(dialog_callback));
-		uint32_t addr = (uint32_t)dialog_callback;
+		//memcpy(buffer, &d_callback, sizeof(d_callback));
+		uint32_t addr = (uint32_t)d_callback;
 		buffer[0] = addr >> 24 & 0xFF;
 		buffer[1] = addr >> 16 & 0xFF;
 		buffer[2] = addr >>  8 & 0xFF;

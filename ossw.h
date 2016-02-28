@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define FIRMWARE_VERSION                 "0.5.0-extended"                           /* Firmware version. */
+#define FIRMWARE_VERSION                 "0.5.1-vaspa"                           /* Firmware version. */
 
 const char* ossw_firmware_version(void);
 const char* ossw_mac_address(void);

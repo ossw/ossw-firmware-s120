@@ -3,18 +3,26 @@
 #include "nordic_common.h"
 #include "time.h"
 #include "ext_ram.h"
+#include "app_scheduler.h"
 
 static app_timer_id_t      m_rtc_timer_id;
 
 static uint32_t current_time;
 static bool store_time = false;
 
+void rtc_tick_event(void * p_event_data, uint16_t event_size)
+{
+		scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
+}
+
 static void rtc_timeout_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
 
     current_time++;
     store_time = true;
-    scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
+	
+		uint32_t err_code = app_sched_event_put(NULL, NULL, rtc_tick_event);
+		APP_ERROR_CHECK(err_code);
 }
 
 static uint32_t rtc_load_time(void) {

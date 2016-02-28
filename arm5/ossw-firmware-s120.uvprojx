@@ -552,6 +552,11 @@
           <GroupName>Screens</GroupName>
           <Files>
             <File>
+              <FileName>scr_watchface_analog.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_watchface_analog.c</FilePath>
+            </File>
+            <File>
               <FileName>dialog_option_text.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\dialog_option_text.c</FilePath>
@@ -615,11 +620,6 @@
               <FileName>scr_setalarm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_setalarm.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_watchface_analog.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\screens\scr_watchface_analog.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1329,6 +1329,11 @@
           <GroupName>Screens</GroupName>
           <Files>
             <File>
+              <FileName>scr_watchface_analog.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_watchface_analog.c</FilePath>
+            </File>
+            <File>
               <FileName>dialog_option_text.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\dialog_option_text.c</FilePath>
@@ -1392,11 +1397,6 @@
               <FileName>scr_setalarm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_setalarm.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_watchface_analog.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\screens\scr_watchface_analog.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1994,15 +1994,15 @@
     </packages>
     <apis/>
     <components>
-      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="3.40.0" condition="CMSIS Core">
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="4.2.0"/>
+      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="4.3.0" condition="Cortex-M Device">
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="4.5.0"/>
         <targetInfos>
           <targetInfo name="flash_softdevice"/>
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
       </component>
-      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="7.2.1" condition="nRF51 Series CMSIS Device">
-        <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="7.2.1"/>
+      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.3.2" condition="nRF51 Series CMSIS Device">
+        <package license="License\license.txt" name="nRF_DeviceFamilyPack" schemaVersion="1.3" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.3.2"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
@@ -2170,6 +2170,12 @@
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="app_fifo" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_fifo">
+        <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_Libraries" Cgroup="app_scheduler" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_scheduler_default">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>
@@ -2472,6 +2478,22 @@
         <component Cclass="nRF_Libraries" Cgroup="app_gpiote" Cvariant="Fast_detect" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_gpiote_Fast_detect"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos/>
+      </file>
+      <file attr="config" category="source" name="scheduler\app_scheduler.c" version="3.0.1">
+        <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\app_scheduler.c</instance>
+        <component Cclass="nRF_Libraries" Cgroup="app_scheduler" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_scheduler_default"/>
+        <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="scheduler\app_scheduler.h" version="3.0.1">
+        <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\app_scheduler.h</instance>
+        <component Cclass="nRF_Libraries" Cgroup="app_scheduler" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_scheduler_default"/>
+        <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="nrf51822_xxaa_s120"/>
+        </targetInfos>
       </file>
       <file attr="config" category="source" name="timer\app_timer.c" version="3.0.1">
         <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\app_timer.c</instance>

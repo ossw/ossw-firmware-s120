@@ -24,6 +24,7 @@
 #include "../ossw.h"
 #include "../command.h"
 #include "../vibration.h"
+#include "app_scheduler.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -38,7 +39,7 @@
 #define APP_ADV_TIMEOUT_IN_SECONDS       0		                                     /**< The advertising timeout in units of seconds. */
 
 
-#define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(10000, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
+#define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(60000, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
 
 #define MIN_CONN_INTERVAL                MSEC_TO_UNITS(30, UNIT_1_25_MS)           /**< Minimum acceptable connection interval. */
 #define MAX_CONN_INTERVAL                MSEC_TO_UNITS(75, UNIT_1_25_MS)           /**< Maximum acceptable connection interval. */
@@ -176,6 +177,11 @@ static void battery_level_update(void)
 }
 
 
+void battery_level_update_event(void * p_event_data, uint16_t event_size)
+{
+    battery_level_update();
+}
+
 /**@brief Function for handling the Battery measurement timer timeout.
  *
  * @details This function will be called each time the battery level measurement timer expires.
@@ -186,7 +192,8 @@ static void battery_level_update(void)
 static void battery_level_meas_timeout_handler(void * p_context)
 {
     UNUSED_PARAMETER(p_context);
-    battery_level_update();
+		uint32_t err_code = app_sched_event_put(NULL, NULL, battery_level_update_event);
+		APP_ERROR_CHECK(err_code);
 }
 
 /**@brief Function for the Timer initialization.

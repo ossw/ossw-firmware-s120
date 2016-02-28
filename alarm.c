@@ -1,10 +1,11 @@
 #include "alarm.h"
 #include "vibration.h"
 #include "ext_ram.h"
-#include "i18n\i18n.h"
 #include "rtc.h"
 #include "mlcd_draw.h"
 #include "scr_mngr.h"
+#include "app_scheduler.h"
+#include "i18n\i18n.h"
 #include "screens\dialog_option_text.h"
 
 #define ALARM_VIBRATION		0x0060E738
@@ -74,12 +75,17 @@ bool alarm_button_handler(uint32_t button_id) {
 		return false;
 }
 
-static void alarm_clock_handler(void * p_context) {
-		vibration_vibrate(ALARM_VIBRATION, 20000);
-		pack_dialog_option(&alarm_button_handler, FONT_BIG_REGULAR, I18N_TRANSLATE(MESSAGE_ALARM_CLOCK),
+void fire_alarm(void * p_event_data, uint16_t event_size) {
+		vibration_vibrate(ALARM_VIBRATION, 10000);
+		pack_dialog_option(&alarm_button_handler, FONT_OPTION_NORMAL, I18N_TRANSLATE(MESSAGE_ALARM_CLOCK),
 				I18N_TRANSLATE(MESSAGE_ALARM_SNOOZE), I18N_TRANSLATE(MESSAGE_ALARM_DISMISS), "\0", "\0");
 		scr_mngr_show_screen_with_param(SCR_DIALOG_OPTION, EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS);
 		alarm_snooze();
+}
+
+static void alarm_clock_handler(void * p_context) {
+		uint32_t err_code = app_sched_event_put(NULL, NULL, fire_alarm);
+		APP_ERROR_CHECK(err_code);
 }
 
 void alarm_clock_init(void) {

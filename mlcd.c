@@ -9,6 +9,7 @@
 #include <string.h>
 #include "fs.h"
 #include "nordic_common.h"
+#include "app_scheduler.h"
 
 #define TEMP_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
 
@@ -43,10 +44,16 @@ static uint8_t bit_reverse(uint8_t byte) {
     #endif /* #if (__CORTEX_M >= 0x03) */
 }
 
+void mlcd_off_event(void * p_event_data, uint16_t event_size)
+{
+		mlcd_backlight_off();
+}
+
 void mlcd_bl_timeout_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
 		if (bl_mode == MLCD_BL_ON_TEMP) {
-				mlcd_backlight_off();
+				uint32_t err_code = app_sched_event_put(NULL, NULL, mlcd_off_event);
+				APP_ERROR_CHECK(err_code);
 		}
 }
 

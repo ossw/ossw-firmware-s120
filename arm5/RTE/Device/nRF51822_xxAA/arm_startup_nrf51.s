@@ -34,7 +34,7 @@
                 IF :DEF: __STACK_SIZE
 Stack_Size      EQU     __STACK_SIZE
                 ELSE
-Stack_Size      EQU     1032
+Stack_Size      EQU     1100
                 ENDIF
 
                 AREA    STACK, NOINIT, READWRITE, ALIGN=3
@@ -44,7 +44,7 @@ __initial_sp
                 IF :DEF: __HEAP_SIZE
 Heap_Size       EQU     __HEAP_SIZE
                 ELSE
-Heap_Size       EQU     552
+Heap_Size       EQU     608
                 ENDIF
 
                 AREA    HEAP, NOINIT, READWRITE, ALIGN=3
