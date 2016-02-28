@@ -436,6 +436,10 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     }
 }
 
+void disconnection_alert_event(void * p_event_data, uint16_t event_size)
+{
+		vibration_vibrate(DISCONNECTION_ALERT, 0x0600);
+}
 
 /**@brief Function for handling the Application's BLE Stack events.
  *
@@ -443,6 +447,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
  */
 static void on_ble_evt(ble_evt_t * p_ble_evt)
 {
+		uint32_t err_code;
     switch (p_ble_evt->header.evt_id)
     {
         case BLE_GAP_EVT_CONNECTED:
@@ -451,7 +456,8 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 
         case BLE_GAP_EVT_DISCONNECTED:
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
-						vibration_vibrate(DISCONNECTION_ALERT, 0x0600);
+						err_code = app_sched_event_put(NULL, NULL, disconnection_alert_event);
+						APP_ERROR_CHECK(err_code);
             break;
 
         default:
