@@ -34,11 +34,6 @@ static void scr_watchface_refresh_time() {
 }
 
 static void scr_watchface_init() {
-//	  spiffs_file fd = config_get_default_watch_face_fd();
-//		if (fd >= 0) {
-//				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
-//				scr_mngr_show_screen_with_param(SCR_WATCH_SET, 1<<28 | 2<<24 | fd);
-//		}
 }
 
 static void scr_watchface_draw() {
@@ -55,7 +50,7 @@ static void scr_watchface_draw() {
 		radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), HOUR_L1, HOUR_L2, 7);
 }
 
-static bool scr_status_handle_button_pressed(uint32_t button_id) {
+static bool scr_analog_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK:
 					  scr_mngr_show_screen(SCR_WATCHFACE);
@@ -76,7 +71,7 @@ bool scr_watchface_analog_handle_event(uint32_t event_type, uint32_t event_param
             scr_watchface_refresh_time();
             return true;
 			  case SCR_EVENT_BUTTON_PRESSED:
-				    if (scr_status_handle_button_pressed(event_param))
+				    if (scr_analog_handle_button_pressed(event_param))
 								return true;
     }
 		return watchset_default_watch_face_handle_event(event_type, event_param);

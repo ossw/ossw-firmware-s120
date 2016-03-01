@@ -10,6 +10,8 @@
 #include "../utf8.h"
 #include <stdlib.h> 
 
+#define MARGIN 2
+
 static bool (*dialog_callback)(uint32_t button_id);
 
 static void scr_dialog_draw_screen() {
@@ -26,23 +28,29 @@ static void scr_dialog_draw_screen() {
 		char* data_ptr;
 		if (text_offset != 0) {
 				data_ptr = (char*)(0x80000000 + m_address + text_offset);
-				mlcd_draw_text(data_ptr, 3, 30, MLCD_XRES - 6, 60, font, HORIZONTAL_ALIGN_LEFT | MULTILINE | VERTICAL_ALIGN_CENTER);
+				mlcd_draw_text(data_ptr, MARGIN, 30, MLCD_XRES-2*MARGIN, 60, font, HORIZONTAL_ALIGN_LEFT | MULTILINE | VERTICAL_ALIGN_CENTER);
 		}
 		if (text_up != 0) {
 				data_ptr = (char*)(0x80000000 + m_address + text_up);
-				mlcd_draw_text(data_ptr, 3, 0, MLCD_XRES-6, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
+				mlcd_draw_text(data_ptr, MARGIN, 0, MLCD_XRES-2*MARGIN, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 		if (text_down != 0) {
 				data_ptr = (char*)(0x80000000 + m_address + text_down);
-				mlcd_draw_text(data_ptr, MLCD_XRES/2, MLCD_YRES-30, MLCD_XRES/2, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
+				int x = MARGIN;
+				if (text_back != 0)
+						x = MLCD_XRES >> 1;
+				mlcd_draw_text(data_ptr, x, MLCD_YRES-30, MLCD_XRES-MARGIN-x, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 		if (text_select != 0) {
 				data_ptr = (char*)(0x80000000 + m_address + text_select);
-				mlcd_draw_text(data_ptr, 3, MLCD_YRES/2-15, MLCD_XRES-6, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
+				mlcd_draw_text(data_ptr, MARGIN, MLCD_YRES/2-15, MLCD_XRES-2*MARGIN, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 		if (text_back != 0) {
+				int x = MARGIN;
+				if (text_down != 0)
+						x = MLCD_XRES >> 1;
 				data_ptr = (char*)(0x80000000 + m_address + text_back);
-				mlcd_draw_text(data_ptr, 3, MLCD_YRES-30, MLCD_XRES/2, 30, font, HORIZONTAL_ALIGN_LEFT | VERTICAL_ALIGN_CENTER);
+				mlcd_draw_text(data_ptr, MARGIN, MLCD_YRES-30, MLCD_XRES-MARGIN-x, 30, font, HORIZONTAL_ALIGN_LEFT | VERTICAL_ALIGN_CENTER);
 		}
 }
 

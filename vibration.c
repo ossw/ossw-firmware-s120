@@ -82,11 +82,11 @@ void vibration_vibrate(uint32_t pattern, uint16_t timeout) {
 		}
 	
     uint32_t err_code;
-    err_code = app_timer_start(m_vibration_pattern_timer_id, APP_TIMER_TICKS(step_length, 0), NULL);
+    err_code = app_timer_start(m_vibration_pattern_timer_id, APP_TIMER_TICKS(step_length, APP_TIMER_PRESCALER), NULL);
     APP_ERROR_CHECK(err_code);
 	
 	  if (timeout != 0) {
-				err_code = app_timer_start(m_vibration_timeout_timer_id, APP_TIMER_TICKS(timeout, 0), NULL);
+				err_code = app_timer_start(m_vibration_timeout_timer_id, APP_TIMER_TICKS(timeout, APP_TIMER_PRESCALER), NULL);
 				APP_ERROR_CHECK(err_code);
 		}
 }

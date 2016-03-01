@@ -41,12 +41,12 @@ static void reformat() {
 }
 
 static const MENU_OPTION settings_menu[] = {
+		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm},
 	  {MESSAGE_DATE, opt_handler_change_date},
 		{MESSAGE_TIME, opt_handler_change_time},
 		{MESSAGE_DISPLAY, mlcd_colors_toggle},
 		{MESSAGE_FORMAT, reformat},
-		{MESSAGE_RESTART, NVIC_SystemReset},
-		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm}
+		{MESSAGE_RESTART, NVIC_SystemReset}
 };
 
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);

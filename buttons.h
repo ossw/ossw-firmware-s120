@@ -5,8 +5,7 @@
 #include <stdint.h>
 #include "app_timer.h"
 
-#define APP_TIMER_PRESCALER              0
-#define BUTTON_DETECTION_DELAY           APP_TIMER_TICKS(1, APP_TIMER_PRESCALER)
+#define BUTTON_DETECTION_DELAY           APP_TIMER_TICKS(26, APP_TIMER_PRESCALER)
 #define BUTTON_LONG_PRESS_DELAY          APP_TIMER_TICKS(450, APP_TIMER_PRESCALER)
 
 void buttons_init(void);
