@@ -241,6 +241,10 @@ void mlcd_fb_flush_with_param(bool force_colors) {
     nrf_gpio_pin_clear(MLCD_SPI_SS);
 }
 
+bool is_mlcd_inverted() {
+		return colors_inverted;
+}
+
 void mlcd_colors_toggle(void) {
 		toggle_colors = true;
 }

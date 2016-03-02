@@ -48,6 +48,8 @@ uint32_t mlcd_temp_backlight_timeout(void);
 
 void mlcd_colors_toggle(void);
 
+bool is_mlcd_inverted(void);
+
 void mlcd_switch_vcom(void);
 
 void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height);

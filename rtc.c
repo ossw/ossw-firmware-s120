@@ -6,8 +6,8 @@
 #include "app_scheduler.h"
 
 static app_timer_id_t      m_rtc_timer_id;
-
 static uint32_t current_time;
+static uint16_t rtc_refresh_interval = RTC_INTERVAL_SECOND;
 static bool store_time = false;
 
 void rtc_tick_event(void * p_event_data, uint16_t event_size)
@@ -31,22 +31,26 @@ static uint32_t rtc_load_time(void) {
 		 return (uint32_t)(((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0]);
 }
 
+void rtc_restart_event(void * p_event_data, uint16_t event_size) {
+    uint32_t err_code = app_timer_start(m_rtc_timer_id, rtc_refresh_interval, NULL);
+    APP_ERROR_CHECK(err_code);
+}
+
 void rtc_timer_init(void) {
-    uint32_t err_code;	 
-		
 	  current_time = rtc_load_time();	
-		if (current_time == 0){
+		if (current_time == 0) {
 			  // set initial time
 			  current_time = 1430141820;
 		}
 		
-    err_code = app_timer_create(&m_rtc_timer_id,
+    uint32_t err_code = app_timer_create(&m_rtc_timer_id,
                                 APP_TIMER_MODE_REPEATED,
                                 rtc_timeout_handler);
     APP_ERROR_CHECK(err_code);
-	
-    err_code = app_timer_start(m_rtc_timer_id, RTC_INTERVAL, NULL);
-    APP_ERROR_CHECK(err_code);
+		rtc_restart_event(NULL, 0);
+}
+
+void set_rtc_refresh_interval(uint16_t interval) {
 }
 
 uint32_t rtc_get_current_time(void) {

@@ -2,6 +2,7 @@
 #include <math.h>
 #include "graph.h"
 #include "mlcd.h"
+#include "mlcd_draw.h"
 #include "ext_ram.h"
 
 // Graphics primitives
@@ -347,3 +348,15 @@ void radialRect(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2, uin
 		fillConvex(4, x, y);
 //		tetragon(x0, y0, x1, y1, x2, y2, x3, y3);
 }
+
+void draw_switch(uint8_t x, uint8_t y, bool active) {
+		mlcd_clear_rect(x, y, 34, 15);
+		if (active) {
+				fillCircle(x+26, y+7, 7);
+				mlcd_draw_rect(x+7, y+5, 11, 5);
+		} else {
+				circle(x+7, y+7, 7);
+				mlcd_draw_rect(x+16, y+5, 10, 5);
+		}
+}
+

@@ -27,15 +27,8 @@ static void scr_alarm_draw_minutes() {
 	  mlcd_draw_digit(alarm_minute%10, 112, TIME_Y_POS, 28, 40, 4);
 }
 
-static void scr_alarm_draw_switch() {
-		mlcd_clear_rect(98, 15, 36, 15);
-		if ((alarm_options & 0x80) == 0) {
-				circle(106, 22, 7);
-				mlcd_draw_rect(115, 20, 10, 5);
-		} else {
-				fillCircle(125, 22, 7);
-				mlcd_draw_rect(106, 20, 11, 5);
-		}
+static void scr_alarm_draw_switch(bool active) {
+		draw_switch(98, 15, active);
 }
 
 static void scr_alarm_toggle_day(uint8_t day) {
@@ -79,14 +72,14 @@ static void scr_changetime_draw_all() {
 		
 	  scr_alarm_draw_hour();
 	  scr_alarm_draw_minutes();
-	  scr_alarm_draw_switch();
+	  scr_alarm_draw_switch(alarm_options & 0x80);
 	  scr_alarm_draw_days();
 }
 
 static void scr_changetime_handle_button_up(void) {
 	  if (change_mode == MODE_ACTIVATE) {
 				alarm_options ^= 0x80;
-				scr_alarm_draw_switch();
+				scr_alarm_draw_switch(alarm_options & 0x80);
 		} else if (change_mode == MODE_HOUR) {
 			  if (++alarm_hour > 23) {
 					  alarm_hour = 0;
@@ -109,7 +102,7 @@ static void scr_changetime_handle_button_up(void) {
 static void scr_changetime_handle_button_down(void) {
 	  if (change_mode == MODE_ACTIVATE) {
 				alarm_options ^= 0x80;
-				scr_alarm_draw_switch();
+				scr_alarm_draw_switch(alarm_options & 0x80);
 		} else if (change_mode == MODE_HOUR) {
 			  if(--alarm_hour < 0) {
 					  alarm_hour = 23;

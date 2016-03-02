@@ -2,6 +2,7 @@
 #define GRAPH_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define PI 3.1415926535
 #define PI_2 2*PI
@@ -25,5 +26,7 @@ void fillRectangle(uint_fast8_t x, uint_fast8_t y, uint_fast8_t w, uint_fast8_t 
 void radialLine(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2);
 void radialTriangle(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2, uint_fast8_t thickness);
 void radialRect(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2, uint_fast8_t thickness);
+
+void draw_switch(uint8_t x, uint8_t y, bool active);
 
 #endif /* GRAPH_H */

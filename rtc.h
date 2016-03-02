@@ -6,7 +6,8 @@
 #include "app_timer.h"
 #include "board.h"
 
-#define RTC_INTERVAL                      APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
+#define RTC_INTERVAL_SECOND					APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
+#define RTC_INTERVAL_MINUTE         APP_TIMER_TICKS(60000, APP_TIMER_PRESCALER)
 
 void rtc_timer_init(void);
 

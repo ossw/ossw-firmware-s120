@@ -12,6 +12,21 @@
 
 static app_timer_id_t			alarm_clock_id;
 
+bool is_alarm_active() {
+		uint8_t alarm_options;
+		int8_t 	alarm_hour, alarm_minute;
+		load_alarm_clock(&alarm_options, &alarm_hour, &alarm_minute);
+		return (alarm_options & 0x80) != 0;
+}
+
+void alarm_toggle() {
+		uint8_t alarm_options;
+		int8_t 	alarm_hour, alarm_minute;
+		load_alarm_clock(&alarm_options, &alarm_hour, &alarm_minute);
+		alarm_options ^= 0x80;
+		store_alarm_clock(alarm_options, alarm_hour, alarm_minute);
+}
+
 void load_alarm_clock(uint8_t * alarm_options, int8_t * alarm_hour, int8_t * alarm_minute) {
 	  uint8_t buffer[3];
 		ext_ram_read_data(EXT_RAM_DATA_ALARM, buffer, 3);
