@@ -6,10 +6,12 @@
 #include "app_timer.h"
 #include "board.h"
 
-#define RTC_INTERVAL_SECOND					APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
-#define RTC_INTERVAL_MINUTE         APP_TIMER_TICKS(60000, APP_TIMER_PRESCALER)
+#define RTC_INTERVAL_SECOND					1
+#define RTC_INTERVAL_MINUTE         60
 
 void rtc_timer_init(void);
+uint16_t rtc_get_refresh_interval(void);
+void rtc_set_refresh_interval(uint16_t new_interval);
 
 uint32_t rtc_get_current_time(void);
 void rtc_set_current_time(uint32_t);

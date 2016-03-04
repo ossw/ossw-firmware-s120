@@ -49,6 +49,9 @@ static const I18N_MESSAGE messages_en[] = {
   /*   44 */{"Oct"},
   /*   45 */{"Nov"},
   /*   46 */{"Dec"},
+  /*   47 */{"Refresh"},
+  /*   48 */{"1 s"},
+  /*   49 */{"1 min"}
 };
 
 #endif

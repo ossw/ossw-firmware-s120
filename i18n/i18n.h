@@ -29,6 +29,9 @@
 #define MESSAGE_SUNDAY_1 21
 #define MESSAGE_SUNDAY_3 28
 #define MESSAGE_JANUARY_3 35
+#define MESSAGE_RTC_REFRESH 47
+#define MESSAGE_1_SECOND 48
+#define MESSAGE_1_MINUTE 49
 
 typedef struct
 {

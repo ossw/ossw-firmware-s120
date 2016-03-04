@@ -5,8 +5,8 @@
 #include "ext_ram.h"
 #include "app_scheduler.h"
 
-static app_timer_id_t      m_rtc_timer_id;
-static uint32_t current_time;
+static app_timer_id_t     m_rtc_timer_id;
+static uint32_t						current_time;
 static uint16_t rtc_refresh_interval = RTC_INTERVAL_SECOND;
 static bool store_time = false;
 
@@ -17,22 +17,22 @@ void rtc_tick_event(void * p_event_data, uint16_t event_size)
 
 static void rtc_timeout_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
-
-    current_time++;
+    current_time += rtc_refresh_interval;
     store_time = true;
-	
 		uint32_t err_code = app_sched_event_put(NULL, NULL, rtc_tick_event);
 		APP_ERROR_CHECK(err_code);
 }
 
 static uint32_t rtc_load_time(void) {
-	   uint8_t buffer[4];
-		 ext_ram_read_data(EXT_RAM_DATA_RTC, buffer, 4);
-		 return (uint32_t)(((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0]);
+	  uint8_t buffer[4];
+		ext_ram_read_data(EXT_RAM_DATA_RTC, buffer, 4);
+		return (uint32_t)(((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0]);
 }
 
 void rtc_restart_event(void * p_event_data, uint16_t event_size) {
-    uint32_t err_code = app_timer_start(m_rtc_timer_id, rtc_refresh_interval, NULL);
+    uint32_t err_code = app_timer_stop(m_rtc_timer_id);
+    APP_ERROR_CHECK(err_code);
+    err_code = app_timer_start(m_rtc_timer_id, APP_TIMER_TICKS(1000*rtc_refresh_interval, APP_TIMER_PRESCALER), NULL);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -42,7 +42,6 @@ void rtc_timer_init(void) {
 			  // set initial time
 			  current_time = 1430141820;
 		}
-		
     uint32_t err_code = app_timer_create(&m_rtc_timer_id,
                                 APP_TIMER_MODE_REPEATED,
                                 rtc_timeout_handler);
@@ -50,7 +49,15 @@ void rtc_timer_init(void) {
 		rtc_restart_event(NULL, 0);
 }
 
-void set_rtc_refresh_interval(uint16_t interval) {
+uint16_t rtc_get_refresh_interval() {
+		return rtc_refresh_interval;
+}
+
+void rtc_set_refresh_interval(uint16_t new_interval) {
+		if (new_interval == rtc_refresh_interval)
+				return;
+		rtc_refresh_interval = new_interval;
+		rtc_restart_event(NULL, 0);
 }
 
 uint32_t rtc_get_current_time(void) {

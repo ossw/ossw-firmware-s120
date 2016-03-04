@@ -20,9 +20,12 @@
 static uint8_t h, m, s;
 
 static void scr_watchface_refresh_time() {
-		radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2);
-		s = rtc_get_current_seconds();
-		if (s == 0) {
+		bool slow = rtc_get_refresh_interval() >= RTC_INTERVAL_MINUTE;
+		if (!slow) {
+				radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2);
+				s = rtc_get_current_seconds();
+		}
+		if (s == 0 || slow) {
 				radialTriangle(CENTER_X, CENTER_Y, 6*m, MIN_L1, MIN_L2, 7);
 				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), HOUR_L1, HOUR_L2, 7);
 				m = rtc_get_current_minutes();
@@ -30,7 +33,8 @@ static void scr_watchface_refresh_time() {
 				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), HOUR_L1, HOUR_L2, 7);
 				radialTriangle(CENTER_X, CENTER_Y, 6*m, MIN_L1, MIN_L2, 7);
 		}
-		radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2);
+		if (!slow)
+				radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2);
 }
 
 static void scr_watchface_init() {
@@ -42,8 +46,11 @@ static void scr_watchface_draw() {
 //		fillCircle(CENTER_X, CENTER_Y, 71);
 		for (int deg = 0; deg < 360; deg += 30)
 				radialRect(CENTER_X, CENTER_Y, deg, 60, 70, 3);
+		bool slow = rtc_get_refresh_interval() >= RTC_INTERVAL_MINUTE;
 		s = rtc_get_current_seconds();
-		radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2);
+		if (!slow) {
+				radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2);
+		}
 		m = rtc_get_current_minutes();
 		radialTriangle(CENTER_X, CENTER_Y, 6*m, MIN_L1, MIN_L2, 7); 
 		h = rtc_get_current_hour_12();

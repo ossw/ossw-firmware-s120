@@ -2,6 +2,7 @@
 #include "mlcd_draw.h"
 #include "string.h"
 #include "fs.h"
+#include "rtc.h"
 
 static void limit_int_range(uint32_t* value, uint32_t max_value) {
 	  if(*value > max_value) {
@@ -237,19 +238,26 @@ static void scr_controls_draw_static_rect(SCR_CONTROL_STATIC_RECT_CONFIG* cfg, b
 }
 
 static void scr_controls_draw_internal(const SCR_CONTROLS_DEFINITION* ctrls_def, bool force) {
+		bool show_seconds = rtc_get_refresh_interval() < RTC_INTERVAL_MINUTE;
 	  for (int i=0; i < ctrls_def->controls_no; i++) {
 			  const SCR_CONTROL_DEFINITION* ctrl_def = &ctrls_def->controls[i];
-			
+				
 			  switch(ctrl_def->type) {
-					  case SCR_CONTROL_NUMBER:
-						    scr_controls_draw_number_control((SCR_CONTROL_NUMBER_CONFIG*)ctrl_def->config, force);
-					      break;
+					  case SCR_CONTROL_NUMBER: {
+								SCR_CONTROL_NUMBER_CONFIG* cfg = (SCR_CONTROL_NUMBER_CONFIG*)ctrl_def->config;
+								if (!show_seconds && cfg->data_handle == (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_seconds)
+										break;
+						    scr_controls_draw_number_control(cfg, force);
+					  }   break;
 					  case SCR_CONTROL_TEXT:
 						    scr_controls_draw_text_control((SCR_CONTROL_TEXT_CONFIG*)ctrl_def->config, force);
 					      break;
-					  case SCR_CONTROL_PROGRESS_BAR:
+					  case SCR_CONTROL_PROGRESS_BAR: {
+								SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg = (SCR_CONTROL_PROGRESS_BAR_CONFIG*)ctrl_def->config;
+								if (!show_seconds && cfg->data_handle == (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_seconds)
+										break;
 						    scr_controls_draw_progress_bar_control((SCR_CONTROL_PROGRESS_BAR_CONFIG*)ctrl_def->config, force);
-					      break;
+						}		break;
 						case SCR_CONTROL_STATIC_RECT:
 							  scr_controls_draw_static_rect((SCR_CONTROL_STATIC_RECT_CONFIG*)ctrl_def->config, force);
 					      break;

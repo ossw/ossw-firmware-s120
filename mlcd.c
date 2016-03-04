@@ -242,7 +242,7 @@ void mlcd_fb_flush_with_param(bool force_colors) {
 }
 
 bool is_mlcd_inverted() {
-		return colors_inverted;
+		return colors_inverted != toggle_colors;
 }
 
 void mlcd_colors_toggle(void) {
