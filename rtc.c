@@ -4,22 +4,42 @@
 #include "time.h"
 #include "ext_ram.h"
 #include "app_scheduler.h"
+#include "BLE\ble_peripheral.h"
 
 static app_timer_id_t     m_rtc_timer_id;
 static uint32_t						current_time;
 static uint16_t rtc_refresh_interval = RTC_INTERVAL_SECOND;
+static uint16_t interval;
 static bool store_time = false;
+
+void rtc_restart_event(void * p_event_data, uint16_t event_size) {
+    uint32_t err_code = app_timer_stop(m_rtc_timer_id);
+    APP_ERROR_CHECK(err_code);
+		if (rtc_refresh_interval == RTC_INTERVAL_SECOND) {
+				interval = RTC_INTERVAL_SECOND;
+		} else if (rtc_refresh_interval == RTC_INTERVAL_MINUTE) {
+				interval = RTC_INTERVAL_MINUTE - rtc_get_current_seconds();
+				if (interval == 0)
+						interval = RTC_INTERVAL_MINUTE;
+		}
+		err_code = app_timer_start(m_rtc_timer_id, APP_TIMER_TICKS(1000*interval, APP_TIMER_PRESCALER), NULL);
+		APP_ERROR_CHECK(err_code);
+}
 
 void rtc_tick_event(void * p_event_data, uint16_t event_size)
 {
+    current_time += interval;
+    store_time = true;
 		scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
+		if (interval != rtc_refresh_interval || (rtc_refresh_interval == RTC_INTERVAL_MINUTE && rtc_get_current_seconds() != 0)) {
+				rtc_restart_event(NULL, 0);
+		}
+		if (rtc_get_current_seconds() == 0 && rtc_get_current_minutes()%10 == 0)
+				battery_level_update();
 }
 
 static void rtc_timeout_handler(void * p_context) {
-    UNUSED_PARAMETER(p_context);
-    current_time += rtc_refresh_interval;
-    store_time = true;
-		uint32_t err_code = app_sched_event_put(NULL, NULL, rtc_tick_event);
+		uint32_t err_code = app_sched_event_put(NULL, 0, rtc_tick_event);
 		APP_ERROR_CHECK(err_code);
 }
 
@@ -27,13 +47,6 @@ static uint32_t rtc_load_time(void) {
 	  uint8_t buffer[4];
 		ext_ram_read_data(EXT_RAM_DATA_RTC, buffer, 4);
 		return (uint32_t)(((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0]);
-}
-
-void rtc_restart_event(void * p_event_data, uint16_t event_size) {
-    uint32_t err_code = app_timer_stop(m_rtc_timer_id);
-    APP_ERROR_CHECK(err_code);
-    err_code = app_timer_start(m_rtc_timer_id, APP_TIMER_TICKS(1000*rtc_refresh_interval, APP_TIMER_PRESCALER), NULL);
-    APP_ERROR_CHECK(err_code);
 }
 
 void rtc_timer_init(void) {
