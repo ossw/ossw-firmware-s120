@@ -68,7 +68,7 @@ void fire_alarm() {
 		vibration_vibrate(ALARM_VIBRATION, 20*1000);
 		pack_dialog_option(&alarm_button_handler, FONT_OPTION_BIG, I18N_TRANSLATE(MESSAGE_ALARM_CLOCK),
 				I18N_TRANSLATE(MESSAGE_ALARM_SNOOZE), I18N_TRANSLATE(MESSAGE_ALARM_DISMISS), "\0", "\0");
-		scr_mngr_show_screen_with_param(SCR_DIALOG_OPTION, EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS);
+		scr_mngr_show_screen(SCR_DIALOG_OPTION);
 		snooze_count = SNOOZE_MINUTES;
 }
 

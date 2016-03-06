@@ -15,7 +15,7 @@
 static bool (*dialog_callback)(uint32_t button_id);
 
 static void scr_dialog_draw_screen() {
-	  uint16_t read_address = EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS;
+	  uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
 		dialog_callback = (bool (*)(uint32_t))get_next_int(&read_address);
     uint8_t font = get_next_byte(&read_address);
     uint8_t text_offset = get_next_byte(&read_address);
@@ -24,32 +24,32 @@ static void scr_dialog_draw_screen() {
 	  uint8_t text_select = get_next_byte(&read_address);
 	  uint8_t text_back = get_next_byte(&read_address);
 		
-		uint16_t m_address = EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS;
+		uint32_t m_address = 0x80000000 + EXT_RAM_DATA_DIALOG_TEXT;
 		char* data_ptr;
 		if (text_offset != 0) {
-				data_ptr = (char*)(0x80000000 + m_address + text_offset);
+				data_ptr = (char*)(m_address + text_offset);
 				mlcd_draw_text(data_ptr, MARGIN, 30, MLCD_XRES-2*MARGIN, 60, font, HORIZONTAL_ALIGN_LEFT | MULTILINE | VERTICAL_ALIGN_CENTER);
 		}
 		if (text_up != 0) {
-				data_ptr = (char*)(0x80000000 + m_address + text_up);
+				data_ptr = (char*)(m_address + text_up);
 				mlcd_draw_text(data_ptr, MARGIN, 0, MLCD_XRES-2*MARGIN, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 		if (text_down != 0) {
-				data_ptr = (char*)(0x80000000 + m_address + text_down);
+				data_ptr = (char*)(m_address + text_down);
 				int x = MARGIN;
 				if (text_back != 0)
 						x = MLCD_XRES >> 1;
 				mlcd_draw_text(data_ptr, x, MLCD_YRES-30, MLCD_XRES-MARGIN-x, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 		if (text_select != 0) {
-				data_ptr = (char*)(0x80000000 + m_address + text_select);
+				data_ptr = (char*)(m_address + text_select);
 				mlcd_draw_text(data_ptr, MARGIN, MLCD_YRES/2-15, MLCD_XRES-2*MARGIN, 30, font, HORIZONTAL_ALIGN_RIGHT | VERTICAL_ALIGN_CENTER);
 		}
 		if (text_back != 0) {
 				int x = MARGIN;
 				if (text_down != 0)
 						x = MLCD_XRES >> 1;
-				data_ptr = (char*)(0x80000000 + m_address + text_back);
+				data_ptr = (char*)(m_address + text_back);
 				mlcd_draw_text(data_ptr, MARGIN, MLCD_YRES-30, MLCD_XRES-MARGIN-x, 30, font, HORIZONTAL_ALIGN_LEFT | VERTICAL_ALIGN_CENTER);
 		}
 }
@@ -115,7 +115,7 @@ void pack_dialog_option(bool (*d_callback)(uint32_t), uint8_t font,
 				memcpy(&buffer[offset], op4, len_op4);
 		}
 		
-		ext_ram_write_data(EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS, buffer, buffer_size);
+		ext_ram_write_data(EXT_RAM_DATA_DIALOG_TEXT, buffer, buffer_size);
 }
 
 bool dialog_option_text_handle_event(uint32_t event_type, uint32_t event_param) {
