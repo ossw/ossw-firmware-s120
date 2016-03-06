@@ -38,9 +38,6 @@
 #define APP_ADV_INTERVAL                 600                                        /**< The advertising interval (in units of 0.625 ms.). */
 #define APP_ADV_TIMEOUT_IN_SECONDS       0		                                     /**< The advertising timeout in units of seconds. */
 
-
-//#define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(60000, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
-
 #define MIN_CONN_INTERVAL                MSEC_TO_UNITS(30, UNIT_1_25_MS)           /**< Minimum acceptable connection interval. */
 #define MAX_CONN_INTERVAL                MSEC_TO_UNITS(75, UNIT_1_25_MS)           /**< Maximum acceptable connection interval. */
 
@@ -74,8 +71,6 @@ static ble_bas_t                         m_bas;                                 
 static ble_ossw_t                        m_ossw;   
 
 static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by device manager */
-
-//static app_timer_id_t                    m_battery_timer_id;                        /**< Battery timer. */
 
 #ifdef BLE_DFU_APP_SUPPORT    
 static ble_dfu_t m_dfus; /**< Structure used to identify the DFU service. */
@@ -174,41 +169,6 @@ void battery_level_update(void)
     {
         APP_ERROR_HANDLER(err_code);
     }
-}
-
-
-//void battery_level_update_event(void * p_event_data, uint16_t event_size)
-//{
-//    battery_level_update();
-//}
-
-/**@brief Function for handling the Battery measurement timer timeout.
- *
- * @details This function will be called each time the battery level measurement timer expires.
- *
- * @param[in] p_context  Pointer used for passing some arbitrary information (context) from the
- *                       app_start_timer() call to the timeout handler.
- */
-//static void battery_level_meas_timeout_handler(void * p_context)
-//{
-//    UNUSED_PARAMETER(p_context);
-//		uint32_t err_code = app_sched_event_put(NULL, NULL, battery_level_update_event);
-//		APP_ERROR_CHECK(err_code);
-//}
-
-/**@brief Function for the Timer initialization.
- *
- * @details Initializes the timer module. This creates and starts application timers.
- */
-static void timers_init(void)
-{
-//    uint32_t err_code;
-
-//    // Create timers.
-//    err_code = app_timer_create(&m_battery_timer_id,
-//                                APP_TIMER_MODE_REPEATED,
-//                                battery_level_meas_timeout_handler);
-//    APP_ERROR_CHECK(err_code);
 }
 
 /**@brief Function for the GAP initialization.
@@ -350,18 +310,6 @@ static void services_init(void)
     /** @snippet [DFU BLE Service initialization] */
 #endif // BLE_DFU_APP_SUPPORT
 }
-
-/**@brief Function for starting application timers.
- */
-static void application_timers_start(void)
-{
-//    uint32_t err_code;
-
-//    // Start application timers.
-//    err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
-//    APP_ERROR_CHECK(err_code);
-}
-
 
 /**@brief Function for handling the Connection Parameters Module.
  *
@@ -628,8 +576,6 @@ static void advertising_init(void)
 void ble_peripheral_mode_init(void) { 
     uint32_t err_code;
 	
-    timers_init();
-	
     ble_stack_init();
     device_manager_init();
     gap_params_init();
@@ -640,6 +586,4 @@ void ble_peripheral_mode_init(void) {
     // Start execution.
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
-		
-    application_timers_start();
 }
