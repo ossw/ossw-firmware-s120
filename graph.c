@@ -1,11 +1,11 @@
-#include<stdint.h>
+#include <stdint.h>
 #include <math.h>
 #include "graph.h"
 #include "mlcd.h"
 #include "mlcd_draw.h"
 #include "ext_ram.h"
 
-// Graphics primitives
+// Additional graphics primitives for monochrome LCD
 // Author: Pavel Vasilyev
 
 // each line is 18 bytes long
@@ -350,10 +350,10 @@ void radialRect(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2, uin
 }
 
 void draw_switch(uint8_t x, uint8_t y, bool active) {
-		mlcd_clear_rect(x, y, 34, 15);
+		mlcd_clear_rect(x, y, 30, 15);
 		if (active) {
-				fillCircle(x+26, y+7, 7);
-				mlcd_draw_rect(x+8, y+4, 10, 7);
+				fillCircle(x+22, y+7, 7);
+				mlcd_draw_rect(x+4, y+4, 10, 7);
 		} else {
 				circle(x+7, y+7, 7);
 				mlcd_draw_rect(x+16, y+4, 10, 7);

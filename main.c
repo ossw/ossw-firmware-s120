@@ -183,7 +183,6 @@ int main(void)
     // Initialize.
     timers_init();
 		rtc_timer_init();
-		alarm_clock_init();
 		buttons_init();
 	  battery_init();
 	

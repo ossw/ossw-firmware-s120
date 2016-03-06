@@ -113,8 +113,6 @@ static void scr_changetime_handle_button_down(void) {
 static void scr_changetime_handle_button_select(void) {
 		if (change_mode >= MODE_MINUTE + 7) {
 				store_alarm_clock(alarm_options, alarm_hour, alarm_minute);
-//				mlcd_backlight_off();
-				alarm_clock_reschedule(alarm_options, alarm_hour, alarm_minute);
 				scr_mngr_show_screen(SCR_SETTINGS);
 		} else {
 			  change_mode++;

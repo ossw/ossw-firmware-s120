@@ -4,6 +4,7 @@
 #include "time.h"
 #include "ext_ram.h"
 #include "app_scheduler.h"
+#include "alarm.h"
 #include "BLE\ble_peripheral.h"
 
 static app_timer_id_t     m_rtc_timer_id;
@@ -34,8 +35,11 @@ void rtc_tick_event(void * p_event_data, uint16_t event_size)
 		if (interval != rtc_refresh_interval || (rtc_refresh_interval == RTC_INTERVAL_MINUTE && rtc_get_current_seconds() != 0)) {
 				rtc_restart_event(NULL, 0);
 		}
-		if (rtc_get_current_seconds() == 0 && rtc_get_current_minutes()%10 == 0)
-				battery_level_update();
+		if (rtc_get_current_seconds() == 0) {
+				alarm_clock_handle();
+				if (rtc_get_current_minutes()%10 == 0)
+						battery_level_update();
+		}
 }
 
 static void rtc_timeout_handler(void * p_context) {
