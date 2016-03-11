@@ -79,7 +79,7 @@ static void select_item_handler(uint8_t item) {
 }
 
 static void test_handler() {
-		pack_dialog_select(0, &select_item_handler, FONT_OPTION_BIG, I18N_TRANSLATE(MESSAGE_ABOUT),
+		pack_dialog_select(0, &select_item_handler, FONT_OPTION_NORMAL, I18N_TRANSLATE(MESSAGE_ABOUT),
 				12, "gypq\0TWO\0THREE\0FOUR\0FIVE\0SIX\0SEVEN\0EIGHT\0NINE\0TEN\0ELEVEN\0TWELVE\0");
 		scr_mngr_show_screen(SCR_DIALOG_SELECT);
 }

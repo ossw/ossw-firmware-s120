@@ -12,9 +12,10 @@
 #include "../graph.h"
 
 #define MARGIN					2
-#define SCROLL_HEIGHT		7
+#define SCROLL_HEIGHT		6
 
 static bool redraw = false;
+static uint8_t items_per_page;
 
 static void skip_string_ext_ram(uint8_t no, uint16_t* address_ptr) {
 		while (no-- > 0) {
@@ -37,7 +38,7 @@ static void dialog_select_draw_screen() {
 		get_next_int(&read_address);
     uint8_t font = get_next_byte(&read_address);
 		const FONT_INFO* font_info = mlcd_resolve_font(font);
-		uint8_t item_height = font_info->height;
+		uint8_t item_height = font_info->height + 2;
 		uint8_t title_height = item_height+4;
 
 		uint32_t m_address = 0x80000000;
@@ -47,7 +48,7 @@ static void dialog_select_draw_screen() {
 		fillRectangle(MARGIN, title_height-3, MLCD_XRES-2*MARGIN, 2);
 		skip_string_ext_ram(1, &read_address);
 
-		uint8_t items_per_page = (MLCD_YRES-title_height-2*SCROLL_HEIGHT)/item_height;
+		items_per_page = (MLCD_YRES-MARGIN-title_height)/item_height;
 		uint8_t page_no = item / items_per_page;
 		uint8_t start_item = page_no * items_per_page;
 		skip_string_ext_ram(start_item, &read_address);
@@ -57,18 +58,20 @@ static void dialog_select_draw_screen() {
 		else
 				items_no = items_per_page;
 		// draw the page with selected item
-		uint8_t y = title_height+SCROLL_HEIGHT;
+		uint8_t list_top = title_height +
+			((MLCD_YRES-MARGIN-title_height-item_height*items_per_page)>>1);
+		uint8_t y = list_top;
 		for (int i = 0; i < items_no; i++) {
 				data_ptr = (char*)(m_address + read_address);
 				mlcd_draw_text(data_ptr, MARGIN, y, MLCD_XRES-2*MARGIN, item_height, font, HORIZONTAL_ALIGN_CENTER | VERTICAL_ALIGN_CENTER);
 				y += item_height;
 				skip_string_ext_ram(1, &read_address);
 		}
-		fillRectangle(MARGIN, title_height+SCROLL_HEIGHT+(item-start_item)*item_height, MLCD_XRES-2*MARGIN, item_height);
+		fillRectangle(MARGIN, list_top+(item-start_item)*item_height, MLCD_XRES-2*MARGIN, item_height);
 		if (page_no > 0)
-				fillUp(MLCD_XRES/2, title_height, SCROLL_HEIGHT);
+				fillUp(MLCD_XRES-SCROLL_HEIGHT-MARGIN, MARGIN, SCROLL_HEIGHT);
 		if (page_no + 1 < CEIL(list_size, items_per_page))
-				fillDown(MLCD_XRES/2, MLCD_YRES-1, SCROLL_HEIGHT);
+				fillDown(MLCD_XRES-SCROLL_HEIGHT-MARGIN, MLCD_YRES-MARGIN, SCROLL_HEIGHT);
 }
 
 void pack_dialog_select(uint8_t init, void (*d_callback)(uint8_t), uint8_t font, const char *title, uint8_t list_size, const char *list) {
@@ -140,6 +143,33 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 
 static bool dialog_select_button_long_pressed(uint32_t button_id) {
 	  switch (button_id) {
+			  case SCR_EVENT_PARAM_BUTTON_UP: {
+						uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
+						uint8_t item = get_next_byte(&read_address);
+					  if (item > 0) {
+								if (item < items_per_page)
+										item = 0;
+								else
+										item -= items_per_page;
+								ext_ram_write_data(EXT_RAM_DATA_DIALOG_TEXT, &item, sizeof(item));
+								redraw = true;
+						}
+				    return true;
+					}
+			  case SCR_EVENT_PARAM_BUTTON_DOWN: {
+						uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
+						uint8_t item = get_next_byte(&read_address);
+						uint8_t last = get_next_byte(&read_address)-1;
+					  if (item < last) {
+								if (item + items_per_page > last)
+										item = last;
+								else
+										item += items_per_page;
+								ext_ram_write_data(EXT_RAM_DATA_DIALOG_TEXT, &item, sizeof(item));
+								redraw = true;
+						}
+				    return true;
+					}
 			  case SCR_EVENT_PARAM_BUTTON_SELECT: {
 						uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
 						uint8_t item = get_next_byte(&read_address);
