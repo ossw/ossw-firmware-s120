@@ -562,6 +562,11 @@
               <FilePath>..\screens\dialog_option_text.c</FilePath>
             </File>
             <File>
+              <FileName>dialog_select.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\dialog_select.c</FilePath>
+            </File>
+            <File>
               <FileName>scr_alert_notification.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_alert_notification.c</FilePath>
@@ -1337,6 +1342,11 @@
               <FileName>dialog_option_text.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\dialog_option_text.c</FilePath>
+            </File>
+            <File>
+              <FileName>dialog_select.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\dialog_select.c</FilePath>
             </File>
             <File>
               <FileName>scr_alert_notification.c</FileName>

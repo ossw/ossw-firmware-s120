@@ -10,6 +10,7 @@
 #include "../fs.h"
 #include "../rtc.h"
 #include "../alarm.h"
+#include "dialog_select.h"
 
 #define MARGIN_LEFT 			5
 #define SUMMARY_X					95
@@ -73,6 +74,16 @@ static void rtc_refresh_toggle() {
 				rtc_set_refresh_interval(RTC_INTERVAL_SECOND);
 }
 
+// TEST DIALOG
+static void select_item_handler(uint8_t item) {
+}
+
+static void test_handler() {
+		pack_dialog_select(0, &select_item_handler, FONT_OPTION_BIG, I18N_TRANSLATE(MESSAGE_ABOUT),
+				12, "gypq\0TWO\0THREE\0FOUR\0FIVE\0SIX\0SEVEN\0EIGHT\0NINE\0TEN\0ELEVEN\0TWELVE\0");
+		scr_mngr_show_screen(SCR_DIALOG_SELECT);
+}
+
 static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm, alarm_toggle, draw_alarm_switch},
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
@@ -80,7 +91,8 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_DISPLAY, mlcd_colors_toggle, mlcd_colors_toggle, draw_colors_switch},
 		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},
-		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL}
+		{MESSAGE_ABOUT, test_handler, test_handler, NULL}
+//		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL}
 };
 
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);

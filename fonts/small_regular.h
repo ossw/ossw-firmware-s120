@@ -1333,14 +1333,14 @@ const FONT_CHAR_INFO_LOOKUP smallRegularBlockLookup[] =
 
 const FONT_INFO smallRegularFontInfo =
 {
-	11, //  Character height
+	smallRegularBlockLookup, //  Character descriptor array
+	smallRegularFontBitmaps, //  Character bitmap array
 	'!', //  Start character
 	'~', //  End character
+	11, //  Character height
 	1,
 	2,
-	smallRegularBlockLookup, //  Character descriptor array
 	1,
-	smallRegularFontBitmaps, //  Character bitmap array
 };
 
 #endif /* SMALL_REGULAR_FONT_H */

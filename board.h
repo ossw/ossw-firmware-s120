@@ -82,4 +82,6 @@ extern uint32_t * p_spi1_base_address;
 #define RX_PIN_NUMBER  15
 #define TX_PIN_NUMBER  16
 
+#define CEIL(x, y) ((x % y) ? x / y + 1 : x / y)
+
 #endif // WATCH_BOARD_H

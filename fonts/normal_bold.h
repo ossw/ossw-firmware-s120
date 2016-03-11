@@ -1803,14 +1803,14 @@ const FONT_CHAR_INFO_LOOKUP normalBoldFontBlockLookup[] =
 
 const FONT_INFO normalBoldFontInfo =
 {
-	16, //  Character height
+	normalBoldFontBlockLookup, //  Character descriptor array
+	normalBoldFontBitmaps, //  Character bitmap array
 	'!', //  Start character
 	'~', //  End character
+	16, //  Character height
 	1,
 	2,
-	normalBoldFontBlockLookup, //  Character descriptor array
-	1,
-	normalBoldFontBitmaps //  Character bitmap array
+	1
 };
 
 #endif /* NORMAL_BOLD_FONT_H */

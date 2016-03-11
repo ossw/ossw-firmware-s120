@@ -10,7 +10,7 @@
 #include "fonts/option_normal.h"
 #include "fonts/option_big.h"
 
-static uint8_t digits[] = {0x3F, 0x6, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x7, 0x7F, 0x6F};
+static const uint8_t digits[] = {0x3F, 0x6, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x7, 0x7F, 0x6F};
 
 static uint8_t draw_width;
 static uint8_t draw_height;
@@ -186,7 +186,7 @@ static uint_fast8_t mlcd_draw_char(uint32_t c, uint_fast8_t x, uint_fast8_t y, u
    return char_width; 
 }
 
-static const FONT_INFO* mlcd_resolve_font(uint_fast8_t font_type) {
+const FONT_INFO* mlcd_resolve_font(uint_fast8_t font_type) {
 	 switch (font_type & 0x1F) {
 		 case FONT_SMALL_REGULAR:
 			 return &smallRegularFontInfo;

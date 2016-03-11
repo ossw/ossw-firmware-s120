@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h> 
 #include "dialog_option_text.h"
 #include "../scr_mngr.h"
 #include "../scr_controls.h"
@@ -8,11 +9,10 @@
 #include "../mlcd.h"
 #include "../ext_ram.h"
 #include "../utf8.h"
-#include <stdlib.h> 
 
 #define MARGIN 2
 
-static bool (*dialog_callback)(uint32_t button_id);
+static bool (*dialog_callback)(uint32_t);
 
 static void scr_dialog_draw_screen() {
 	  uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;

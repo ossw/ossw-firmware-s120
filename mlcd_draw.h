@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "fonts/font.h"
 #include "mlcd.h"
 
 #define FONT_SMALL_REGULAR    1
@@ -39,5 +40,7 @@ void mlcd_draw_arrow_down(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t w
 void mlcd_draw_rect_border(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness);
 
 uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t x, uint_fast8_t y, uint_fast8_t width, uint_fast8_t height, uint_fast8_t font_type, uint8_t alignment);
+
+const FONT_INFO* mlcd_resolve_font(uint_fast8_t font_type);
 
 #endif /* MLCD_DRAW_H */

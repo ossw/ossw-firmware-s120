@@ -16,6 +16,7 @@
 #include "screens/scr_watchface_analog.h"
 #include "screens/scr_setalarm.h"
 #include "screens/dialog_option_text.h"
+#include "screens/dialog_select.h"
 #include "mlcd.h"
 #include "stopwatch.h"
 #include "config.h"
@@ -171,6 +172,9 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 				    break;
 			  case SCR_DIALOG_OPTION:
 				    handled = dialog_option_text_handle_event(event_type, event_param);
+				    break;
+			  case SCR_DIALOG_SELECT:
+				    handled = dialog_select_handle_event(event_type, event_param);
 				    break;
 				case SCR_NOT_SET:
 					  return;

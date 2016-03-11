@@ -298,6 +298,18 @@ void fillRectangle(uint_fast8_t x, uint_fast8_t y, uint_fast8_t w, uint_fast8_t 
 		}
 }
 
+void fillUp(uint_fast8_t x, uint_fast8_t y, uint_fast8_t h) {
+		for (uint_fast8_t i = 0; i < h; i++) {
+				hLine(y+i, x-i, x+i);
+		}
+}
+
+void fillDown(uint_fast8_t x, uint_fast8_t y, uint_fast8_t h) {
+		for (uint_fast8_t i = 0; i < h; i++) {
+				hLine(y-i, x-i, x+i);
+		}
+}
+
 void radialLine(int16_t cx, int16_t cy, int16_t deg, int16_t r1, int16_t r2) {
 		float angle = DEG_TO_RAD(deg);
 		float sa = sin(angle);

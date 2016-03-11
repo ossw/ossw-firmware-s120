@@ -68,7 +68,7 @@ void vibration_vibrate(uint32_t pattern, uint16_t timeout) {
 			  vibration_motor_off();
 				return;
 		}
-		step_counter = ceil(timeout/step_length);
+		step_counter = CEIL(timeout, step_length);
 	  vibration_next_step(NULL, 0);
 
     uint32_t err_code;
