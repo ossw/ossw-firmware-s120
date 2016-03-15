@@ -1,120 +1,56 @@
 #include "accel.h"
 #include "nrf_drv_gpiote.h"
 #include "app_error.h"
-//#include "nrf_drv_twi.h"
-//#include "app_util_platform.h"
 #include "twi_master.h"
 #include "board.h"
 #include "mlcd.h"
-#include "nrf_delay.h"
 #include "app_timer.h"
 #include "mlcd.h"
-#include "scr_mngr.h"
-#include "ble/ble_peripheral.h"
+#include "nordic_common.h"
+#include <nrf_delay.h>
+#include "time.h"
 
 #define DEFAULT_I2C_ADDR 0x1D
+//#define ACC_INTERVAL                      APP_TIMER_TICKS(30, APP_TIMER_PRESCALER)
+    
+//static volatile int8_t xVal = 0;
+//static volatile int8_t yVal = 0;
+//static volatile int8_t zVal = 0;
 
+//static app_timer_id_t      m_acc_timer_id;
+void accel_write_register(uint8_t reg, uint8_t value);
+void accel_read_register(uint8_t reg, uint8_t* value);
+void accel_read_multi_register(uint8_t reg, uint8_t* value, uint8_t legth);
+
+/*
+static void accel_timeout_handler(void * p_context) {
+	uint8_t trans_src;
+	int8_t data[3];
+	accel_read_register(0x1E, &trans_src);
+	accel_read_multi_register(0x01, (uint8_t*)data, 3);
+	xVal = data[0];
+	yVal = data[1];
+	zVal = data[2];
+}
+*/
+/*
 static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-		uint8_t int_src;
-		accel_read_register(0x0C, &int_src);
-//		uint8_t sysmod;
-//		accel_read_register(0x0B, &sysmod);
-/*		switch(pin) {
-			case ACCEL_INT1:
-					mlcd_backlight_toggle();
-					break;
-			case ACCEL_INT2:
-					mlcd_colors_toggle();
-					break;
-		}*/
-				#ifdef OSSW_DEBUG
-//						printf("SYSMOD: 0x%02x\r\n", sysmod);
-				#endif
-	
-		
-				#ifdef OSSW_DEBUG
-						printf("INT_SRC: 0x%02x\r\n", int_src);
-				#endif
 
-				
-		if (int_src & 0x08) {
-
-				uint8_t pulse_src;
-				accel_read_register(0x22, &pulse_src);
-
-		//		if (pulse_src>>6&0x1) {
-		//				mlcd_backlight_toggle();
-	//			}
-				//mlcd_backlight_temp_on();
-				scr_mngr_handle_event(SCR_EVENT_WRIST_SHAKE, 0);
-				#ifdef OSSW_DEBUG
-			printf("PULSE_SRC: [x:%d, y:%d, z:%d, dbl: %d]\r\n", (pulse_src>>4&0x1)*(pulse_src&0x1?-1:1), (pulse_src>>5&0x1)*(pulse_src>>1&0x1?-1:1), (pulse_src>>6&0x1)*(pulse_src>>2&0x1?-1:1), pulse_src>>3&0x1);
-				#endif
-		}
-	/*	if (int_src & 0x80) {
-				printf("ASLEEP\r\n");
-		}
-		if (int_src & 0x20) {
-
-				uint8_t trans_src;
-				accel_read_register(0x1E, &trans_src);
-			
-				int8_t data[3];
-				uint8_t yMod;
-				accel_read_multi_register(0x01, (uint8_t*)data, 3);
-			
-				yMod = abs(data[1]);
-			
-				if (data[0] < -50 && data[2]>30) {
-						// first part of whirst move
-						app_timer_cnt_get(&wirst_start);
-				} else if (data[0] > 0 && data[2]<30 && yMod <= 20) {
-						// second part of whirst move
-						if (wirst_start != 0) {
-								uint32_t curr;
-								app_timer_cnt_get(&curr);
-								uint32_t diff;
-								app_timer_cnt_diff_compute(curr, wirst_start, &diff);
-							
-				#ifdef OSSW_DEBUG
-			//			printf("DIFF: 0x%06x\r\n", diff);
-				#endif
-							
-								if (diff<=WHIRST_MOVE_MAX_TIME) {
-										mlcd_backlight_temp_on();
-								}
-						}
-						wirst_start = 0;		
-				}			
-			
-				#ifdef OSSW_DEBUG
-		//				printf("DATA: [x:%d, y:%d, z:%d]\r\n", data[0], data[1], data[2]);
-				#endif
-			
-			
-			
-				#ifdef OSSW_DEBUG
-		//	printf("TRANS_SRC: [x:%d, y:%d, z:%d]\r\n", (trans_src>>1&0x1)*(trans_src&0x1?-1:1), (trans_src>>3&0x1)*(trans_src>>2&0x1?-1:1), (trans_src>>5&0x1)*(trans_src>>4&0x1?-1:1));
-				#endif
-		}*/
-	/*	if (int_src & 0x10) {
-
-				uint8_t lndc_src;
-				accel_read_register(0x10, &lndc_src);
-
-				#ifdef OSSW_DEBUG
-						printf("SRC_LNDPRT: 0x%02x\r\n", lndc_src);
-				#endif
-			
-		}*/
-		
-	//	accel_read_register(0x0B, &sysmod);
-		#ifdef OSSW_DEBUG
-	//			printf("SYSMOD: 0x%02x\r\n", sysmod);
-		#endif
 }
+*/
 
+void accel_get_values(int8_t * x, int8_t * y, int8_t * z) {
+	uint8_t trans_src;
+	int8_t data[3];
+	accel_read_register(0x1E, &trans_src);
+	accel_read_multi_register(0x01, (uint8_t*)data, 3);
+	*x = data[0];
+	*y = data[1];
+	*z = data[2];
+}
+	
+/*
 static uint32_t accel_int_init(uint8_t pin_no)
 {
     uint32_t err_code;
@@ -139,15 +75,27 @@ static uint32_t accel_int_init(uint8_t pin_no)
     nrf_drv_gpiote_in_event_enable(pin_no, true);
 		return NRF_SUCCESS;
 }
-
+*/
+/*
+void accel_init_timer() {
+		uint32_t err_code;
+		err_code = app_timer_create(&m_acc_timer_id,
+                                APP_TIMER_MODE_REPEATED,
+                                accel_timeout_handler);
+    APP_ERROR_CHECK(err_code);
+	
+    err_code = app_timer_start(m_acc_timer_id, ACC_INTERVAL, NULL);
+    APP_ERROR_CHECK(err_code);
+}
+*/
 void accel_init(void) {
 		twi_master_init();
 	
-    uint32_t err_code;
+    //uint32_t err_code;
 		//err_code = accel_int_init(ACCEL_INT1);
     //APP_ERROR_CHECK(err_code);
-		err_code = accel_int_init(ACCEL_INT2);
-    APP_ERROR_CHECK(err_code);
+		//err_code = accel_int_init(ACCEL_INT2);
+    //APP_ERROR_CHECK(err_code);
 	
 		//0x2B: CTRL_REG2 System Control 2 register
 		//reset
