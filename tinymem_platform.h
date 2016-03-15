@@ -66,7 +66,7 @@
  *
  *                  Each index uses sizeof(tm_index_t) * 2 bytes of data
  */
-#define TM_POOL_INDEXES        (64)
+#define TM_POOL_INDEXES        (32)
 
 /*---------------------------------------------------------------------------*/
 /**
@@ -102,7 +102,7 @@
  *                      < 65536                      | uint16_t
  *                      >=65536                      | INVALID
  */
-#define TM_POOL_SIZE            ((128 + 1)*TM_BLOCK_SIZE - TM_BLOCK_SIZE)
+#define TM_POOL_SIZE            ((86 + 1)*TM_BLOCK_SIZE - TM_BLOCK_SIZE)
 
 /*---------------------------------------------------------------------------*/
 /**
