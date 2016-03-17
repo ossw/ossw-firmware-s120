@@ -14,6 +14,8 @@
 #define MARGIN					2
 #define SCROLL_HEIGHT		6
 
+static void (*dialog_callback)(uint8_t);
+static uint16_t dialog_input;
 static bool redraw = false;
 static uint8_t items_per_page;
 
@@ -23,29 +25,21 @@ static void skip_string_ext_ram(uint8_t no, uint16_t* address_ptr) {
 		}
 }
 
-static void execute_callback(uint8_t param) {
-		uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
-		get_next_short(&read_address);
-		void (*dialog_callback)(uint8_t) = (void (*)(uint8_t))get_next_int(&read_address);
-		dialog_callback(param);
-}
-
 static void dialog_select_draw_screen() {
 		mlcd_clear_rect(0, 0, MLCD_XRES, MLCD_YRES);
-	  uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
+		uint16_t read_address = dialog_input;
 		uint8_t item = get_next_byte(&read_address);
 		uint8_t list_size = get_next_byte(&read_address);
-		get_next_int(&read_address);
     uint8_t font = get_next_byte(&read_address);
 		const FONT_INFO* font_info = mlcd_resolve_font(font);
 		uint8_t item_height = font_info->height + 2;
-		uint8_t title_height = item_height+4;
+		uint8_t title_height = item_height+2;
 
 		uint32_t m_address = 0x80000000;
 		char* data_ptr;
 		data_ptr = (char*)(m_address + read_address);
 		mlcd_draw_text(data_ptr, 0, 0, MLCD_XRES, item_height, font, HORIZONTAL_ALIGN_CENTER);
-		fillRectangle(MARGIN, title_height-3, MLCD_XRES-2*MARGIN, 2);
+		fillRectangle(MARGIN, item_height-1, MLCD_XRES-2*MARGIN, 2);
 		skip_string_ext_ram(1, &read_address);
 
 		items_per_page = (MLCD_YRES-MARGIN-title_height)/item_height;
@@ -74,7 +68,12 @@ static void dialog_select_draw_screen() {
 				fillDown(MLCD_XRES-SCROLL_HEIGHT-MARGIN, MLCD_YRES-MARGIN, SCROLL_HEIGHT);
 }
 
+void dialog_select_init(void (*d_callback)(uint8_t)) {
+		dialog_callback = d_callback;
+}
+
 void pack_dialog_select(uint8_t init, void (*d_callback)(uint8_t), uint8_t font, const char *title, uint8_t list_size, const char *list) {
+		dialog_callback = d_callback;
 		uint8_t len_title = strlen(title);
 		uint8_t buffer_size = sizeof(init) + 4 + sizeof(font) + len_title+1 + sizeof(list_size);
 		uint16_t shift = 0;
@@ -89,12 +88,6 @@ void pack_dialog_select(uint8_t init, void (*d_callback)(uint8_t), uint8_t font,
 		bindex += sizeof(init);
 		buffer[bindex] = list_size;
 		bindex += sizeof(list_size);
-		//memcpy(buffer, &d_callback, sizeof(d_callback));
-		uint32_t addr = (uint32_t)d_callback;
-		buffer[bindex++] = addr >> 24 & 0xFF;
-		buffer[bindex++] = addr >> 16 & 0xFF;
-		buffer[bindex++] = addr >>  8 & 0xFF;
-		buffer[bindex++] = addr & 0xFF;
 		buffer[bindex] = font;
 		bindex += sizeof(font);
 		memcpy(buffer+bindex, title, ++len_title);
@@ -106,35 +99,36 @@ void pack_dialog_select(uint8_t init, void (*d_callback)(uint8_t), uint8_t font,
 static bool dialog_select_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK: {
-						execute_callback(CANCEL);
-					  scr_mngr_show_screen(SCR_WATCHFACE);
+						dialog_callback(CANCEL);
+					  set_modal_dialog(false);
 				    return true;
 					}
 			  case SCR_EVENT_PARAM_BUTTON_UP: {
-						uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
+						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
 					  if (item > 0) {
 								item--;
-								ext_ram_write_data(EXT_RAM_DATA_DIALOG_TEXT, &item, sizeof(item));
+								ext_ram_write_data(dialog_input, &item, sizeof(item));
 								redraw = true;
 						}
 				    return true;
 					}
 			  case SCR_EVENT_PARAM_BUTTON_DOWN: {
-						uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
+						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
 						uint8_t last = get_next_byte(&read_address)-1;
 					  if (item < last) {
 								item++;
-								ext_ram_write_data(EXT_RAM_DATA_DIALOG_TEXT, &item, sizeof(item));
+								ext_ram_write_data(dialog_input, &item, sizeof(item));
 								redraw = true;
 						}
 				    return true;
 					}
 			  case SCR_EVENT_PARAM_BUTTON_SELECT: {
-						uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
+						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
-					  execute_callback(item);
+					  dialog_callback(item);
+					  set_modal_dialog(false);
 				    return true;
 					}
 		}
@@ -144,20 +138,20 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 static bool dialog_select_button_long_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_UP: {
-						uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
+						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
 					  if (item > 0) {
 								if (item < items_per_page)
 										item = 0;
 								else
 										item -= items_per_page;
-								ext_ram_write_data(EXT_RAM_DATA_DIALOG_TEXT, &item, sizeof(item));
+								ext_ram_write_data(dialog_input, &item, sizeof(item));
 								redraw = true;
 						}
 				    return true;
 					}
 			  case SCR_EVENT_PARAM_BUTTON_DOWN: {
-						uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
+						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
 						uint8_t last = get_next_byte(&read_address)-1;
 					  if (item < last) {
@@ -165,15 +159,15 @@ static bool dialog_select_button_long_pressed(uint32_t button_id) {
 										item = last;
 								else
 										item += items_per_page;
-								ext_ram_write_data(EXT_RAM_DATA_DIALOG_TEXT, &item, sizeof(item));
+								ext_ram_write_data(dialog_input, &item, sizeof(item));
 								redraw = true;
 						}
 				    return true;
 					}
 			  case SCR_EVENT_PARAM_BUTTON_SELECT: {
-						uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
+						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
-					  execute_callback(item);
+					  dialog_callback(item);
 						return true;
 				}
 		}
@@ -190,6 +184,7 @@ static void dialog_select_refresh_screen() {
 bool dialog_select_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
+						dialog_input = event_param;
 				    return true;
         case SCR_EVENT_DRAW_SCREEN:
             dialog_select_draw_screen();

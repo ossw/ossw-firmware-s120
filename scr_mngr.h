@@ -75,6 +75,8 @@ void scr_mngr_show_notifications(void);
 
 void scr_mngr_close_notifications(void);
 
+void set_modal_dialog(bool);
+
 uint8_t scr_mngr_current_screen(void);
 
 void scr_mngr_redraw(void);

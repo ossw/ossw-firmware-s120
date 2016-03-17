@@ -18,9 +18,12 @@
 #define NOTIFICATIONS_PREV_PART							          0x33
 #define NOTIFICATIONS_OPEN							              0x34
 
+#define DIALOG_RESULT										              0x35
+
 #define NOTIFICATIONS_TYPE_ALERT 											1
 #define NOTIFICATIONS_TYPE_INFO												2
 #define NOTIFICATIONS_TYPE_UPDATE											3
+#define NOTIFICATIONS_TYPE_DIALOG_SELECT							4
 
 #define NOTIFICATIONS_CATEGORY_SUMMARY								0
 #define NOTIFICATIONS_CATEGORY_INCOMING_CALL					1

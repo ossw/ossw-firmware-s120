@@ -13,6 +13,10 @@
 
 static int8_t snooze_count = -1;
 
+bool is_alarm_running() {
+		return snooze_count > -1;
+}
+
 bool is_alarm_active() {
 		uint8_t alarm_options;
 		int8_t 	alarm_hour, alarm_minute;
@@ -55,17 +59,20 @@ bool alarm_button_handler(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 						vibration_stop();
 						snooze_count = SNOOZE_MINUTES;
+						set_modal_dialog(false);
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 						vibration_stop();
 						snooze_count = -1;
+						set_modal_dialog(false);
 				    return true;
 		}
 		return false;
 }
 
 void fire_alarm() {
-		vibration_vibrate(ALARM_VIBRATION, 20*1000);
+		set_modal_dialog(true);
+		vibration_vibrate(ALARM_VIBRATION, 40*1000);
 		pack_dialog_option(&alarm_button_handler, FONT_OPTION_BIG, I18N_TRANSLATE(MESSAGE_ALARM_CLOCK),
 				I18N_TRANSLATE(MESSAGE_ALARM_SNOOZE), I18N_TRANSLATE(MESSAGE_ALARM_DISMISS), "\0", "\0");
 		scr_mngr_show_screen(SCR_DIALOG_OPTION);

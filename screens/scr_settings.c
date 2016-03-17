@@ -10,6 +10,7 @@
 #include "../fs.h"
 #include "../rtc.h"
 #include "../alarm.h"
+#include "../ext_ram.h"
 #include "dialog_select.h"
 
 #define MARGIN_LEFT 			5
@@ -81,7 +82,7 @@ static void select_item_handler(uint8_t item) {
 static void test_handler() {
 		pack_dialog_select(0, &select_item_handler, FONT_OPTION_NORMAL, I18N_TRANSLATE(MESSAGE_ABOUT),
 				12, "gypq\0TWO\0THREE\0FOUR\0FIVE\0SIX\0SEVEN\0EIGHT\0NINE\0TEN\0ELEVEN\0TWELVE\0");
-		scr_mngr_show_screen(SCR_DIALOG_SELECT);
+		scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_DIALOG_TEXT);
 }
 
 static const MENU_OPTION settings_menu[] = {

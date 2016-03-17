@@ -16,7 +16,7 @@ static bool (*dialog_callback)(uint32_t);
 
 static void scr_dialog_draw_screen() {
 	  uint16_t read_address = EXT_RAM_DATA_DIALOG_TEXT;
-		dialog_callback = (bool (*)(uint32_t))get_next_int(&read_address);
+//		dialog_callback = (bool (*)(uint32_t))get_next_int(&read_address);
     uint8_t font = get_next_byte(&read_address);
     uint8_t text_offset = get_next_byte(&read_address);
 		uint8_t text_up = get_next_byte(&read_address);
@@ -56,6 +56,7 @@ static void scr_dialog_draw_screen() {
 
 void pack_dialog_option(bool (*d_callback)(uint32_t), uint8_t font,
 		const char * title, const char *op1, const char *op2, const char *op3, const char *op4) {
+		dialog_callback = d_callback;
 		uint8_t len_title = strlen(title)+1;
 		uint8_t len_op1 = strlen(op1)+1;
 		uint8_t len_op2 = strlen(op2)+1;
@@ -77,12 +78,12 @@ void pack_dialog_option(bool (*d_callback)(uint32_t), uint8_t font,
 		memset(buffer, 0, buffer_size);
 		uint8_t bindex = 0;
 		//memcpy(buffer, &d_callback, sizeof(d_callback));
-		uint32_t addr = (uint32_t)d_callback;
-		buffer[0] = addr >> 24 & 0xFF;
-		buffer[1] = addr >> 16 & 0xFF;
-		buffer[2] = addr >>  8 & 0xFF;
-		buffer[3] = addr & 0xFF;
-		bindex += sizeof(addr);
+//		uint32_t addr = (uint32_t)d_callback;
+//		buffer[0] = addr >> 24 & 0xFF;
+//		buffer[1] = addr >> 16 & 0xFF;
+//		buffer[2] = addr >>  8 & 0xFF;
+//		buffer[3] = addr & 0xFF;
+//		bindex += sizeof(addr);
 		buffer[bindex] = font;
 		bindex += sizeof(font);
 		if (len_title > 1) {

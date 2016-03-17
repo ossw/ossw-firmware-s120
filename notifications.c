@@ -8,6 +8,7 @@
 #include "ext_ram.h"
 #include "nrf_soc.h"
 #include "board.h"
+#include "screens/dialog_select.h"
 
 static app_timer_id_t      m_notifications_alert_timer_id;
 static uint16_t m_current_alert_notification_id = 0;
@@ -48,6 +49,11 @@ void copy_notification_info_data(uint16_t address, uint16_t size) {
 		}
 }
 
+static void send_select_result(uint8_t item) {
+		if (item < 0xFF)
+				ble_peripheral_invoke_notification_function_with_data(DIALOG_RESULT, &item, sizeof(item));
+}
+
 void notifications_handle_data(uint16_t address, uint16_t size) {
 		uint8_t notification_type = get_next_byte(&address);
 	 	switch (notification_type) {
@@ -74,6 +80,11 @@ void notifications_handle_data(uint16_t address, uint16_t size) {
 								copy_notification_info_data(address, size - 1);
 							  notifications_info_update();
 						}
+						break;
+				case NOTIFICATIONS_TYPE_DIALOG_SELECT:
+						dialog_select_init(send_select_result);
+						set_modal_dialog(true);
+						scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS+1);
 						break;
 		}
 }
