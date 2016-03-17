@@ -27,7 +27,7 @@ static uint32_t switch_to_screen_param = 0;
 static uint32_t scr_alert_notification_address = 0;
 static uint8_t switch_to_screen = SCR_NOT_SET;
 static uint8_t current_screen = SCR_NOT_SET;
-static uint8_t old_screen = SCR_NOT_SET;
+static uint8_t previous_screen = SCR_NOT_SET;
 
 static uint8_t scr_notifications_state = SCR_NOTIFICATIONS_STATE_NONE;
 static uint8_t scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_NONE;
@@ -39,7 +39,7 @@ void set_modal_dialog(bool state) {
 		modal_dialog = state;
 		if (!state) {
 				// temporal fix, need a queue to save all the history of screens
-				switch_to_screen = old_screen;
+				switch_to_screen = previous_screen;
 				scr_mngr_draw_ctx draw_ctx;
 				draw_ctx.force_colors = false;
 				scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
@@ -232,6 +232,8 @@ void scr_mngr_show_screen_with_param(uint16_t screen_id, uint32_t param) {
 }
 
 void scr_mngr_show_screen(uint16_t screen_id) {
+		if (screen_id == previous_screen)
+				return;
 	  switch_to_screen = screen_id;
 	  switch_to_screen_param = NULL;
 }
@@ -286,7 +288,8 @@ void scr_mngr_draw_screen(void) {
 				}
 		} else {
 				if (switch_to_screen != SCR_NOT_SET) {
-						old_screen = current_screen;
+						previous_screen = current_screen;
+						uint8_t old_screen = current_screen;
 						uint16_t new_screen;
 						// disable events
 						current_screen = SCR_NOT_SET;
