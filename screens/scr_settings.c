@@ -16,6 +16,7 @@
 #define MARGIN_LEFT 			5
 #define SUMMARY_X					95
 #define MENU_ITEM_HEIGHT	20
+#define MENU_ITEMS_PER_PAGE 7
 
 static int8_t selectedOption = 0;
 static int8_t lastSelectedOption = 0xFF;
@@ -92,8 +93,8 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_DISPLAY, mlcd_colors_toggle, mlcd_colors_toggle, draw_colors_switch},
 		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},
+		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL},
 		{MESSAGE_ABOUT, test_handler, test_handler, NULL}
-//		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL}
 };
 
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);
@@ -103,17 +104,23 @@ static void draw_option(const char *text, uint_fast8_t yPos) {
 }
 
 static void scr_settings_draw_options() {
-		int menu_size = sizeof(settings_menu)/sizeof(MENU_OPTION);
-		uint_fast8_t yPos = 22;  
-		for (int i=0; i<menu_size; i++) {
-				void (*s_drawer)(uint8_t x, uint8_t y) = settings_menu[i].summary_drawer;
-						draw_option(I18N_TRANSLATE(settings_menu[i].message_key), yPos);
-						if (i==selectedOption)
-								fillRectangle(0, yPos-2, SUMMARY_X-2*MARGIN_LEFT, MENU_ITEM_HEIGHT);
-						if (s_drawer != NULL)
-								s_drawer(SUMMARY_X, yPos);
-						yPos += MENU_ITEM_HEIGHT;
-				}
+		uint_fast8_t yPos = 22;
+		uint8_t page_no = selectedOption / MENU_ITEMS_PER_PAGE;
+		uint8_t start_item = page_no * MENU_ITEMS_PER_PAGE;
+		uint8_t items_no;
+		if (SIZE_OF_MENU - start_item < MENU_ITEMS_PER_PAGE)
+				items_no = SIZE_OF_MENU - start_item;
+		else
+				items_no = MENU_ITEMS_PER_PAGE;
+		for (int i=0; i<items_no; i++) {
+				void (*s_drawer)(uint8_t x, uint8_t y) = settings_menu[start_item+i].summary_drawer;
+				draw_option(I18N_TRANSLATE(settings_menu[start_item+i].message_key), yPos);
+				if (start_item+i==selectedOption)
+						fillRectangle(0, yPos-2, SUMMARY_X-2*MARGIN_LEFT, MENU_ITEM_HEIGHT);
+				if (s_drawer != NULL)
+						s_drawer(SUMMARY_X, yPos);
+				yPos += MENU_ITEM_HEIGHT;
+		}
 }
 
 static void scr_settings_refresh_screen() {
@@ -128,7 +135,7 @@ static void scr_settings_refresh_screen() {
 }
 
 static void scr_settings_init() {
-		selectedOption = 0;
+		//selectedOption = 0;
 		lastSelectedOption = 0xFF;
 	
 		spiffs_file fd = SPIFFS_open(&fs, "u/settings", SPIFFS_RDONLY, 0);
