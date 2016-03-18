@@ -232,7 +232,7 @@ void scr_mngr_show_screen_with_param(uint16_t screen_id, uint32_t param) {
 }
 
 void scr_mngr_show_screen(uint16_t screen_id) {
-		if (screen_id == previous_screen)
+		if (screen_id == current_screen)
 				return;
 	  switch_to_screen = screen_id;
 	  switch_to_screen_param = NULL;
