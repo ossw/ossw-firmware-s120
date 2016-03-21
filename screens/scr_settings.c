@@ -14,6 +14,8 @@
 #include "dialog_select.h"
 
 #define MARGIN_LEFT 			5
+#define SCROLL_HEIGHT			6
+#define HEADER_HEIGHT			18
 #define SUMMARY_X					95
 #define MENU_ITEM_HEIGHT	20
 #define MENU_ITEMS_PER_PAGE 7
@@ -104,7 +106,7 @@ static void draw_option(const char *text, uint_fast8_t yPos) {
 }
 
 static void scr_settings_draw_options() {
-		uint_fast8_t yPos = 22;
+		uint_fast8_t yPos = HEADER_HEIGHT+4;
 		uint8_t page_no = selectedOption / MENU_ITEMS_PER_PAGE;
 		uint8_t start_item = page_no * MENU_ITEMS_PER_PAGE;
 		uint8_t items_no;
@@ -121,6 +123,14 @@ static void scr_settings_draw_options() {
 						s_drawer(SUMMARY_X, yPos);
 				yPos += MENU_ITEM_HEIGHT;
 		}
+		if (page_no > 0)
+				fillUp(MLCD_XRES/2, HEADER_HEIGHT-SCROLL_HEIGHT-1, SCROLL_HEIGHT);
+		if (page_no + 1 < CEIL(SIZE_OF_MENU, MENU_ITEMS_PER_PAGE))
+				fillDown(MLCD_XRES/2, MLCD_YRES-2, SCROLL_HEIGHT);
+		if (lastSelectedOption / MENU_ITEMS_PER_PAGE == 1 && page_no == 0) {
+				mlcd_clear_rect(0, 0, MLCD_XRES, HEADER_HEIGHT);
+				scr_mngr_draw_notification_bar();
+		}
 }
 
 static void scr_settings_refresh_screen() {
@@ -128,7 +138,7 @@ static void scr_settings_refresh_screen() {
 	
 		int8_t curr_opt = selectedOption;
 	  if (lastSelectedOption != curr_opt) {
-				mlcd_clear_rect(0, 18, MLCD_XRES, MLCD_YRES-18);
+				mlcd_clear_rect(0, HEADER_HEIGHT, MLCD_XRES, MLCD_YRES-HEADER_HEIGHT);
 				scr_settings_draw_options();
 	  }
 		lastSelectedOption = curr_opt;
@@ -153,7 +163,7 @@ static void scr_settings_draw_screen() {
 static void scr_refresh_summary() {
 		void (*s_drawer)(uint8_t, uint8_t) = settings_menu[selectedOption].summary_drawer;
 		if (s_drawer != NULL) {
-				mlcd_clear_rect(0, 20+MENU_ITEM_HEIGHT*selectedOption, MLCD_XRES, MENU_ITEM_HEIGHT);
+				mlcd_clear_rect(0, 2+HEADER_HEIGHT+MENU_ITEM_HEIGHT*selectedOption, MLCD_XRES, MENU_ITEM_HEIGHT);
 				scr_settings_draw_options();
 		}
 }
