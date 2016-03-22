@@ -2,6 +2,7 @@
 #include "mlcd_draw.h"
 #include "string.h"
 #include "fs.h"
+#include "pedometer_ac.h"
 
 static void limit_int_range(uint32_t* value, uint32_t max_value) {
 	  if(*value > max_value) {
@@ -249,12 +250,18 @@ static void scr_controls_draw_internal(const SCR_CONTROLS_DEFINITION* ctrls_def,
 					      break;
 					  case SCR_CONTROL_PROGRESS_BAR:
 						    scr_controls_draw_progress_bar_control((SCR_CONTROL_PROGRESS_BAR_CONFIG*)ctrl_def->config, force);
+								
 					      break;
 						case SCR_CONTROL_STATIC_RECT:
 							  scr_controls_draw_static_rect((SCR_CONTROL_STATIC_RECT_CONFIG*)ctrl_def->config, force);
 					      break;
 				}
 		}
+		char buf[30];
+		
+		mlcd_clear_rect(2, 20, 30, 15);
+		snprintf(buf, sizeof(buf), "%i", pedometerACGetSteps());
+		mlcd_draw_text(buf, 2, 20, MLCD_XRES-20, 15, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_LEFT);
 }
 
 void scr_controls_draw(const SCR_CONTROLS_DEFINITION* ctrls_def) {

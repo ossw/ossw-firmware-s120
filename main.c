@@ -32,6 +32,7 @@
 #include "accel.h"
 #include "watchset.h"
 #include "config.h"
+#include "pedometer_ac.h"
 
 #ifdef OSSW_DEBUG
 		#include "app_uart.h"
@@ -196,7 +197,7 @@ int main(void)
 		notifications_init();
 		
 		stopwatch_init();
-		
+		pedometerACInitTimer();
 		mlcd_timers_init();
 		
     // Enter main loop.
@@ -213,6 +214,8 @@ int main(void)
 				watchset_process_async_operation();
 			  
 				scr_mngr_draw_screen();
+				
+				pedometerACProcess();
 				
         power_manage();
     }
