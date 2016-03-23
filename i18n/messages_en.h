@@ -50,8 +50,10 @@ static const I18N_MESSAGE messages_en[] = {
   /*   45 */{"Nov"},
   /*   46 */{"Dec"},
   /*   47 */{"Refresh"},
-  /*   48 */{"1 s"},
-  /*   49 */{"1 min"}
+  /*   48 */{"1s"},
+  /*   49 */{"1min"},
+  /*   50 */{"Shake light"},
+  /*   51 */{"Notif light"}
 };
 
 #endif

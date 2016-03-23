@@ -7,6 +7,7 @@
 #include "../mlcd.h"
 #include "../ext_ram.h"
 #include "../utf8.h"
+#include "../config.h"
 #include "../i18n/i18n.h"
 #include "../ble/ble_peripheral.h"
 #include <stdlib.h> 
@@ -112,7 +113,8 @@ static void scr_notifications_draw_screen() {
 					
 						char* data_ptr = (char*)(0x80000000 + read_address);
 						mlcd_draw_text(data_ptr, 3, 3,  MLCD_XRES - 6, MLCD_YRES - 6, font, HORIZONTAL_ALIGN_LEFT | MULTILINE);
-						mlcd_backlight_temp_on();
+						if (get_settings(CONFIG_NOTIFICATION_LIGHT))
+								mlcd_backlight_short();
 				}
 						break;
 				case NOTIFICATIONS_CATEGORY_SUMMARY:
@@ -127,7 +129,8 @@ static void scr_notifications_draw_screen() {
 								}
 								mlcd_draw_digit(notification_count / 10U, MARGIN_SUMMARY, SUMMARY2_Y, SIZE_SUMMARY2_X, SIZE_SUMMARY2_Y, 11);
 								mlcd_draw_digit(notification_count % 10U, (MLCD_XRES>>1)+MARGIN_SUMMARY, SUMMARY2_Y, SIZE_SUMMARY2_X, SIZE_SUMMARY2_Y, 11);
-								mlcd_backlight_temp_on();
+								if (get_settings(CONFIG_NOTIFICATION_LIGHT))
+										mlcd_backlight_short();
 						}
 				}
 						break;

@@ -11,11 +11,12 @@
 #include "nordic_common.h"
 #include "app_scheduler.h"
 
-#define TEMP_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
+#define SHORT_BL_TIMEOUT_UNIT           APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
+#define LONG_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(300*1000, APP_TIMER_PRESCALER)
 
-#define MLCD_BL_OFF 			0x0
-#define MLCD_BL_ON 				0x1
-#define MLCD_BL_ON_TEMP 	0x10
+#define MLCD_BL_OFF 			0x00
+#define MLCD_BL_LONG 			0x01
+#define MLCD_BL_SHORT			0x10
 
 #define MLCD_IS_LINE_CHANGED(line_no) (fb_line_changes[line_no>>3]>>(line_no&0x7) & 0x1)
 #define MLCD_SET_LINE_CHANGED(line_no) (fb_line_changes[line_no>>3]|=1<<(line_no&0x7))
@@ -51,10 +52,8 @@ void mlcd_off_event(void * p_event_data, uint16_t event_size)
 
 void mlcd_bl_timeout_handler(void * p_context) {
     UNUSED_PARAMETER(p_context);
-		if (bl_mode == MLCD_BL_ON_TEMP) {
-				uint32_t err_code = app_sched_event_put(NULL, NULL, mlcd_off_event);
-				APP_ERROR_CHECK(err_code);
-		}
+		uint32_t err_code = app_sched_event_put(NULL, NULL, mlcd_off_event);
+		APP_ERROR_CHECK(err_code);
 }
 
 void mlcd_init(void)
@@ -105,26 +104,26 @@ void mlcd_backlight_off(void)
   nrf_gpio_pin_clear(LCD_BACKLIGHT);
 }
 
-void mlcd_backlight_on(void)
+void mlcd_backlight_long(void)
 {
 	app_timer_stop(mlcd_bl_timer_id);
-	bl_mode = MLCD_BL_ON;
+	bl_mode = MLCD_BL_LONG;
   nrf_gpio_pin_set(LCD_BACKLIGHT);
 }
 
-void mlcd_backlight_temp_on(void) {
-	if (bl_mode == MLCD_BL_ON) {
+void mlcd_backlight_short(void) {
+	if (bl_mode == MLCD_BL_LONG) {
 			return;
 	}
 	app_timer_stop(mlcd_bl_timer_id);
-	bl_mode = MLCD_BL_ON_TEMP;
+	bl_mode = MLCD_BL_SHORT;
   nrf_gpio_pin_set(LCD_BACKLIGHT);
-	app_timer_start(mlcd_bl_timer_id, temp_bl_timeout * TEMP_BL_TIMEOUT_UNIT, NULL);
+	app_timer_start(mlcd_bl_timer_id, temp_bl_timeout * SHORT_BL_TIMEOUT_UNIT, NULL);
 }
 
-void mlcd_backlight_temp_extend(void) {
-		if (bl_mode == MLCD_BL_ON_TEMP) {
-				mlcd_backlight_temp_on();
+void mlcd_backlight_extend(void) {
+		if (bl_mode == MLCD_BL_SHORT) {
+				mlcd_backlight_short();
 		}
 }
 
@@ -132,13 +131,13 @@ void mlcd_backlight_toggle(void)
 {
 	switch (bl_mode) {
 			case MLCD_BL_OFF:
-					mlcd_backlight_on();
+					mlcd_backlight_long();
 					break;
-			case MLCD_BL_ON:
+			case MLCD_BL_LONG:
 					mlcd_backlight_off();
 					break;
-			case MLCD_BL_ON_TEMP:
-					mlcd_backlight_on();
+			case MLCD_BL_SHORT:
+					mlcd_backlight_long();
 					break;
 	}
 }

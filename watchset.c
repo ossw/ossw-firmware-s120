@@ -208,7 +208,7 @@ void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
 				    mlcd_colors_toggle();
 			      break;
 				case WATCH_SET_FUNC_TEMPORARY_BACKLIGHT:
-						mlcd_backlight_temp_on();
+						mlcd_backlight_short();
 						break;
 			  case WATCH_SET_FUNC_SHOW_SETTINGS:
 				    scr_mngr_show_screen(SCR_SETTINGS);

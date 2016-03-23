@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include "fs.h"
 
+#define CONFIG_DISCONNECT_ALERT			1
+#define CONFIG_NOTIFICATION_LIGHT		2
+
 typedef struct {
 		uint8_t action_id;
 		uint8_t parameter;
@@ -29,5 +32,13 @@ int config_get_handler_index_from_event(uint32_t event_type, uint32_t event_para
 void config_set_default_global_actions(default_action* actions);
 
 void config_set_default_watchface_actions(default_action* actions);
+
+bool get_settings(uint32_t mask);
+
+void settings_toggle(uint32_t mask);
+
+void settings_on(uint32_t mask);
+
+void settings_off(uint32_t mask);
 
 #endif /* CONFIGUTARION_H */

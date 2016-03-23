@@ -30,15 +30,15 @@ void mlcd_display_on(void);
 
 void mlcd_display_off(void);
 
-void mlcd_backlight_on(void);
+void mlcd_backlight_long(void);
 
 void mlcd_backlight_off(void);
 
 void mlcd_backlight_toggle(void);
 
-void mlcd_backlight_temp_on(void);
+void mlcd_backlight_short(void);
 
-void mlcd_backlight_temp_extend(void);
+void mlcd_backlight_extend(void);
 
 void mlcd_temp_backlight_timeout_inc(void);
 

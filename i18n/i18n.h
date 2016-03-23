@@ -32,6 +32,8 @@
 #define MESSAGE_RTC_REFRESH 47
 #define MESSAGE_1_SECOND 48
 #define MESSAGE_1_MINUTE 49
+#define MESSAGE_SHAKE_LIGHT 50
+#define MESSAGE_NOTIF_LIGHT 51
 
 typedef struct
 {

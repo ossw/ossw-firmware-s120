@@ -11,14 +11,17 @@
 #include "../rtc.h"
 #include "../alarm.h"
 #include "../ext_ram.h"
+#include "../config.h"
+#include "../watchset.h"
 #include "dialog_select.h"
 
-#define MARGIN_LEFT 			5
+#define MARGIN_LEFT 			3
 #define SCROLL_HEIGHT			6
 #define HEADER_HEIGHT			18
-#define SUMMARY_X					95
+#define SUMMARY_X					100
 #define MENU_ITEM_HEIGHT	20
 #define MENU_ITEMS_PER_PAGE 7
+#define MENU_SWITCH_PADDING_X 10
 
 static int8_t selectedOption = 0;
 static int8_t lastSelectedOption = 0xFF;
@@ -55,12 +58,23 @@ static void reformat() {
 
 static void draw_alarm_switch(uint8_t x, uint8_t y) {
 		bool on = is_alarm_active();
-		draw_switch(x+10, y+2, on);
+		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
+static void draw_shake_light_switch(uint8_t x, uint8_t y) {
+		default_action* default_actions = config_get_default_global_actions();
+		bool on = default_actions[8].action_id;
+		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
+static void draw_notif_light_switch(uint8_t x, uint8_t y) {
+		bool on = get_settings(CONFIG_NOTIFICATION_LIGHT);
+		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
 static void draw_colors_switch(uint8_t x, uint8_t y) {
 		bool on = is_mlcd_inverted();
-		draw_switch(x+10, y+2, on);
+		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
 static void draw_interval_summary(uint8_t x, uint8_t y) {
@@ -78,6 +92,19 @@ static void rtc_refresh_toggle() {
 				rtc_set_refresh_interval(RTC_INTERVAL_SECOND);
 }
 
+static void notif_light_toggle() {
+		settings_toggle(CONFIG_NOTIFICATION_LIGHT);
+}
+
+static void shake_light_toggle() {
+		default_action* default_actions = config_get_default_global_actions();
+		if (default_actions[8].action_id == 0)
+				default_actions[8].action_id = WATCH_SET_FUNC_TEMPORARY_BACKLIGHT;
+		else
+				default_actions[8].action_id = 0;
+		config_set_default_global_actions(default_actions);
+}
+
 // TEST DIALOG
 static void select_item_handler(uint8_t item) {
 }
@@ -90,10 +117,12 @@ static void test_handler() {
 
 static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm, alarm_toggle, draw_alarm_switch},
+		{MESSAGE_DISPLAY, mlcd_colors_toggle, mlcd_colors_toggle, draw_colors_switch},
+		{MESSAGE_SHAKE_LIGHT, shake_light_toggle, shake_light_toggle, draw_shake_light_switch},
+		{MESSAGE_NOTIF_LIGHT, notif_light_toggle, notif_light_toggle, draw_notif_light_switch},
+		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
 		{MESSAGE_TIME, opt_handler_change_time, opt_handler_change_time, NULL},
-		{MESSAGE_DISPLAY, mlcd_colors_toggle, mlcd_colors_toggle, draw_colors_switch},
-		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},
 		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL},
 		{MESSAGE_ABOUT, test_handler, test_handler, NULL}
@@ -101,8 +130,13 @@ static const MENU_OPTION settings_menu[] = {
 
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);
 
-static void draw_option(const char *text, uint_fast8_t yPos) {
-  	mlcd_draw_text(text, MARGIN_LEFT, yPos, MLCD_XRES, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_LEFT);
+static void draw_option(uint_fast8_t item, uint_fast8_t yPos) {
+  	mlcd_draw_text(I18N_TRANSLATE(settings_menu[item].message_key), MARGIN_LEFT, yPos, MLCD_XRES-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_LEFT);
+		void (*s_drawer)(uint8_t x, uint8_t y) = settings_menu[item].summary_drawer;
+		if (s_drawer != NULL)
+				s_drawer(SUMMARY_X, yPos);
+		if (item == selectedOption)
+				fillRectangle(0, yPos-2, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT);
 }
 
 static void scr_settings_draw_options() {
@@ -115,12 +149,7 @@ static void scr_settings_draw_options() {
 		else
 				items_no = MENU_ITEMS_PER_PAGE;
 		for (int i=0; i<items_no; i++) {
-				void (*s_drawer)(uint8_t x, uint8_t y) = settings_menu[start_item+i].summary_drawer;
-				draw_option(I18N_TRANSLATE(settings_menu[start_item+i].message_key), yPos);
-				if (start_item+i==selectedOption)
-						fillRectangle(0, yPos-2, SUMMARY_X-2*MARGIN_LEFT, MENU_ITEM_HEIGHT);
-				if (s_drawer != NULL)
-						s_drawer(SUMMARY_X, yPos);
+				draw_option(start_item+i, yPos);
 				yPos += MENU_ITEM_HEIGHT;
 		}
 		if (page_no > 0)
@@ -163,8 +192,10 @@ static void scr_settings_draw_screen() {
 static void scr_refresh_summary() {
 		void (*s_drawer)(uint8_t, uint8_t) = settings_menu[selectedOption].summary_drawer;
 		if (s_drawer != NULL) {
-				mlcd_clear_rect(0, 2+HEADER_HEIGHT+MENU_ITEM_HEIGHT*selectedOption, MLCD_XRES, MENU_ITEM_HEIGHT);
-				scr_settings_draw_options();
+//				scr_settings_draw_options();
+				uint_fast8_t yPos = HEADER_HEIGHT+MENU_ITEM_HEIGHT*(selectedOption%MENU_ITEMS_PER_PAGE);
+				mlcd_clear_rect(0, yPos+2, MLCD_XRES, MENU_ITEM_HEIGHT);
+				draw_option(selectedOption, yPos+4);
 		}
 }
 
