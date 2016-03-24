@@ -102,35 +102,54 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 						dialog_callback(CANCEL);
 					  set_modal_dialog(false);
 				    return true;
-					}
+				}
 			  case SCR_EVENT_PARAM_BUTTON_UP: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
 					  if (item > 0) {
 								item--;
+								uint8_t list_size = get_next_byte(&read_address);
+								uint8_t font = get_next_byte(&read_address);
+								const FONT_INFO* font_info = mlcd_resolve_font(font);
+								uint8_t item_height = font_info->height + 2;
+								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
+								if (item/items_per_page == (item+1)/items_per_page) {
+										// same page, move selection only
+										uint8_t list_top = item_height + 2 + ((MLCD_YRES-MARGIN-item_height*(items_per_page+1)-2)>>1);
+										fillRectangle(MARGIN, list_top+(item % items_per_page)*item_height, MLCD_XRES-2*MARGIN, item_height<<1);
+								} else
+										redraw = true;
 								ext_ram_write_data(dialog_input, &item, sizeof(item));
-								redraw = true;
 						}
 				    return true;
-					}
+				}
 			  case SCR_EVENT_PARAM_BUTTON_DOWN: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
 						uint8_t last = get_next_byte(&read_address)-1;
 					  if (item < last) {
+								uint8_t font = get_next_byte(&read_address);
+								const FONT_INFO* font_info = mlcd_resolve_font(font);
+								uint8_t item_height = font_info->height + 2;
+								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
+								if (item/items_per_page == (item+1)/items_per_page) {
+										// same page, move selection only
+										uint8_t list_top = item_height + 2 + ((MLCD_YRES-MARGIN-item_height*(items_per_page+1)-2)>>1);
+										fillRectangle(MARGIN, list_top+(item % items_per_page)*item_height, MLCD_XRES-2*MARGIN, item_height<<1);
+								} else
+										redraw = true;
 								item++;
 								ext_ram_write_data(dialog_input, &item, sizeof(item));
-								redraw = true;
 						}
 				    return true;
-					}
+				}
 			  case SCR_EVENT_PARAM_BUTTON_SELECT: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
 					  dialog_callback(item);
 					  set_modal_dialog(false);
 				    return true;
-					}
+				}
 		}
 		return false;
 }
