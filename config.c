@@ -14,7 +14,8 @@
 #define OFFSET_GLOBAL_ACTION_HANLDERS (OFFSET_CUSTOM_WATCHSET+(SPIFFS_OBJ_NAME_LEN*CUSTOM_WATCHSET_NUMBER))
 #define OFFSET_WATCH_FACE_ACTION_HANLDERS (OFFSET_GLOBAL_ACTION_HANLDERS + (9 * 2))
 
-static uint32_t settings;
+#define SETTINGS_SIZE 1
+
 static default_action default_global_actions[9];
 static default_action default_watchface_actions[9];
 
@@ -152,17 +153,24 @@ int config_get_handler_index_from_event(uint32_t event_type, uint32_t event_para
 }
 
 bool get_settings(uint32_t mask) {
+		uint32_t settings = get_ext_ram_int(EXT_RAM_SETTINGS);
 		return settings & mask;
 }
 
 void settings_toggle(uint32_t mask) {
+		uint32_t settings = get_ext_ram_int(EXT_RAM_SETTINGS);
 		settings ^= mask;
+		put_ext_ram_int(EXT_RAM_SETTINGS, settings);
 }
 
 void settings_on(uint32_t mask) {
+		uint32_t settings = get_ext_ram_int(EXT_RAM_SETTINGS);
 		settings |= mask;
+		put_ext_ram_int(EXT_RAM_SETTINGS, settings);
 }
 
 void settings_off(uint32_t mask) {
+		uint32_t settings = get_ext_ram_int(EXT_RAM_SETTINGS);
 		settings &= ~mask;
+		put_ext_ram_int(EXT_RAM_SETTINGS, settings);
 }

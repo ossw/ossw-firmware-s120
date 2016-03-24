@@ -57,3 +57,14 @@ uint32_t get_next_int(uint16_t *ptr) {
 	  (*ptr)+=4;		
 	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
 }
+
+uint32_t get_ext_ram_int(uint16_t address) {
+    uint8_t data[4];
+	  ext_ram_read_data(address, data, 4);
+	  return data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
+}
+
+void put_ext_ram_int(uint16_t address, uint32_t value) {
+    uint8_t data[4] = {value>>24, value>>16&0xFF, value>>8&0xFF, value&0xFF};
+	  ext_ram_write_data(address, data, 4);
+}

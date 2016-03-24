@@ -7,6 +7,8 @@
 
 #define CONFIG_DISCONNECT_ALERT			1
 #define CONFIG_NOTIFICATION_LIGHT		2
+#define CONFIG_DISPLAY_INVERT				4
+#define CONFIG_SLOW_REFRESH					8
 
 typedef struct {
 		uint8_t action_id;

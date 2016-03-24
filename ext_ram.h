@@ -15,11 +15,12 @@
 #define EXT_RAM_HOLD_DISABLE         0x01
 #define EXT_RAM_HOLD_ENABLE          0x00
 
-#define EXT_RAM_PAGE_SIZE 0x20
+#define EXT_RAM_PAGE_SIZE						 0x20
 
-#define EXT_RAM_DATA_FRAME_BUFFER    0x0 // 0x0000 - 0x0BCF
+#define EXT_RAM_DATA_FRAME_BUFFER    0x0000 // 0x0000 - 0x0BCF
 #define EXT_RAM_DATA_RTC             0x0BD0 // 0x0BD0 - 0x0BD3
-#define EXT_RAM_DATA_ALARM					 0x0BE0 // 0x0BE0 - 0x0BE2
+#define EXT_RAM_DATA_ALARM					 0x0BD4 // 0x0BD4 - 0x0BD6
+#define EXT_RAM_SETTINGS						 0x0BD7 // 0x0BD7 - 
 
 #define EXT_RAM_CONFIG							 0x0C00 // 0x0C00 - 0x0CDF
 
@@ -48,5 +49,9 @@ uint8_t get_next_byte(uint16_t *ptr);
 uint16_t get_next_short(uint16_t *ptr);
 
 uint32_t get_next_int(uint16_t *ptr);
+
+uint32_t get_ext_ram_int(uint16_t address);
+
+void put_ext_ram_int(uint16_t address, uint32_t value);
 
 #endif /* EXT_RAM_H */
