@@ -15,6 +15,7 @@
 #include "screens/scr_status.h"
 #include "screens/scr_watchface_analog.h"
 #include "screens/scr_setalarm.h"
+#include "screens/scr_timer.h"
 #include "screens/dialog_option_text.h"
 #include "screens/dialog_select.h"
 #include "mlcd.h"
@@ -180,6 +181,9 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 				    break;
 			  case SCR_SET_ALARM:
 				    handled = scr_set_alarm_handle_event(event_type, event_param);
+				    break;
+			  case SCR_TIMER:
+				    handled = scr_timer_handle_event(event_type, event_param);
 				    break;
 			  case SCR_DIALOG_OPTION:
 				    handled = dialog_option_text_handle_event(event_type, event_param);

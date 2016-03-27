@@ -8,6 +8,7 @@
 #include "../alarm.h"
 
 #define TIME_Y_POS    		60
+#define ARROW_HEIGHT			8
 #define MODE_HOUR     		0x01
 #define MODE_MINUTE	  		0x02
 
@@ -34,8 +35,8 @@ static void scr_alarm_draw_day(uint8_t day) {
 		uint8_t day_mask = 1<<day;
 		mlcd_draw_text(I18N_TRANSLATE(MESSAGE_SUNDAY_1+day), 3+day*20, 130, 18, 18, FONT_BIG_REGULAR, HORIZONTAL_ALIGN_CENTER);
 		if (day == rtc_get_current_day_of_week()-1)
-				hLine(146, 4+day*20, 18+day*20);
-		if ((alarm_options & day_mask) != 0)
+				fillRectangle(146, 4+day*20, 18+day*20, 2);
+		if (alarm_options & day_mask)
 				scr_alarm_toggle_day(day);
 }
 
@@ -51,18 +52,18 @@ static void scr_alarm_draw_days() {
 }
 
 static void scr_changetime_draw_all() {
-	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_ALARM_CLOCK), 10, 10, 80, NULL, FONT_OPTION_BIG, HORIZONTAL_ALIGN_LEFT);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_ALARM_CLOCK), 10, 5, 80, NULL, FONT_OPTION_BIG, HORIZONTAL_ALIGN_LEFT);
 //	  mlcd_draw_rect(0, 25, MLCD_XRES, 2);
 	
 	  mlcd_draw_rect(69, TIME_Y_POS + 24, 5, 5);
 	  mlcd_draw_rect(69, TIME_Y_POS + 10, 5, 5);
 	
 	  if (change_mode == MODE_HOUR) {
-			  mlcd_draw_arrow_up(24, TIME_Y_POS + 45, 20, 10, 4);
-			  mlcd_draw_arrow_down(24, TIME_Y_POS - 15, 20, 10, 4);
+			  fillDown(34, TIME_Y_POS + 52, ARROW_HEIGHT);
+			  fillUp(34, TIME_Y_POS - 13, ARROW_HEIGHT);
 		} else if (change_mode == MODE_MINUTE) {
-			  mlcd_draw_arrow_up(100, TIME_Y_POS + 45, 20, 10, 4);
-			  mlcd_draw_arrow_down(100, TIME_Y_POS - 15, 20, 10, 4);
+			  fillDown(110, TIME_Y_POS + 52, ARROW_HEIGHT);
+			  fillUp(110, TIME_Y_POS - 13, ARROW_HEIGHT);
 		}
 		
 	  scr_alarm_draw_hour();

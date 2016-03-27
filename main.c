@@ -34,6 +34,7 @@
 #include "config.h"
 #include "alarm.h"
 #include "app_scheduler.h"
+#include "screens\scr_timer.h"
 
 #ifdef OSSW_DEBUG
 		#include "app_uart.h"
@@ -199,6 +200,7 @@ int main(void)
 		notifications_init();
 		
 		stopwatch_init();
+		timer_feature_init();
 		
 		mlcd_timers_init();
 		

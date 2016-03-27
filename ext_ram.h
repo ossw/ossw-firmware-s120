@@ -22,6 +22,7 @@
 #define EXT_RAM_DATA_ALARM					 0x0BD4 // 0x0BD4 - 0x0BD6
 #define EXT_RAM_SETTINGS						 0x0BD7 // 0x0BD7 - 
 
+#define EXT_RAM_TIMER_0							 0x0BF8 // 0x0BF8 - 0x0BFF
 #define EXT_RAM_CONFIG							 0x0C00 // 0x0C00 - 0x0CDF
 
 #define EXT_RAM_DATA_STOPWATCH_RECALL				0x0CE0 // 0x0CE0 - 0x0E6F
@@ -49,6 +50,10 @@ uint8_t get_next_byte(uint16_t *ptr);
 uint16_t get_next_short(uint16_t *ptr);
 
 uint32_t get_next_int(uint16_t *ptr);
+
+uint16_t get_ext_ram_short(uint16_t address);
+
+void put_ext_ram_short(uint16_t address, uint16_t value);
 
 uint32_t get_ext_ram_int(uint16_t address);
 

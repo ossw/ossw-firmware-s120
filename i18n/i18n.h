@@ -34,6 +34,10 @@
 #define MESSAGE_1_MINUTE 49
 #define MESSAGE_SHAKE_LIGHT 50
 #define MESSAGE_NOTIF_LIGHT 51
+#define MESSAGE_TIMER				52
+#define MESSAGE_HOURS				53
+#define MESSAGE_MINUTES			54
+#define MESSAGE_SECONDS			55
 
 typedef struct
 {

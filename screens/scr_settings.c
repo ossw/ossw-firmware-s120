@@ -45,6 +45,10 @@ static void opt_handler_change_time() {
 //    scr_mngr_show_screen(SCR_ABOUT);
 //};
 
+static void opt_handler_timer() {
+		scr_mngr_show_screen(SCR_TIMER);
+};
+
 static void opt_handler_set_alarm() {
 		scr_mngr_show_screen(SCR_SET_ALARM);
 };
@@ -85,11 +89,8 @@ static void draw_interval_summary(uint8_t x, uint8_t y) {
 }
 
 static void rtc_refresh_toggle() {
-		uint16_t interval = rtc_get_refresh_interval();
-		if (interval == RTC_INTERVAL_SECOND)
-				rtc_set_refresh_interval(RTC_INTERVAL_MINUTE);
-		else
-				rtc_set_refresh_interval(RTC_INTERVAL_SECOND);
+		settings_toggle(CONFIG_SLOW_REFRESH);
+		rtc_toggle_refresh_interval();
 }
 
 static void notif_light_toggle() {
@@ -116,6 +117,7 @@ static void test_handler() {
 }
 
 static const MENU_OPTION settings_menu[] = {
+		{MESSAGE_TIMER, opt_handler_timer, opt_handler_timer, NULL},
 		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm, alarm_toggle, draw_alarm_switch},
 		{MESSAGE_DISPLAY, mlcd_colors_toggle, mlcd_colors_toggle, draw_colors_switch},
 		{MESSAGE_SHAKE_LIGHT, shake_light_toggle, shake_light_toggle, draw_shake_light_switch},
@@ -210,16 +212,12 @@ static bool scr_settings_handle_button_pressed(uint32_t button_id) {
 					  scr_mngr_show_screen(SCR_WATCHFACE);
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_UP:
-					  selectedOption--;
-				    if (selectedOption < 0) {
-								selectedOption = 0;
-						}
+				    if (selectedOption > 0)
+								selectedOption--;
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
-					  selectedOption++;
-				    if (selectedOption >= SIZE_OF_MENU) {
-								selectedOption = SIZE_OF_MENU-1;
-						}
+				    if (selectedOption+1 < SIZE_OF_MENU)
+								selectedOption++;
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
 					  settings_menu[selectedOption].select_handler();
@@ -231,6 +229,18 @@ static bool scr_settings_handle_button_pressed(uint32_t button_id) {
 
 static bool scr_settings_handle_button_long_pressed(uint32_t button_id) {
 	  switch (button_id) {
+			  case SCR_EVENT_PARAM_BUTTON_UP:
+				    if (selectedOption > MENU_ITEMS_PER_PAGE)
+								selectedOption -= MENU_ITEMS_PER_PAGE;
+						else
+								selectedOption = 0;
+				    return true;
+			  case SCR_EVENT_PARAM_BUTTON_DOWN:
+				    if (selectedOption + MENU_ITEMS_PER_PAGE < SIZE_OF_MENU)
+								selectedOption += MENU_ITEMS_PER_PAGE;
+						else
+								selectedOption = SIZE_OF_MENU-1;
+				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT: {
 						void (*ls_handler)() = settings_menu[selectedOption].long_select_handler;
 						if (ls_handler != NULL) {

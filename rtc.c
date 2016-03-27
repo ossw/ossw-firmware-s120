@@ -5,13 +5,14 @@
 #include "ext_ram.h"
 #include "app_scheduler.h"
 #include "alarm.h"
+#include "config.h"
 #include "BLE\ble_peripheral.h"
 
-static app_timer_id_t     m_rtc_timer_id;
-static uint32_t						current_time;
-static uint16_t rtc_refresh_interval = RTC_INTERVAL_SECOND;
-static uint16_t interval;
-static bool store_time = false;
+static app_timer_id_t		m_rtc_timer_id;
+static uint32_t					current_time;
+static uint16_t 				rtc_refresh_interval = RTC_INTERVAL_SECOND;
+static uint16_t					interval;
+static bool							store_time = false;
 
 void rtc_restart_event(void * p_event_data, uint16_t event_size) {
     uint32_t err_code = app_timer_stop(m_rtc_timer_id);
@@ -53,6 +54,13 @@ static uint32_t rtc_load_time(void) {
 		return (uint32_t)(((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0]);
 }
 
+void rtc_toggle_refresh_interval() {
+		if (rtc_refresh_interval == RTC_INTERVAL_MINUTE)
+				rtc_set_refresh_interval(RTC_INTERVAL_SECOND);
+		else
+				rtc_set_refresh_interval(RTC_INTERVAL_MINUTE);
+}
+
 void rtc_timer_init(void) {
 	  current_time = rtc_load_time();	
 		if (current_time == 0) {
@@ -63,7 +71,10 @@ void rtc_timer_init(void) {
                                 APP_TIMER_MODE_REPEATED,
                                 rtc_timeout_handler);
     APP_ERROR_CHECK(err_code);
-		rtc_restart_event(NULL, 0);
+		if (get_settings(CONFIG_SLOW_REFRESH))
+				rtc_set_refresh_interval(RTC_INTERVAL_MINUTE);
+		else
+				rtc_set_refresh_interval(RTC_INTERVAL_SECOND);
 }
 
 uint16_t rtc_get_refresh_interval() {

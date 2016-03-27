@@ -66,7 +66,7 @@ extern uint32_t * p_spi1_base_address;
 #define MLCD_SPI_SS SPI1_SS0
 
 #define APP_TIMER_PRESCALER              0	                /**< Value of the RTC1 PRESCALER register. */
-#define APP_TIMER_MAX_TIMERS             8		              /**< Maximum number of simultaneously created timers. */
+#define APP_TIMER_MAX_TIMERS             9		              /**< Maximum number of simultaneously created timers. */
 #define APP_TIMER_OP_QUEUE_SIZE          2                  /**< Size of timer operation queues. */
 
 #define SCHED_MAX_EVENT_DATA_SIZE sizeof(nrf_drv_gpiote_pin_t)

@@ -626,6 +626,11 @@
               <FileType>1</FileType>
               <FilePath>..\screens\scr_setalarm.c</FilePath>
             </File>
+            <File>
+              <FileName>scr_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_timer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1407,6 +1412,11 @@
               <FileName>scr_setalarm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_setalarm.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_timer.c</FilePath>
             </File>
           </Files>
         </Group>
