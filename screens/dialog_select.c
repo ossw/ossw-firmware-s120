@@ -32,14 +32,14 @@ static void dialog_select_draw_screen() {
 		uint8_t list_size = get_next_byte(&read_address);
     uint8_t font = get_next_byte(&read_address);
 		const FONT_INFO* font_info = mlcd_resolve_font(font);
-		uint8_t item_height = font_info->height + 2;
+		uint8_t item_height = font_info->height;
 		uint8_t title_height = item_height+2;
 
 		uint32_t m_address = 0x80000000;
 		char* data_ptr;
 		data_ptr = (char*)(m_address + read_address);
 		mlcd_draw_text(data_ptr, 0, 0, MLCD_XRES, item_height, font, HORIZONTAL_ALIGN_CENTER);
-		fillRectangle(MARGIN, item_height-1, MLCD_XRES-2*MARGIN, 2);
+		fillRectangle(MARGIN, item_height, MLCD_XRES-2*MARGIN, 2);
 		skip_string_ext_ram(1, &read_address);
 
 		items_per_page = (MLCD_YRES-MARGIN-title_height)/item_height;
@@ -52,8 +52,7 @@ static void dialog_select_draw_screen() {
 		else
 				items_no = items_per_page;
 		// draw the page with selected item
-		uint8_t list_top = title_height +
-			((MLCD_YRES-MARGIN-title_height-item_height*items_per_page)>>1);
+		uint8_t list_top = title_height + ((MLCD_YRES-title_height-item_height*items_per_page)>>1);
 		uint8_t y = list_top;
 		for (int i = 0; i < items_no; i++) {
 				data_ptr = (char*)(m_address + read_address);
@@ -111,11 +110,11 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 								uint8_t list_size = get_next_byte(&read_address);
 								uint8_t font = get_next_byte(&read_address);
 								const FONT_INFO* font_info = mlcd_resolve_font(font);
-								uint8_t item_height = font_info->height + 2;
+								uint8_t item_height = font_info->height;
 								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
-										uint8_t list_top = item_height + 2 + ((MLCD_YRES-MARGIN-item_height*(items_per_page+1)-2)>>1);
+										uint8_t list_top = item_height + 2 + ((MLCD_YRES-item_height*(items_per_page+1)-2)>>1);
 										fillRectangle(MARGIN, list_top+(item % items_per_page)*item_height, MLCD_XRES-2*MARGIN, item_height<<1);
 								} else
 										redraw = true;
@@ -130,11 +129,11 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 					  if (item < last) {
 								uint8_t font = get_next_byte(&read_address);
 								const FONT_INFO* font_info = mlcd_resolve_font(font);
-								uint8_t item_height = font_info->height + 2;
+								uint8_t item_height = font_info->height;
 								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
-										uint8_t list_top = item_height + 2 + ((MLCD_YRES-MARGIN-item_height*(items_per_page+1)-2)>>1);
+										uint8_t list_top = item_height + 2 + ((MLCD_YRES-item_height*(items_per_page+1)-2)>>1);
 										fillRectangle(MARGIN, list_top+(item % items_per_page)*item_height, MLCD_XRES-2*MARGIN, item_height<<1);
 								} else
 										redraw = true;

@@ -10,7 +10,7 @@
 
 static app_timer_id_t		m_rtc_timer_id;
 static uint32_t					current_time;
-static uint16_t 				rtc_refresh_interval = RTC_INTERVAL_SECOND;
+static uint16_t 				rtc_refresh_interval;
 static uint16_t					interval;
 static bool							store_time = false;
 

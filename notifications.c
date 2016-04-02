@@ -33,10 +33,10 @@ void notifications_init(void) {
     APP_ERROR_CHECK(err_code);
 }
 
-void copy_notification_info_data(uint16_t address, uint16_t size) {
+void copy_notification_info_data(uint16_t address_from, uint16_t address_to, uint16_t size) {
 		uint8_t buffer[16];
-		uint16_t current_read_address = address;
-	  uint16_t current_write_address = EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS;
+		uint16_t current_read_address = address_from;
+	  uint16_t current_write_address = address_to;
 		uint16_t data_to_copy = size > 1024 ? 1024 : size;
 		uint8_t part_size;
 			while(data_to_copy > 0) {
@@ -69,7 +69,7 @@ void notifications_handle_data(uint16_t address, uint16_t size) {
 				{	
 						uint32_t vibration_pattern = get_next_int(&address);
 						uint16_t time = get_next_short(&address);
-						copy_notification_info_data(address, size - 7);
+						copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 7);
 						notifications_info_notify(time, vibration_pattern);
 						}
 						break;
@@ -77,14 +77,15 @@ void notifications_handle_data(uint16_t address, uint16_t size) {
 						if (size == 1) {
 							  notifications_info_clear_all();
 						} else {
-								copy_notification_info_data(address, size - 1);
+								copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 1);
 							  notifications_info_update();
 						}
 						break;
 				case NOTIFICATIONS_TYPE_DIALOG_SELECT:
 						dialog_select_init(send_select_result);
 						set_modal_dialog(true);
-						scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_NOTIFICATION_UPLOAD_ADDRESS+1);
+						copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 1);
+						scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS);
 						break;
 		}
 }
