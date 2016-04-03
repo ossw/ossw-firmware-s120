@@ -34,24 +34,23 @@ void notifications_init(void) {
 }
 
 void copy_notification_info_data(uint16_t address_from, uint16_t address_to, uint16_t size) {
-		uint8_t buffer[16];
-		uint16_t current_read_address = address_from;
-	  uint16_t current_write_address = address_to;
-		uint16_t data_to_copy = size > 1024 ? 1024 : size;
-		uint8_t part_size;
-			while(data_to_copy > 0) {
-				part_size = data_to_copy > 16 ? 16 : data_to_copy;
-				ext_ram_read_data(current_read_address, buffer, part_size);
-				ext_ram_write_data(current_write_address, buffer, part_size);
-				current_read_address += part_size;
-				current_write_address += part_size;
-				data_to_copy -= part_size;
-		}
+	uint8_t buffer[16];
+	uint16_t current_read_address = address_from;
+	uint16_t current_write_address = address_to;
+	uint16_t data_to_copy = size > 1024 ? 1024 : size;
+	uint8_t part_size;
+	while(data_to_copy > 0) {
+		part_size = data_to_copy > 16 ? 16 : data_to_copy;
+		ext_ram_read_data(current_read_address, buffer, part_size);
+		ext_ram_write_data(current_write_address, buffer, part_size);
+		current_read_address += part_size;
+		current_write_address += part_size;
+		data_to_copy -= part_size;
+	}
 }
 
 static void send_select_result(uint8_t item) {
-		if (item < 0xFF)
-				ble_peripheral_invoke_notification_function_with_data(DIALOG_RESULT, &item, sizeof(item));
+	ble_peripheral_invoke_notification_function_with_data(DIALOG_RESULT, &item, sizeof(item));
 }
 
 void notifications_handle_data(uint16_t address, uint16_t size) {
@@ -83,9 +82,12 @@ void notifications_handle_data(uint16_t address, uint16_t size) {
 						break;
 				case NOTIFICATIONS_TYPE_DIALOG_SELECT:
 						dialog_select_init(send_select_result);
-						set_modal_dialog(true);
 						copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 1);
+						set_modal_dialog(true);
 						scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS);
+						break;
+				case NOTIFICATIONS_TYPE_DIALOG_CLOSE:
+						set_modal_dialog(false);
 						break;
 		}
 }

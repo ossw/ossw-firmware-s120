@@ -14,7 +14,7 @@
 #define MARGIN					2
 #define SCROLL_HEIGHT		6
 
-static void (*dialog_callback)(uint8_t);
+static void (*d_select_callback)(uint8_t);
 static uint16_t dialog_input;
 static bool redraw = false;
 static uint8_t items_per_page;
@@ -68,11 +68,11 @@ static void dialog_select_draw_screen() {
 }
 
 void dialog_select_init(void (*d_callback)(uint8_t)) {
-		dialog_callback = d_callback;
+		d_select_callback = d_callback;
 }
 
 void pack_dialog_select(uint8_t init, void (*d_callback)(uint8_t), uint8_t font, const char *title, uint8_t list_size, const char *list) {
-		dialog_callback = d_callback;
+		d_select_callback = d_callback;
 		uint8_t len_title = strlen(title);
 		uint8_t buffer_size = sizeof(init) + 4 + sizeof(font) + len_title+1 + sizeof(list_size);
 		uint16_t shift = 0;
@@ -98,8 +98,8 @@ void pack_dialog_select(uint8_t init, void (*d_callback)(uint8_t), uint8_t font,
 static bool dialog_select_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK: {
-						dialog_callback(CANCEL);
 					  set_modal_dialog(false);
+						d_select_callback(CANCEL);
 				    return true;
 				}
 			  case SCR_EVENT_PARAM_BUTTON_UP: {
@@ -145,8 +145,7 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_SELECT: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
-					  dialog_callback(item);
-					  set_modal_dialog(false);
+					  d_select_callback(item);
 				    return true;
 				}
 		}
@@ -185,7 +184,7 @@ static bool dialog_select_button_long_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_SELECT: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
-					  dialog_callback(item);
+					  d_select_callback(item);
 						return true;
 				}
 		}

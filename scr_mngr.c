@@ -37,14 +37,17 @@ static bool redraw = true;
 static bool modal_dialog = false;
 
 void set_modal_dialog(bool state) {
-		modal_dialog = state;
-		if (!state) {
-				// temporal fix, need a queue to save all the history of screens
-				switch_to_screen = previous_screen;
-				scr_mngr_draw_ctx draw_ctx;
-				draw_ctx.force_colors = false;
-				scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
-		}
+	if (state) {
+		if (!modal_dialog)
+			previous_screen = current_screen;
+	} else {
+		// temporal fix, need a queue to save all the history of screens
+		switch_to_screen = previous_screen;
+		scr_mngr_draw_ctx draw_ctx;
+		draw_ctx.force_colors = false;
+		scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
+	}
+	modal_dialog = state;
 }
 		
 static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
@@ -292,7 +295,6 @@ void scr_mngr_draw_screen(void) {
 				}
 		} else {
 				if (switch_to_screen != SCR_NOT_SET) {
-						previous_screen = current_screen;
 						uint8_t old_screen = current_screen;
 						uint16_t new_screen;
 						// disable events
