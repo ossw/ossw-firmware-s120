@@ -348,6 +348,7 @@ void timer_tick_event(void * p_event_data, uint16_t event_size)
 	if (timer_2 == 0 && timer_1 == 0) {
 		scr_timer_pause();
 		vibration_vibrate(TIMER_VIBRATION, 3000);
+		mlcd_backlight_blink(500, 3);
 		scr_load_saved_timer(0);
 	}
 }

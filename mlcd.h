@@ -40,6 +40,8 @@ void mlcd_backlight_short(void);
 
 void mlcd_backlight_extend(void);
 
+void mlcd_backlight_blink(int32_t timeout, uint8_t count);
+
 void mlcd_temp_backlight_timeout_inc(void);
 
 void mlcd_temp_backlight_timeout_dec(void);

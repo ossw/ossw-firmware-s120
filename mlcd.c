@@ -17,6 +17,7 @@
 #define MLCD_BL_OFF 			0x00
 #define MLCD_BL_LONG 			0x01
 #define MLCD_BL_SHORT			0x10
+#define MLCD_BL_BLINK			0x80
 
 #define MLCD_IS_LINE_CHANGED(line_no) (fb_line_changes[line_no>>3]>>(line_no&0x7) & 0x1)
 #define MLCD_SET_LINE_CHANGED(line_no) (fb_line_changes[line_no>>3]|=1<<(line_no&0x7))
@@ -26,6 +27,7 @@ static uint8_t fb_line_changes[MLCD_YRES/8];
 static uint8_t vcom;
 static uint8_t bl_mode = MLCD_BL_OFF;
 static uint8_t temp_bl_timeout = 5;
+static uint8_t bl_blink_counter;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
 
@@ -45,36 +47,53 @@ static uint8_t bit_reverse(uint8_t byte) {
     #endif /* #if (__CORTEX_M >= 0x03) */
 }
 
+void mlcd_backlight_blink_toggle() {
+	uint8_t t = bl_blink_counter & 1 ^ bl_mode & MLCD_BL_LONG;
+	if (t)
+		nrf_gpio_pin_set(LCD_BACKLIGHT);
+	else
+		nrf_gpio_pin_clear(LCD_BACKLIGHT);
+	if (bl_blink_counter <= MLCD_BL_BLINK) {
+		app_timer_stop(mlcd_bl_timer_id);
+		bl_blink_counter = 0;
+	} else
+		bl_blink_counter--;
+}
+	
 void mlcd_off_event(void * p_event_data, uint16_t event_size)
 {
+	if (bl_blink_counter > 0) {
+		mlcd_backlight_blink_toggle();
+	} else {
 		mlcd_backlight_off();
+		app_timer_stop(mlcd_bl_timer_id);
+	}
 }
 
 void mlcd_bl_timeout_handler(void * p_context) {
-    UNUSED_PARAMETER(p_context);
-		uint32_t err_code = app_sched_event_put(NULL, NULL, mlcd_off_event);
-		APP_ERROR_CHECK(err_code);
+	UNUSED_PARAMETER(p_context);
+	uint32_t err_code = app_sched_event_put(NULL, NULL, mlcd_off_event);
+	APP_ERROR_CHECK(err_code);
 }
 
 void mlcd_init(void)
 {
-    nrf_gpio_cfg_output(LCD_ENABLE);
-    nrf_gpio_cfg_output(LCD_BACKLIGHT);
-    nrf_gpio_cfg_output(LCD_VOLTAGE_REG);
-    nrf_gpio_pin_clear(LCD_ENABLE);
-    nrf_gpio_pin_clear(LCD_BACKLIGHT);
-    nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
-	  vcom = VCOM_LO;
+	nrf_gpio_cfg_output(LCD_ENABLE);
+	nrf_gpio_cfg_output(LCD_BACKLIGHT);
+	nrf_gpio_cfg_output(LCD_VOLTAGE_REG);
+	nrf_gpio_pin_clear(LCD_ENABLE);
+	nrf_gpio_pin_clear(LCD_BACKLIGHT);
+	nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
+	vcom = VCOM_LO;
 }
-
 
 void mlcd_timers_init(void)
 {
-    uint32_t err_code;	 
-    err_code = app_timer_create(&mlcd_bl_timer_id,
-                                APP_TIMER_MODE_SINGLE_SHOT,
-                                mlcd_bl_timeout_handler);
-    APP_ERROR_CHECK(err_code);
+	uint32_t err_code;	 
+	err_code = app_timer_create(&mlcd_bl_timer_id,
+                              APP_TIMER_MODE_REPEATED,
+                              mlcd_bl_timeout_handler);
+	APP_ERROR_CHECK(err_code);
 }
 
 void mlcd_display_off(void)
@@ -99,21 +118,23 @@ void mlcd_power_on(void)
 
 void mlcd_backlight_off(void)
 {
-	app_timer_stop(mlcd_bl_timer_id);
 	bl_mode = MLCD_BL_OFF;
   nrf_gpio_pin_clear(LCD_BACKLIGHT);
+	if (bl_blink_counter == 0)
+		app_timer_stop(mlcd_bl_timer_id);
 }
 
 void mlcd_backlight_long(void)
 {
-	app_timer_stop(mlcd_bl_timer_id);
 	bl_mode = MLCD_BL_LONG;
   nrf_gpio_pin_set(LCD_BACKLIGHT);
+	if (bl_blink_counter == 0)
+		app_timer_stop(mlcd_bl_timer_id);
 }
 
 void mlcd_backlight_short(void) {
-	if (bl_mode == MLCD_BL_LONG) {
-			return;
+	if (bl_mode == MLCD_BL_LONG || bl_blink_counter > 0) {
+		return;
 	}
 	app_timer_stop(mlcd_bl_timer_id);
 	bl_mode = MLCD_BL_SHORT;
@@ -122,37 +143,43 @@ void mlcd_backlight_short(void) {
 }
 
 void mlcd_backlight_extend(void) {
-		if (bl_mode == MLCD_BL_SHORT) {
-				mlcd_backlight_short();
-		}
+	if (bl_mode == MLCD_BL_SHORT) {
+		mlcd_backlight_short();
+	}
 }
 
 void mlcd_backlight_toggle(void)
 {
 	switch (bl_mode) {
-			case MLCD_BL_OFF:
-					mlcd_backlight_long();
-					break;
-			case MLCD_BL_LONG:
-					mlcd_backlight_off();
-					break;
-			case MLCD_BL_SHORT:
-					mlcd_backlight_long();
-					break;
+		case MLCD_BL_OFF:
+			mlcd_backlight_long();
+			break;
+		case MLCD_BL_LONG:
+			mlcd_backlight_off();
+			break;
+		case MLCD_BL_SHORT:
+			mlcd_backlight_long();
+			break;
 	}
 }
 
 uint32_t mlcd_temp_backlight_timeout(void) {
-		return temp_bl_timeout;
+	return temp_bl_timeout;
 }
 
 void mlcd_set_temp_backlight_timeout(int32_t timeout) {
-		if (timeout > 20) {
-				timeout = 20;
-		} else if (timeout < 1) {
-				timeout = 1;
-		}
-		temp_bl_timeout = timeout;
+	if (timeout > 20) {
+		timeout = 20;
+	} else if (timeout < 1) {
+		timeout = 1;
+	}
+	temp_bl_timeout = timeout;
+}
+
+void mlcd_backlight_blink(int32_t timeout, uint8_t count) {
+	bl_blink_counter = count << 1 | MLCD_BL_BLINK;
+	mlcd_backlight_blink_toggle();
+	app_timer_start(mlcd_bl_timer_id, APP_TIMER_TICKS(timeout, APP_TIMER_PRESCALER), NULL);
 }
 
 void mlcd_switch_vcom() {
