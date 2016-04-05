@@ -41,8 +41,8 @@ static void scr_watchface_init() {
 }
 
 static void scr_watchface_draw() {
-//		for (int i=1; i<11; i++)
-//				fillCircle(i*(i+2), i+1, i);
+//		for (int i=1; i<20; i++)
+//				hLine(i, 1, i);
 //		fillCircle(CENTER_X, CENTER_Y, 71);
 		for (int deg = 0; deg < 360; deg += 30)
 				radialRect(CENTER_X, CENTER_Y, deg, 60, 70, 3);

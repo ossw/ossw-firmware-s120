@@ -111,8 +111,9 @@ static void select_item_handler(uint8_t item) {
 }
 
 static void test_handler() {
-		pack_dialog_select(0, &select_item_handler, FONT_OPTION_NORMAL, I18N_TRANSLATE(MESSAGE_ABOUT),
-				12, "gypq\0TWO\0THREE\0FOUR\0FIVE\0SIX\0SEVEN\0EIGHT\0NINE\0TEN\0ELEVEN\0TWELVE\0");
+		pack_dialog_select(0, &select_item_handler, FONT_OPTION_NORMAL, SELECT_RADIO, I18N_TRANSLATE(MESSAGE_ABOUT),
+				15, "One\0Two\0Three\0Four\0Five\0Six\0Seven\0Eight\0Nine\0Ten\0Eleven\0Twelve\0Thurteen\0Fourteen\0Fifteen\0");
+		set_modal_dialog(true);
 		scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_DIALOG_TEXT);
 }
 

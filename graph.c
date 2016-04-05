@@ -292,7 +292,7 @@ void fillCircle(uint_fast8_t xc, uint_fast8_t yc, uint_fast8_t r) {
 }
 
 void fillRectangle(uint_fast8_t x, uint_fast8_t y, uint_fast8_t w, uint_fast8_t h) {
-		uint_fast8_t x1 = x + w;
+		uint_fast8_t x1 = x + w - 1;
 		for (uint_fast8_t i = 0; i < h; i++) {
 				hLine(y+i, x, x1);
 		}
