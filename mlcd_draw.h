@@ -24,6 +24,8 @@
 
 #define MULTILINE												0x8
 #define SPLIT_WORD											0x4
+#define STYLE_UNDERLINE									0x2
+#define STYLE_LINE_THROUGH							0x1
 
 void mlcd_draw_digit(uint_fast8_t digit, uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness);
 

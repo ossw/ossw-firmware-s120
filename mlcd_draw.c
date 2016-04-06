@@ -1,6 +1,7 @@
 #include "mlcd_draw.h"
 #include "mlcd.h"
 #include "utf8.h"
+#include "graph.h"
 #include "fonts/font.h"
 #include "fonts/small_regular.h"
 #include "fonts/small_bold.h"
@@ -332,6 +333,8 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t
 	  const FONT_INFO* font = mlcd_resolve_font(font_type);
 	  bool multiline = font_alignment & MULTILINE;
 	  bool split_word = font_alignment & SPLIT_WORD;
+		bool line_through = font_alignment & STYLE_LINE_THROUGH;
+		bool underline = font_alignment & STYLE_UNDERLINE;
 		
 		if (font_alignment & VERTICAL_ALIGN_CENTER) {
 				int calc_height = mlcd_calc_text_height(text, start_x, start_y, width, height, font_type, font_alignment);
@@ -381,6 +384,10 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t
 				if (c <= 0){
 						last_line = true;
 				}
+				if (line_through)
+					fillRectangle(start_x, y+(font->height >> 1)-2, x-start_x, 2);
+				if (underline)
+					fillRectangle(start_x, y+font->height-2, x-start_x, 2);
 				
 				x = start_x;
 				y += font->height + (c==11 ? font->height/2 : font->charDist);

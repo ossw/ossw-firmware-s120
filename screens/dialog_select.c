@@ -75,8 +75,11 @@ static void dialog_select_draw_screen() {
 		uint8_t y = list_top;
 		for (int i = 0; i < items_no; i++) {
 				data_ptr = (char*)(m_address + read_address);
-				mlcd_draw_text(data_ptr, text_x, y, MLCD_XRES-MARGIN-text_x, item_height, font, font_style);
 				uint8_t marked = bitset[(i + start_item) >> 3] & (1 << ((i + start_item) & 7));
+				if (marked)
+					mlcd_draw_text(data_ptr, text_x, y, MLCD_XRES-MARGIN-text_x, item_height, font, font_style | STYLE_LINE_THROUGH);
+				else
+					mlcd_draw_text(data_ptr, text_x, y, MLCD_XRES-MARGIN-text_x, item_height, font, font_style);
 				switch (style) {
 					case SELECT_RADIO: {
 						uint8_t cx = MARGIN + RADIO_RADIUS;
