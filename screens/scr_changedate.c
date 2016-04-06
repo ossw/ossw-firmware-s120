@@ -45,16 +45,16 @@ static void scr_changedate_draw_all() {
 	
 	  if (change_mode == MODE_DAY) {
         mlcd_draw_rect_border(0, DATE_Y_POS - 3, 34, DATE_HEIGHT+6, 1);
-        mlcd_draw_arrow_up(0, DATE_Y_POS + 32, 34, 16, 6);
-        mlcd_draw_arrow_down(0, DATE_Y_POS - 24, 34, 16, 6);
+        mlcd_draw_arrow_down(0, DATE_Y_POS + 32, 34, 16, 6);
+        mlcd_draw_arrow_up(0, DATE_Y_POS - 24, 34, 16, 6);
     } else if (change_mode == MODE_MONTH) {
         mlcd_draw_rect_border(40, DATE_Y_POS - 3, 34, DATE_HEIGHT+6, 1);
-        mlcd_draw_arrow_up(40, DATE_Y_POS + 32, 34, 16, 6);
-        mlcd_draw_arrow_down(40, DATE_Y_POS - 24, 34, 16, 6);
+        mlcd_draw_arrow_down(40, DATE_Y_POS + 32, 34, 16, 6);
+        mlcd_draw_arrow_up(40, DATE_Y_POS - 24, 34, 16, 6);
     } else if (change_mode == MODE_YEAR) {
         mlcd_draw_rect_border(80, DATE_Y_POS - 3, 64, DATE_HEIGHT+6, 1);
-        mlcd_draw_arrow_up(95, DATE_Y_POS + 32, 34, 16, 6);
-        mlcd_draw_arrow_down(95, DATE_Y_POS - 24, 34, 16, 6);
+        mlcd_draw_arrow_down(95, DATE_Y_POS + 32, 34, 16, 6);
+        mlcd_draw_arrow_up(95, DATE_Y_POS - 24, 34, 16, 6);
     }
     
 	  scr_changedate_draw_day();

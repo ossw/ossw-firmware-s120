@@ -9,6 +9,7 @@
 
 #define TIME_Y_POS    		60
 #define ARROW_HEIGHT			8
+#define DAY_HEIGHT				5
 #define MODE_HOUR     		0x01
 #define MODE_MINUTE	  		0x02
 
@@ -28,14 +29,15 @@ static void scr_alarm_draw_minutes() {
 }
 
 static void scr_alarm_toggle_day(uint8_t day) {
-		fillRectangle(2+day*20, 127, 18, 22);
+		fillRectangle(4+day*20, 128, 17, 20);
 }
 
 static void scr_alarm_draw_day(uint8_t day) {
 		uint8_t day_mask = 1<<day;
-		mlcd_draw_text(I18N_TRANSLATE(MESSAGE_SUNDAY_1+day), 3+day*20, 130, 18, 18, FONT_BIG_REGULAR, HORIZONTAL_ALIGN_CENTER);
+		uint8_t day_x = 4+day*20;
+		mlcd_draw_text(I18N_TRANSLATE(MESSAGE_SUNDAY_1+day), day_x, 130, 18, 18, FONT_BIG_REGULAR, HORIZONTAL_ALIGN_CENTER);
 		if (day == rtc_get_current_day_of_week()-1)
-				fillRectangle(146, 4+day*20, 18+day*20, 2);
+				fillRectangle(day_x+1, 145, 15, 2);
 		if (alarm_options & day_mask)
 				scr_alarm_toggle_day(day);
 }
@@ -46,8 +48,8 @@ static void scr_alarm_draw_days() {
 		}
 		if (change_mode > MODE_MINUTE) {
 				uint8_t day = change_mode - MODE_MINUTE - 1;
-			  mlcd_draw_arrow_up(3+day*20, 151, 16, 8, 4);
-			  mlcd_draw_arrow_down(3+day*20, 117, 16, 8, 4);
+			  fillUp(12 + day*20, 121, DAY_HEIGHT);
+			  fillDown(12 + day*20, 154, DAY_HEIGHT);
 		}
 }
 

@@ -88,7 +88,7 @@ static uint_fast8_t draw_arrow_up_func(uint_fast8_t x, uint_fast8_t y) {
 }
 
 static uint_fast8_t draw_arrow_down_func(uint_fast8_t x, uint_fast8_t y) {
-	y = draw_height - y;
+	y = draw_height - y - 1;
 	return (
              (  (y < draw_height * x * 2 / draw_width) && (y < draw_height * (draw_width-x) * 2 / draw_width))
                 &&
@@ -131,14 +131,14 @@ void mlcd_draw_rect_border(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t 
 	  mlcd_fb_draw_with_func(draw_rect_border_func, x_pos, y_pos, width, height);
 }
 
-void mlcd_draw_arrow_up(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness) {
+void mlcd_draw_arrow_down(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness) {
 	  draw_width = width;
 	  draw_height = height;
 	  draw_thickness = thickness;
 	  mlcd_fb_draw_with_func(draw_arrow_up_func, x_pos, y_pos, width, height);
 }
 
-void mlcd_draw_arrow_down(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness) {
+void mlcd_draw_arrow_up(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness) {
 	  draw_width = width;
 	  draw_height = height;
 	  draw_thickness = thickness;
