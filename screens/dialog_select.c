@@ -14,12 +14,12 @@
 #define MARGIN					2
 #define SCROLL_HEIGHT		6
 #define RADIO_RADIUS		7
-#define CHECK_BOX_SIZE	12
+#define CHECK_BOX_SIZE	14
+#define WIDGET_PADDING	24
 
 static void (*d_select_callback)(uint8_t);
 static uint16_t dialog_input;
 static bool redraw = false;
-//static uint8_t style;
 static uint8_t items_per_page;
 
 void dialog_select_init(void (*d_callback)(uint8_t)) {
@@ -42,9 +42,9 @@ static void dialog_select_draw_screen() {
 		uint8_t bitset_size = CEIL(list_size, 8);
 		uint8_t bitset[bitset_size];
 		uint8_t font_style = VERTICAL_ALIGN_CENTER;
-		uint8_t width = MLCD_XRES - (MARGIN << 1);
+		uint8_t text_x = MARGIN;
 		if (style > 0) {
-			width -= CHECK_BOX_SIZE << 1;
+			text_x = WIDGET_PADDING;
 			font_style |= HORIZONTAL_ALIGN_LEFT;
 			for (int i = 0; i < bitset_size; i++)
 				bitset[i] = get_next_byte(&read_address);
@@ -75,11 +75,11 @@ static void dialog_select_draw_screen() {
 		uint8_t y = list_top;
 		for (int i = 0; i < items_no; i++) {
 				data_ptr = (char*)(m_address + read_address);
-				mlcd_draw_text(data_ptr, MARGIN, y, MLCD_XRES-2*MARGIN, item_height, font, font_style);
+				mlcd_draw_text(data_ptr, text_x, y, MLCD_XRES-MARGIN-text_x, item_height, font, font_style);
 				uint8_t marked = bitset[(i + start_item) >> 3] & (1 << ((i + start_item) & 7));
 				switch (style) {
 					case SELECT_RADIO: {
-						uint8_t cx = MLCD_XRES - MARGIN - RADIO_RADIUS;
+						uint8_t cx = MARGIN + RADIO_RADIUS;
 						uint8_t cy = y + (item_height >> 1);
 						circle(cx, cy, RADIO_RADIUS);
 						if (marked) {
@@ -88,7 +88,7 @@ static void dialog_select_draw_screen() {
 						break;
 					}
 					case SELECT_CHECK: {
-						uint8_t cx = MLCD_XRES - MARGIN - CHECK_BOX_SIZE;
+						uint8_t cx = MARGIN;
 						uint8_t cy = y + ((item_height - CHECK_BOX_SIZE) >> 1);
 						mlcd_draw_rect_border(cx, cy, CHECK_BOX_SIZE, CHECK_BOX_SIZE, 1);
 						if (marked) {
@@ -100,7 +100,7 @@ static void dialog_select_draw_screen() {
 				y += item_height;
 				skip_string_ext_ram(1, &read_address);
 		}
-		fillRectangle(MARGIN, list_top+(item-start_item)*item_height, width, item_height);
+		fillRectangle(text_x-MARGIN, list_top+(item-start_item)*item_height, MLCD_XRES+MARGIN-text_x, item_height);
 		if (page_no > 0)
 				fillUp(MLCD_XRES-SCROLL_HEIGHT-MARGIN, MARGIN, SCROLL_HEIGHT);
 		if (page_no + 1 < CEIL(list_size, items_per_page))
@@ -122,16 +122,16 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 								uint8_t list_size = get_next_byte(&read_address);
 								uint8_t font = get_next_byte(&read_address);
 								uint8_t style = get_next_byte(&read_address);
-								uint8_t width = MLCD_XRES - (MARGIN << 1);
+								uint8_t select_x = 0;
 								if (style > 0)
-									width -= CHECK_BOX_SIZE << 1;
+									select_x = WIDGET_PADDING - MARGIN;
 								const FONT_INFO* font_info = mlcd_resolve_font(font);
 								uint8_t item_height = font_info->height;
 								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
 										uint8_t list_top = item_height + 2 + ((MLCD_YRES-item_height*(items_per_page+1)-2)>>1);
-										fillRectangle(MARGIN, list_top+(item % items_per_page)*item_height, width, item_height<<1);
+										fillRectangle(select_x, list_top+(item % items_per_page)*item_height, MLCD_XRES-select_x, item_height<<1);
 								} else
 										redraw = true;
 								ext_ram_write_data(dialog_input, &item, sizeof(item));
@@ -145,16 +145,16 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 					  if (item < last) {
 								uint8_t font = get_next_byte(&read_address);
 								uint8_t style = get_next_byte(&read_address);
-								uint8_t width = MLCD_XRES - (MARGIN << 1);
+								uint8_t select_x = 0;
 								if (style > 0)
-									width -= CHECK_BOX_SIZE << 1;
+									select_x = WIDGET_PADDING - MARGIN;
 								const FONT_INFO* font_info = mlcd_resolve_font(font);
 								uint8_t item_height = font_info->height;
 								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
 										uint8_t list_top = item_height + 2 + ((MLCD_YRES-item_height*(items_per_page+1)-2)>>1);
-										fillRectangle(MARGIN, list_top+(item % items_per_page)*item_height, width, item_height<<1);
+										fillRectangle(select_x, list_top+(item % items_per_page)*item_height, MLCD_XRES-select_x, item_height<<1);
 								} else
 										redraw = true;
 								item++;
