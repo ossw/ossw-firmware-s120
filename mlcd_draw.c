@@ -385,7 +385,7 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t
 						last_line = true;
 				}
 				if (line_through)
-					fillRectangle(start_x, y+(font->height >> 1)-2, x-start_x, 2);
+					fillRectangle(start_x, y+(font->height >> 1)-1, x-start_x, 2);
 				if (underline)
 					fillRectangle(start_x, y+font->height-2, x-start_x, 2);
 				
