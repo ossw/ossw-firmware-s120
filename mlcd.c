@@ -177,7 +177,9 @@ void mlcd_set_temp_backlight_timeout(int32_t timeout) {
 }
 
 void mlcd_backlight_blink(int32_t timeout, uint8_t count) {
-	bl_blink_counter = count << 1 | MLCD_BL_BLINK;
+	if (count == 0)
+		return;
+	bl_blink_counter = (count << 1) - 1 | MLCD_BL_BLINK;
 	mlcd_backlight_blink_toggle();
 	app_timer_start(mlcd_bl_timer_id, APP_TIMER_TICKS(timeout, APP_TIMER_PRESCALER), NULL);
 }
