@@ -2,6 +2,7 @@
 #include "scr_choosemode.h"
 #include "../scr_mngr.h"
 #include "../mlcd_draw.h"
+#include "../graph.h"
 #include "../rtc.h"
 #include "../mlcd.h"
 #include "../utf8.h"
@@ -31,8 +32,8 @@ static void scr_choosemode_draw() {
 	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_PERIPHERAL), 0, 16, MLCD_XRES, 30, FONT_OPTION_BIG, HORIZONTAL_ALIGN_CENTER);
 	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_OFFLINE), 0, 74, MLCD_XRES, 30, FONT_OPTION_BIG, HORIZONTAL_ALIGN_CENTER);
 	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MODE_CENTRAL), 0, 129, MLCD_XRES, 30, FONT_OPTION_BIG, HORIZONTAL_ALIGN_CENTER);
-	  mlcd_draw_rect(0, 55, MLCD_XRES, 2);
-		mlcd_draw_rect(0, 113, MLCD_XRES, 2);
+	  fillRectangle(0, 55, MLCD_XRES, 2, DRAW_WHITE);
+		fillRectangle(0, 113, MLCD_XRES, 2, DRAW_WHITE);
 }
 
 bool scr_choosemode_handle_event(uint32_t event_type, uint32_t event_param) {

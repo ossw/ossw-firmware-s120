@@ -67,13 +67,13 @@ static uint_fast8_t draw_vertical_progress_func(uint_fast8_t x, uint_fast8_t y) 
 	  return y >= draw_param ? 1 : 0;
 }
 
-static uint_fast8_t clear_rect_func(uint_fast8_t x, uint_fast8_t y) {
-	  return 0;
-}
+//static uint_fast8_t clear_rect_func(uint_fast8_t x, uint_fast8_t y) {
+//	  return 0;
+//}
 
-static uint_fast8_t draw_rect_func(uint_fast8_t x, uint_fast8_t y) {
-	  return 1;
-}
+//static uint_fast8_t draw_rect_func(uint_fast8_t x, uint_fast8_t y) {
+//	  return 1;
+//}
 
 static uint_fast8_t draw_rect_border_func(uint_fast8_t x, uint_fast8_t y) {
   	return (x < draw_thickness || y < draw_thickness || x >= draw_width - draw_thickness || y >= draw_height - draw_thickness) ? 1 : 0;
@@ -113,17 +113,17 @@ void mlcd_draw_simple_progress(uint_fast8_t value, uint_fast8_t max, uint_fast8_
 		mlcd_fb_draw_with_func(horizontal?draw_horizontal_progress_func:draw_vertical_progress_func, x_pos, y_pos, width, height);
 }
 
-void mlcd_clear_rect(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {
-	  draw_width = width;
-	  draw_height = height;
-	  mlcd_fb_draw_with_func(clear_rect_func, x_pos, y_pos, width, height);
-}
+//void mlcd_clear_rect(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {
+//	  draw_width = width;
+//	  draw_height = height;
+//	  mlcd_fb_draw_with_func(clear_rect_func, x_pos, y_pos, width, height);
+//}
 
-void mlcd_draw_rect(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {
-	  draw_width = width;
-	  draw_height = height;
-	  mlcd_fb_draw_with_func(draw_rect_func, x_pos, y_pos, width, height);
-}
+//void mlcd_draw_rect(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {
+//	  draw_width = width;
+//	  draw_height = height;
+//	  mlcd_fb_draw_with_func(draw_rect_func, x_pos, y_pos, width, height);
+//}
 
 void mlcd_draw_rect_border(uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height, uint_fast8_t thickness) {
 	  draw_width = width;
@@ -385,9 +385,9 @@ uint_fast8_t mlcd_draw_text(const char *text, uint_fast8_t start_x, uint_fast8_t
 						last_line = true;
 				}
 				if (line_through)
-					fillRectangle(start_x, y+(font->height >> 1)-1, x-start_x, 2);
+					fillRectangle(start_x, y+(font->height >> 1)-1, x-start_x, 2, DRAW_WHITE);
 				if (underline)
-					fillRectangle(start_x, y+font->height-2, x-start_x, 2);
+					fillRectangle(start_x, y+font->height-2, x-start_x, 2, DRAW_WHITE);
 				
 				x = start_x;
 				y += font->height + (c==11 ? font->height/2 : font->charDist);

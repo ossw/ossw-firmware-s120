@@ -29,7 +29,7 @@ static void scr_alarm_draw_minutes() {
 }
 
 static void scr_alarm_toggle_day(uint8_t day) {
-		fillRectangle(4+day*20, 128, 17, 20);
+		fillRectangle(4+day*20, 128, 17, 20, DRAW_XOR);
 }
 
 static void scr_alarm_draw_day(uint8_t day) {
@@ -37,7 +37,7 @@ static void scr_alarm_draw_day(uint8_t day) {
 		uint8_t day_x = 4+day*20;
 		mlcd_draw_text(I18N_TRANSLATE(MESSAGE_SUNDAY_1+day), day_x, 130, 18, 18, FONT_BIG_REGULAR, HORIZONTAL_ALIGN_CENTER);
 		if (day == rtc_get_current_day_of_week()-1)
-				fillRectangle(day_x+1, 145, 15, 2);
+				fillRectangle(day_x+1, 145, 15, 2, DRAW_XOR);
 		if (alarm_options & day_mask)
 				scr_alarm_toggle_day(day);
 }
@@ -48,24 +48,23 @@ static void scr_alarm_draw_days() {
 		}
 		if (change_mode > MODE_MINUTE) {
 				uint8_t day = change_mode - MODE_MINUTE - 1;
-			  fillUp(12 + day*20, 121, DAY_HEIGHT);
-			  fillDown(12 + day*20, 154, DAY_HEIGHT);
+			  fillUp(12 + day*20, 121, DAY_HEIGHT, DRAW_WHITE);
+			  fillDown(12 + day*20, 154, DAY_HEIGHT, DRAW_WHITE);
 		}
 }
 
 static void scr_changetime_draw_all() {
 	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_ALARM_CLOCK), 10, 5, 80, NULL, FONT_OPTION_BIG, HORIZONTAL_ALIGN_LEFT);
-//	  mlcd_draw_rect(0, 25, MLCD_XRES, 2);
-	
-	  mlcd_draw_rect(69, TIME_Y_POS + 24, 5, 5);
-	  mlcd_draw_rect(69, TIME_Y_POS + 10, 5, 5);
+
+	  fillRectangle(69, TIME_Y_POS + 24, 5, 5, DRAW_WHITE);
+	  fillRectangle(69, TIME_Y_POS + 10, 5, 5, DRAW_WHITE);
 	
 	  if (change_mode == MODE_HOUR) {
-			  fillDown(34, TIME_Y_POS + 52, ARROW_HEIGHT);
-			  fillUp(34, TIME_Y_POS - 13, ARROW_HEIGHT);
+			  fillDown(34, TIME_Y_POS + 52, ARROW_HEIGHT, DRAW_WHITE);
+			  fillUp(34, TIME_Y_POS - 13, ARROW_HEIGHT, DRAW_WHITE);
 		} else if (change_mode == MODE_MINUTE) {
-			  fillDown(110, TIME_Y_POS + 52, ARROW_HEIGHT);
-			  fillUp(110, TIME_Y_POS - 13, ARROW_HEIGHT);
+			  fillDown(110, TIME_Y_POS + 52, ARROW_HEIGHT, DRAW_WHITE);
+			  fillUp(110, TIME_Y_POS - 13, ARROW_HEIGHT, DRAW_WHITE);
 		}
 		
 	  scr_alarm_draw_hour();

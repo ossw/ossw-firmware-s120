@@ -22,19 +22,19 @@ static uint8_t h, m, s;
 static void scr_watchface_refresh_time() {
 		bool slow = rtc_get_refresh_interval() >= RTC_INTERVAL_MINUTE;
 		if (!slow) {
-				radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2);
+				radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2, DRAW_XOR);
 				s = rtc_get_current_seconds();
 		}
 		if (s == 0 || slow) {
-				radialTriangle(CENTER_X, CENTER_Y, 6*m, MIN_L1, MIN_L2, 7);
-				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), HOUR_L1, HOUR_L2, 7);
+				radialTriangle(CENTER_X, CENTER_Y, 6*m, MIN_L1, MIN_L2, 7, DRAW_XOR);
+				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), HOUR_L1, HOUR_L2, 7, DRAW_XOR);
 				m = rtc_get_current_minutes();
 				h = rtc_get_current_hour_12();
-				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), HOUR_L1, HOUR_L2, 7);
-				radialTriangle(CENTER_X, CENTER_Y, 6*m, MIN_L1, MIN_L2, 7);
+				radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), HOUR_L1, HOUR_L2, 7, DRAW_XOR);
+				radialTriangle(CENTER_X, CENTER_Y, 6*m, MIN_L1, MIN_L2, 7, DRAW_XOR);
 		}
 		if (!slow)
-				radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2);
+				radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2, DRAW_XOR);
 }
 
 static void scr_watchface_init() {
@@ -45,16 +45,16 @@ static void scr_watchface_draw() {
 //				hLine(i, 1, i);
 //		fillCircle(CENTER_X, CENTER_Y, 71);
 		for (int deg = 0; deg < 360; deg += 30)
-				radialRect(CENTER_X, CENTER_Y, deg, 60, 70, 3);
+				radialRect(CENTER_X, CENTER_Y, deg, 60, 70, 3, DRAW_XOR);
 		bool slow = rtc_get_refresh_interval() >= RTC_INTERVAL_MINUTE;
 		s = rtc_get_current_seconds();
 		if (!slow) {
-				radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2);
+				radialLine(CENTER_X, CENTER_Y, 6*s, SEC_L1, SEC_L2, DRAW_XOR);
 		}
 		m = rtc_get_current_minutes();
-		radialTriangle(CENTER_X, CENTER_Y, 6*m, MIN_L1, MIN_L2, 7); 
+		radialTriangle(CENTER_X, CENTER_Y, 6*m, MIN_L1, MIN_L2, 7, DRAW_XOR); 
 		h = rtc_get_current_hour_12();
-		radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), HOUR_L1, HOUR_L2, 7);
+		radialRect(CENTER_X, CENTER_Y, 30*h+(m>>1), HOUR_L1, HOUR_L2, 7, DRAW_XOR);
 }
 
 static bool scr_analog_handle_button_pressed(uint32_t button_id) {

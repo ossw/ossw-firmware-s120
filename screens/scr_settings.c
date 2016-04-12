@@ -107,15 +107,15 @@ static void shake_light_toggle() {
 }
 
 // TEST DIALOG
-static void select_item_handler(uint8_t item) {
-}
+//static void select_item_handler(uint8_t item) {
+//}
 
-static void test_handler() {
-		pack_dialog_select(0, &select_item_handler, FONT_OPTION_NORMAL, SELECT_CHECK, I18N_TRANSLATE(MESSAGE_ABOUT),
-				15, "One\0Two\0Three\0Four\0Five\0Six\0Seven\0Eight\0Nine\0Ten\0Eleven\0Twelve\0Thurteen\0Fourteen\0Fifteen\0");
-		set_modal_dialog(true);
-		scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_DIALOG_TEXT);
-}
+//static void test_handler() {
+//		pack_dialog_select(0, &select_item_handler, FONT_OPTION_NORMAL, SELECT_CHECK, I18N_TRANSLATE(MESSAGE_ABOUT),
+//				15, "One\0Two\0Three\0Four\0Five\0Six\0Seven\0Eight\0Nine\0Ten\0Eleven\0Twelve\0Thurteen\0Fourteen\0Fifteen\0");
+//		set_modal_dialog(true);
+//		scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_DIALOG_TEXT);
+//}
 
 static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_TIMER, opt_handler_timer, opt_handler_timer, NULL},
@@ -127,8 +127,8 @@ static const MENU_OPTION settings_menu[] = {
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
 		{MESSAGE_TIME, opt_handler_change_time, opt_handler_change_time, NULL},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},
-		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL},
-		{MESSAGE_ABOUT, test_handler, test_handler, NULL}
+		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL}
+//		{MESSAGE_ABOUT, test_handler, test_handler, NULL}
 };
 
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);
@@ -140,7 +140,7 @@ static void draw_option(uint_fast8_t item) {
 		if (s_drawer != NULL)
 				s_drawer(SUMMARY_X, yPos);
 		if (item == selectedOption)
-				fillRectangle(0, yPos-2, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT);
+				fillRectangle(0, yPos-2, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT, DRAW_XOR);
 }
 
 static void scr_settings_draw_options() {
@@ -155,11 +155,11 @@ static void scr_settings_draw_options() {
 				draw_option(start_item+i);
 		}
 		if (page_no > 0)
-				fillUp(MLCD_XRES/2, HEADER_HEIGHT-SCROLL_HEIGHT-2, SCROLL_HEIGHT);
+				fillUp(MLCD_XRES/2, HEADER_HEIGHT-SCROLL_HEIGHT-2, SCROLL_HEIGHT, DRAW_XOR);
 		if (page_no + 1 < CEIL(SIZE_OF_MENU, MENU_ITEMS_PER_PAGE))
-				fillDown(MLCD_XRES/2, MLCD_YRES-2, SCROLL_HEIGHT);
+				fillDown(MLCD_XRES/2, MLCD_YRES-2, SCROLL_HEIGHT, DRAW_XOR);
 		if (lastSelectedOption / MENU_ITEMS_PER_PAGE == 1 && page_no == 0) {
-				mlcd_clear_rect(0, 0, MLCD_XRES, HEADER_HEIGHT);
+				fillRectangle(0, 0, MLCD_XRES, HEADER_HEIGHT, DRAW_BLACK);
 				scr_mngr_draw_notification_bar();
 		}
 }
@@ -170,14 +170,14 @@ static void scr_settings_refresh_screen() {
 				return;
 	  if (lastSelectedOption / MENU_ITEMS_PER_PAGE != selectedOption / MENU_ITEMS_PER_PAGE) {
 				// on page change
-				mlcd_clear_rect(0, HEADER_HEIGHT, MLCD_XRES, MLCD_YRES-HEADER_HEIGHT);
+				fillRectangle(0, HEADER_HEIGHT, MLCD_XRES, MLCD_YRES-HEADER_HEIGHT, DRAW_BLACK);
 				scr_settings_draw_options();
 	  } else {
 				// on item change
 				uint_fast8_t yPos = HEADER_HEIGHT + 2 + MENU_ITEM_HEIGHT * (selectedOption % MENU_ITEMS_PER_PAGE);
-				fillRectangle(0, yPos, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT);
+				fillRectangle(0, yPos, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT, DRAW_XOR);
 				yPos = HEADER_HEIGHT + 2 + MENU_ITEM_HEIGHT * (lastSelectedOption % MENU_ITEMS_PER_PAGE);
-				fillRectangle(0, yPos, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT);
+				fillRectangle(0, yPos, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT, DRAW_XOR);
 		}
 		lastSelectedOption = selectedOption;
 }
@@ -202,7 +202,7 @@ static void scr_refresh_summary() {
 		void (*s_drawer)(uint8_t, uint8_t) = settings_menu[selectedOption].summary_drawer;
 		if (s_drawer != NULL) {
 				uint_fast8_t yPos = HEADER_HEIGHT+MENU_ITEM_HEIGHT*(selectedOption%MENU_ITEMS_PER_PAGE);
-				mlcd_clear_rect(0, yPos+2, MLCD_XRES, MENU_ITEM_HEIGHT);
+				fillRectangle(0, yPos+2, MLCD_XRES, MENU_ITEM_HEIGHT, DRAW_BLACK);
 				draw_option(selectedOption);
 		}
 }

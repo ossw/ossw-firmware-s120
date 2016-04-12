@@ -5,7 +5,7 @@ static const I18N_MESSAGE messages_en[] = {
 	/*   0 */{""},
   /*   1 */{"Date"},
   /*   2 */{"Time"},
-  /*   3 */{"Display"},
+  /*   3 */{"Invert"},
   /*   4 */{"Sensors"},
   /*   5 */{"Restart"},
   /*   6 */{"Set date"},

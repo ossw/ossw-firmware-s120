@@ -44,18 +44,18 @@ static void scr_timer_draw_arrows() {
 	if ((timer_mode & MODE_VISIBLE) == 0)
 		return;
 	if (timer_mode & MODE_EDIT_FIRST) {
-		fillDown(34, TIME_Y_POS + 52, ARROW_HEIGHT);
-		fillUp(34, TIME_Y_POS - 13, ARROW_HEIGHT);
+		fillDown(34, TIME_Y_POS + 52, ARROW_HEIGHT, DRAW_XOR);
+		fillUp(34, TIME_Y_POS - 13, ARROW_HEIGHT, DRAW_XOR);
 	} else {
-		fillDown(110, TIME_Y_POS + 52, ARROW_HEIGHT);
-		fillUp(110, TIME_Y_POS - 13, ARROW_HEIGHT);
+		fillDown(110, TIME_Y_POS + 52, ARROW_HEIGHT, DRAW_XOR);
+		fillUp(110, TIME_Y_POS - 13, ARROW_HEIGHT, DRAW_XOR);
 	}
 }
 
 static void scr_timer_draw_units() {
 	if ((timer_mode & MODE_VISIBLE) == 0)
 		return;
-	mlcd_clear_rect(0, TIME_Y_POS+55, MLCD_XRES, 20);
+	fillRectangle(0, TIME_Y_POS+55, MLCD_XRES, 20, DRAW_BLACK);
 	if (timer_mode & MODE_UNIT_MIN) {
 		mlcd_draw_text(I18N_TRANSLATE(MESSAGE_HOURS), 0, TIME_Y_POS+55, MLCD_XRES/2, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 		mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MINUTES), MLCD_XRES/2, TIME_Y_POS+55, MLCD_XRES/2, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
@@ -63,6 +63,11 @@ static void scr_timer_draw_units() {
 		mlcd_draw_text(I18N_TRANSLATE(MESSAGE_MINUTES), 0, TIME_Y_POS+55, MLCD_XRES/2, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 		mlcd_draw_text(I18N_TRANSLATE(MESSAGE_SECONDS), MLCD_XRES/2, TIME_Y_POS+55, MLCD_XRES/2, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 	}
+}
+
+static void scr_mark_timer() {
+	uint8_t marked = (timer_mode >> 4) & 3;
+	rectangle((marked&1)*72, TIME_Y_POS+79+20*(marked>>1), MLCD_XRES/2, 17, DRAW_XOR);
 }
 
 static void scr_draw_saved_timers() {
@@ -90,6 +95,7 @@ static void scr_draw_saved_timers() {
 		txt[4] = '0'+t2%10;
 		mlcd_draw_text(txt, (i&1)*72, TIME_Y_POS+80+20*(i>>1), MLCD_XRES/2, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 	}
+	scr_mark_timer();
 }
 
 static void scr_draw_timer_all() {
@@ -97,8 +103,8 @@ static void scr_draw_timer_all() {
 		return;
   mlcd_draw_text(I18N_TRANSLATE(MESSAGE_TIMER), 10, 5, 80, NULL, FONT_OPTION_BIG, HORIZONTAL_ALIGN_LEFT);
 	
-  mlcd_draw_rect(69, TIME_Y_POS + 24, 5, 5);
-  mlcd_draw_rect(69, TIME_Y_POS + 10, 5, 5);
+  fillRectangle(69, TIME_Y_POS + 24, 5, 5, DRAW_WHITE);
+  fillRectangle(69, TIME_Y_POS + 10, 5, 5, DRAW_WHITE);
   scr_draw_timer_1();
   scr_draw_timer_2();
 	scr_timer_draw_units();
@@ -148,9 +154,11 @@ static void scr_save_timer() {
 static void scr_timer_roll_saved() {
 	uint8_t saved_index = (timer_mode >> 4) + 1 & 3;
 	scr_load_saved_timer(saved_index);
+	scr_mark_timer();
 	// store the index
 	timer_mode &= ~MODE_OLD_VALUES;
 	timer_mode |= (saved_index << 4) | MODE_SAVE_NEW;
+	scr_mark_timer();
 }
 
 static void scr_timer_pause() {
@@ -179,7 +187,7 @@ static void scr_timer_resume() {
 		scr_save_timer();
 		timer_mode &= ~MODE_SAVE_NEW;
 	}
-	mlcd_clear_rect(0, TIME_Y_POS+80, MLCD_XRES, 38);
+	fillRectangle(0, TIME_Y_POS+79, MLCD_XRES, 38, DRAW_BLACK);
 }
 
 static void scr_timer_toggle_play() {

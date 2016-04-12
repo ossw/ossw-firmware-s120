@@ -4,6 +4,7 @@
 #include "../scr_mngr.h"
 #include "../mlcd_draw.h"
 #include "../mlcd.h"
+#include "../graph.h"
 #include "../i18n/i18n.h"
 #include "../battery.h"
 #include "../scr_controls.h"
@@ -45,8 +46,7 @@ static bool scr_status_handle_button_pressed(uint32_t button_id) {
 }
 
 static void scr_status_draw_battery_status() {
-	
-		mlcd_clear_rect(0, 25, MLCD_XRES, 20);
+		fillRectangle(0, 25, MLCD_XRES, 20, DRAW_BLACK);
 		if (mode == 1) {
 				mlcd_draw_text("charging", 0, 25, MLCD_XRES, 20, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_CENTER);
 		} else if (mode == 2) {
@@ -75,7 +75,7 @@ static void scr_status_refresh_screen() {
 }
 
 static void scr_status_draw_screen() {
-		mlcd_draw_rect(109, 60, 6, 12);
+		fillRectangle(109, 60, 6, 12, DRAW_WHITE);
 		mode = battery_is_charging()? (battery_is_full() ? 2 : 1) : 0;
 		scr_status_draw_battery_status();
 							

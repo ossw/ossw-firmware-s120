@@ -23,17 +23,16 @@ static bool redraw = false;
 static uint8_t items_per_page;
 
 void dialog_select_init(void (*d_callback)(uint8_t)) {
-		d_select_callback = d_callback;
+	d_select_callback = d_callback;
 }
 
 static void skip_string_ext_ram(uint8_t no, uint16_t* address_ptr) {
-		while (no-- > 0) {
-				while (get_next_byte(address_ptr) != '\0');
-		}
+	while (no-- > 0)
+		while (get_next_byte(address_ptr) != '\0');
 }
 
 static void dialog_select_draw_screen() {
-		mlcd_clear_rect(0, 0, MLCD_XRES, MLCD_YRES);
+		fillRectangle(0, 0, MLCD_XRES, MLCD_YRES, DRAW_BLACK);
 		uint16_t read_address = dialog_input;
 		uint8_t item = get_next_byte(&read_address);
 		uint8_t list_size = get_next_byte(&read_address);
@@ -58,7 +57,7 @@ static void dialog_select_draw_screen() {
 		char* data_ptr;
 		data_ptr = (char*)(m_address + read_address);
 		mlcd_draw_text(data_ptr, 0, 0, MLCD_XRES, item_height, font, HORIZONTAL_ALIGN_CENTER);
-		fillRectangle(MARGIN, item_height, MLCD_XRES-2*MARGIN, 2);
+		fillRectangle(MARGIN, item_height, MLCD_XRES-2*MARGIN, 2, DRAW_XOR);
 		skip_string_ext_ram(1, &read_address);
 
 		items_per_page = (MLCD_YRES-MARGIN-title_height)/item_height;
@@ -84,18 +83,18 @@ static void dialog_select_draw_screen() {
 					case SELECT_RADIO: {
 						uint8_t cx = MARGIN + RADIO_RADIUS;
 						uint8_t cy = y + (item_height >> 1);
-						circle(cx, cy, RADIO_RADIUS);
+						circle(cx, cy, RADIO_RADIUS, DRAW_XOR);
 						if (marked) {
-							fillCircle(cx, cy, RADIO_RADIUS-2);
+							fillCircle(cx, cy, RADIO_RADIUS-2, DRAW_XOR);
 						}
 						break;
 					}
 					case SELECT_CHECK: {
 						uint8_t cx = MARGIN;
 						uint8_t cy = y + ((item_height - CHECK_BOX_SIZE) >> 1);
-						mlcd_draw_rect_border(cx, cy, CHECK_BOX_SIZE, CHECK_BOX_SIZE, 1);
+						rectangle(cx, cy, CHECK_BOX_SIZE, CHECK_BOX_SIZE, DRAW_WHITE);
 						if (marked) {
-							fillRectangle(cx+2, cy+2, CHECK_BOX_SIZE-4, CHECK_BOX_SIZE-4);
+							fillRectangle(cx+2, cy+2, CHECK_BOX_SIZE-4, CHECK_BOX_SIZE-4, DRAW_XOR);
 						}
 						break;
 					}
@@ -103,11 +102,11 @@ static void dialog_select_draw_screen() {
 				y += item_height;
 				skip_string_ext_ram(1, &read_address);
 		}
-		fillRectangle(text_x-MARGIN, list_top+(item-start_item)*item_height, MLCD_XRES+MARGIN-text_x, item_height);
+		fillRectangle(text_x-MARGIN, list_top+(item-start_item)*item_height, MLCD_XRES+MARGIN-text_x, item_height, DRAW_XOR);
 		if (page_no > 0)
-				fillUp(MLCD_XRES-SCROLL_HEIGHT-MARGIN, MARGIN, SCROLL_HEIGHT);
+				fillUp(MLCD_XRES-SCROLL_HEIGHT-MARGIN, MARGIN, SCROLL_HEIGHT, DRAW_XOR);
 		if (page_no + 1 < CEIL(list_size, items_per_page))
-				fillDown(MLCD_XRES-SCROLL_HEIGHT-MARGIN, MLCD_YRES-MARGIN, SCROLL_HEIGHT);
+				fillDown(MLCD_XRES-SCROLL_HEIGHT-MARGIN, MLCD_YRES-MARGIN, SCROLL_HEIGHT, DRAW_XOR);
 }
 
 static bool dialog_select_button_pressed(uint32_t button_id) {
@@ -134,7 +133,7 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
 										uint8_t list_top = item_height + 2 + ((MLCD_YRES-item_height*(items_per_page+1)-2)>>1);
-										fillRectangle(select_x, list_top+(item % items_per_page)*item_height, MLCD_XRES-select_x, item_height<<1);
+										fillRectangle(select_x, list_top+(item % items_per_page)*item_height, MLCD_XRES-select_x, item_height<<1, DRAW_XOR);
 								} else
 										redraw = true;
 								ext_ram_write_data(dialog_input, &item, sizeof(item));
@@ -157,7 +156,7 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
 										uint8_t list_top = item_height + 2 + ((MLCD_YRES-item_height*(items_per_page+1)-2)>>1);
-										fillRectangle(select_x, list_top+(item % items_per_page)*item_height, MLCD_XRES-select_x, item_height<<1);
+										fillRectangle(select_x, list_top+(item % items_per_page)*item_height, MLCD_XRES-select_x, item_height<<1, DRAW_XOR);
 								} else
 										redraw = true;
 								item++;

@@ -1,6 +1,7 @@
 #include "scr_changedate.h"
 #include "../scr_mngr.h"
 #include "../mlcd_draw.h"
+#include "../graph.h"
 #include "../rtc.h"
 #include "../i18n/i18n.h"
 #include <time.h>
@@ -38,10 +39,10 @@ static void scr_changedate_draw_year() {
 
 static void scr_changedate_draw_all() {
 	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_SET_DATE), 20, 13, NULL, NULL, FONT_OPTION_BIG, 0);
-	  mlcd_draw_rect(0, 50, MLCD_XRES, 2);
+	  fillRectangle(0, 50, MLCD_XRES, 2, DRAW_WHITE);
 	
-	  mlcd_draw_rect(35, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4);
-	  mlcd_draw_rect(75, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4);
+	  fillRectangle(35, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4, DRAW_WHITE);
+	  fillRectangle(75, DATE_Y_POS + DATE_HEIGHT - 4, 4, 4, DRAW_WHITE);
 	
 	  if (change_mode == MODE_DAY) {
         mlcd_draw_rect_border(0, DATE_Y_POS - 3, 34, DATE_HEIGHT+6, 1);
