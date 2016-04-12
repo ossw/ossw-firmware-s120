@@ -7,14 +7,14 @@
 
   <Targets>
     <Target>
-      <TargetName>weloop</TargetName>
+      <TargetName>smaq-nrf51</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <TargetOption>
         <TargetCommonOption>
           <Device>nRF51822_xxAA</Device>
           <Vendor>Nordic Semiconductor</Vendor>
-          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.8.3.2</PackID>
+          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.8.0.3</PackID>
           <PackURL>http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/</PackURL>
           <Cpu>IROM(0x00000000,0x40000) IRAM(0x20000000,0x4000) CPUTYPE("Cortex-M0") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -309,8 +309,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x1d000</StartAddress>
-                <Size>0x1f000</Size>
+                <StartAddress>0x1c000</StartAddress>
+                <Size>0x20000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -347,7 +347,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -363,7 +363,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>BLE_DFU_APP_SUPPORT BLE_STACK_SUPPORT_REQD S110 S120 TARGET_WELOOP SOFTDEVICE_PRESENT NRF51 SWI_DISABLE0 AMX_ANSIONLY</Define>
+              <Define>BLE_STACK_SUPPORT_REQD S130 TARGET_SMAQ_NRF51 SOFTDEVICE_PRESENT NRF51 SWI_DISABLE0 AMX_ANSIONLY</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -409,19 +409,14 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
-              <FileName>ossw.c</FileName>
+              <FileName>smaq_nrf51.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\ossw.c</FilePath>
+              <FilePath>..\..\..\target\smaq\smaq_nrf51.c</FilePath>
             </File>
             <File>
-              <FileName>weloop.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\target\weloop\weloop.c</FilePath>
-            </File>
-            <File>
-              <FileName>weloop.h</FileName>
+              <FileName>smaq_nrf51.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\target\weloop\weloop.h</FilePath>
+              <FilePath>..\..\..\target\smaq\smaq_nrf51.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -429,229 +424,24 @@
           <GroupName>Libraries</GroupName>
           <Files>
             <File>
-              <FileName>ext_flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\ext_flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>ext_ram.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\ext_ram.c</FilePath>
-            </File>
-            <File>
-              <FileName>mlcd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\mlcd.c</FilePath>
-            </File>
-            <File>
-              <FileName>mlcd_draw.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\mlcd_draw.c</FilePath>
-            </File>
-            <File>
-              <FileName>notifications.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\notifications.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_controls.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\scr_controls.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_mngr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\scr_mngr.c</FilePath>
-            </File>
-            <File>
-              <FileName>utf8.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\utf8.c</FilePath>
-            </File>
-            <File>
-              <FileName>vibration.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\vibration.c</FilePath>
-            </File>
-            <File>
-              <FileName>command.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\command.c</FilePath>
-            </File>
-            <File>
-              <FileName>command_rx_buffer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\command_rx_buffer.c</FilePath>
-            </File>
-            <File>
-              <FileName>stopwatch.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\stopwatch.c</FilePath>
-            </File>
-            <File>
-              <FileName>watchset.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\watchset.c</FilePath>
-            </File>
-            <File>
-              <FileName>fs.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\fs.c</FilePath>
-            </File>
-            <File>
-              <FileName>accel.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\accel.c</FilePath>
-            </File>
-            <File>
-              <FileName>config.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\config.c</FilePath>
-            </File>
-            <File>
-              <FileName>spi_nrf5x.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\spi_nrf5x.c</FilePath>
-            </File>
-            <File>
               <FileName>mcu_nrf5x.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\mcu_nrf5x.c</FilePath>
+              <FilePath>..\..\..\mcu_nrf5x.c</FilePath>
             </File>
             <File>
               <FileName>gpio_nrf5x.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\gpio_nrf5x.c</FilePath>
+              <FilePath>..\..\..\gpio_nrf5x.c</FilePath>
             </File>
             <File>
               <FileName>timer_nrf5x.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\timer_nrf5x.c</FilePath>
+              <FilePath>..\..\..\timer_nrf5x.c</FilePath>
             </File>
             <File>
-              <FileName>rtc_nrf5x.c</FileName>
+              <FileName>command_rx_buffer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\rtc_nrf5x.c</FilePath>
-            </File>
-            <File>
-              <FileName>battery_nrf5x.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\battery_nrf5x.c</FilePath>
-            </File>
-            <File>
-              <FileName>buttons_nrf5x.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\buttons_nrf5x.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Screens</GroupName>
-          <Files>
-            <File>
-              <FileName>scr_alert_notification.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_alert_notification.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_changedate.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_changedate.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_changetime.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_changetime.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_choosemode.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_choosemode.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_notifications.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_notifications.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_settings.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_settings.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_watchface.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_watchface.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_watchset.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_watchset.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_watchset_list.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_watchset_list.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_about.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_about.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_status.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\screens\scr_status.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Fonts</GroupName>
-          <Files>
-            <File>
-              <FileName>big_bold.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\fonts\big_bold.h</FilePath>
-            </File>
-            <File>
-              <FileName>big_regular.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\fonts\big_regular.h</FilePath>
-            </File>
-            <File>
-              <FileName>font.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\fonts\font.h</FilePath>
-            </File>
-            <File>
-              <FileName>normal_bold.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\fonts\normal_bold.h</FilePath>
-            </File>
-            <File>
-              <FileName>normal_regular.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\fonts\normal_regular.h</FilePath>
-            </File>
-            <File>
-              <FileName>option_big.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\fonts\option_big.h</FilePath>
-            </File>
-            <File>
-              <FileName>option_normal.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\fonts\option_normal.h</FilePath>
-            </File>
-            <File>
-              <FileName>small_bold.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\fonts\small_bold.h</FilePath>
-            </File>
-            <File>
-              <FileName>small_regular.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\fonts\small_regular.h</FilePath>
+              <FilePath>..\..\..\command_rx_buffer.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -661,87 +451,12 @@
             <File>
               <FileName>ble_ossw.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\ble\ble_ossw.c</FilePath>
-            </File>
-            <File>
-              <FileName>ble_central.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\ble\ble_central.c</FilePath>
+              <FilePath>..\..\..\ble\ble_ossw.c</FilePath>
             </File>
             <File>
               <FileName>ble_peripheral.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\ble\ble_peripheral.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>PAWN</GroupName>
-          <Files>
-            <File>
-              <FileName>amx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\pawn\amx.c</FilePath>
-            </File>
-            <File>
-              <FileName>amxext.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\pawn\amxext.c</FilePath>
-            </File>
-            <File>
-              <FileName>amxutil.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\pawn\amxutil.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>i18n</GroupName>
-          <Files>
-            <File>
-              <FileName>i18n.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\i18n\i18n.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>spiffs</GroupName>
-          <Files>
-            <File>
-              <FileName>spiffs_check.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\spiffs\spiffs_check.c</FilePath>
-            </File>
-            <File>
-              <FileName>spiffs_gc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\spiffs\spiffs_gc.c</FilePath>
-            </File>
-            <File>
-              <FileName>spiffs_hydrogen.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\spiffs\spiffs_hydrogen.c</FilePath>
-            </File>
-            <File>
-              <FileName>spiffs_nucleus.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\spiffs\spiffs_nucleus.c</FilePath>
-            </File>
-            <File>
-              <FileName>spiffs.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\spiffs\spiffs.h</FilePath>
-            </File>
-            <File>
-              <FileName>spiffs_config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\spiffs\spiffs_config.h</FilePath>
-            </File>
-            <File>
-              <FileName>spiffs_nucleus.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\spiffs\spiffs_nucleus.h</FilePath>
+              <FilePath>..\..\..\ble\ble_peripheral.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -750,18 +465,318 @@
         </Group>
         <Group>
           <GroupName>::Device</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>1</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>2</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
         </Group>
         <Group>
           <GroupName>::nRF_BLE</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>1</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>2</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
         </Group>
         <Group>
           <GroupName>::nRF_Drivers</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>1</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>2</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
         </Group>
         <Group>
           <GroupName>::nRF_Libraries</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>1</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>2</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
         </Group>
         <Group>
           <GroupName>::nRF_SoftDevice</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>1</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>2</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
         </Group>
       </Groups>
     </Target>
@@ -774,11 +789,13 @@
       </filter>
       <package name="CMSIS" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="ARM" version="4.2.0">
         <targetInfos>
+          <targetInfo name="smaq-nrf51" versionMatchMode="fixed"/>
           <targetInfo name="weloop"/>
         </targetInfos>
       </package>
       <package name="nRF_BLE" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE" vendor="NordicSemiconductor" version="3.0.1">
         <targetInfos>
+          <targetInfo name="smaq-nrf51" versionMatchMode="fixed"/>
           <targetInfo name="weloop" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
@@ -787,8 +804,14 @@
           <targetInfo name="weloop"/>
         </targetInfos>
       </package>
+      <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.0.3">
+        <targetInfos>
+          <targetInfo name="smaq-nrf51" versionMatchMode="fixed"/>
+        </targetInfos>
+      </package>
       <package name="nRF_Drivers" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers" vendor="NordicSemiconductor" version="3.0.1">
         <targetInfos>
+          <targetInfo name="smaq-nrf51" versionMatchMode="fixed"/>
           <targetInfo name="weloop" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
@@ -799,11 +822,13 @@
       </package>
       <package name="nRF_Libraries" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries" vendor="NordicSemiconductor" version="3.0.1">
         <targetInfos>
+          <targetInfo name="smaq-nrf51" versionMatchMode="fixed"/>
           <targetInfo name="weloop" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
       <package name="nRF_SoftDevice_Common" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_Common" vendor="NordicSemiconductor" version="1.1.4">
         <targetInfos>
+          <targetInfo name="smaq-nrf51" versionMatchMode="fixed"/>
           <targetInfo name="weloop" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
@@ -812,235 +837,258 @@
           <targetInfo name="weloop" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
+      <package name="nRF_SoftDevice_S130" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S130/" vendor="NordicSemiconductor" version="1.0.1">
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </package>
     </packages>
     <apis/>
     <components>
       <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="3.40.0" condition="CMSIS Core">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="4.2.0"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
-      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="7.2.1" condition="nRF51 Series CMSIS Device">
-        <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="7.2.1"/>
+      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.0.3" condition="nRF51 Series CMSIS Device">
+        <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.0.3"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_advdata" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_advdata">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_advertising" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_advertising">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_common" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_common">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_conn_params" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_conn_params">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_db_discovery" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_db_discovery">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_service_common" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_service_common">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="device_manager" Cvariant="Peripheral" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="device_manager_Peripheral">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_bas" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_bas">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_bas_c" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_bas_c">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_cscs" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_cscs">
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_dfu" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_dfu">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_dis" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_dis">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_hrs_c" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_hrs_c">
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
-      <component Cclass="nRF_Drivers" Cgroup="app_uart" Cvariant="Fifo" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_uart_Fifo">
+      <component Cclass="nRF_BLE" Cgroup="BLE_Services" Csub="ble_sc_ctrlpt" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_sc_ctrlpt">
+        <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_Drivers" Cgroup="app_uart" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_uart_default">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="nrf_adc" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_adc">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="nrf_delay" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_delay">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="nrf_drv_common" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_drv_common">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="nrf_drv_gpiote" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_drv_gpiote">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="nrf_error" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_error_default">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="nrf_gpio" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_gpio">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="nrf_gpiote" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_gpiote">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
-        </targetInfos>
-      </component>
-      <component Cclass="nRF_Drivers" Cgroup="nrf_soc" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_soc_default">
-        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
-        <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="pstorage" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="pstorage_default">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_Drivers" Cgroup="spi_slave" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="spi_slave">
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Drivers" Cgroup="twi_master" Cvariant="Software" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="twi_master_Software">
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="DFU" Csub="dfu_app_handler" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="dfu_app_handler">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="DFU" Csub="dfu_bootloader_util" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="dfu_bootloader_util">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="app_button" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_button">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="app_error" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_error">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
-        </targetInfos>
-      </component>
-      <component Cclass="nRF_Libraries" Cgroup="app_fifo" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_fifo">
-        <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
-        <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="app_timer" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_timer_default">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="app_trace" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_trace_default">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="app_util" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_util_default">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_Libraries" Cgroup="nordic_common" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nordic_common">
+        <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="nrf_assert" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_assert">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="retarget" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="retarget">
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </component>
+      <component Cclass="nRF_Libraries" Cgroup="sensorsim" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="sensorsim">
+        <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_SoftDevice" Cgroup="Internal" Csub="sd_common" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="1.1.4" condition="sd_common_default">
         <package name="nRF_SoftDevice_Common" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_Common/" vendor="NordicSemiconductor" version="1.1.4"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_SoftDevice" Cgroup="Internal" Csub="softdevice_present" Cvendor="NordicSemiconductor" Cversion="1.1.4" condition="softdevice_present">
         <package name="nRF_SoftDevice_Common" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_Common/" vendor="NordicSemiconductor" version="1.1.4"/>
         <targetInfos>
-          <targetInfo name="weloop" versionMatchMode="fixed"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
-      <component Cclass="nRF_SoftDevice" Cgroup="s120" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="2.1.0" condition="s120_default">
-        <package name="nRF_SoftDevice_S120" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S120/" vendor="NordicSemiconductor" version="2.1.0"/>
+      <component Cclass="nRF_SoftDevice" Cgroup="s130" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="1.0.1" condition="s130_default">
+        <package name="nRF_SoftDevice_S130" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S130/" vendor="NordicSemiconductor" version="1.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </component>
     </components>
@@ -1083,18 +1131,18 @@
       </file>
       <file attr="config" category="source" condition="ARM Compiler" name="Device\Source\arm\arm_startup_nrf51.s">
         <instance index="0">RTE\Device\nRF51822_xxAA\arm_startup_nrf51.s</instance>
-        <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.0.3" condition="nRF51 Series CMSIS Device"/>
-        <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.0.3"/>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.3.2" condition="nRF51 Series CMSIS Device"/>
+        <package license="License\license.txt" name="nRF_DeviceFamilyPack" schemaVersion="1.3" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.3.2"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="Device\Source\system_nrf51.c">
         <instance index="0">RTE\Device\nRF51822_xxAA\system_nrf51.c</instance>
-        <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.0.3" condition="nRF51 Series CMSIS Device"/>
-        <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.0.3"/>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.3.2" condition="nRF51 Series CMSIS Device"/>
+        <package license="License\license.txt" name="nRF_DeviceFamilyPack" schemaVersion="1.3" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.3.2"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="common\ble_advdata.c" version="3.0.1">
@@ -1138,7 +1186,7 @@
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_advdata" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_advdata"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="common\ble_advdata.h" version="3.0.1">
@@ -1146,7 +1194,7 @@
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_advdata" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_advdata"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="ble_advertising\ble_advertising.c" version="3.0.1">
@@ -1154,7 +1202,7 @@
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_advertising" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_advertising"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="common\ble_conn_params.c" version="3.0.1">
@@ -1162,7 +1210,7 @@
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_conn_params" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_conn_params"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="common\ble_conn_params.h" version="3.0.1">
@@ -1170,7 +1218,7 @@
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_conn_params" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_conn_params"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="ble_db_discovery\ble_db_discovery.c" version="3.0.1">
@@ -1178,7 +1226,7 @@
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_db_discovery" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_db_discovery"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="ble_db_discovery\ble_db_discovery.h" version="3.0.1">
@@ -1186,15 +1234,15 @@
         <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="ble_db_discovery" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="ble_db_discovery"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="device_manager\config\device_manager_cnfg.h" version="3.0.1">
         <instance index="0">RTE\nRF_BLE\nRF51822_xxAA\device_manager_cnfg.h</instance>
-        <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="device_manager" Cvariant="Central" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="device_manager_Central"/>
+        <component Cclass="nRF_BLE" Cgroup="BLE_Modules" Csub="device_manager" Cvariant="Peripheral" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="device_manager_Peripheral"/>
         <package name="nRF_BLE" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_BLE/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="uart\app_uart.h" version="3.0.1">
@@ -1233,36 +1281,48 @@
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos/>
       </file>
-      <file attr="config" category="header" name="uart\app_uart.h" version="3.0.1">
-        <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\app_uart.h</instance>
-        <component Cclass="nRF_Drivers" Cgroup="app_uart" Cvariant="Fifo" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_uart_Fifo"/>
+      <file attr="config" category="source" name="uart\app_uart.c" version="3.0.1">
+        <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\app_uart.c</instance>
+        <component Cclass="nRF_Drivers" Cgroup="app_uart" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_uart_default"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="uart\app_uart.h" version="3.0.1">
+        <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\app_uart.h</instance>
+        <component Cclass="nRF_Drivers" Cgroup="app_uart" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_uart_default"/>
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="uart\app_uart_fifo.c" version="3.0.1">
-        <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\app_uart_fifo.c</instance>
+        <instance index="0" removed="1">RTE\nRF_Drivers\nRF51822_xxAA\app_uart_fifo.c</instance>
         <component Cclass="nRF_Drivers" Cgroup="app_uart" Cvariant="Fifo" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_uart_Fifo"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
-        <targetInfos>
-          <targetInfo name="weloop"/>
-        </targetInfos>
+        <targetInfos/>
       </file>
       <file attr="config" category="header" name="config\nrf_drv_config.h" version="3.0.1">
         <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\nrf_drv_config.h</instance>
         <component Cclass="nRF_Drivers" Cgroup="nrf_drv_gpiote" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_drv_gpiote"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
+      </file>
+      <file attr="config" category="source" name="spi_slave\nrf_drv_spis.c" version="4.0.0-2.alpha">
+        <instance index="0" removed="1">RTE\nRF_Drivers\nRF51822_xxAA\nrf_drv_spis.c</instance>
+        <component Cclass="nRF_Drivers" Cgroup="nrf_drv_spis" Cvendor="NordicSemiconductor" Cversion="4.0.0-2.alpha" condition="nrf_drv_spis"/>
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="4.0.0-2.alpha"/>
+        <targetInfos/>
       </file>
       <file attr="config" category="source" name="pstorage\pstorage.c" version="3.0.1">
         <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\pstorage.c</instance>
         <component Cclass="nRF_Drivers" Cgroup="pstorage" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="pstorage_default"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="pstorage\pstorage.h" version="3.0.1">
@@ -1270,7 +1330,7 @@
         <component Cclass="nRF_Drivers" Cgroup="pstorage" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="pstorage_default"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="pstorage\config\pstorage_platform.h" version="3.0.1">
@@ -1278,7 +1338,7 @@
         <component Cclass="nRF_Drivers" Cgroup="pstorage" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="pstorage_default"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="spi_master\spi_master.c" version="3.0.1">
@@ -1293,12 +1353,28 @@
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos/>
       </file>
+      <file attr="config" category="source" name="spi_slave\spi_slave.c" version="3.0.1">
+        <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\spi_slave.c</instance>
+        <component Cclass="nRF_Drivers" Cgroup="spi_slave" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="spi_slave"/>
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="spi_slave\spi_slave.h" version="3.0.1">
+        <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\spi_slave.h</instance>
+        <component Cclass="nRF_Drivers" Cgroup="spi_slave" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="spi_slave"/>
+        <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </file>
       <file attr="config" category="header" name="twi_master\incubated\twi_master.h" version="3.0.1">
         <instance index="0">RTE\nRF_Drivers\nRF51822_xxAA\twi_master.h</instance>
         <component Cclass="nRF_Drivers" Cgroup="twi_master" Cvariant="Software" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="twi_master_Software"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="twi_master\incubated\config\twi_master_config.h" version="3.0.1">
@@ -1306,7 +1382,7 @@
         <component Cclass="nRF_Drivers" Cgroup="twi_master" Cvariant="Software" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="twi_master_Software"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="twi_master\incubated\twi_sw_master.c" version="3.0.1">
@@ -1314,7 +1390,7 @@
         <component Cclass="nRF_Drivers" Cgroup="twi_master" Cvariant="Software" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="twi_master_Software"/>
         <package name="nRF_Drivers" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Drivers/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="button\app_button.c" version="3.0.1">
@@ -1406,7 +1482,7 @@
         <component Cclass="nRF_Libraries" Cgroup="app_button" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_button"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="button\app_button.h" version="3.0.1">
@@ -1414,7 +1490,7 @@
         <component Cclass="nRF_Libraries" Cgroup="app_button" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_button"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="util\app_error.c" version="3.0.1">
@@ -1422,7 +1498,7 @@
         <component Cclass="nRF_Libraries" Cgroup="app_error" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_error"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="util\app_error.h" version="3.0.1">
@@ -1430,24 +1506,20 @@
         <component Cclass="nRF_Libraries" Cgroup="app_error" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_error"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="fifo\app_fifo.c" version="3.0.1">
-        <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\app_fifo.c</instance>
+        <instance index="0" removed="1">RTE\nRF_Libraries\nRF51822_xxAA\app_fifo.c</instance>
         <component Cclass="nRF_Libraries" Cgroup="app_fifo" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_fifo"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
-        <targetInfos>
-          <targetInfo name="weloop"/>
-        </targetInfos>
+        <targetInfos/>
       </file>
       <file attr="config" category="header" name="fifo\app_fifo.h" version="3.0.1">
-        <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\app_fifo.h</instance>
+        <instance index="0" removed="1">RTE\nRF_Libraries\nRF51822_xxAA\app_fifo.h</instance>
         <component Cclass="nRF_Libraries" Cgroup="app_fifo" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_fifo"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
-        <targetInfos>
-          <targetInfo name="weloop"/>
-        </targetInfos>
+        <targetInfos/>
       </file>
       <file attr="config" category="source" name="gpiote\app_gpiote.c" version="3.0.1">
         <instance index="0" removed="1">RTE\nRF_Libraries\nRF51822_xxAA\app_gpiote.c</instance>
@@ -1472,7 +1544,7 @@
         <component Cclass="nRF_Libraries" Cgroup="app_timer" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_timer_default"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="timer\app_timer.h" version="3.0.1">
@@ -1480,7 +1552,7 @@
         <component Cclass="nRF_Libraries" Cgroup="app_timer" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_timer_default"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="trace\app_trace.c" version="3.0.1">
@@ -1488,7 +1560,7 @@
         <component Cclass="nRF_Libraries" Cgroup="app_trace" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_trace_default"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="trace\app_trace.h" version="3.0.1">
@@ -1496,7 +1568,7 @@
         <component Cclass="nRF_Libraries" Cgroup="app_trace" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_trace_default"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="util\nrf_assert.c" version="3.0.1">
@@ -1504,7 +1576,7 @@
         <component Cclass="nRF_Libraries" Cgroup="nrf_assert" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_assert"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="header" name="util\nrf_assert.h" version="3.0.1">
@@ -1512,22 +1584,36 @@
         <component Cclass="nRF_Libraries" Cgroup="nrf_assert" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="nrf_assert"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
+      </file>
+      <file attr="config" category="source" name="util\nrf_log.c" version="4.0.0-2.alpha">
+        <instance index="0" removed="1">RTE\nRF_Libraries\nRF51822_xxAA\nrf_log.c</instance>
+        <component Cclass="nRF_Libraries" Cgroup="nrf_log" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="4.0.0-2.alpha" condition="nrf_log_default"/>
+        <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="4.0.0-2.alpha"/>
+        <targetInfos/>
+      </file>
+      <file attr="config" category="header" name="util\nrf_log.h" version="4.0.0-2.alpha">
+        <instance index="0" removed="1">RTE\nRF_Libraries\nRF51822_xxAA\nrf_log.h</instance>
+        <component Cclass="nRF_Libraries" Cgroup="nrf_log" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="4.0.0-2.alpha" condition="nrf_log_default"/>
+        <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="4.0.0-2.alpha"/>
+        <targetInfos/>
       </file>
       <file attr="config" category="source" name="uart\retarget.c" version="3.0.1">
         <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\retarget.c</instance>
         <component Cclass="nRF_Libraries" Cgroup="retarget" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="retarget"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
       <file attr="config" category="source" name="sensorsim\sensorsim.c" version="3.0.1">
-        <instance index="0" removed="1">RTE\nRF_Libraries\nRF51822_xxAA\sensorsim.c</instance>
+        <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\sensorsim.c</instance>
         <component Cclass="nRF_Libraries" Cgroup="sensorsim" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="sensorsim"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
-        <targetInfos/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
       </file>
       <file attr="config" category="doc" name="doc\s110_nrf51_8.0.0_licence-agreement.txt" version="8.0.2">
         <instance index="0" removed="1">RTE\nRF_SoftDevice\nRF51822_XXAA\s110_nrf51_8.0.0_licence-agreement.txt</instance>
@@ -1559,10 +1645,10 @@
         <package name="nRF_SoftDevice_Common" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_Common/" vendor="NordicSemiconductor" version="1.1.4"/>
         <targetInfos/>
       </file>
-      <file attr="config" category="doc" name="doc\s110_nrf51_8.0.0_licence-agreement.txt" version="8.0.2">
+      <file attr="config" category="doc" name="doc\s110_nrf51_8.0.0_licence-agreement.txt" version="8.0.3">
         <instance index="0" removed="1">RTE\nRF_SoftDevice\nRF51822_xxAA\s110_nrf51_8.0.0_licence-agreement.txt</instance>
-        <component Cclass="nRF_SoftDevice" Cgroup="s110" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="8.0.2" condition="s110_default"/>
-        <package name="nRF_SoftDevice_S110" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S110/" vendor="NordicSemiconductor" version="8.0.2"/>
+        <component Cclass="nRF_SoftDevice" Cgroup="s110" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="8.0.3" condition="s110_default"/>
+        <package name="nRF_SoftDevice_S110" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S110/" vendor="NordicSemiconductor" version="8.0.3"/>
         <targetInfos/>
       </file>
       <file attr="config" category="other" name="hex\s110_softdevice.hex" version="8.0.2">
@@ -1571,13 +1657,11 @@
         <package name="nRF_SoftDevice_S110" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S110/" vendor="NordicSemiconductor" version="8.0.2"/>
         <targetInfos/>
       </file>
-      <file attr="config" category="doc" name="doc\s120_nrf51822_2.0.0_licence_agreement.txt" version="2.0.0">
-        <instance index="0">RTE\nRF_SoftDevice\nRF51822_xxAA\s120_nrf51822_2.0.0_licence_agreement.txt</instance>
-        <component Cclass="nRF_SoftDevice" Cgroup="s120" Cvariant="Headers" Cvendor="NordicSemiconductor" Cversion="2.0.0" condition="s120_Headers"/>
-        <package name="nRF_SoftDevice_S120" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S120/" vendor="NordicSemiconductor" version="2.0.0"/>
-        <targetInfos>
-          <targetInfo name="weloop"/>
-        </targetInfos>
+      <file attr="config" category="doc" name="doc\s120_nrf51822_2.0.0_licence_agreement.txt" version="2.1.0">
+        <instance index="0" removed="1">RTE\nRF_SoftDevice\nRF51822_xxAA\s120_nrf51822_2.0.0_licence_agreement.txt</instance>
+        <component Cclass="nRF_SoftDevice" Cgroup="s120" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="2.1.0" condition="s120_default"/>
+        <package name="nRF_SoftDevice_S120" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S120/" vendor="NordicSemiconductor" version="2.1.0"/>
+        <targetInfos/>
       </file>
       <file attr="config" category="other" name="hex\s120_softdevice.hex" version="2.0.0">
         <instance index="0" removed="1">RTE\nRF_SoftDevice\nRF51822_xxAA\s120_softdevice.hex</instance>
@@ -1586,9 +1670,17 @@
         <targetInfos/>
       </file>
       <file attr="config" category="doc" name="doc\s130_nrf51822_1.0.0_licence_agreement.txt" version="1.0.1">
-        <instance index="0" removed="1">RTE\nRF_SoftDevice\nRF51822_xxAA\s130_nrf51822_1.0.0_licence_agreement.txt</instance>
+        <instance index="0">RTE\nRF_SoftDevice\nRF51822_xxAA\s130_nrf51822_1.0.0_licence_agreement.txt</instance>
         <component Cclass="nRF_SoftDevice" Cgroup="s130" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="1.0.1" condition="s130_default"/>
         <package name="nRF_SoftDevice_S130" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S130/" vendor="NordicSemiconductor" version="1.0.1"/>
+        <targetInfos>
+          <targetInfo name="smaq-nrf51"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="doc" name="doc\s130_nrf51_2.0.0-7.alpha_licence_agreement.txt" version="2.0.0-7.alpha">
+        <instance index="0" removed="1">RTE\nRF_SoftDevice\nRF51822_xxAA\s130_nrf51_2.0.0-7.alpha_licence_agreement.txt</instance>
+        <component Cclass="nRF_SoftDevice" Cgroup="s130" Cvariant="Present_only" Cvendor="NordicSemiconductor" Cversion="2.0.0-7.alpha" condition="s130_Present_only"/>
+        <package name="nRF_SoftDevice_S130" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_S130/" vendor="NordicSemiconductor" version="2.0.0-7.alpha"/>
         <targetInfos/>
       </file>
       <file attr="config" category="source" name="softdevice_handler\softdevice_handler.c" version="1.1.4">
@@ -1596,7 +1688,7 @@
         <component Cclass="nRF_SoftDevice" Cgroup="Internal" Csub="sd_common" Cvariant="default" Cvendor="NordicSemiconductor" Cversion="1.1.4" condition="sd_common_default"/>
         <package name="nRF_SoftDevice_Common" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_Common/" vendor="NordicSemiconductor" version="1.1.4"/>
         <targetInfos>
-          <targetInfo name="weloop"/>
+          <targetInfo name="smaq-nrf51"/>
         </targetInfos>
       </file>
     </files>

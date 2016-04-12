@@ -4,14 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void command_process(void);
+void command_receive(uint8_t *rx_data, uint8_t rx_size, void (*handler)(uint8_t));
 
-void command_reset_data(void);
-
-void command_append_data(uint8_t *data, uint8_t size);
-
-void command_data_complete(void);
-
-bool command_is_data_handled(void);
+void command_send(uint8_t *tx_data, uint8_t tx_size, void (*handler)(uint8_t));
 
 #endif /* COMMAND_H */

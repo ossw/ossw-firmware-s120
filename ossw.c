@@ -10,7 +10,7 @@
 #include "battery.h"
 #include "vibration.h"
 #include "notifications.h"
-#include "command.h"
+#include "command_rx_buffer.h"
 #include "stopwatch.h"
 #include "fs.h"
 #include "accel.h"
@@ -64,7 +64,7 @@ static uint_fast8_t splashscreen_draw_func(uint_fast8_t x, uint_fast8_t y)
 		return 0;
 }
 
-void ossw_main(void) {
+void ossw_init(void) {
 
 	  mlcd_fb_draw_with_func(splashscreen_draw_func, 0, 0, MLCD_XRES, MLCD_YRES);
 	
@@ -81,24 +81,23 @@ void ossw_main(void) {
 		stopwatch_init();
 		
 		mlcd_timers_init();
+}
+
+
+void ossw_process(void) {
+    
+		if (rtc_should_store_current_time()) {
+				rtc_store_current_time();
+		}
 		
-    // Enter main loop.
-    for (;;)
-    {
-			  if (rtc_should_store_current_time()) {
-					  rtc_store_current_time();
-				}
-				
-				stopwatch_process();
-				
-				command_process();
-				
-				watchset_process_async_operation();
-			  
-				scr_mngr_draw_screen();
-				
-        mcu_power_manage();
-    }
+		stopwatch_process();
+		
+		command_rx_buffer_process();
+		
+		watchset_process_async_operation();
+		
+		scr_mngr_draw_screen();
+
 }
 
 const char* ossw_firmware_version(void) {

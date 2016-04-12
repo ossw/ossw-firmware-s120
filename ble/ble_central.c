@@ -427,7 +427,9 @@ static void ble_stack_init(void)
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 
     ble_enable_params.gatts_enable_params.service_changed = false;
+#ifdef S120
     ble_enable_params.gap_enable_params.role              = BLE_GAP_ROLE_CENTRAL;
+#endif
 
     err_code = sd_ble_enable(&ble_enable_params);
     APP_ERROR_CHECK(err_code);

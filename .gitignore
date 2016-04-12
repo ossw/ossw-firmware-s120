@@ -4,3 +4,4 @@ arm5/smaq/smaq-efm32/obj
 arm5/smaq/smaq-efm32/DebugConfig
 arm5/smaq/smaq-efm32/lst
 ossw-smaq-efm32.uvguix.*
+ossw-smaq-nrf51.uvguix.*

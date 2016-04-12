@@ -8,6 +8,9 @@
 #include "../../timer.h"
 #include "../../gpio.h"
 #include "../../ossw.h"
+#include "../../mcu.h"
+#include "../../command.h"
+#include "../../command_over_spi.h"
 #include "em_device.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
@@ -16,6 +19,8 @@
 #include "rtcdriver.h" 
 #include "gpiointerrupt.h" 
 #include "sleep.h" 
+
+
 
 void smaq_clocks_init(void) {
 		SystemCoreClockUpdate();
@@ -109,9 +114,10 @@ void smaq_gpio_init(void) {
 	gpio_pin_set(EXT_FLASH_SPI_SS);
 	gpio_pin_clear(VIBRATION_MOTOR);
 	gpio_pin_clear(LCD_BACKLIGHT);
+	gpio_pin_clear(LCD_ENABLE);
 	
   GPIO_IntConfig(gpioPortA, 1, true, true, true);
-  //GPIO_IntConfig(gpioPortD, 5, false, true, true);
+  GPIO_IntConfig(gpioPortD, 5, false, true, true);
   GPIO_IntConfig(gpioPortA, 6, true, true, true);
   GPIO_IntConfig(gpioPortC, 10, true, true, true);
   GPIO_IntConfig(gpioPortF, 12, true, true, true);
@@ -192,6 +198,56 @@ static void before_sleep() {
 static void after_wakeup() {
 }
 
+static void nrf_send_command_response(uint8_t resp_code) {
+    uint8_t command[] = {SPI_CMD_WRITE, SPI_CMD_REG_CMD_RESP, resp_code};
+    spi_master_tx(NRF_SPI, NRF_SPI_SS, command, 3);
+}
+
+static bool process_command = false;
+
+static void nrf_process_command(void) {
+	
+		mlcd_backlight_toggle();
+	
+    uint8_t command[] = {SPI_CMD_SET_READ_REG, SPI_CMD_REG_CMD_SIZE};
+    spi_master_tx(NRF_SPI, NRF_SPI_SS, command, 2);
+		
+		mcu_delay_ms(5);
+		
+    command[0] = SPI_CMD_READ_REG;
+		uint8_t data_size;
+    spi_master_rx_data(NRF_SPI, NRF_SPI_SS, command, 1, &data_size, 1, NULL);
+		
+		if (data_size == 0) {
+				return;
+		}
+		
+		mcu_delay_ms(5);
+		
+    command[0] = SPI_CMD_SET_READ_REG;
+		command[1] = SPI_CMD_REG_CMD_DATA;
+    spi_master_tx(NRF_SPI, NRF_SPI_SS, command, 2);
+		
+		mcu_delay_ms(5);
+		
+    uint8_t data[data_size];
+    spi_master_rx_data(NRF_SPI, NRF_SPI_SS, command, 1, data, data_size, NULL);
+			
+		command_receive(data, data_size, nrf_send_command_response);
+		
+}
+
+static void nrf_int_handler(uint8_t pin)
+{
+		process_command = true;
+	
+		
+//	vibration_motor_on();
+//	mcu_delay_ms(100);
+//	vibration_motor_off();
+}
+
+
 /**@brief Function for application main entry.
  */
 int main(void)
@@ -205,6 +261,12 @@ int main(void)
 	
 	  smaq_clocks_init();
 	  smaq_gpio_init();
+	
+		// dont't know what it does but it fixes lcd screen :)
+		gpio_pin_set(gpioPortC<<4 | 0);
+		mcu_delay_ms(10);
+		gpio_pin_clear(gpioPortC<<4 | 0);
+	
 	  smaq_spi_init();
 	
 		SLEEP_Init((SLEEP_CbFuncPtr_t)before_sleep, (SLEEP_CbFuncPtr_t)after_wakeup);
@@ -220,6 +282,23 @@ int main(void)
 	  rtc_timer_init();
 		buttons_init();
 	  battery_init();
+		
+		
+		GPIOINT_CallbackRegister(NRF_INT & 0xF, nrf_int_handler);
 	
-		ossw_main();
+		ossw_init();
+		
+	
+		 // Enter main loop.
+    for (;;)
+    {
+			
+				if (process_command) {
+						process_command = false;
+						nrf_process_command();
+				}
+			
+			  ossw_process();
+				mcu_power_manage();
+    }
 }

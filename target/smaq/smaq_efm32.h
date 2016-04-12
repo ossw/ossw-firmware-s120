@@ -49,6 +49,10 @@
 #define MLCD_SPI USART1
 #define MLCD_SPI_SS (gpioPortD<<4 | 3)
 
+#define NRF_SPI USART0
+#define NRF_SPI_SS (gpioPortE<<4 | 13)
+#define NRF_INT	(gpioPortD<<4 | 5)
+
 //#define ACCEL_INT1				 3u
 //#define ACCEL_INT2				 2u
 

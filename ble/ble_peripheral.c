@@ -22,9 +22,9 @@
 #include "../scr_mngr.h"
 #include "../rtc.h"
 #include "../ossw.h"
-#include "../command.h"
+#include "../command_rx_buffer.h"
 
-#define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
+#define IS_SRVC_CHANGED_CHARACT_PRESENT  0                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
 #ifdef BLE_DFU_APP_SUPPORT
 #include "ble_dfu.h"
@@ -33,21 +33,18 @@
 
 #define DEVICE_NAME                      "OSSW"                                     /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                "OpenSource"                               /**< Manufacturer. Will be passed to Device Information Service. */
-#define APP_ADV_INTERVAL                 600                                        /**< The advertising interval (in units of 0.625 ms.). */
-#define APP_ADV_TIMEOUT_IN_SECONDS       0		                                     /**< The advertising timeout in units of seconds. */
-
+#define APP_ADV_INTERVAL                40                                         /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
+#define APP_ADV_TIMEOUT_IN_SECONDS      180   
 
 #define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(10000, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
 
-#define MIN_CONN_INTERVAL                MSEC_TO_UNITS(30, UNIT_1_25_MS)           /**< Minimum acceptable connection interval. */
-#define MAX_CONN_INTERVAL                MSEC_TO_UNITS(75, UNIT_1_25_MS)           /**< Maximum acceptable connection interval. */
-
-#define SLAVE_LATENCY                    1                                          /**< Slave latency. */
-#define CONN_SUP_TIMEOUT                 MSEC_TO_UNITS(10000, UNIT_10_MS)            /**< Connection supervisory timeout (4 seconds). */
-
-#define FIRST_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(10000, APP_TIMER_PRESCALER) /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
-#define NEXT_CONN_PARAMS_UPDATE_DELAY    APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER)/**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
-#define MAX_CONN_PARAMS_UPDATE_COUNT     3                                          /**< Number of attempts before giving up the connection parameter negotiation. */
+#define MIN_CONN_INTERVAL               MSEC_TO_UNITS(500, UNIT_1_25_MS)           /**< Minimum acceptable connection interval (0.5 seconds). */
+#define MAX_CONN_INTERVAL               MSEC_TO_UNITS(1000, UNIT_1_25_MS)          /**< Maximum acceptable connection interval (1 second). */
+#define SLAVE_LATENCY                   0                                          /**< Slave latency. */
+#define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(4000, UNIT_10_MS)            /**< Connection supervisory timeout (4 seconds). */
+#define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER) /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
+#define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER)/**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
+#define MAX_CONN_PARAMS_UPDATE_COUNT    3                                          /**< Number of attempts before giving up the connection parameter negotiation. */
 
 #define SEC_PARAM_BOND                   1                                          /**< Perform bonding. */
 #define SEC_PARAM_MITM                   0                                          /**< Man In The Middle protection not required. */
@@ -95,31 +92,31 @@ static void ossw_data_handler(ble_ossw_t * p_ossw, uint8_t * p_data, uint16_t le
 	
 	 switch(p_data[0]) {	
 		 case 0x01:
-					scr_mngr_handle_event(SCR_EVENT_APP_CONNECTION_CONFIRMED, NULL);
+					//scr_mngr_handle_event(SCR_EVENT_APP_CONNECTION_CONFIRMED, NULL);
 					break;
 		 case 0x10:
 			    // set current time
-					rtc_set_current_time((p_data[1]<<24) | (p_data[2]<<16) | (p_data[3]<<8) | p_data[4]);
+					//rtc_set_current_time((p_data[1]<<24) | (p_data[2]<<16) | (p_data[3]<<8) | p_data[4]);
 					break; 
 		 case 0x40:
 					// command first part
-					command_reset_data();
-					command_append_data(p_data+1, length-1);
+					command_rx_buffer_reset();
+					command_rx_buffer_append(p_data+1, length-1);
 					break;
 		 case 0x41:
 					// command next part
-					command_append_data(p_data+1, length-1);
+					command_rx_buffer_append(p_data+1, length-1);
 					break;
 		 case 0x42:
 					// command last part
-					command_append_data(p_data+1, length-1);
-					command_data_complete();
+					command_rx_buffer_append(p_data+1, length-1);
+					command_rx_buffer_commit(ble_peripheral_confirm_command_processed);
 					break;
 		 case 0x43:
 					// command first and last part
-					command_reset_data();
-					command_append_data(p_data+1, length-1);
-					command_data_complete();
+					command_rx_buffer_reset();
+					command_rx_buffer_append(p_data+1, length-1);
+					command_rx_buffer_commit(ble_peripheral_confirm_command_processed);
 					break;
 	 }
 }
@@ -160,7 +157,7 @@ static void battery_level_update(void)
     uint32_t err_code;
     uint8_t  battery_level;
 
-    battery_level = (uint8_t)battery_get_level();
+    battery_level = 0;//(uint8_t)battery_get_level();
 
     err_code = ble_bas_battery_level_update(&m_bas, battery_level);
     if ((err_code != NRF_SUCCESS) &&
@@ -287,13 +284,13 @@ static void services_init(void)
     ble_bas_init_t bas_init;
     ble_dis_init_t dis_init;
 	  ble_ossw_init_t ossw_init;
-	
+
     memset(&ossw_init, 0, sizeof(ossw_init));
     ossw_init.data_handler = ossw_data_handler;
     err_code = ble_ossw_init(&m_ossw, &ossw_init);
     APP_ERROR_CHECK(err_code);
 
-    // Initialize Battery Service.
+ 	   // Initialize Battery Service.
     memset(&bas_init, 0, sizeof(bas_init));
     // Here the sec level for the Battery Service can be changed/increased.
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_char_attr_md.cccd_write_perm);
@@ -500,8 +497,13 @@ static void ble_stack_init(void)
     ble_enable_params_t ble_enable_params;
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 //    ble_enable_params.gatts_enable_params.attr_tab_size   = BLE_GATTS_ATTR_TAB_SIZE_MIN;
-    ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;;
+    ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
+#ifdef S120
     ble_enable_params.gap_enable_params.role = BLE_GAP_ROLE_PERIPH;
+#endif
+#if defined(S130) || defined(S310)
+    ble_enable_params.gatts_enable_params.attr_tab_size   = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
+#endif
     err_code = sd_ble_enable(&ble_enable_params);
     APP_ERROR_CHECK(err_code);
 
@@ -551,6 +553,7 @@ static void device_manager_init(void)
     err_code = pstorage_init();
     APP_ERROR_CHECK(err_code);
 
+		init_data.clear_persistent_data	 = false;	
     err_code = dm_init(&init_data);
     APP_ERROR_CHECK(err_code);
 

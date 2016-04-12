@@ -8,11 +8,11 @@ static timer_id_t      m_vibration_timeout_timer_id;
 static uint32_t m_pattern;
 static uint8_t m_next_step;
 
-static void vibration_motor_on(void) {
+void vibration_motor_on(void) {
     gpio_pin_set(VIBRATION_MOTOR);
 }
 
-static void vibration_motor_off(void) {
+void vibration_motor_off(void) {
     gpio_pin_clear(VIBRATION_MOTOR);
 }
 

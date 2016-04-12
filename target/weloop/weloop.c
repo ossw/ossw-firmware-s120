@@ -269,7 +269,14 @@ int main(void)
     // Initialize the SoftDevice handler module.
     SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
 	
-		ossw_main();
+		ossw_init();
+		
+		// Enter main loop.
+    for (;;)
+    {	
+				ossw_process();	
+        mcu_power_manage();
+    }
 }
 
 void __aeabi_assert(const char * a, const char * b, int c){
