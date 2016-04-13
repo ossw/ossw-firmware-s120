@@ -10,6 +10,7 @@
 #include "fs.h"
 #include "nordic_common.h"
 #include "app_scheduler.h"
+#include "config.h"
 
 #define SHORT_BL_TIMEOUT_UNIT           APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
 #define LONG_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(300*1000, APP_TIMER_PRESCALER)
@@ -85,6 +86,7 @@ void mlcd_init(void)
 	nrf_gpio_pin_clear(LCD_BACKLIGHT);
 	nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
 	vcom = VCOM_LO;
+	colors_inverted = get_settings(CONFIG_DISPLAY_INVERT);
 }
 
 void mlcd_timers_init(void)
@@ -274,7 +276,8 @@ bool is_mlcd_inverted() {
 }
 
 void mlcd_colors_toggle(void) {
-		toggle_colors = true;
+	toggle_colors = true;
+	settings_toggle(CONFIG_DISPLAY_INVERT);
 }
 
 void mlcd_fb_draw_with_func(uint_fast8_t (*f)(uint_fast8_t, uint_fast8_t), uint_fast8_t x_pos, uint_fast8_t y_pos, uint_fast8_t width, uint_fast8_t height) {

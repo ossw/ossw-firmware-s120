@@ -152,13 +152,22 @@ static void scr_save_timer() {
 }
 
 static void scr_timer_roll_saved() {
-	uint8_t saved_index = (timer_mode >> 4) + 1 & 3;
-	scr_load_saved_timer(saved_index);
-	scr_mark_timer();
-	// store the index
-	timer_mode &= ~MODE_OLD_VALUES;
-	timer_mode |= (saved_index << 4) | MODE_SAVE_NEW;
-	scr_mark_timer();
+	uint16_t t = 0x7fff & get_ext_ram_short(EXT_RAM_TIMER_0 + (((timer_mode >> 4) & 3) << 1));
+	if (t != (timer_1 << 8 | timer_2)) {
+		// if timer was started then just reset
+		timer_1 = t >> 8;
+		timer_2 = t & 0xff;
+		scr_draw_timer_1();
+		scr_draw_timer_2();
+	} else {
+		uint8_t saved_index = (timer_mode >> 4) + 1 & 3;
+		scr_load_saved_timer(saved_index);
+		scr_mark_timer();
+		// store the index
+		timer_mode &= ~MODE_OLD_VALUES;
+		timer_mode |= (saved_index << 4) | MODE_SAVE_NEW;
+		scr_mark_timer();
+	}
 }
 
 static void scr_timer_pause() {
