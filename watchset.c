@@ -238,9 +238,8 @@ void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
             scr_mngr_show_screen_with_param(SCR_WATCH_SET_LIST, WATCH_SET_TYPE_UTILITY);
 			      break;
 				case WATCH_SET_FUNC_CLOSE:
-						if (watch_face) {
+						if (watch_face)
 								config_clear_dafault_watch_face();
-						}
 					  scr_mngr_show_screen(SCR_WATCHFACE);
 					  break;
 			  case WATCH_SET_FUNC_STOPWATCH_START:
@@ -267,6 +266,18 @@ void watchset_invoke_internal_function(uint8_t function_id, uint32_t param) {
 				case WATCH_SET_FUNC_SET_TIME:
 						rtc_set_current_time(param);
 						break;
+			  case WATCH_SET_FUNC_PHONE_DISCOVERY:
+				    notifications_invoke_function(PHONE_FUNC_PHONE_DISCOVERY);
+			      break;
+			  case WATCH_SET_FUNC_SEND_SMS:
+				    notifications_invoke_function(PHONE_FUNC_SEND_SMS);
+			      break;
+			  case WATCH_SET_FUNC_CALL_CONTACT:
+				    notifications_invoke_function(PHONE_FUNC_CALL_CONTACT);
+			      break;
+			  case WATCH_SET_FUNC_GTASKS:
+				    notifications_invoke_function(PHONE_FUNC_GTASKS);
+			      break;
 		}
 }
 

@@ -58,6 +58,11 @@ static const I18N_MESSAGE messages_en[] = {
   /*   53 */{"Hours"},
   /*   54 */{"Minutes"},
   /*   55 */{"Seconds"},
+  /*   56 */{"Find the phone"},
+  /*   57 */{"Send an SMS"},
+  /*   58 */{"Call a contact"},
+  /*   59 */{"G.Tasks"},
+  /*   60 */{"Notifications"},
 };
 
 #endif

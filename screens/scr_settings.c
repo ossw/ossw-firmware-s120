@@ -13,6 +13,7 @@
 #include "../ext_ram.h"
 #include "../config.h"
 #include "../watchset.h"
+#include "../notifications.h"
 #include "dialog_select.h"
 
 #define MARGIN_LEFT 			3
@@ -27,18 +28,18 @@ static int8_t selectedOption = 0;
 static int8_t lastSelectedOption = 0;
 
 typedef struct {
-	  const uint16_t message_key;
-	  void (*select_handler)();
-	  void (*long_select_handler)();
-	  void (*summary_drawer)(uint8_t x, uint8_t y);
+	const uint16_t message_key;
+	void (*select_handler)();
+	void (*long_select_handler)();
+	void (*summary_drawer)(uint8_t x, uint8_t y);
 } MENU_OPTION;	
 
 static void opt_handler_change_date() {
-    scr_mngr_show_screen(SCR_CHANGE_DATE);
+	scr_mngr_show_screen(SCR_CHANGE_DATE);
 };
 	
 static void opt_handler_change_time() {
-    scr_mngr_show_screen(SCR_CHANGE_TIME);
+	scr_mngr_show_screen(SCR_CHANGE_TIME);
 };
 
 //static void opt_handler_about() {
@@ -46,23 +47,43 @@ static void opt_handler_change_time() {
 //};
 
 static void opt_handler_timer() {
-		scr_mngr_show_screen(SCR_TIMER);
+	scr_mngr_show_screen(SCR_TIMER);
+};
+
+static void opt_handler_phone_discovery() {
+	notifications_invoke_function(PHONE_FUNC_PHONE_DISCOVERY);
+};
+
+static void opt_handler_send_sms() {
+	notifications_invoke_function(PHONE_FUNC_SEND_SMS);
+};
+
+static void opt_handler_call_contact() {
+	notifications_invoke_function(PHONE_FUNC_CALL_CONTACT);
+};
+
+static void opt_handler_gtasks() {
+	notifications_invoke_function(PHONE_FUNC_GTASKS);
+};
+
+static void opt_handler_notifications() {
+	notifications_invoke_function(NOTIFICATIONS_FUNCTION_RESEND);
 };
 
 static void opt_handler_set_alarm() {
-		scr_mngr_show_screen(SCR_SET_ALARM);
+	scr_mngr_show_screen(SCR_SET_ALARM);
 };
 
 void fs_reformat(void);
 
 static void reformat() {
-		fs_reformat();
-		scr_mngr_show_screen(SCR_WATCHFACE);
+	fs_reformat();
+	scr_mngr_show_screen(SCR_WATCHFACE);
 }
 
 static void draw_alarm_switch(uint8_t x, uint8_t y) {
-		bool on = is_alarm_active();
-		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+	bool on = is_alarm_active();
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
 static void draw_shake_light_switch(uint8_t x, uint8_t y) {
@@ -119,6 +140,11 @@ static void shake_light_toggle() {
 
 static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_TIMER, opt_handler_timer, opt_handler_timer, NULL},
+		{MESSAGE_SEND_SMS, opt_handler_send_sms, opt_handler_send_sms, NULL},
+		{MESSAGE_CALL_CONTACT, opt_handler_call_contact, opt_handler_call_contact, NULL},
+		{MESSAGE_GTASKS, opt_handler_gtasks, opt_handler_gtasks, NULL},
+		{MESSAGE_NOTIFICATIONS, opt_handler_notifications, opt_handler_notifications, NULL},
+		{MESSAGE_PHONE_DISCOVERY, opt_handler_phone_discovery, opt_handler_phone_discovery, NULL},
 		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm, alarm_toggle, draw_alarm_switch},
 		{MESSAGE_DISPLAY, mlcd_colors_toggle, mlcd_colors_toggle, draw_colors_switch},
 		{MESSAGE_SHAKE_LIGHT, shake_light_toggle, shake_light_toggle, draw_shake_light_switch},
@@ -134,13 +160,16 @@ static const MENU_OPTION settings_menu[] = {
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);
 
 static void draw_option(uint_fast8_t item) {
-		uint_fast8_t yPos = HEADER_HEIGHT + 4 + MENU_ITEM_HEIGHT * (item % MENU_ITEMS_PER_PAGE);
-  	mlcd_draw_text(I18N_TRANSLATE(settings_menu[item].message_key), MARGIN_LEFT, yPos, MLCD_XRES-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_LEFT);
-		void (*s_drawer)(uint8_t x, uint8_t y) = settings_menu[item].summary_drawer;
-		if (s_drawer != NULL)
-				s_drawer(SUMMARY_X, yPos);
-		if (item == selectedOption)
-				fillRectangle(0, yPos-2, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT, DRAW_XOR);
+	uint_fast8_t yPos = HEADER_HEIGHT + 4 + MENU_ITEM_HEIGHT * (item % MENU_ITEMS_PER_PAGE);
+ 	mlcd_draw_text(I18N_TRANSLATE(settings_menu[item].message_key), MARGIN_LEFT, yPos, MLCD_XRES-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_LEFT);
+	void (*s_drawer)(uint8_t x, uint8_t y) = settings_menu[item].summary_drawer;
+	uint8_t sel_width = MLCD_XRES;
+	if (s_drawer != NULL) {
+		s_drawer(SUMMARY_X, yPos);
+		sel_width = SUMMARY_X;
+	}
+	if (item == selectedOption)
+		fillRectangle(0, yPos-2, sel_width, MENU_ITEM_HEIGHT, DRAW_XOR);
 }
 
 static void scr_settings_draw_options() {
@@ -155,9 +184,9 @@ static void scr_settings_draw_options() {
 				draw_option(start_item+i);
 		}
 		if (page_no > 0)
-				fillUp(MLCD_XRES/2, HEADER_HEIGHT-SCROLL_HEIGHT-2, SCROLL_HEIGHT, DRAW_XOR);
+				fillUp(MLCD_XRES/2, HEADER_HEIGHT-SCROLL_HEIGHT-2, SCROLL_HEIGHT, DRAW_WHITE);
 		if (page_no + 1 < CEIL(SIZE_OF_MENU, MENU_ITEMS_PER_PAGE))
-				fillDown(MLCD_XRES/2, MLCD_YRES-2, SCROLL_HEIGHT, DRAW_XOR);
+				fillDown(MLCD_XRES/2, MLCD_YRES-2, SCROLL_HEIGHT, DRAW_WHITE);
 		if (lastSelectedOption / MENU_ITEMS_PER_PAGE == 1 && page_no == 0) {
 				fillRectangle(0, 0, MLCD_XRES, HEADER_HEIGHT, DRAW_BLACK);
 				scr_mngr_draw_notification_bar();
@@ -165,32 +194,35 @@ static void scr_settings_draw_options() {
 }
 
 static void scr_settings_refresh_screen() {
-	  scr_mngr_redraw_notification_bar();
-	  if (lastSelectedOption == selectedOption)
-				return;
-	  if (lastSelectedOption / MENU_ITEMS_PER_PAGE != selectedOption / MENU_ITEMS_PER_PAGE) {
-				// on page change
-				fillRectangle(0, HEADER_HEIGHT, MLCD_XRES, MLCD_YRES-HEADER_HEIGHT, DRAW_BLACK);
-				scr_settings_draw_options();
-	  } else {
-				// on item change
-				uint_fast8_t yPos = HEADER_HEIGHT + 2 + MENU_ITEM_HEIGHT * (selectedOption % MENU_ITEMS_PER_PAGE);
-				fillRectangle(0, yPos, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT, DRAW_XOR);
-				yPos = HEADER_HEIGHT + 2 + MENU_ITEM_HEIGHT * (lastSelectedOption % MENU_ITEMS_PER_PAGE);
-				fillRectangle(0, yPos, SUMMARY_X-MARGIN_LEFT, MENU_ITEM_HEIGHT, DRAW_XOR);
-		}
-		lastSelectedOption = selectedOption;
+  scr_mngr_redraw_notification_bar();
+  if (lastSelectedOption == selectedOption)
+		return;
+  if (lastSelectedOption / MENU_ITEMS_PER_PAGE != selectedOption / MENU_ITEMS_PER_PAGE) {
+		// on page change
+		fillRectangle(0, HEADER_HEIGHT, MLCD_XRES, MLCD_YRES-HEADER_HEIGHT, DRAW_BLACK);
+		scr_settings_draw_options();
+  } else {
+		// on item change
+		uint8_t sel_width = MLCD_XRES;
+		if (settings_menu[selectedOption].summary_drawer != NULL)
+			sel_width = SUMMARY_X;
+		uint_fast8_t yPos = HEADER_HEIGHT + 2 + MENU_ITEM_HEIGHT * (selectedOption % MENU_ITEMS_PER_PAGE);
+		fillRectangle(0, yPos, sel_width, MENU_ITEM_HEIGHT, DRAW_XOR);
+		sel_width = MLCD_XRES;
+		if (settings_menu[lastSelectedOption].summary_drawer != NULL)
+			sel_width = SUMMARY_X;
+		yPos = HEADER_HEIGHT + 2 + MENU_ITEM_HEIGHT * (lastSelectedOption % MENU_ITEMS_PER_PAGE);
+		fillRectangle(0, yPos, sel_width, MENU_ITEM_HEIGHT, DRAW_XOR);
+	}
+	lastSelectedOption = selectedOption;
 }
 
 static void scr_settings_init() {
-		//selectedOption = 0;
-		//lastSelectedOption = 0xFF;
-	
-		spiffs_file fd = SPIFFS_open(&fs, "u/settings", SPIFFS_RDONLY, 0);
-		if (fd >= 0) {
-				SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
-				scr_mngr_show_screen_with_param(SCR_WATCH_SET, 2<<24 | fd);
-		}
+	spiffs_file fd = SPIFFS_open(&fs, "u/settings", SPIFFS_RDONLY, 0);
+	if (fd >= 0) {
+		SPIFFS_lseek(&fs, fd, 0, SPIFFS_SEEK_SET);
+		scr_mngr_show_screen_with_param(SCR_WATCH_SET, 2<<24 | fd);
+	}
 }
 
 static void scr_settings_draw_screen() {

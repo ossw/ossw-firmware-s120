@@ -19,6 +19,10 @@
 #define NOTIFICATIONS_OPEN							              0x34
 
 #define DIALOG_RESULT										              0x35
+#define PHONE_FUNC_PHONE_DISCOVERY										0x40
+#define PHONE_FUNC_SEND_SMS							              0x41
+#define PHONE_FUNC_CALL_CONTACT					              0x42
+#define PHONE_FUNC_GTASKS								              0x43
 
 #define NOTIFICATIONS_TYPE_ALERT 											1
 #define NOTIFICATIONS_TYPE_INFO												2
