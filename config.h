@@ -5,10 +5,12 @@
 #include <stdint.h>
 #include "fs.h"
 
-#define CONFIG_DISCONNECT_ALERT			1
-#define CONFIG_NOTIFICATION_LIGHT		2
-#define CONFIG_DISPLAY_INVERT				4
-#define CONFIG_SLOW_REFRESH					8
+#define CONFIG_DISCONNECT_ALERT			0x01
+#define CONFIG_NOTIFICATION_LIGHT		0x02
+#define CONFIG_DISPLAY_INVERT				0x04
+#define CONFIG_SLOW_REFRESH					0x08
+#define CONFIG_CENTRAL_MODE					0x10
+#define CONFIG_BLUETOOTH_ON					0x20
 
 typedef struct {
 		uint8_t action_id;

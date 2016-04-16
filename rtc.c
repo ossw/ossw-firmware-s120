@@ -38,7 +38,7 @@ void rtc_tick_event(void * p_event_data, uint16_t event_size)
 		}
 		if (rtc_get_current_seconds() == 0) {
 				alarm_clock_handle();
-				if (rtc_get_current_minutes()%10 == 0)
+				if (rtc_get_current_minutes()%10 == 0 && get_settings(CONFIG_BLUETOOTH_ON) && !get_settings(CONFIG_CENTRAL_MODE))
 						battery_level_update();
 		}
 }
@@ -62,7 +62,8 @@ void rtc_toggle_refresh_interval() {
 }
 
 void rtc_timer_init(void) {
-	  current_time = rtc_load_time();	
+		settings_off(CONFIG_BLUETOOTH_ON);
+	  current_time = rtc_load_time();
 		if (current_time == 0) {
 			  // set initial time
 			  current_time = 1430141820;

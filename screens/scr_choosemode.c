@@ -7,6 +7,7 @@
 #include "../mlcd.h"
 #include "../utf8.h"
 #include "../i18n/i18n.h"
+#include "../config.h"
 
 #include "../ble/ble_central.h"
 #include "../ble/ble_peripheral.h"
@@ -16,13 +17,17 @@ static bool scr_choosemode_handle_button_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_UP:
   	        ble_peripheral_mode_init();
 					  scr_mngr_show_screen(SCR_WATCHFACE);
+						settings_off(CONFIG_CENTRAL_MODE);
+						settings_on(CONFIG_BLUETOOTH_ON);
 						return true;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
 					  scr_mngr_show_screen(SCR_WATCHFACE);
+						settings_off(CONFIG_BLUETOOTH_ON);
 						return true;
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 	          ble_central_mode_init();
 					  scr_mngr_show_screen(SCR_WATCHFACE);
+						settings_on(CONFIG_BLUETOOTH_ON | CONFIG_CENTRAL_MODE);
 				    return true;
 		}
 		return false;

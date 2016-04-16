@@ -142,7 +142,7 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_TIMER, opt_handler_timer, opt_handler_timer, NULL},
 		{MESSAGE_SEND_SMS, opt_handler_send_sms, opt_handler_send_sms, NULL},
 		{MESSAGE_CALL_CONTACT, opt_handler_call_contact, opt_handler_call_contact, NULL},
-		{MESSAGE_GTASKS, opt_handler_gtasks, opt_handler_gtasks, NULL},
+//		{MESSAGE_GTASKS, opt_handler_gtasks, opt_handler_gtasks, NULL},
 		{MESSAGE_NOTIFICATIONS, opt_handler_notifications, opt_handler_notifications, NULL},
 		{MESSAGE_PHONE_DISCOVERY, opt_handler_phone_discovery, opt_handler_phone_discovery, NULL},
 		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm, alarm_toggle, draw_alarm_switch},
