@@ -6,11 +6,13 @@
 #include "target.h"
 #include "em_usart.h"
 
-void spi_init(void);
-	
+void spi_init(void) {
+}
+
+/*
 bool spi_master_tx_rx(void *spi_handler, uint32_t device, uint16_t transfer_size, const uint8_t *tx_data, uint8_t *rx_data) {
 		return true;
-}
+}*/
 
 bool spi_master_tx(void *spi_handler, uint32_t device, const uint8_t* command, uint16_t command_size) {
 		gpio_pin_clear(device);
@@ -29,12 +31,16 @@ bool spi_master_tx_data(void *spi_handler, uint32_t device, const uint8_t* comma
 
 bool spi_master_tx_data_no_cs(void *spi_handler, const uint8_t* tx_data, uint32_t tx_data_size){
 		for (int i=0; i<tx_data_size; i++) {
-				USART_Tx(spi_handler, tx_data[i]);
+				USART_SpiTransfer(spi_handler, tx_data[i]);
 		}
 		return true;
 }
 
 bool spi_master_rx_data(void *spi_handler, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t rx_data_size, bool* has_changed){
+		gpio_pin_clear(device);
+		spi_master_tx_data_no_cs(spi_handler, command, command_size);
+		spi_master_rx_data_no_cs(spi_handler, rx_data, rx_data_size, false, has_changed);
+		gpio_pin_set(device);
 		return true;
 }
 
@@ -43,13 +49,19 @@ bool spi_master_rx_text(void *spi_handler, uint32_t device, const uint8_t* comma
 }
 
 bool spi_master_rx_data_no_cs(void *spi_handler, uint8_t* rx_data, uint32_t rx_data_size, bool stop_on_zero, bool* has_changed){
+		for (int i=0; i<rx_data_size; i++) {
+				rx_data[i] = USART_SpiTransfer(spi_handler, 0xFF);
+				if (stop_on_zero && rx_data[i] == 0) {
+						break;
+				}
+		}
 		return true;
 }
-
+/*
 bool spi_master_rx_to_tx_no_cs(void *spi_handler, uint32_t *dest_spi_base, uint32_t data_size, bool revert){
 		return true;
 }
 
 bool spi_master_tx_value(void *spi_handler, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t value, uint32_t tx_data_size){
 		return true;
-}
+}*/

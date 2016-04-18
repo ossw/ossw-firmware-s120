@@ -26,7 +26,6 @@ bool ext_flash_read_text(uint32_t ext_flash_address, uint8_t *buffer, uint32_t d
     return spi_master_rx_data(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 4, buffer, data_size, has_changed);
 }
 
-
 bool ext_flash_write_enable() {
     uint8_t command[] = {0x06};
     return spi_master_tx(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 1);
@@ -35,7 +34,7 @@ bool ext_flash_write_enable() {
 bool ext_flash_wait_until_ready() {
     uint8_t status = 0;
     ext_flash_read_status(&status);
-    if (status & 0x01 == 0) {
+    if ((status & 0x01) == 0) {
          return true;
     }
     // first wait 10us, second 100us, third and following 1000us
@@ -146,4 +145,11 @@ bool ext_flash_check_equal(int32_t ext_flash_address, uint8_t *buffer, uint32_t 
         ext_flash_address += part_size;
     }
     return true;
+}
+
+bool ext_flash_is_supported(void) {
+    uint8_t command[] = {0x9F};
+		uint8_t version[3];
+    spi_master_rx_data(EXT_FLASH_SPI, EXT_FLASH_SPI_SS, command, 1, version, 3, NULL);
+		return version[0] == 0xEF;
 }

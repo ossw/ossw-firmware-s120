@@ -82,13 +82,12 @@ static void spi_slave_event_handle(spi_slave_evt_t event)
 								switch(m_rx_buf[1]) {
 										case SPI_CMD_REG_CMD_RESP:
 												tx_size = 0;
-												m_last_command_resp_handler(m_rx_buf[2]);
+												m_last_command_resp_handler(0);
 												m_last_command_size = 0;
 												m_last_command_resp_handler = NULL;
 												break;
 								}
 								break;
-								
 				}
 			
         err_code = spi_slave_buffers_set(m_tx_buf, m_rx_buf, tx_size, (uint8_t)sizeof(m_rx_buf));
@@ -110,8 +109,8 @@ uint32_t nrf51_spi_slave_init(void)
 		spi_slave_config.pin_csn            = SPIS0_SS;
 		spi_slave_config.mode               = SPI_MODE_0;           // CPOL : 0  / CPHA : 1    From Cortex-M3
 		spi_slave_config.bit_order          = SPIM_LSB_FIRST;            
-		spi_slave_config.def_tx_character   = DEF_CHARACTER;        // 0xAA
-		spi_slave_config.orc_tx_character   = ORC_CHARACTER;        // 0x55
+		spi_slave_config.def_tx_character   = DEF_CHARACTER;
+		spi_slave_config.orc_tx_character   = ORC_CHARACTER;
 	
 		err_code = spi_slave_init(&spi_slave_config);
 		APP_ERROR_CHECK(err_code);
@@ -130,6 +129,7 @@ void command_receive(uint8_t *rx_data, uint8_t rx_size, void (*handler)(uint8_t)
 	
 		// interrupt master
 		gpio_pin_clear(MASTER_INT);
+		nrf_delay_ms(1);
 		gpio_pin_set(MASTER_INT);
 
 }

@@ -273,7 +273,8 @@ int main(void)
 		
 		// Enter main loop.
     for (;;)
-    {	
+    {
+				command_rx_buffer_process();
 				ossw_process();	
         mcu_power_manage();
     }

@@ -65,7 +65,6 @@ static uint_fast8_t splashscreen_draw_func(uint_fast8_t x, uint_fast8_t y)
 }
 
 void ossw_init(void) {
-
 	  mlcd_fb_draw_with_func(splashscreen_draw_func, 0, 0, MLCD_XRES, MLCD_YRES);
 	
 	  mlcd_fb_flush();
@@ -91,8 +90,6 @@ void ossw_process(void) {
 		}
 		
 		stopwatch_process();
-		
-		command_rx_buffer_process();
 		
 		watchset_process_async_operation();
 		

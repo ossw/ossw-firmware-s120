@@ -115,6 +115,8 @@ void command_receive(uint8_t *rx_data, uint8_t rx_size, void (*handler)(uint8_t)
 			    // stop alert notification
 					handle_notification_alert_stop(rx_data[1] << 8 | rx_data[2]);
 			    break;
+		 default:
+					respCode = 0xFF;
 		}
 
 		if (handler != NULL) {

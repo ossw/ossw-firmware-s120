@@ -51,6 +51,11 @@ void fs_reformat(void) {
 }
 
 void fs_init() {
+	
+		if (!ext_flash_is_supported()) {
+				return;
+		}
+	
 		int res = fs_mount();
 		//printf("mount res: %i\n", res);
 		

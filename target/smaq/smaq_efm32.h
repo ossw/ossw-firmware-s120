@@ -44,7 +44,7 @@
 #define TIMEOUT_COUNTER         0x3000uL                     /**< Timeout for SPI transaction in units of loop iterations. */
 
 #define EXT_FLASH_SPI USART2
-#define EXT_FLASH_SPI_SS        (gpioPortA<<4 | 5)
+#define EXT_FLASH_SPI_SS        (gpioPortC<<4 | 5)
 
 #define MLCD_SPI USART1
 #define MLCD_SPI_SS (gpioPortD<<4 | 3)

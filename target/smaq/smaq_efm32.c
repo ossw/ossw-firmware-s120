@@ -46,9 +46,6 @@ void smaq_gpio_init(void) {
 	//button down
 	GPIO_PinModeSet(gpioPortA, 1, gpioModeInputPull, 0);
 	
-	//CS for ext flash
-	GPIO_PinModeSet(gpioPortA, 5, gpioModePushPull, 1);
-	
 	//back button
 	GPIO_PinModeSet(gpioPortA, 6, gpioModeInputPull, 0);
 	
@@ -66,6 +63,9 @@ void smaq_gpio_init(void) {
 	
 	//SPI2 CLK
 	GPIO_PinModeSet(gpioPortC, 4, gpioModePushPull, 0);
+	
+	//CS for ext flash
+	GPIO_PinModeSet(gpioPortC, 5, gpioModePushPull, 1);
 	
 	//up button
 	GPIO_PinModeSet(gpioPortC, 10, gpioModeInputPull, 0);
@@ -101,20 +101,6 @@ void smaq_gpio_init(void) {
 	
 	//select button
 	GPIO_PinModeSet(gpioPortF, 12, gpioModeInputPull, 0);
-
-	// $[Route Configuration]
-
-	
-	/* Enable signals CLK, CS, RX, TX */
-//	USART2->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_RXPEN
-//			| USART_ROUTE_TXPEN;
-	// [Route Configuration]$
-	
-	gpio_pin_clear(MLCD_SPI_SS);
-	gpio_pin_set(EXT_FLASH_SPI_SS);
-	gpio_pin_clear(VIBRATION_MOTOR);
-	gpio_pin_clear(LCD_BACKLIGHT);
-	gpio_pin_clear(LCD_ENABLE);
 	
   GPIO_IntConfig(gpioPortA, 1, true, true, true);
   GPIO_IntConfig(gpioPortD, 5, false, true, true);
@@ -190,6 +176,10 @@ void smaq_spi_init(void) {
 	/* Enable signals CLK, TX */
 	USART1->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN;
 	USART1->CMD = USART_CMD_RXDIS;
+	
+	/* Enable signals CLK, RX, TX */
+	USART2->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_RXPEN
+			| USART_ROUTE_TXPEN;
 }
 
 static void before_sleep() {
@@ -207,12 +197,13 @@ static bool process_command = false;
 
 static void nrf_process_command(void) {
 	
+    uint8_t data[256];
 		mlcd_backlight_toggle();
 	
     uint8_t command[] = {SPI_CMD_SET_READ_REG, SPI_CMD_REG_CMD_SIZE};
     spi_master_tx(NRF_SPI, NRF_SPI_SS, command, 2);
 		
-		mcu_delay_ms(5);
+		mcu_delay_ms(40);
 		
     command[0] = SPI_CMD_READ_REG;
 		uint8_t data_size;
@@ -222,15 +213,15 @@ static void nrf_process_command(void) {
 				return;
 		}
 		
-		mcu_delay_ms(5);
+		mcu_delay_ms(40);
 		
     command[0] = SPI_CMD_SET_READ_REG;
 		command[1] = SPI_CMD_REG_CMD_DATA;
     spi_master_tx(NRF_SPI, NRF_SPI_SS, command, 2);
 		
-		mcu_delay_ms(5);
+		mcu_delay_ms(50);
 		
-    uint8_t data[data_size];
+    command[0] = SPI_CMD_READ_REG;
     spi_master_rx_data(NRF_SPI, NRF_SPI_SS, command, 1, data, data_size, NULL);
 			
 		command_receive(data, data_size, nrf_send_command_response);
@@ -240,11 +231,6 @@ static void nrf_process_command(void) {
 static void nrf_int_handler(uint8_t pin)
 {
 		process_command = true;
-	
-		
-//	vibration_motor_on();
-//	mcu_delay_ms(100);
-//	vibration_motor_off();
 }
 
 
@@ -292,7 +278,6 @@ int main(void)
 		 // Enter main loop.
     for (;;)
     {
-			
 				if (process_command) {
 						process_command = false;
 						nrf_process_command();
