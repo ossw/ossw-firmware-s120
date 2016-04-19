@@ -198,34 +198,33 @@ static bool process_command = false;
 static void nrf_process_command(void) {
 	
     uint8_t data[256];
-		mlcd_backlight_toggle();
 	
-    uint8_t command[] = {SPI_CMD_SET_READ_REG, SPI_CMD_REG_CMD_SIZE};
-    spi_master_tx(NRF_SPI, NRF_SPI_SS, command, 2);
+		uint8_t command[] = {SPI_CMD_READ_REG, SPI_CMD_REG_CMD_INFO};
+		spi_master_tx(NRF_SPI, NRF_SPI_SS, command, 2);
 		
-		mcu_delay_ms(40);
+		mcu_delay_ms(5);
 		
-    command[0] = SPI_CMD_READ_REG;
-		uint8_t data_size;
-    spi_master_rx_data(NRF_SPI, NRF_SPI_SS, command, 1, &data_size, 1, NULL);
+		spi_master_rx_data(NRF_SPI, NRF_SPI_SS, NULL, 0, data, 3, NULL);
 		
-		if (data_size == 0) {
+		if (data[0] == 0) {
 				return;
 		}
 		
-		mcu_delay_ms(40);
+		uint8_t data_size = data[2];
 		
-    command[0] = SPI_CMD_SET_READ_REG;
+		mcu_delay_ms(5);
+		
 		command[1] = SPI_CMD_REG_CMD_DATA;
     spi_master_tx(NRF_SPI, NRF_SPI_SS, command, 2);
 		
-		mcu_delay_ms(50);
-		
-    command[0] = SPI_CMD_READ_REG;
-    spi_master_rx_data(NRF_SPI, NRF_SPI_SS, command, 1, data, data_size, NULL);
+		mcu_delay_ms(5);
+	
+		data[0] = data[1];
+    spi_master_rx_data(NRF_SPI, NRF_SPI_SS, NULL, 0, data+1, data_size, NULL);
 			
-		command_receive(data, data_size, nrf_send_command_response);
+		mcu_delay_ms(5);
 		
+		command_receive(data, data_size, nrf_send_command_response);
 }
 
 static void nrf_int_handler(uint8_t pin)

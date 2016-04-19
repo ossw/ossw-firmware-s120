@@ -34,7 +34,7 @@ static uint8_t m_tx_buf[TX_BUF_SIZE];
 static uint8_t m_rx_buf[RX_BUF_SIZE]; 
 
 static uint8_t m_last_command_data[256];
-static uint8_t m_last_command_size;
+static uint16_t m_last_command_size;
 static void (*m_last_command_resp_handler)(uint8_t);
 	 
 /**@brief Callback function for asserts in the SoftDevice.
@@ -60,34 +60,34 @@ static void spi_slave_event_handle(spi_slave_evt_t event)
     if (event.evt_type == SPI_SLAVE_XFER_DONE)
     {   
 				uint8_t tx_size = 0;
-				switch(m_rx_buf[0]) {
-						case SPI_CMD_SET_READ_REG:
-								switch(m_rx_buf[1]) {
-									case SPI_CMD_REG_CMD_SIZE:
-											tx_size = 2;
-											m_tx_buf[0] = 0xFF;
-											m_tx_buf[1] = m_last_command_size;
-											break;
-									case SPI_CMD_REG_CMD_DATA:
-											tx_size = m_last_command_size + 1;
-											m_tx_buf[0] = 0xFF;
-											memcpy(m_tx_buf+1, m_last_command_data, m_last_command_size);
-											break;
-								}
-								break;
-						case SPI_CMD_READ_REG:
-								tx_size = 0;
-								break;
-						case SPI_CMD_WRITE:
-								switch(m_rx_buf[1]) {
-										case SPI_CMD_REG_CMD_RESP:
-												tx_size = 0;
-												m_last_command_resp_handler(0);
-												m_last_command_size = 0;
-												m_last_command_resp_handler = NULL;
-												break;
-								}
-								break;
+			
+				if (event.rx_amount > 0) {
+						switch(m_rx_buf[0]) {
+								case SPI_CMD_READ_REG:
+										switch(m_rx_buf[1]) {
+											case SPI_CMD_REG_CMD_INFO:
+													tx_size = 3;
+													m_tx_buf[0] = (m_last_command_size > 0);
+													m_tx_buf[1] = (m_last_command_size > 0)?m_last_command_data[0]:0;
+													m_tx_buf[2] = (m_last_command_size > 0)?m_last_command_size-1:0;
+													break;
+											case SPI_CMD_REG_CMD_DATA:
+													tx_size = (m_last_command_size > 0)?m_last_command_size - 1 : 0;
+													memcpy(m_tx_buf, m_last_command_data+1, tx_size);
+													break;
+										}
+										break;
+								case SPI_CMD_WRITE:
+										switch(m_rx_buf[1]) {
+												case SPI_CMD_REG_CMD_RESP:
+														tx_size = 0;
+														m_last_command_resp_handler(m_rx_buf[2]);
+														m_last_command_size = 0;
+														m_last_command_resp_handler = NULL;
+														break;
+										}
+										break;
+						}
 				}
 			
         err_code = spi_slave_buffers_set(m_tx_buf, m_rx_buf, tx_size, (uint8_t)sizeof(m_rx_buf));
@@ -121,7 +121,7 @@ uint32_t nrf51_spi_slave_init(void)
     return NRF_SUCCESS;
 }
 
-void command_receive(uint8_t *rx_data, uint8_t rx_size, void (*handler)(uint8_t)) {
+void command_receive(uint8_t *rx_data, uint16_t rx_size, void (*handler)(uint8_t)) {
 		
 		m_last_command_size = rx_size;
 		memcpy(m_last_command_data, rx_data, rx_size);

@@ -43,11 +43,11 @@ bool spi_master_rx_data(void *spi_handler, uint32_t device, const uint8_t* comma
 		gpio_pin_set(device);
 		return true;
 }
-
+/*
 bool spi_master_rx_text(void *spi_handler, uint32_t device, const uint8_t* command, uint16_t command_size, uint8_t* rx_data, uint32_t max_rx_data_size, bool* has_changed){
 		return true;
 }
-
+*/
 bool spi_master_rx_data_no_cs(void *spi_handler, uint8_t* rx_data, uint32_t rx_data_size, bool stop_on_zero, bool* has_changed){
 		for (int i=0; i<rx_data_size; i++) {
 				rx_data[i] = USART_SpiTransfer(spi_handler, 0xFF);

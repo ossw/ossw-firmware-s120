@@ -53,7 +53,7 @@ static void handle_external_properties_change(uint8_t *data, uint32_t size) {
 		}
 }
 
-void command_receive(uint8_t *rx_data, uint8_t rx_size, void (*handler)(uint8_t)) {
+void command_receive(uint8_t *rx_data, uint16_t rx_size, void (*handler)(uint8_t)) {
 
 		uint8_t respCode = 0;
 
