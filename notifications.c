@@ -49,8 +49,12 @@ void copy_notification_info_data(uint16_t address_from, uint16_t address_to, uin
 	}
 }
 
-static void send_select_result(uint8_t item) {
-	ble_peripheral_invoke_notification_function_with_data(DIALOG_RESULT, &item, sizeof(item));
+static void send_select_result(uint8_t token, uint8_t buttons, uint8_t item) {
+	uint8_t data[2] = {buttons, item};
+	if (token == 0)
+		ble_peripheral_invoke_notification_function_with_data(DIALOG_RESULT, data, sizeof(data));
+	else
+		ble_peripheral_invoke_notification_function_with_data(token, data, sizeof(data));
 }
 
 void notifications_handle_data(uint16_t address, uint16_t size) {

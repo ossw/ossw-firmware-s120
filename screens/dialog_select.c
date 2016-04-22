@@ -15,14 +15,14 @@
 #define SCROLL_HEIGHT		6
 #define RADIO_RADIUS		7
 #define CHECK_BOX_SIZE	14
-#define WIDGET_PADDING	24
+//#define WIDGET_PADDING	24
 
-static void (*d_select_callback)(uint8_t);
+static void (*d_select_callback)(uint8_t, uint8_t, uint8_t);
 static uint16_t dialog_input;
 static bool redraw = false;
 static uint8_t items_per_page;
 
-void dialog_select_init(void (*d_callback)(uint8_t)) {
+void dialog_select_init(void (*d_callback)(uint8_t, uint8_t, uint8_t)) {
 	d_select_callback = d_callback;
 }
 
@@ -35,6 +35,7 @@ static void dialog_select_draw_screen() {
 		fillRectangle(0, 0, MLCD_XRES, MLCD_YRES, DRAW_BLACK);
 		uint16_t read_address = dialog_input;
 		uint8_t item = get_next_byte(&read_address);
+		uint8_t token = get_next_byte(&read_address);
 		uint8_t list_size = get_next_byte(&read_address);
     uint8_t font = get_next_byte(&read_address);
 		uint8_t style = get_next_byte(&read_address);
@@ -43,7 +44,6 @@ static void dialog_select_draw_screen() {
 		uint8_t font_style = VERTICAL_ALIGN_CENTER;
 		uint8_t text_x = MARGIN;
 		if (style > 0) {
-			text_x = WIDGET_PADDING;
 			font_style |= HORIZONTAL_ALIGN_LEFT;
 			for (int i = 0; i < bitset_size; i++)
 				bitset[i] = get_next_byte(&read_address);
@@ -52,6 +52,8 @@ static void dialog_select_draw_screen() {
 		const FONT_INFO* font_info = mlcd_resolve_font(font);
 		uint8_t item_height = font_info->height;
 		uint8_t title_height = item_height+2;
+		if (style & (SELECT_RADIO | SELECT_CHECK))
+			text_x += item_height;
 
 		uint32_t m_address = 0x80000000;
 		char* data_ptr;
@@ -75,29 +77,30 @@ static void dialog_select_draw_screen() {
 		for (int i = 0; i < items_no; i++) {
 				data_ptr = (char*)(m_address + read_address);
 				uint8_t marked = bitset[(i + start_item) >> 3] & (1 << ((i + start_item) & 7));
-				if (marked)
+				if (marked && (style & SELECT_STRIKE))
 					mlcd_draw_text(data_ptr, text_x, y, MLCD_XRES-MARGIN-text_x, item_height, font, font_style | STYLE_LINE_THROUGH);
 				else
 					mlcd_draw_text(data_ptr, text_x, y, MLCD_XRES-MARGIN-text_x, item_height, font, font_style);
-				switch (style) {
-					case SELECT_RADIO: {
+				if (style & SELECT_RADIO) {
 						uint8_t cx = MARGIN + RADIO_RADIUS;
 						uint8_t cy = y + (item_height >> 1);
-						circle(cx, cy, RADIO_RADIUS, DRAW_XOR);
+						uint8_t radius = (item_height >> 1) - 2;
+						if (radius > RADIO_RADIUS)
+							radius = RADIO_RADIUS;
+						circle(cx, cy, radius, DRAW_WHITE);
 						if (marked) {
-							fillCircle(cx, cy, RADIO_RADIUS-2, DRAW_XOR);
+							fillCircle(cx, cy, radius-2, DRAW_WHITE);
 						}
-						break;
-					}
-					case SELECT_CHECK: {
+				} else if (style & SELECT_CHECK) {
 						uint8_t cx = MARGIN;
-						uint8_t cy = y + ((item_height - CHECK_BOX_SIZE) >> 1);
-						rectangle(cx, cy, CHECK_BOX_SIZE, CHECK_BOX_SIZE, DRAW_WHITE);
+						uint8_t chbox_size = item_height - 4;
+						if (chbox_size > CHECK_BOX_SIZE)
+							chbox_size = CHECK_BOX_SIZE;
+						uint8_t cy = y + ((item_height - chbox_size) >> 1);
+						rectangle(cx, cy, chbox_size, chbox_size, DRAW_WHITE);
 						if (marked) {
-							fillRectangle(cx+2, cy+2, CHECK_BOX_SIZE-4, CHECK_BOX_SIZE-4, DRAW_XOR);
+							fillRectangle(cx+2, cy+2, chbox_size-4, chbox_size-4, DRAW_WHITE);
 						}
-						break;
-					}
 				}
 				y += item_height;
 				skip_string_ext_ram(1, &read_address);
@@ -112,23 +115,26 @@ static void dialog_select_draw_screen() {
 static bool dialog_select_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_BACK: {
-					  set_modal_dialog(false);
-						d_select_callback(CANCEL);
+						uint16_t read_address = dialog_input;
+						uint8_t item = get_next_byte(&read_address);
+						uint8_t token = get_next_byte(&read_address);
+						d_select_callback(token, SCR_EVENT_PARAM_BUTTON_BACK, item);
 				    return true;
 				}
 			  case SCR_EVENT_PARAM_BUTTON_UP: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
+						read_address++; // skip token
 					  if (item > 0) {
 								item--;
 								uint8_t list_size = get_next_byte(&read_address);
 								uint8_t font = get_next_byte(&read_address);
 								uint8_t style = get_next_byte(&read_address);
 								uint8_t select_x = 0;
-								if (style > 0)
-									select_x = WIDGET_PADDING - MARGIN;
 								const FONT_INFO* font_info = mlcd_resolve_font(font);
 								uint8_t item_height = font_info->height;
+								if (style & (SELECT_RADIO | SELECT_CHECK))
+									select_x += item_height;
 								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
@@ -143,15 +149,16 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_DOWN: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
+						read_address++; // skip token
 						uint8_t last = get_next_byte(&read_address)-1;
 					  if (item < last) {
 								uint8_t font = get_next_byte(&read_address);
 								uint8_t style = get_next_byte(&read_address);
 								uint8_t select_x = 0;
-								if (style > 0)
-									select_x = WIDGET_PADDING - MARGIN;
 								const FONT_INFO* font_info = mlcd_resolve_font(font);
 								uint8_t item_height = font_info->height;
+								if (style & (SELECT_RADIO | SELECT_CHECK))
+									select_x += item_height;
 								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
@@ -167,8 +174,9 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_SELECT: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
+						uint8_t token = get_next_byte(&read_address);
 						uint8_t list_size = get_next_byte(&read_address);
-						read_address++;
+						read_address++; // skip font
 						uint8_t style = get_next_byte(&read_address);
 						uint8_t bitset_size = CEIL(list_size, 8);
 						uint8_t bitset[bitset_size];
@@ -182,11 +190,11 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 								memset(bitset, 0, bitset_size);
 								bitset[item >> 3] |= item_mask;
 							}
-							ext_ram_write_data(dialog_input+4, bitset, bitset_size);
+							ext_ram_write_data(dialog_input+5, bitset, bitset_size);
 							// TODO: can be optimized for less refresh
 							dialog_select_draw_screen();
 						} else
-							d_select_callback(item);
+							d_select_callback(token, SCR_EVENT_PARAM_BUTTON_SELECT, item);
 				    return true;
 				}
 		}
@@ -211,6 +219,7 @@ static bool dialog_select_button_long_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_DOWN: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
+						read_address++; // skip token
 						uint8_t last = get_next_byte(&read_address)-1;
 					  if (item < last) {
 								if (item + items_per_page > last)
@@ -225,8 +234,17 @@ static bool dialog_select_button_long_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_SELECT: {
 						uint16_t read_address = dialog_input;
 						uint8_t item = get_next_byte(&read_address);
-					  d_select_callback(item);
+						uint8_t token = get_next_byte(&read_address);
+					  d_select_callback(token, SCR_EVENT_PARAM_BUTTON_SELECT+16, item);
 						return true;
+				}
+				case SCR_EVENT_PARAM_BUTTON_BACK: {
+					  set_modal_dialog(false);
+						uint16_t read_address = dialog_input;
+						uint8_t item = get_next_byte(&read_address);
+						uint8_t token = get_next_byte(&read_address);
+						d_select_callback(token, SCR_EVENT_PARAM_BUTTON_BACK+16, item);
+				    return true;
 				}
 		}
 		return false;
@@ -258,7 +276,7 @@ bool dialog_select_handle_event(uint32_t event_type, uint32_t event_param) {
 		return false;
 }
 
-void pack_dialog_select(uint8_t init, void (*d_callback)(uint8_t), uint8_t font, uint8_t st, const char *title, uint8_t list_size, const char *list) {
+void pack_dialog_select(uint8_t init, uint8_t token, void (*d_callback)(uint8_t, uint8_t, uint8_t), uint8_t font, uint8_t st, const char *title, uint8_t list_size, const char *list) {
 		d_select_callback = d_callback;
 		uint8_t len_title = strlen(title);
 		uint8_t bitset_size = CEIL(list_size, 8);
@@ -275,6 +293,8 @@ void pack_dialog_select(uint8_t init, void (*d_callback)(uint8_t), uint8_t font,
 		uint8_t bindex = 0;
 		buffer[bindex] = init;
 		bindex += sizeof(init);
+		buffer[bindex] = token;
+		bindex += sizeof(token);
 		buffer[bindex] = list_size;
 		bindex += sizeof(list_size);
 		buffer[bindex] = font;

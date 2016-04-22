@@ -128,21 +128,21 @@ static void shake_light_toggle() {
 }
 
 // TEST DIALOG
-//static void select_item_handler(uint8_t item) {
-//}
+static void select_item_handler(uint8_t token, uint8_t buttons, uint8_t item) {
+}
 
-//static void test_handler() {
-//		pack_dialog_select(0, &select_item_handler, FONT_OPTION_NORMAL, SELECT_CHECK, I18N_TRANSLATE(MESSAGE_ABOUT),
-//				15, "One\0Two\0Three\0Four\0Five\0Six\0Seven\0Eight\0Nine\0Ten\0Eleven\0Twelve\0Thurteen\0Fourteen\0Fifteen\0");
-//		set_modal_dialog(true);
-//		scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_DIALOG_TEXT);
-//}
+static void test_handler() {
+		pack_dialog_select(0, 0, &select_item_handler, FONT_OPTION_NORMAL, SELECT_CHECK, I18N_TRANSLATE(MESSAGE_ABOUT),
+				15, "One\0Two\0Three\0Four\0Five\0Six\0Seven\0Eight\0Nine\0Ten\0Eleven\0Twelve\0Thurteen\0Fourteen\0Fifteen\0");
+		set_modal_dialog(true);
+		scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_DIALOG_TEXT);
+}
 
 static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_TIMER, opt_handler_timer, opt_handler_timer, NULL},
 		{MESSAGE_SEND_SMS, opt_handler_send_sms, opt_handler_send_sms, NULL},
 		{MESSAGE_CALL_CONTACT, opt_handler_call_contact, opt_handler_call_contact, NULL},
-//		{MESSAGE_GTASKS, opt_handler_gtasks, opt_handler_gtasks, NULL},
+		{MESSAGE_GTASKS, opt_handler_gtasks, opt_handler_gtasks, NULL},
 		{MESSAGE_NOTIFICATIONS, opt_handler_notifications, opt_handler_notifications, NULL},
 		{MESSAGE_PHONE_DISCOVERY, opt_handler_phone_discovery, opt_handler_phone_discovery, NULL},
 		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm, alarm_toggle, draw_alarm_switch},
@@ -153,8 +153,8 @@ static const MENU_OPTION settings_menu[] = {
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
 		{MESSAGE_TIME, opt_handler_change_time, opt_handler_change_time, NULL},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},
-		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL}
-//		{MESSAGE_ABOUT, test_handler, test_handler, NULL}
+		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL},
+		{MESSAGE_ABOUT, test_handler, test_handler, NULL}
 };
 
 static const uint8_t SIZE_OF_MENU = sizeof(settings_menu)/sizeof(MENU_OPTION);
