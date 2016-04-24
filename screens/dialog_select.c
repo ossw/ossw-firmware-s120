@@ -53,7 +53,7 @@ static void dialog_select_draw_screen() {
 		uint8_t item_height = font_info->height;
 		uint8_t title_height = item_height+2;
 		if (style & (SELECT_RADIO | SELECT_CHECK))
-			text_x += item_height;
+			text_x += item_height + MARGIN;
 
 		uint32_t m_address = 0x80000000;
 		char* data_ptr;
@@ -93,7 +93,7 @@ static void dialog_select_draw_screen() {
 						}
 				} else if (style & SELECT_CHECK) {
 						uint8_t cx = MARGIN;
-						uint8_t chbox_size = item_height - 4;
+						uint8_t chbox_size = item_height - 2;
 						if (chbox_size > CHECK_BOX_SIZE)
 							chbox_size = CHECK_BOX_SIZE;
 						uint8_t cy = y + ((item_height - chbox_size) >> 1);
@@ -134,7 +134,7 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 								const FONT_INFO* font_info = mlcd_resolve_font(font);
 								uint8_t item_height = font_info->height;
 								if (style & (SELECT_RADIO | SELECT_CHECK))
-									select_x += item_height;
+									select_x += item_height + MARGIN;
 								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
@@ -158,7 +158,7 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 								const FONT_INFO* font_info = mlcd_resolve_font(font);
 								uint8_t item_height = font_info->height;
 								if (style & (SELECT_RADIO | SELECT_CHECK))
-									select_x += item_height;
+									select_x += item_height + MARGIN;
 								items_per_page = (MLCD_YRES-MARGIN-item_height-2)/item_height;
 								if (item/items_per_page == (item+1)/items_per_page) {
 										// same page, move selection only
@@ -193,8 +193,8 @@ static bool dialog_select_button_pressed(uint32_t button_id) {
 							ext_ram_write_data(dialog_input+5, bitset, bitset_size);
 							// TODO: can be optimized for less refresh
 							dialog_select_draw_screen();
-						} else
-							d_select_callback(token, SCR_EVENT_PARAM_BUTTON_SELECT, item);
+						}
+						d_select_callback(token, SCR_EVENT_PARAM_BUTTON_SELECT, item);
 				    return true;
 				}
 		}
