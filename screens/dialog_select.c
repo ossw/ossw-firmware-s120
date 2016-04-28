@@ -41,14 +41,12 @@ static void dialog_select_draw_screen() {
 		uint8_t style = get_next_byte(&read_address);
 		uint8_t bitset_size = CEIL(list_size, 8);
 		uint8_t bitset[bitset_size];
-		uint8_t font_style = VERTICAL_ALIGN_CENTER;
+		uint8_t font_style = VERTICAL_ALIGN_CENTER | HORIZONTAL_ALIGN_LEFT;
 		uint8_t text_x = MARGIN;
 		if (style > 0) {
-			font_style |= HORIZONTAL_ALIGN_LEFT;
 			for (int i = 0; i < bitset_size; i++)
 				bitset[i] = get_next_byte(&read_address);
-		} else
-			font_style |= HORIZONTAL_ALIGN_CENTER;
+		}
 		const FONT_INFO* font_info = mlcd_resolve_font(font);
 		uint8_t item_height = font_info->height;
 		uint8_t title_height = item_height+2;

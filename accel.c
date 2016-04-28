@@ -176,7 +176,7 @@ void accel_init(void) {
 		accel_write_register(0x2D, 0x08);
 
 		 //0x21: PULSE_CFG Pulse Configuration register
-		accel_write_register(0x21, 0x50);
+		accel_write_register(0x21, 0x55);
 
 		//0x23 – 0x25: PULSE_THSX, Y, Z Pulse Threshold for X, Y and Z registers
 		accel_write_register(0x23, 0x20);
