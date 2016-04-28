@@ -11,6 +11,7 @@
 #define CONFIG_SLOW_REFRESH					0x08
 #define CONFIG_CENTRAL_MODE					0x10
 #define CONFIG_BLUETOOTH_ON					0x20
+#define CONFIG_BUTTONS_LIGHT				0x40
 
 typedef struct {
 		uint8_t action_id;

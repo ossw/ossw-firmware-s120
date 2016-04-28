@@ -214,7 +214,8 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 
 void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 		if (event_type == SCR_EVENT_BUTTON_PRESSED || event_type == SCR_EVENT_BUTTON_LONG_PRESSED) {
-				mlcd_backlight_extend();
+			if (get_settings(CONFIG_BUTTONS_LIGHT))
+				mlcd_backlight_short();
 		}
 		if (!modal_dialog) {
 	  if (scr_alert_notification_state != SCR_ALERT_NOTIFICATION_STATE_NONE) {

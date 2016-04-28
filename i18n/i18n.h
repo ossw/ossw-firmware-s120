@@ -43,6 +43,8 @@
 #define MESSAGE_CALL_CONTACT		58
 #define MESSAGE_GTASKS					59
 #define MESSAGE_NOTIFICATIONS		60
+#define MESSAGE_BUTTONS_LIGHT		61
+#define MESSAGE_BACKLIGHT				62
 
 typedef struct
 {

@@ -74,6 +74,10 @@ static void opt_handler_set_alarm() {
 	scr_mngr_show_screen(SCR_SET_ALARM);
 };
 
+static void opt_handler_backlight() {
+//	scr_mngr_show_screen(SCR_SET_LIGHT_INTERVAL);
+};
+
 void fs_reformat(void);
 
 static void reformat() {
@@ -97,6 +101,11 @@ static void draw_notif_light_switch(uint8_t x, uint8_t y) {
 		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
+static void draw_buttons_light_switch(uint8_t x, uint8_t y) {
+		bool on = get_settings(CONFIG_BUTTONS_LIGHT);
+		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
 static void draw_colors_switch(uint8_t x, uint8_t y) {
 		bool on = is_mlcd_inverted();
 		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
@@ -116,6 +125,10 @@ static void rtc_refresh_toggle() {
 
 static void notif_light_toggle() {
 		settings_toggle(CONFIG_NOTIFICATION_LIGHT);
+}
+
+static void buttons_light_toggle() {
+		settings_toggle(CONFIG_BUTTONS_LIGHT);
 }
 
 static void shake_light_toggle() {
@@ -147,8 +160,10 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_PHONE_DISCOVERY, opt_handler_phone_discovery, opt_handler_phone_discovery, NULL},
 		{MESSAGE_ALARM_CLOCK, opt_handler_set_alarm, alarm_toggle, draw_alarm_switch},
 		{MESSAGE_DISPLAY, mlcd_colors_toggle, mlcd_colors_toggle, draw_colors_switch},
+		{MESSAGE_BACKLIGHT, opt_handler_backlight, opt_handler_backlight, NULL},
 		{MESSAGE_SHAKE_LIGHT, shake_light_toggle, shake_light_toggle, draw_shake_light_switch},
 		{MESSAGE_NOTIF_LIGHT, notif_light_toggle, notif_light_toggle, draw_notif_light_switch},
+		{MESSAGE_BUTTONS_LIGHT, buttons_light_toggle, buttons_light_toggle, draw_buttons_light_switch},
 		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
 		{MESSAGE_TIME, opt_handler_change_time, opt_handler_change_time, NULL},

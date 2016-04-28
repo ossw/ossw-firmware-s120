@@ -63,6 +63,8 @@ static const I18N_MESSAGE messages_en[] = {
   /*   58 */{"Call a contact"},
   /*   59 */{"G.Tasks"},
   /*   60 */{"Notifications"},
+  /*   61 */{"Click light"},
+  /*   62 */{"Backlight"},
 };
 
 #endif
