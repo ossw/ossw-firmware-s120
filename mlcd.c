@@ -89,6 +89,8 @@ void mlcd_init(void)
 	vcom = VCOM_LO;
 	colors_inverted = get_settings(CONFIG_DISPLAY_INVERT);
 	uint8_t delay = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT);
+	if (delay == 0)
+		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT, 1);
 	if (delay > 9)
 		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT, 9);
 	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS);
