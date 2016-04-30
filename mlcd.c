@@ -88,17 +88,17 @@ void mlcd_init(void)
 	nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
 	vcom = VCOM_LO;
 	colors_inverted = get_settings(CONFIG_DISPLAY_INVERT);
-	uint8_t delay = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT);
+	uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
 	if (delay == 0)
-		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT, 1);
+		put_ext_ram_byte(EXT_RAM_LIGHT_DURATION, 1);
 	if (delay > 9)
-		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT, 9);
-	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS);
+		put_ext_ram_byte(EXT_RAM_LIGHT_DURATION, 9);
+	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS);
 	if (light_hour1 > 23)
-		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS, 0);
-	uint8_t light_hour2 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS + 1);
+		put_ext_ram_byte(EXT_RAM_LIGHT_HOURS, 0);
+	uint8_t light_hour2 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1);
 	if (light_hour2 > 23)
-		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS+1, 0);
+		put_ext_ram_byte(EXT_RAM_LIGHT_HOURS+1, 0);
 }
 
 void mlcd_timers_init(void)
@@ -150,9 +150,9 @@ void mlcd_backlight_short(void) {
 	if (bl_mode == MLCD_BL_LONG || bl_blink_counter > 0) {
 		return;
 	}
-	uint8_t delay = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT);
-	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS);
-	uint8_t light_hour2 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS + 1);
+	uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
+	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS);
+	uint8_t light_hour2 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1);
 	uint8_t curr_hour = rtc_get_current_hour_24();
 	if (light_hour1 == light_hour2 ||
 		(light_hour1 <= curr_hour && curr_hour < light_hour2) || 

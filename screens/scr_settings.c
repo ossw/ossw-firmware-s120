@@ -82,10 +82,10 @@ static void opt_handler_light_hours() {
 }
 
 static void opt_handler_light_delay() {
-	uint8_t delay = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT);
+	uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
 	if (++delay > 9)
 		delay = 1;
-	put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT, delay);
+	put_ext_ram_byte(EXT_RAM_LIGHT_DURATION, delay);
 }
 
 void fs_reformat(void);
@@ -127,8 +127,8 @@ static void draw_disconnect_alert_switch(uint8_t x, uint8_t y) {
 }
 
 static void draw_light_hours(uint8_t x, uint8_t y) {
-	uint8_t h1 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS);
-	uint8_t h2 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS + 1);
+	uint8_t h1 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS);
+	uint8_t h2 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1);
 		char txt[6];
 		txt[0] = '0' + h1/10;
 		txt[1] = '0' + h1%10;
@@ -140,7 +140,7 @@ static void draw_light_hours(uint8_t x, uint8_t y) {
 }
 
 static void draw_light_delay(uint8_t x, uint8_t y) {
-		uint8_t delay = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT);
+		uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
 		char txt[3];
 		txt[0] = '0' + delay;
 		txt[1] = 's';

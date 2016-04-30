@@ -17,15 +17,15 @@
 
 #define EXT_RAM_PAGE_SIZE						 0x20
 
-#define EXT_RAM_DATA_FRAME_BUFFER    0x0000 // 0x0000 - 0x0BCF
-#define EXT_RAM_DATA_RTC             0x0BD0 // 0x0BD0 - 0x0BD3
-#define EXT_RAM_DATA_ALARM					 0x0BD4 // 0x0BD4 - 0x0BD6
-#define EXT_RAM_SETTINGS						 0x0BD7 // 0x0BD7 - 
+#define EXT_RAM_DATA_FRAME_BUFFER   0x0000 // 0x0000 - 0x0BCF
+#define EXT_RAM_DATA_RTC            0x0BD0 // 0x0BD0 - 0x0BD3
+#define EXT_RAM_DATA_ALARM					0x0BD4 // 0x0BD4 - 0x0BD6
+#define EXT_RAM_SETTINGS						0x0BD7 // 0x0BD7 - 0x0BDA
+#define EXT_RAM_LIGHT_DURATION			0x0BDB // 1 byte
+#define EXT_RAM_LIGHT_HOURS					0x0BDC // 2 bytes
 
-#define EXT_RAM_TIMER_0							 0x0BF8 // 4*2 bytes
-#define EXT_RAM_CONFIG							 0x0C00 // 4 bytes
-#define EXT_RAM_CONFIG_LIGHT				 0x0C04 // 1 byte
-#define EXT_RAM_CONFIG_LIGHT_HOURS	 0x0C05 // 2 bytes
+#define EXT_RAM_TIMER_0							0x0BF8 // 4*2 bytes
+#define EXT_RAM_CONFIG							0x0C00
 
 #define EXT_RAM_DATA_STOPWATCH_RECALL				0x0CE0 // 0x0CE0 - 0x0E6F
 #define EXT_RAM_DATA_DIALOG_TEXT						0x0E70 // 0x0E70 - 0x0FFF

@@ -80,8 +80,8 @@ static void scr_changetime_handle_button_select(void) {
 }
 
 static void scr_changetime_handle_button_back(void) {
-		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS, light_hour1);
-		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS + 1, light_hour2);
+		put_ext_ram_byte(EXT_RAM_LIGHT_HOURS, light_hour1);
+		put_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1, light_hour2);
     scr_mngr_show_screen(SCR_SETTINGS);
 }
 
@@ -104,8 +104,8 @@ static bool scr_changetime_handle_button_pressed(uint32_t event_type, uint32_t b
 }
 
 static void scr_changetime_init() {
-		light_hour1 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS);
-		light_hour2 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS + 1);
+		light_hour1 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS);
+		light_hour2 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1);
 	  change_mode = MODE_HOUR1;
 }
 
