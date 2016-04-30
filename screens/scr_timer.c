@@ -79,7 +79,8 @@ static void scr_draw_saved_timers() {
 		uint8_t t2 = t & 0xFF;
 		if (t == 0 || t2 > 59)
 			return;
-		char txt[6];
+		char txt[7];
+		txt[6] = '\0';
 		if (t & TIMER_MINUTES) {
 			txt[2] = 'h';
 			txt[5] = 'm';

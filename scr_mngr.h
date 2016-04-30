@@ -18,6 +18,7 @@
 #define SCR_DIALOG_OPTION              0x0C
 #define SCR_DIALOG_SELECT              0x0D
 #define SCR_TIMER					             0x0E
+#define SCR_LIGHT_HOURS		             0x0F
 
 #define SCR_ALERT_NOTIFICATION         0xA0
 #define SCR_NOTIFICATIONS              0xA1

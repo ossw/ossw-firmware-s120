@@ -631,6 +631,11 @@
               <FileType>1</FileType>
               <FilePath>..\screens\scr_timer.c</FilePath>
             </File>
+            <File>
+              <FileName>scr_light_hours.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_light_hours.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1417,6 +1422,11 @@
               <FileName>scr_timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_light_hours.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_light_hours.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -11,6 +11,7 @@
 #include "nordic_common.h"
 #include "app_scheduler.h"
 #include "config.h"
+#include "rtc.h"
 
 #define SHORT_BL_TIMEOUT_UNIT           APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
 #define LONG_BL_TIMEOUT_UNIT            APP_TIMER_TICKS(300*1000, APP_TIMER_PRESCALER)
@@ -27,7 +28,7 @@
 static uint8_t fb_line_changes[MLCD_YRES/8];
 static uint8_t vcom;
 static uint8_t bl_mode = MLCD_BL_OFF;
-static uint8_t temp_bl_timeout = 5;
+//static uint8_t temp_bl_timeout = 5;
 static uint8_t bl_blink_counter;
 static bool colors_inverted = false;
 static bool toggle_colors = false;
@@ -87,6 +88,15 @@ void mlcd_init(void)
 	nrf_gpio_pin_clear(LCD_VOLTAGE_REG);
 	vcom = VCOM_LO;
 	colors_inverted = get_settings(CONFIG_DISPLAY_INVERT);
+	uint8_t delay = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT);
+	if (delay > 9)
+		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT, 9);
+	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS);
+	if (light_hour1 > 23)
+		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS, 0);
+	uint8_t light_hour2 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS + 1);
+	if (light_hour2 > 23)
+		put_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS+1, 0);
 }
 
 void mlcd_timers_init(void)
@@ -138,10 +148,18 @@ void mlcd_backlight_short(void) {
 	if (bl_mode == MLCD_BL_LONG || bl_blink_counter > 0) {
 		return;
 	}
-	app_timer_stop(mlcd_bl_timer_id);
-	bl_mode = MLCD_BL_SHORT;
-  nrf_gpio_pin_set(LCD_BACKLIGHT);
-	app_timer_start(mlcd_bl_timer_id, temp_bl_timeout * SHORT_BL_TIMEOUT_UNIT, NULL);
+	uint8_t delay = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT);
+	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS);
+	uint8_t light_hour2 = get_ext_ram_byte(EXT_RAM_CONFIG_LIGHT_HOURS + 1);
+	uint8_t curr_hour = rtc_get_current_hour_24();
+	if (light_hour1 == light_hour2 ||
+		(light_hour1 <= curr_hour && curr_hour < light_hour2) || 
+		(light_hour2 <= curr_hour && curr_hour < light_hour1)) {
+		app_timer_stop(mlcd_bl_timer_id);
+		bl_mode = MLCD_BL_SHORT;
+		nrf_gpio_pin_set(LCD_BACKLIGHT);
+		app_timer_start(mlcd_bl_timer_id, delay * SHORT_BL_TIMEOUT_UNIT, NULL);
+	}
 }
 
 void mlcd_backlight_extend(void) {
@@ -165,18 +183,18 @@ void mlcd_backlight_toggle(void)
 	}
 }
 
-uint32_t mlcd_temp_backlight_timeout(void) {
-	return temp_bl_timeout;
-}
-
-void mlcd_set_temp_backlight_timeout(int32_t timeout) {
-	if (timeout > 20) {
-		timeout = 20;
-	} else if (timeout < 1) {
-		timeout = 1;
-	}
-	temp_bl_timeout = timeout;
-}
+//uint32_t mlcd_temp_backlight_timeout(void) {
+//	return temp_bl_timeout;
+//}
+//
+//void mlcd_set_temp_backlight_timeout(int32_t timeout) {
+//	if (timeout > 20) {
+//		timeout = 20;
+//	} else if (timeout < 1) {
+//		timeout = 1;
+//	}
+//	temp_bl_timeout = timeout;
+//}
 
 void mlcd_backlight_blink(int32_t timeout, uint8_t count) {
 	if (count == 0)

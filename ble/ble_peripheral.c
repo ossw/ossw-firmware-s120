@@ -24,6 +24,7 @@
 #include "../ossw.h"
 #include "../command.h"
 #include "../vibration.h"
+#include "../config.h"
 #include "app_scheduler.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
@@ -386,6 +387,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 
 void disconnection_alert_event(void * p_event_data, uint16_t event_size)
 {
+	if (get_settings(CONFIG_DISCONNECT_ALERT))
 		vibration_vibrate(DISCONNECTION_ALERT, 0x0600);
 }
 
