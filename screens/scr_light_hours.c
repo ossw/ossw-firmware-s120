@@ -7,7 +7,7 @@
 #include "../graph.h"
 #include "../alarm.h"
 
-#define TIME_Y_POS    		60
+#define TIME_Y_POS    		80
 #define ARROW_HEIGHT			8
 #define MODE_HOUR1     		0
 #define MODE_HOUR2	  		1
@@ -27,7 +27,7 @@ static void scr_hours_draw_hour2() {
 }
 
 static void scr_changetime_draw_all() {
-	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_ALARM_CLOCK), 10, 5, 80, NULL, FONT_OPTION_BIG, HORIZONTAL_ALIGN_LEFT);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_BACKLIGHT_HOURS), 10, 10, MLCD_XRES-10, 40, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_LEFT | MULTILINE);
 	  fillRectangle(67, TIME_Y_POS + 18, 10, 4, DRAW_WHITE);
 	
 	  if (change_mode == MODE_HOUR1) {

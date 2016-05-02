@@ -136,7 +136,7 @@ static void draw_light_hours(uint8_t x, uint8_t y) {
 		txt[3] = '0' + h2/10;
 		txt[4] = '0' + h2%10;
 		txt[5] = '\0';
-		mlcd_draw_text(txt, x, y+3, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_SMALL_BOLD, HORIZONTAL_ALIGN_RIGHT);
+		mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_RIGHT);
 }
 
 static void draw_light_delay(uint8_t x, uint8_t y) {
