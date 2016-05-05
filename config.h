@@ -1,5 +1,5 @@
-#ifndef CONFIGUTARION_H
-#define CONFIGUTARION_H
+#ifndef CONFIGURATION_H
+#define CONFIGURATION_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -12,6 +12,7 @@
 #define CONFIG_CENTRAL_MODE					0x10
 #define CONFIG_BLUETOOTH_ON					0x20
 #define CONFIG_BUTTONS_LIGHT				0x40
+#define CONFIG_OCLOCK								0x80
 
 typedef struct {
 		uint8_t action_id;
@@ -46,4 +47,4 @@ void settings_on(uint32_t mask);
 
 void settings_off(uint32_t mask);
 
-#endif /* CONFIGUTARION_H */
+#endif /* CONFIGURATION_H */

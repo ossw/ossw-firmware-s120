@@ -388,7 +388,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 void disconnection_alert_event(void * p_event_data, uint16_t event_size)
 {
 	if (get_settings(CONFIG_DISCONNECT_ALERT))
-		vibration_vibrate(DISCONNECTION_ALERT, 0x0600);
+		vibration_vibrate(DISCONNECTION_ALERT, 0x0600, false);
 }
 
 /**@brief Function for handling the Application's BLE Stack events.

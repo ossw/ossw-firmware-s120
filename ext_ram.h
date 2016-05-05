@@ -22,7 +22,8 @@
 #define EXT_RAM_DATA_ALARM					0x0BD4 // 0x0BD4 - 0x0BD6
 #define EXT_RAM_SETTINGS						0x0BD7 // 0x0BD7 - 0x0BDA
 #define EXT_RAM_LIGHT_DURATION			0x0BDB // 1 byte
-#define EXT_RAM_LIGHT_HOURS					0x0BDC // 2 bytes
+#define EXT_RAM_DARK_HOURS					0x0BDC // 2 bytes
+#define EXT_RAM_SILENT_HOURS				0x0BDE // 2 bytes
 
 #define EXT_RAM_TIMER_0							0x0BF8 // 4*2 bytes
 #define EXT_RAM_CONFIG							0x0C00

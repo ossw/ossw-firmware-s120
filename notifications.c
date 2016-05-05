@@ -101,7 +101,7 @@ void notifications_info_notify(uint16_t time, uint32_t vibration_pattern) {
 	  scr_mngr_show_notifications();
 	
 	  if (m_current_alert_notification_id == 0) {
-				vibration_vibrate(vibration_pattern, time);
+				vibration_vibrate(vibration_pattern, time, false);
 		}
 }
 
@@ -119,7 +119,7 @@ void notifications_alert_notify(uint16_t notification_id, uint16_t address, uint
 		m_current_alert_notification_id = notification_id;
 	  scr_mngr_show_alert_notification(address);
 		if (!update) {
-				vibration_vibrate(vibration_pattern, 60*1000);
+				vibration_vibrate(vibration_pattern, 60*1000, false);
 	  
 				uint32_t err_code;	 
 				err_code = app_timer_start(m_notifications_alert_timer_id, APP_TIMER_TICKS(timeout, APP_TIMER_PRESCALER), NULL);

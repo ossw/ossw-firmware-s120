@@ -7,6 +7,7 @@
 #include "../rtc.h"
 #include "../mlcd.h"
 #include "../ext_ram.h"
+#include "../config.h"
 #include "../utf8.h"
 #include "../pawn/amxutil.h"
 #include "../i18n/i18n.h"
@@ -31,7 +32,9 @@ static bool scr_alert_notification_handle_button_pressed(uint32_t button_id) {
 }
 
 static void scr_alert_notification_init(uint32_t address) {
-	  m_address = address;
+	m_address = address;
+	if (get_settings(CONFIG_NOTIFICATION_LIGHT))
+		mlcd_backlight_short();
 }
 	/*
 static void draw_incmonig_call_notification() {

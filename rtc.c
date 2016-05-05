@@ -6,7 +6,10 @@
 #include "app_scheduler.h"
 #include "alarm.h"
 #include "config.h"
+#include "vibration.h"
 #include "BLE\ble_peripheral.h"
+
+#define OCLOCK_PATTERN							 0x0860C000
 
 static app_timer_id_t		m_rtc_timer_id;
 static uint32_t					current_time;
@@ -28,37 +31,38 @@ void rtc_restart_event(void * p_event_data, uint16_t event_size) {
 		APP_ERROR_CHECK(err_code);
 }
 
-void rtc_tick_event(void * p_event_data, uint16_t event_size)
-{
-    current_time += interval;
-    store_time = true;
-		scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
-		if (interval != rtc_refresh_interval || (rtc_refresh_interval == RTC_INTERVAL_MINUTE && rtc_get_current_seconds() != 0)) {
-				rtc_restart_event(NULL, 0);
-		}
-		if (rtc_get_current_seconds() == 0) {
-				alarm_clock_handle();
-				if (rtc_get_current_minutes()%10 == 0 && get_settings(CONFIG_BLUETOOTH_ON) && !get_settings(CONFIG_CENTRAL_MODE))
-						battery_level_update();
-		}
+void rtc_tick_event(void * p_event_data, uint16_t event_size) {
+  current_time += interval;
+  store_time = true;
+	scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
+	if (interval != rtc_refresh_interval || (rtc_refresh_interval == RTC_INTERVAL_MINUTE && rtc_get_current_seconds() != 0)) {
+		rtc_restart_event(NULL, 0);
+	}
+	if (rtc_get_current_seconds() == 0) {
+		alarm_clock_handle();
+		if (rtc_get_current_minutes() == 0 && get_settings(CONFIG_OCLOCK))
+			vibration_vibrate(OCLOCK_PATTERN, 0x0300, false);
+		if (rtc_get_current_minutes()%10 == 0 && get_settings(CONFIG_BLUETOOTH_ON) && !get_settings(CONFIG_CENTRAL_MODE))
+			battery_level_update();
+	}
 }
 
 static void rtc_timeout_handler(void * p_context) {
-		uint32_t err_code = app_sched_event_put(NULL, 0, rtc_tick_event);
-		APP_ERROR_CHECK(err_code);
+	uint32_t err_code = app_sched_event_put(NULL, 0, rtc_tick_event);
+	APP_ERROR_CHECK(err_code);
 }
 
 static uint32_t rtc_load_time(void) {
-	  uint8_t buffer[4];
-		ext_ram_read_data(EXT_RAM_DATA_RTC, buffer, 4);
-		return (uint32_t)(((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0]);
+	uint8_t buffer[4];
+	ext_ram_read_data(EXT_RAM_DATA_RTC, buffer, 4);
+	return (uint32_t)(((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0]);
 }
 
 void rtc_toggle_refresh_interval() {
-		if (rtc_refresh_interval == RTC_INTERVAL_MINUTE)
-				rtc_set_refresh_interval(RTC_INTERVAL_SECOND);
-		else
-				rtc_set_refresh_interval(RTC_INTERVAL_MINUTE);
+	if (rtc_refresh_interval == RTC_INTERVAL_MINUTE)
+		rtc_set_refresh_interval(RTC_INTERVAL_SECOND);
+	else
+		rtc_set_refresh_interval(RTC_INTERVAL_MINUTE);
 }
 
 void rtc_timer_init(void) {

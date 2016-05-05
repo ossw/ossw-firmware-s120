@@ -91,10 +91,10 @@ void mlcd_init(void)
 	uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
 	if (delay == 0 || delay > 9)
 		put_ext_ram_byte(EXT_RAM_LIGHT_DURATION, 1);
-	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS);
-	uint8_t light_hour2 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1);
+	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_DARK_HOURS);
+	uint8_t light_hour2 = get_ext_ram_byte(EXT_RAM_DARK_HOURS + 1);
 	if (light_hour1 > 23 || light_hour2 > 23)
-		put_ext_ram_short(EXT_RAM_LIGHT_HOURS, 0);
+		put_ext_ram_short(EXT_RAM_DARK_HOURS, 0);
 }
 
 void mlcd_timers_init(void)
@@ -147,8 +147,8 @@ void mlcd_backlight_short(void) {
 		return;
 	}
 	uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
-	uint8_t hour1 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS);
-	uint8_t hour2 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1);
+	uint8_t hour1 = get_ext_ram_byte(EXT_RAM_DARK_HOURS);
+	uint8_t hour2 = get_ext_ram_byte(EXT_RAM_DARK_HOURS + 1);
 	uint8_t curr = rtc_get_current_hour_24();
 	if (hour1 == hour2 || (hour1 <= curr && curr < hour2) || 
 		(hour2 < hour1 && (curr < hour2 || hour1 <= curr))) {

@@ -77,8 +77,12 @@ static void opt_handler_set_alarm() {
 	scr_mngr_show_screen(SCR_SET_ALARM);
 }
 
-static void opt_handler_light_hours() {
-	scr_mngr_show_screen(SCR_LIGHT_HOURS);
+static void opt_handler_dark_hours() {
+	scr_mngr_show_screen(SCR_DARK_HOURS);
+}
+
+static void opt_handler_silent_hours() {
+	scr_mngr_show_screen(SCR_SILENT_HOURS);
 }
 
 static void opt_handler_light_delay() {
@@ -116,6 +120,11 @@ static void draw_buttons_light_switch(uint8_t x, uint8_t y) {
 		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
+static void draw_oclock_switch(uint8_t x, uint8_t y) {
+		bool on = get_settings(CONFIG_OCLOCK);
+		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
 static void draw_colors_switch(uint8_t x, uint8_t y) {
 		bool on = is_mlcd_inverted();
 		draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
@@ -126,9 +135,9 @@ static void draw_disconnect_alert_switch(uint8_t x, uint8_t y) {
 	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
-static void draw_light_hours(uint8_t x, uint8_t y) {
-	uint8_t h1 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS);
-	uint8_t h2 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1);
+static void draw_silent_hours(uint8_t x, uint8_t y) {
+	uint8_t h1 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS);
+	uint8_t h2 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1);
 		char txt[6];
 		txt[0] = '0' + h1/10;
 		txt[1] = '0' + h1%10;
@@ -136,7 +145,20 @@ static void draw_light_hours(uint8_t x, uint8_t y) {
 		txt[3] = '0' + h2/10;
 		txt[4] = '0' + h2%10;
 		txt[5] = '\0';
-		mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_BOLD, HORIZONTAL_ALIGN_RIGHT);
+		mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
+}
+
+static void draw_dark_hours(uint8_t x, uint8_t y) {
+	uint8_t h1 = get_ext_ram_byte(EXT_RAM_DARK_HOURS);
+	uint8_t h2 = get_ext_ram_byte(EXT_RAM_DARK_HOURS + 1);
+		char txt[6];
+		txt[0] = '0' + h1/10;
+		txt[1] = '0' + h1%10;
+		txt[2] = '-';
+		txt[3] = '0' + h2/10;
+		txt[4] = '0' + h2%10;
+		txt[5] = '\0';
+		mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
 }
 
 static void draw_light_delay(uint8_t x, uint8_t y) {
@@ -172,6 +194,10 @@ static void buttons_light_toggle() {
 	settings_toggle(CONFIG_BUTTONS_LIGHT);
 }
 
+static void oclock_toggle() {
+	settings_toggle(CONFIG_OCLOCK);
+}
+
 static void shake_light_toggle() {
 		default_action* default_actions = config_get_default_global_actions();
 		if (default_actions[8].action_id == 0)
@@ -205,8 +231,10 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_SHAKE_LIGHT, shake_light_toggle, shake_light_toggle, draw_shake_light_switch},
 		{MESSAGE_NOTIF_LIGHT, notif_light_toggle, notif_light_toggle, draw_notif_light_switch},
 		{MESSAGE_BUTTONS_LIGHT, buttons_light_toggle, buttons_light_toggle, draw_buttons_light_switch},
-		{MESSAGE_LIGHT_HOURS, opt_handler_light_hours, opt_handler_light_hours, draw_light_hours},
+		{MESSAGE_DARK_HOURS, opt_handler_dark_hours, opt_handler_dark_hours, draw_dark_hours},
+		{MESSAGE_SILENT_HOURS, opt_handler_silent_hours, opt_handler_silent_hours, draw_silent_hours},
 		{MESSAGE_LIGHT_DELAY, opt_handler_light_delay, opt_handler_light_delay, draw_light_delay},
+		{MESSAGE_OCLOCK, oclock_toggle, oclock_toggle, draw_oclock_switch},
 		{MESSAGE_DISCONNECT_ALERT, disconnect_alert_toggle, disconnect_alert_toggle, draw_disconnect_alert_switch},
 		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},

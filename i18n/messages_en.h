@@ -65,10 +65,12 @@ static const I18N_MESSAGE messages_en[] = {
   /*   60 */{"Notifications"},
   /*   61 */{"Click light"},
   /*   62 */{"Light delay"},
-  /*   63 */{"Light hours"},
+  /*   63 */{"Dark hours"},
   /*   64 */{"Backlight active hours"},
   /*   65 */{"Discon.alert"},
   /*   66 */{"Watch faces"},
+  /*   67 */{"Silence"},
+  /*   68 */{"O'clock"},
 };
 
 #endif

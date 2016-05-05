@@ -1,4 +1,4 @@
-#include "scr_light_hours.h"
+#include "scr_silent_hours.h"
 #include "../scr_mngr.h"
 #include "../mlcd_draw.h"
 #include "../rtc.h"
@@ -27,7 +27,7 @@ static void scr_hours_draw_hour2() {
 }
 
 static void scr_changetime_draw_all() {
-	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_BACKLIGHT_HOURS), 10, 10, MLCD_XRES-10, 40, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_LEFT | MULTILINE);
+	  mlcd_draw_text(I18N_TRANSLATE(MESSAGE_SILENT_HOURS), 10, 10, MLCD_XRES-10, 40, FONT_OPTION_BIG, HORIZONTAL_ALIGN_LEFT | MULTILINE);
 	  fillRectangle(67, TIME_Y_POS + 18, 10, 4, DRAW_WHITE);
 	
 	  if (change_mode == MODE_HOUR1) {
@@ -80,8 +80,8 @@ static void scr_changetime_handle_button_select(void) {
 }
 
 static void scr_changetime_handle_button_back(void) {
-		put_ext_ram_byte(EXT_RAM_LIGHT_HOURS, light_hour1);
-		put_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1, light_hour2);
+		put_ext_ram_byte(EXT_RAM_SILENT_HOURS, light_hour1);
+		put_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1, light_hour2);
     scr_mngr_show_screen(SCR_SETTINGS);
 }
 
@@ -104,12 +104,12 @@ static bool scr_changetime_handle_button_pressed(uint32_t event_type, uint32_t b
 }
 
 static void scr_changetime_init() {
-		light_hour1 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS);
-		light_hour2 = get_ext_ram_byte(EXT_RAM_LIGHT_HOURS + 1);
+		light_hour1 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS);
+		light_hour2 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1);
 	  change_mode = MODE_HOUR1;
 }
 
-bool scr_set_light_hours_handle_event(uint32_t event_type, uint32_t event_param) {
+bool scr_set_silent_hours_handle_event(uint32_t event_type, uint32_t event_param) {
 	  switch(event_type) {
 			  case SCR_EVENT_INIT_SCREEN:
 				    scr_changetime_init();

@@ -72,7 +72,7 @@ bool alarm_button_handler(uint32_t button_id) {
 
 void fire_alarm() {
 		set_modal_dialog(true);
-		vibration_vibrate(ALARM_VIBRATION, 40*1000);
+		vibration_vibrate(ALARM_VIBRATION, 40*1000, true);
 		pack_dialog_option(&alarm_button_handler, FONT_OPTION_BIG, I18N_TRANSLATE(MESSAGE_ALARM_CLOCK),
 				I18N_TRANSLATE(MESSAGE_ALARM_SNOOZE), I18N_TRANSLATE(MESSAGE_ALARM_DISMISS), "\0", "\0");
 		scr_mngr_show_screen(SCR_DIALOG_OPTION);
