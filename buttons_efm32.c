@@ -44,6 +44,20 @@ static void button_pressed_callback(uint8_t pin)
 		bool pressed;
 		button_is_pushed(gpio_pin, &pressed);
 		if (pressed) {
+				if (gpio_pin == SCR_EVENT_PARAM_BUTTON_UP) {
+						bool another_pressed = false;
+						button_is_pushed(SCR_EVENT_PARAM_BUTTON_DOWN, &another_pressed);
+						if (another_pressed) {
+								mcu_reset();
+						}
+				} else if (gpio_pin == SCR_EVENT_PARAM_BUTTON_DOWN) {
+						bool another_pressed = false;
+						button_is_pushed(SCR_EVENT_PARAM_BUTTON_UP, &another_pressed);
+						if (another_pressed) {
+								mcu_reset();
+						}
+				}
+			
 				timer_start_with_param(button_debouncing_timer_id, BUTTON_DETECTION_DELAY, (void*)gpio_pin);
 		} else {
 				if (gpio_pin == last_pressed_pin) {

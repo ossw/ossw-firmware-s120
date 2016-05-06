@@ -15,6 +15,7 @@
 #include "nrf_soc.h"
 #include "softdevice_handler.h"
 #include "spi_slave.h"
+#include "bootloader_util.h"
 #include "../../target.h"
 #include "../../command.h"
 #include "../../command_rx_buffer.h"
@@ -36,6 +37,28 @@ static uint8_t m_rx_buf[RX_BUF_SIZE];
 static uint8_t m_last_command_data[256];
 static uint16_t m_last_command_size;
 static void (*m_last_command_resp_handler)(uint8_t);
+
+
+void turn_off_ble(void) {
+		nrf_gpio_cfg_sense_input(SPIS0_SS, NRF_GPIO_PIN_NOPULL, NRF_GPIO_PIN_SENSE_LOW);
+		sd_power_system_off();
+}
+
+void enter_dfu_mode(){
+		ble_reset_prepare();
+
+    uint32_t err_code = sd_power_gpregret_set(BOOTLOADER_DFU_START);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = sd_softdevice_disable();
+    APP_ERROR_CHECK(err_code);
+
+    err_code = sd_softdevice_vector_table_base_set(NRF_UICR->BOOTLOADERADDR);
+    APP_ERROR_CHECK(err_code);
+
+    NVIC_ClearPendingIRQ(SWI2_IRQn);
+    bootloader_util_app_start(NRF_UICR->BOOTLOADERADDR);
+}
 	 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -63,6 +86,25 @@ static void spi_slave_event_handle(spi_slave_evt_t event)
 			
 				if (event.rx_amount > 0) {
 						switch(m_rx_buf[0]) {
+								case 0xA:
+										switch(m_rx_buf[1]) {
+												case 0x9:
+														// efm32 power off
+														// disable bluetooth;
+														turn_off_ble();
+														break;
+												case 0x16:
+														// efm32 power on
+														// do nothing
+														break;
+												case 0xC:
+														if (m_rx_buf[2] == 1) {
+																// efm32 power on (DFU mode)
+																enter_dfu_mode();
+														}
+														break;
+										}
+										break;
 								case SPI_CMD_READ_REG:
 										switch(m_rx_buf[1]) {
 											case SPI_CMD_REG_CMD_INFO:

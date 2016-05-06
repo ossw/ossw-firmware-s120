@@ -24,7 +24,7 @@
 #include "../ossw.h"
 #include "../command_rx_buffer.h"
 
-#define IS_SRVC_CHANGED_CHARACT_PRESENT  0                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
+#define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
 #ifdef BLE_DFU_APP_SUPPORT
 #include "ble_dfu.h"
@@ -250,7 +250,7 @@ static void advertising_stop(void)
  *          @ref dfu_app_handler.c before entering the bootloader/DFU.
  *          This allows the current running application to shut down gracefully.
  */
-static void reset_prepare(void)
+void ble_reset_prepare(void)
 {
     uint32_t err_code;
 
@@ -333,7 +333,7 @@ static void services_init(void)
     err_code = ble_dfu_init(&m_dfus, &dfus_init);
     APP_ERROR_CHECK(err_code);
 
-    dfu_app_reset_prepare_set(reset_prepare);
+    dfu_app_reset_prepare_set(ble_reset_prepare);
     dfu_app_dm_appl_instance_set(m_app_handle);
     /** @snippet [DFU BLE Service initialization] */
 #endif // BLE_DFU_APP_SUPPORT

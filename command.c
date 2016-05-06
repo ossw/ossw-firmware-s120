@@ -106,7 +106,7 @@ void command_receive(uint8_t *rx_data, uint16_t rx_size, void (*handler)(uint8_t
 		 case 0x42:
 			    // upload notification finished
 					handle_notification_upload_done();
-			    break;
+			    break;	
 		 case 0x43:
 			    // extend alert notification
 					handle_notification_alert_extend(rx_data[1] << 8 | rx_data[2], rx_data[3] << 8 | rx_data[4]);
@@ -114,6 +114,10 @@ void command_receive(uint8_t *rx_data, uint16_t rx_size, void (*handler)(uint8_t
 		 case 0x44:
 			    // stop alert notification
 					handle_notification_alert_stop(rx_data[1] << 8 | rx_data[2]);
+			    break;
+		 case 0xF0:
+			    // restart
+					mcu_reset();
 			    break;
 		 default:
 					respCode = 0xFF;

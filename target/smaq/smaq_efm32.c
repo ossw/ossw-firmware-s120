@@ -11,6 +11,7 @@
 #include "../../mcu.h"
 #include "../../command.h"
 #include "../../command_over_spi.h"
+#include "../../scr_mngr.h"
 #include "em_device.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
@@ -44,10 +45,12 @@ void smaq_clocks_init(void) {
 void smaq_gpio_init(void) {
 	
 	//button down
-	GPIO_PinModeSet(gpioPortA, 1, gpioModeInputPull, 0);
+	GPIO_PinModeSet(gpioPortA, 1, gpioModeInput, 0);
+	
+	GPIO_PinModeSet(gpioPortA, 3, gpioModePushPull, 0);
 	
 	//back button
-	GPIO_PinModeSet(gpioPortA, 6, gpioModeInputPull, 0);
+	GPIO_PinModeSet(gpioPortA, 6, gpioModeInput, 0);
 	
 	//vibration motor
 	GPIO_PinModeSet(gpioPortA, 8, gpioModePushPull, 0);
@@ -55,20 +58,25 @@ void smaq_gpio_init(void) {
 	//lcd backlight
 	GPIO_PinModeSet(gpioPortA, 10, gpioModePushPull, 0);
 	
+	GPIO_PinModeSet(gpioPortC, 0, gpioModePushPull, 1);
+	
 	//SPI2 TX
 	GPIO_PinModeSet(gpioPortC, 2, gpioModePushPull, 0);
 	
 	//SPI2 RX
-	GPIO_PinModeSet(gpioPortC, 3, gpioModeInput, 0);
+	GPIO_PinModeSet(gpioPortC, 3, gpioModeInputPull, 0);
 	
 	//SPI2 CLK
 	GPIO_PinModeSet(gpioPortC, 4, gpioModePushPull, 0);
 	
 	//CS for ext flash
-	GPIO_PinModeSet(gpioPortC, 5, gpioModePushPull, 1);
+	//GPIO_PinModeSet(gpioPortC, 5, gpioModePushPull, 1);
+	
+	GPIO_PinModeSet(gpioPortC, 8, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortC, 9, gpioModeInputPullFilter, 0);
 	
 	//up button
-	GPIO_PinModeSet(gpioPortC, 10, gpioModeInputPull, 0);
+	GPIO_PinModeSet(gpioPortC, 10, gpioModeInput, 0);
 	
 	//SPI1 TX
 	GPIO_PinModeSet(gpioPortD, 0, gpioModePushPull, 0);
@@ -79,19 +87,25 @@ void smaq_gpio_init(void) {
 	//CS for MLCD
 	GPIO_PinModeSet(gpioPortD, 3, gpioModePushPull, 0);
 	
+	GPIO_PinModeSet(gpioPortD, 4, gpioModeInputPull, 0);
+	
 	//NRF data interrupt
 	GPIO_PinModeSet(gpioPortD, 5, gpioModeInputPull, 0);
 	
 	//MLCD ON/OFF
 	GPIO_PinModeSet(gpioPortD, 6, gpioModePushPull, 0);
 	
+	GPIO_PinModeSet(gpioPortD, 8, gpioModePushPull, 0);
+	
 //	// $[Port E Configuration]
 
+	GPIO_PinModeSet(gpioPortE, 9, gpioModeInputPullFilter, 0);
+	
 	//SPI0 TX
 	GPIO_PinModeSet(gpioPortE, 10, gpioModePushPull, 0);
 	
 	//SPI0 RX
-	GPIO_PinModeSet(gpioPortE, 11, gpioModeInput, 0);
+	GPIO_PinModeSet(gpioPortE, 11, gpioModeInputPull, 0);
 	
 	//SPI0 CLK
 	GPIO_PinModeSet(gpioPortE, 12, gpioModePushPull, 0);
@@ -100,11 +114,13 @@ void smaq_gpio_init(void) {
 	GPIO_PinModeSet(gpioPortE, 13, gpioModePushPull, 1);
 	
 	//select button
-	GPIO_PinModeSet(gpioPortF, 12, gpioModeInputPull, 0);
+	GPIO_PinModeSet(gpioPortF, 12, gpioModeInput, 0);
 	
   GPIO_IntConfig(gpioPortA, 1, true, true, true);
+  GPIO_IntConfig(gpioPortD, 4, true, true, true);
   GPIO_IntConfig(gpioPortD, 5, false, true, true);
   GPIO_IntConfig(gpioPortA, 6, true, true, true);
+  GPIO_IntConfig(gpioPortC, 9, true, true, true);
   GPIO_IntConfig(gpioPortC, 10, true, true, true);
   GPIO_IntConfig(gpioPortF, 12, true, true, true);
 }
@@ -160,11 +176,9 @@ void smaq_spi_init(void) {
 		initprs.prsTriggerChannel = usartPrsTriggerCh0;
 		USART_InitPrsTrigger(USART2, &initprs);	
 		
-		
-	/* Module PCNT0 is configured to location 2 */
-//	PCNT0->ROUTE = (PCNT0->ROUTE & ~_PCNT_ROUTE_LOCATION_MASK)
-//			| PCNT_ROUTE_LOCATION_LOC2;
-
+	PCNT0->ROUTE = (PCNT0->ROUTE & ~_PCNT_ROUTE_LOCATION_MASK)
+			| PCNT_ROUTE_LOCATION_LOC2;
+			
 	/* Enable signals CLK, CS, RX, TX */
 	USART0->ROUTE |= USART_ROUTE_CLKPEN  | USART_ROUTE_RXPEN
 			| USART_ROUTE_TXPEN;
@@ -196,14 +210,12 @@ static void nrf_send_command_response(uint8_t resp_code) {
 static bool process_command = false;
 
 static void nrf_process_command(void) {
-	
-    uint8_t data[256];
-	
 		uint8_t command[] = {SPI_CMD_READ_REG, SPI_CMD_REG_CMD_INFO};
 		spi_master_tx(NRF_SPI, NRF_SPI_SS, command, 2);
 		
 		mcu_delay_ms(5);
 		
+    uint8_t data[256];
 		spi_master_rx_data(NRF_SPI, NRF_SPI_SS, NULL, 0, data, 3, NULL);
 		
 		if (data[0] == 0) {
@@ -247,11 +259,6 @@ int main(void)
 	  smaq_clocks_init();
 	  smaq_gpio_init();
 	
-		// dont't know what it does but it fixes lcd screen :)
-		gpio_pin_set(gpioPortC<<4 | 0);
-		mcu_delay_ms(10);
-		gpio_pin_clear(gpioPortC<<4 | 0);
-	
 	  smaq_spi_init();
 	
 		SLEEP_Init((SLEEP_CbFuncPtr_t)before_sleep, (SLEEP_CbFuncPtr_t)after_wakeup);
@@ -273,7 +280,9 @@ int main(void)
 	
 		ossw_init();
 		
-	
+ble_peripheral_mode_init();
+scr_mngr_show_screen(SCR_WATCHFACE);
+						
 		 // Enter main loop.
     for (;;)
     {
