@@ -1709,14 +1709,14 @@ const FONT_CHAR_INFO_LOOKUP normalRegularFontBlockLookup[] =
 
 const FONT_INFO normalRegularFontInfo =
 {
-	15, //  Character height
+	normalRegularFontBlockLookup,
+	normalRegularFontBitmaps, //  Character bitmap array
 	'!', //  Start character
 	'~', //  End character
+	15, //  Character height
 	1,
 	2, //  Width, in pixels, of space character
-	normalRegularFontBlockLookup,
-	1,
-	normalRegularFontBitmaps, //  Character bitmap array
+	1
 };
 
 #endif /* NORMAL_REGULAR_FONT_H */

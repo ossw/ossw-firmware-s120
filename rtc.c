@@ -3,42 +3,94 @@
 #include "nordic_common.h"
 #include "time.h"
 #include "ext_ram.h"
+#include "app_scheduler.h"
+#include "alarm.h"
+#include "config.h"
+#include "vibration.h"
+#include "BLE\ble_peripheral.h"
 
-static app_timer_id_t      m_rtc_timer_id;
+#define OCLOCK_PATTERN							 0x0860C000
 
-static uint32_t current_time;
-static bool store_time = false;
+static app_timer_id_t		m_rtc_timer_id;
+static uint32_t					current_time;
+static uint16_t 				rtc_refresh_interval;
+static uint16_t					interval;
+static bool							store_time = false;
+
+void rtc_restart_event(void * p_event_data, uint16_t event_size) {
+    uint32_t err_code = app_timer_stop(m_rtc_timer_id);
+    APP_ERROR_CHECK(err_code);
+		if (rtc_refresh_interval == RTC_INTERVAL_SECOND) {
+				interval = RTC_INTERVAL_SECOND;
+		} else if (rtc_refresh_interval == RTC_INTERVAL_MINUTE) {
+				interval = RTC_INTERVAL_MINUTE - rtc_get_current_seconds();
+				if (interval == 0)
+						interval = RTC_INTERVAL_MINUTE;
+		}
+		err_code = app_timer_start(m_rtc_timer_id, APP_TIMER_TICKS(1000*interval, APP_TIMER_PRESCALER), NULL);
+		APP_ERROR_CHECK(err_code);
+}
+
+void rtc_tick_event(void * p_event_data, uint16_t event_size) {
+  current_time += interval;
+  store_time = true;
+	scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
+	if (interval != rtc_refresh_interval || (rtc_refresh_interval == RTC_INTERVAL_MINUTE && rtc_get_current_seconds() != 0)) {
+		rtc_restart_event(NULL, 0);
+	}
+	if (rtc_get_current_seconds() == 0) {
+		alarm_clock_handle();
+		if (rtc_get_current_minutes() == 0 && get_settings(CONFIG_OCLOCK))
+			vibration_vibrate(OCLOCK_PATTERN, 0x0300, false);
+		if (rtc_get_current_minutes()%10 == 0 && get_settings(CONFIG_BLUETOOTH_ON) && !get_settings(CONFIG_CENTRAL_MODE))
+			battery_level_update();
+	}
+}
 
 static void rtc_timeout_handler(void * p_context) {
-    UNUSED_PARAMETER(p_context);
-
-    current_time++;
-    store_time = true;
-    scr_mngr_handle_event(SCR_EVENT_RTC_TIME_CHANGED, current_time);
+	uint32_t err_code = app_sched_event_put(NULL, 0, rtc_tick_event);
+	APP_ERROR_CHECK(err_code);
 }
 
 static uint32_t rtc_load_time(void) {
-	   uint8_t buffer[4];
-		 ext_ram_read_data(EXT_RAM_DATA_RTC, buffer, 4);
-		 return (uint32_t)(((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0]);
+	uint8_t buffer[4];
+	ext_ram_read_data(EXT_RAM_DATA_RTC, buffer, 4);
+	return (uint32_t)(((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0]);
+}
+
+void rtc_toggle_refresh_interval() {
+	if (rtc_refresh_interval == RTC_INTERVAL_MINUTE)
+		rtc_set_refresh_interval(RTC_INTERVAL_SECOND);
+	else
+		rtc_set_refresh_interval(RTC_INTERVAL_MINUTE);
 }
 
 void rtc_timer_init(void) {
-    uint32_t err_code;	 
-		
-	  current_time = rtc_load_time();	
-		if (current_time == 0){
+		settings_off(CONFIG_BLUETOOTH_ON);
+	  current_time = rtc_load_time();
+		if (current_time == 0) {
 			  // set initial time
 			  current_time = 1430141820;
 		}
-		
-    err_code = app_timer_create(&m_rtc_timer_id,
+    uint32_t err_code = app_timer_create(&m_rtc_timer_id,
                                 APP_TIMER_MODE_REPEATED,
                                 rtc_timeout_handler);
     APP_ERROR_CHECK(err_code);
-	
-    err_code = app_timer_start(m_rtc_timer_id, RTC_INTERVAL, NULL);
-    APP_ERROR_CHECK(err_code);
+		if (get_settings(CONFIG_SLOW_REFRESH))
+				rtc_set_refresh_interval(RTC_INTERVAL_MINUTE);
+		else
+				rtc_set_refresh_interval(RTC_INTERVAL_SECOND);
+}
+
+uint16_t rtc_get_refresh_interval() {
+		return rtc_refresh_interval;
+}
+
+void rtc_set_refresh_interval(uint16_t new_interval) {
+		if (new_interval == rtc_refresh_interval)
+				return;
+		rtc_refresh_interval = new_interval;
+		rtc_restart_event(NULL, 0);
 }
 
 uint32_t rtc_get_current_time(void) {

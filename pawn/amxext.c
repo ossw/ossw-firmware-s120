@@ -11,7 +11,7 @@ static cell AMX_NATIVE_CALL n_lcd_bl(AMX* amx, const cell params[])
 	  if (params[1] == 0) {
 	      mlcd_backlight_off();
 		} else {
-		  	mlcd_backlight_on();
+		  	mlcd_backlight_long();
 		}
     return(0);
 }

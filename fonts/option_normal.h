@@ -1889,14 +1889,14 @@ const FONT_CHAR_INFO_LOOKUP optionNormalFontBlockLookup[] =
 
 const FONT_INFO optionNormalFontInfo =
 {
-	18,
+	optionNormalFontBlockLookup,
+	optionNormalFontBitmaps,
 	'!',
 	'|',
+	18,
 	2,
 	5,
-	optionNormalFontBlockLookup,
-	1,
-	optionNormalFontBitmaps
+	1
 };
 
 #endif /* OPTION_NORMAL_FONT_H */

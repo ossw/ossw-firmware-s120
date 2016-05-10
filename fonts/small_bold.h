@@ -1333,14 +1333,14 @@ const FONT_CHAR_INFO_LOOKUP smallBoldBlockLookup[] =
 
 const FONT_INFO smallBoldFontInfo =
 {
-	11, //  Character height
+	smallBoldBlockLookup, //  Character descriptor array
+	smallBoldFontBitmaps, //  Character bitmap array
 	'!', //  Start character
 	'~', //  End character
+	11, //  Character height
 	1,
 	2,
-	smallBoldBlockLookup, //  Character descriptor array
-	1,
-	smallBoldFontBitmaps, //  Character bitmap array
+	1
 };
 
 #endif /* SMALL_BOLD_FONT_H */

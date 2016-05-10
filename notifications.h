@@ -18,9 +18,18 @@
 #define NOTIFICATIONS_PREV_PART							          0x33
 #define NOTIFICATIONS_OPEN							              0x34
 
+#define DIALOG_RESULT										              0x35
+#define PHONE_FUNC_PHONE_DISCOVERY										0x40
+#define PHONE_FUNC_SEND_SMS							              0x41
+#define PHONE_FUNC_CALL_CONTACT					              0x42
+#define PHONE_FUNC_GTASKS								              0x43
+
 #define NOTIFICATIONS_TYPE_ALERT 											1
 #define NOTIFICATIONS_TYPE_INFO												2
 #define NOTIFICATIONS_TYPE_UPDATE											3
+#define NOTIFICATIONS_TYPE_DIALOG_SELECT							4
+#define NOTIFICATIONS_TYPE_DIALOG_OPTIONS							5
+#define NOTIFICATIONS_TYPE_DIALOG_CLOSE								255
 
 #define NOTIFICATIONS_CATEGORY_SUMMARY								0
 #define NOTIFICATIONS_CATEGORY_INCOMING_CALL					1
@@ -58,6 +67,6 @@ void notifications_next(uint16_t notification_id);
 
 void notifications_dismiss_all(void);
 
-uint32_t notifications_get_current_data(void);
+uint16_t notifications_get_current_data(void);
 
 #endif /* NOTIFICATIONS_H */

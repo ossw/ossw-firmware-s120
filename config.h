@@ -1,9 +1,18 @@
-#ifndef CONFIGUTARION_H
-#define CONFIGUTARION_H
+#ifndef CONFIGURATION_H
+#define CONFIGURATION_H
 
 #include <stdbool.h>
 #include <stdint.h>
 #include "fs.h"
+
+#define CONFIG_DISCONNECT_ALERT			0x01
+#define CONFIG_NOTIFICATION_LIGHT		0x02
+#define CONFIG_DISPLAY_INVERT				0x04
+#define CONFIG_SLOW_REFRESH					0x08
+#define CONFIG_CENTRAL_MODE					0x10
+#define CONFIG_BLUETOOTH_ON					0x20
+#define CONFIG_BUTTONS_LIGHT				0x40
+#define CONFIG_OCLOCK								0x80
 
 typedef struct {
 		uint8_t action_id;
@@ -30,4 +39,12 @@ void config_set_default_global_actions(default_action* actions);
 
 void config_set_default_watchface_actions(default_action* actions);
 
-#endif /* CONFIGUTARION_H */
+bool get_settings(uint32_t mask);
+
+void settings_toggle(uint32_t mask);
+
+void settings_on(uint32_t mask);
+
+void settings_off(uint32_t mask);
+
+#endif /* CONFIGURATION_H */

@@ -2085,14 +2085,14 @@ const FONT_CHAR_INFO_LOOKUP bigRegularFontBlockLookup[] =
 
 const FONT_INFO bigRegularFontInfo =
 {
-	19, //  Character height
+	bigRegularFontBlockLookup, //  Character descriptor array
+	bigRegularFontBitmaps, //  Character bitmap array
 	'!', //  Start character
 	'~', //  End character
+	19, //  Character height
 	1,
 	4, //  Width, in pixels, of space character
-	bigRegularFontBlockLookup, //  Character descriptor array
 	1,
-	bigRegularFontBitmaps, //  Character bitmap array
 };
 
 #endif /* BIG_REGULAR_FONT_H */

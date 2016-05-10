@@ -2657,14 +2657,14 @@ const FONT_CHAR_INFO_LOOKUP optionBigFontBlockLookup[] =
 
 const FONT_INFO optionBigFontInfo =
 {
-	26,
+	optionBigFontBlockLookup,
+	optionBigFontBitmaps,
 	'!',
 	'|',
+	26,
 	3,
 	6,
-	optionBigFontBlockLookup,
-	1,
-	optionBigFontBitmaps,
+	1
 };
 
 #endif /* OPTION_BIG_FONT_H */

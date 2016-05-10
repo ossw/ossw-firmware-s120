@@ -1,7 +1,9 @@
 #include "scr_controls.h"
 #include "mlcd_draw.h"
+#include "graph.h"
 #include "string.h"
 #include "fs.h"
+#include "rtc.h"
 
 static void limit_int_range(uint32_t* value, uint32_t max_value) {
 	  if(*value > max_value) {
@@ -24,7 +26,7 @@ static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no
 			
 			  if (decimal_size > 0 && digits_no - i == decimal_size) {
 					  if (force){
-					      mlcd_draw_rect(current_x, y + digit_height - thickness, thickness, thickness);
+					      fillRectangle(current_x, y + digit_height - thickness, thickness, thickness, DRAW_WHITE);
 						}
 					  current_x += thickness + digit_space;
 				}
@@ -40,7 +42,7 @@ static void draw_int_value(uint32_t value, uint32_t old_value, uint8_t digits_no
 					  if (scaled_val > 0 || draw_zero_value) {
 								mlcd_draw_digit(new_digit, current_x, y, digit_width, digit_height, thickness);
 						} else {
-							  mlcd_clear_rect(current_x, y, digit_width, digit_height);
+							  fillRectangle(current_x, y, digit_width, digit_height, DRAW_BLACK);
 						}
 				}
 				div = div/10;
@@ -55,9 +57,9 @@ static void draw_1X_int_value(uint32_t value, uint32_t old_value, uint8_t digits
 		
 		if (force || old_digit != new_digit) {
 			  if (new_digit) {
-					  mlcd_draw_rect(x, y, thickness, digit_height);
+					  fillRectangle(x, y, thickness, digit_height, DRAW_WHITE);
 				} else {
-					  mlcd_clear_rect(x, y, thickness, digit_height);
+					  fillRectangle(x, y, thickness, digit_height, DRAW_BLACK);
 				}
 		}
 		draw_int_value(value, old_value, digits_no - 1, decimal_size, x + thickness + digit_space, y, digit_width, digit_height, thickness, digit_space, false, force);
@@ -94,7 +96,7 @@ static void draw_int_img_value(uint32_t value, uint32_t old_value, uint8_t digit
 								SPIFFS_lseek(&fs, file, base_address + (((digit_width+7)/8)*digit_height*new_digit), SPIFFS_SEEK_SET);
 								mlcd_fb_draw_bitmap_from_file(file, current_x, y, digit_width, digit_height, digit_width);
 						} else {
-							  mlcd_clear_rect(current_x, y, digit_width, digit_height);
+							  fillRectangle(current_x, y, digit_width, digit_height, DRAW_BLACK);
 						}
 				}
 				div = div/10;
@@ -204,7 +206,7 @@ void scr_controls_draw_text_control(SCR_CONTROL_TEXT_CONFIG* cfg, bool force) {
 		if (force) {
 			  mlcd_draw_text(cfg->data->last_value, cfg->x, cfg->y,cfg->width, cfg->height, font_type, alignment);
 		} else {
-				mlcd_clear_rect(cfg->x, cfg->y,cfg->width, cfg->height);
+				fillRectangle(cfg->x, cfg->y,cfg->width, cfg->height, DRAW_BLACK);
 				mlcd_draw_text(cfg->data->last_value, cfg->x, cfg->y,cfg->width, cfg->height, font_type, alignment);
 		}
 }
@@ -232,24 +234,31 @@ void scr_controls_draw_progress_bar_control(SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg
 
 static void scr_controls_draw_static_rect(SCR_CONTROL_STATIC_RECT_CONFIG* cfg, bool force) {
 		if (force) {
-				mlcd_draw_rect(cfg->x, cfg->y, cfg->width, cfg->height);
+				fillRectangle(cfg->x, cfg->y, cfg->width, cfg->height, DRAW_WHITE);
 		}
 }
 
 static void scr_controls_draw_internal(const SCR_CONTROLS_DEFINITION* ctrls_def, bool force) {
+		bool show_seconds = rtc_get_refresh_interval() < RTC_INTERVAL_MINUTE;
 	  for (int i=0; i < ctrls_def->controls_no; i++) {
 			  const SCR_CONTROL_DEFINITION* ctrl_def = &ctrls_def->controls[i];
-			
+				
 			  switch(ctrl_def->type) {
-					  case SCR_CONTROL_NUMBER:
-						    scr_controls_draw_number_control((SCR_CONTROL_NUMBER_CONFIG*)ctrl_def->config, force);
-					      break;
+					  case SCR_CONTROL_NUMBER: {
+								SCR_CONTROL_NUMBER_CONFIG* cfg = (SCR_CONTROL_NUMBER_CONFIG*)ctrl_def->config;
+								if (!show_seconds && cfg->data_handle == (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_seconds)
+										break;
+						    scr_controls_draw_number_control(cfg, force);
+					  }   break;
 					  case SCR_CONTROL_TEXT:
 						    scr_controls_draw_text_control((SCR_CONTROL_TEXT_CONFIG*)ctrl_def->config, force);
 					      break;
-					  case SCR_CONTROL_PROGRESS_BAR:
+					  case SCR_CONTROL_PROGRESS_BAR: {
+								SCR_CONTROL_PROGRESS_BAR_CONFIG* cfg = (SCR_CONTROL_PROGRESS_BAR_CONFIG*)ctrl_def->config;
+								if (!show_seconds && cfg->data_handle == (uint32_t (*)(uint32_t, uint8_t, uint8_t*, bool*))rtc_get_current_seconds)
+										break;
 						    scr_controls_draw_progress_bar_control((SCR_CONTROL_PROGRESS_BAR_CONFIG*)ctrl_def->config, force);
-					      break;
+						}		break;
 						case SCR_CONTROL_STATIC_RECT:
 							  scr_controls_draw_static_rect((SCR_CONTROL_STATIC_RECT_CONFIG*)ctrl_def->config, force);
 					      break;

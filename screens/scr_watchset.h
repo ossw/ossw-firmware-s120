@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include "../watchset.h"
 
+bool scr_watch_set_invoke_function(int idx);
+
 void scr_watch_set_invoke_external_function(uint8_t function_id);
 
 bool scr_watch_set_handle_event(uint32_t event_type, uint32_t event_param);

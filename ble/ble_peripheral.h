@@ -15,4 +15,6 @@ void ble_peripheral_set_watch_set_id(uint32_t watch_set_id);
  
 void ble_peripheral_confirm_command_processed(uint8_t respCode);
 
+void battery_level_update(void);
+
 #endif

@@ -13,6 +13,13 @@
 #define SCR_WATCH_SET_LIST             0x07
 #define SCR_ABOUT			                 0x08
 #define SCR_STATUS				             0x09
+#define SCR_WATCHFACE_ANALOG           0x0A
+#define SCR_SET_ALARM                  0x0B
+#define SCR_DIALOG_OPTION              0x0C
+#define SCR_DIALOG_SELECT              0x0D
+#define SCR_TIMER					             0x0E
+#define SCR_DARK_HOURS		             0x0F
+#define SCR_SILENT_HOURS		           0x10
 
 #define SCR_ALERT_NOTIFICATION         0xA0
 #define SCR_NOTIFICATIONS              0xA1
@@ -70,6 +77,8 @@ void scr_mngr_close_alert_notification(void);
 void scr_mngr_show_notifications(void);
 
 void scr_mngr_close_notifications(void);
+
+void set_modal_dialog(bool);
 
 uint8_t scr_mngr_current_screen(void);
 

@@ -1,6 +1,5 @@
 #include <string.h>
 #include "scr_alert_notification.h"
-#include "nrf_delay.h"
 #include "../scr_mngr.h"
 #include "../scr_controls.h"
 #include "../notifications.h"
@@ -8,13 +7,14 @@
 #include "../rtc.h"
 #include "../mlcd.h"
 #include "../ext_ram.h"
+#include "../config.h"
 #include "../utf8.h"
 #include "../pawn/amxutil.h"
 #include "../i18n/i18n.h"
 #include "../ble/ble_peripheral.h"
 #include <stdlib.h> 
 
-static uint32_t m_address;
+static uint16_t m_address;
 
 static bool scr_alert_notification_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
@@ -31,22 +31,10 @@ static bool scr_alert_notification_handle_button_pressed(uint32_t button_id) {
 		return false;
 }
 
-static uint8_t get_next_byte(uint32_t *ptr) {
-    uint8_t data;
-	  ext_ram_read_data(*ptr, &data, 1);
-	  (*ptr)++;
-	  return data;
-}
-
-static uint16_t get_next_short(uint32_t *ptr) {
-    uint8_t data[2];
-	  ext_ram_read_data(*ptr, data, 2);
-	  (*ptr)+=2;		
-	  return data[0] << 8 | data[1];
-}
-
 static void scr_alert_notification_init(uint32_t address) {
-	  m_address = address;
+	m_address = address;
+	if (get_settings(CONFIG_NOTIFICATION_LIGHT))
+		mlcd_backlight_short();
 }
 	/*
 static void draw_incmonig_call_notification() {
@@ -67,7 +55,7 @@ static void draw_incmonig_call_notification() {
 }
 */
 static void draw_default_notification() {
-	  uint32_t read_address = m_address + 1;
+	  uint16_t read_address = m_address + 1;
     uint16_t text_offset = get_next_short(&read_address);
     uint8_t font = get_next_byte(&read_address);
     uint8_t operationsNo = get_next_byte(&read_address);

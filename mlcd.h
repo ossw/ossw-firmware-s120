@@ -30,15 +30,17 @@ void mlcd_display_on(void);
 
 void mlcd_display_off(void);
 
-void mlcd_backlight_on(void);
+void mlcd_backlight_long(void);
 
 void mlcd_backlight_off(void);
 
 void mlcd_backlight_toggle(void);
 
-void mlcd_backlight_temp_on(void);
+void mlcd_backlight_short(void);
 
-void mlcd_backlight_temp_extend(void);
+void mlcd_backlight_extend(void);
+
+void mlcd_backlight_blink(int32_t timeout, uint8_t count);
 
 void mlcd_temp_backlight_timeout_inc(void);
 
@@ -47,6 +49,8 @@ void mlcd_temp_backlight_timeout_dec(void);
 uint32_t mlcd_temp_backlight_timeout(void);
 
 void mlcd_colors_toggle(void);
+
+bool is_mlcd_inverted(void);
 
 void mlcd_switch_vcom(void);
 
@@ -61,5 +65,7 @@ void mlcd_fb_flush(void);
 void mlcd_fb_flush_with_param(bool force_colors);
 
 void mlcd_fb_clear(void);
+
+void mlcd_set_line_changed(uint_fast8_t y);
 
 #endif /* MLCD_H */

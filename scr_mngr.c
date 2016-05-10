@@ -13,23 +13,43 @@
 #include "screens/scr_alert_notification.h"
 #include "screens/scr_about.h"
 #include "screens/scr_status.h"
+#include "screens/scr_watchface_analog.h"
+#include "screens/scr_setalarm.h"
+#include "screens/scr_timer.h"
+#include "screens/scr_dark_hours.h"
+#include "screens/dialog_option_text.h"
+#include "screens/dialog_select.h"
 #include "mlcd.h"
 #include "stopwatch.h"
 #include "config.h"
 #include "watchset.h"
 
-static uint8_t switch_to_screen = SCR_NOT_SET;
+static NUMBER_CONTROL_DATA hour_ctrl_data;
 static uint32_t switch_to_screen_param = 0;
+static uint32_t scr_alert_notification_address = 0;
+static uint8_t switch_to_screen = SCR_NOT_SET;
 static uint8_t current_screen = SCR_NOT_SET;
+static uint8_t previous_screen = SCR_NOT_SET;
 
 static uint8_t scr_notifications_state = SCR_NOTIFICATIONS_STATE_NONE;
-
 static uint8_t scr_alert_notification_state = SCR_ALERT_NOTIFICATION_STATE_NONE;
-static uint32_t scr_alert_notification_address = 0;
-		
-static NUMBER_CONTROL_DATA hour_ctrl_data;
 
 static bool redraw = true;
+static bool modal_dialog = false;
+
+void set_modal_dialog(bool state) {
+	if (state) {
+		if (!modal_dialog)
+			previous_screen = current_screen;
+	} else {
+		// temporal fix, need a queue to save all the history of screens
+		switch_to_screen = previous_screen;
+		scr_mngr_draw_ctx draw_ctx;
+		draw_ctx.force_colors = false;
+		scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
+	}
+	modal_dialog = state;
+}
 		
 static const SCR_CONTROL_NUMBER_CONFIG hour_config = {
 		NUMBER_RANGE_0__99,
@@ -160,6 +180,27 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 			  case SCR_WATCH_SET_LIST:
 				    handled = scr_watchset_list_handle_event(event_type, event_param);
 				    break;
+			  case SCR_WATCHFACE_ANALOG:
+				    handled = scr_watchface_analog_handle_event(event_type, event_param);
+				    break;
+			  case SCR_SET_ALARM:
+				    handled = scr_set_alarm_handle_event(event_type, event_param);
+				    break;
+			  case SCR_TIMER:
+				    handled = scr_timer_handle_event(event_type, event_param);
+				    break;
+			  case SCR_DARK_HOURS:
+				    handled = scr_set_dark_hours_handle_event(event_type, event_param);
+				    break;
+			  case SCR_SILENT_HOURS:
+				    handled = scr_set_silent_hours_handle_event(event_type, event_param);
+				    break;
+			  case SCR_DIALOG_OPTION:
+				    handled = dialog_option_text_handle_event(event_type, event_param);
+				    break;
+			  case SCR_DIALOG_SELECT:
+				    handled = dialog_select_handle_event(event_type, event_param);
+				    break;
 				case SCR_NOT_SET:
 					  return;
 		}
@@ -180,9 +221,10 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 
 void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 		if (event_type == SCR_EVENT_BUTTON_PRESSED || event_type == SCR_EVENT_BUTTON_LONG_PRESSED) {
-				mlcd_backlight_temp_extend();
+			if (get_settings(CONFIG_BUTTONS_LIGHT))
+				mlcd_backlight_short();
 		}
-	
+		if (!modal_dialog) {
 	  if (scr_alert_notification_state != SCR_ALERT_NOTIFICATION_STATE_NONE) {
 		    if (scr_alert_notification_state == SCR_ALERT_NOTIFICATION_STATE_SHOW) {
 				    scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, event_type, event_param);
@@ -195,6 +237,7 @@ void scr_mngr_handle_event(uint32_t event_type, uint32_t event_param) {
 		    }
 				return;
 	  }
+		}
 	  scr_mngr_handle_event_internal(current_screen, event_type, event_param);
 }
 	
@@ -204,6 +247,8 @@ void scr_mngr_show_screen_with_param(uint16_t screen_id, uint32_t param) {
 }
 
 void scr_mngr_show_screen(uint16_t screen_id) {
+		if (screen_id == current_screen)
+				return;
 	  switch_to_screen = screen_id;
 	  switch_to_screen_param = NULL;
 }
@@ -220,7 +265,7 @@ void scr_mngr_draw_screen(void) {
 		scr_mngr_draw_ctx draw_ctx;
 		draw_ctx.force_colors = false;
 	
-	  if (scr_alert_notification_state != SCR_ALERT_NOTIFICATION_STATE_NONE) {
+	  if (!modal_dialog && scr_alert_notification_state != SCR_ALERT_NOTIFICATION_STATE_NONE) {
 				if (scr_alert_notification_state == SCR_ALERT_NOTIFICATION_STATE_INIT) {
 						scr_mngr_handle_event_internal(SCR_ALERT_NOTIFICATION, SCR_EVENT_INIT_SCREEN, scr_alert_notification_address);
 					  // draw alert notification screen
@@ -236,7 +281,7 @@ void scr_mngr_draw_screen(void) {
 						mlcd_fb_clear();
 						scr_mngr_handle_event(SCR_EVENT_DRAW_SCREEN, (uint32_t)&draw_ctx);
 				}
-		} else if (scr_notifications_state != SCR_NOTIFICATIONS_STATE_NONE) {
+		} else if (!modal_dialog && scr_notifications_state != SCR_NOTIFICATIONS_STATE_NONE) {
 				if (scr_notifications_state == SCR_NOTIFICATIONS_STATE_INIT) {
 						scr_mngr_handle_event_internal(SCR_NOTIFICATIONS, SCR_EVENT_INIT_SCREEN, NULL);
 					  // draw alert notification screen
@@ -258,7 +303,7 @@ void scr_mngr_draw_screen(void) {
 				}
 		} else {
 				if (switch_to_screen != SCR_NOT_SET) {
-						uint16_t old_screen = current_screen;
+						uint8_t old_screen = current_screen;
 						uint16_t new_screen;
 						// disable events
 						current_screen = SCR_NOT_SET;

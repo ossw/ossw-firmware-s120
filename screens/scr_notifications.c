@@ -1,6 +1,5 @@
 #include <string.h>
 #include "scr_notifications.h"
-#include "nrf_delay.h"
 #include "../scr_mngr.h"
 #include "../scr_controls.h"
 #include "../notifications.h"
@@ -8,23 +7,17 @@
 #include "../mlcd.h"
 #include "../ext_ram.h"
 #include "../utf8.h"
+#include "../config.h"
 #include "../i18n/i18n.h"
 #include "../ble/ble_peripheral.h"
 #include <stdlib.h> 
 
-static uint8_t get_next_byte(uint32_t *ptr) {
-    uint8_t data;
-	  ext_ram_read_data(*ptr, &data, 1);
-	  (*ptr)++;
-	  return data;
-}
-
-static uint16_t get_next_short(uint32_t *ptr) {
-    uint8_t data[2];
-	  ext_ram_read_data(*ptr, data, 2);
-	  (*ptr)+=2;		
-	  return data[0] << 8 | data[1];
-}
+#define MARGIN_SUMMARY 20
+#define SIZE_SUMMARY1_X MLCD_XRES-2*MARGIN_SUMMARY
+#define SIZE_SUMMARY1_Y MLCD_YRES-2*MARGIN_SUMMARY
+#define SIZE_SUMMARY2_X MLCD_XRES/2-2*MARGIN_SUMMARY
+#define SIZE_SUMMARY2_Y MLCD_YRES/2-2*MARGIN_SUMMARY
+#define SUMMARY2_Y MLCD_YRES/4+MARGIN_SUMMARY
 
 static bool scr_notifications_handle_button_pressed(uint32_t button_id) {
 	  switch (button_id) {
@@ -33,7 +26,7 @@ static bool scr_notifications_handle_button_pressed(uint32_t button_id) {
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_UP:
 				{
-						uint32_t read_address = notifications_get_current_data();
+						uint16_t read_address = notifications_get_current_data();
 						uint8_t notification_type = get_next_byte(&read_address);
 	
 						if (notification_type != NOTIFICATIONS_CATEGORY_SUMMARY) {
@@ -48,7 +41,7 @@ static bool scr_notifications_handle_button_pressed(uint32_t button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 				{
 					
-						uint32_t read_address = notifications_get_current_data();
+						uint16_t read_address = notifications_get_current_data();
 						uint8_t notification_type = get_next_byte(&read_address);
 	
 						if (notification_type == NOTIFICATIONS_CATEGORY_SUMMARY) {
@@ -69,7 +62,7 @@ static bool scr_notifications_handle_button_pressed(uint32_t button_id) {
 				    return true;
 			  case SCR_EVENT_PARAM_BUTTON_SELECT:
 				{
-						uint32_t read_address = notifications_get_current_data();
+						uint16_t read_address = notifications_get_current_data();
 						uint8_t notification_type = get_next_byte(&read_address);
 	
 						if (notification_type != NOTIFICATIONS_CATEGORY_SUMMARY) {
@@ -86,7 +79,7 @@ static bool scr_notifications_handle_button_long_pressed(uint32_t button_id) {
 	  switch (button_id) {
 			  case SCR_EVENT_PARAM_BUTTON_DOWN:
 				{
-						uint32_t read_address = notifications_get_current_data();
+						uint16_t read_address = notifications_get_current_data();
 						uint8_t notification_type = get_next_byte(&read_address);
 						if (notification_type != NOTIFICATIONS_CATEGORY_SUMMARY) {
 								uint16_t notification_id = get_next_short(&read_address);
@@ -102,7 +95,7 @@ static void scr_notifications_init() {
 }
 
 static void scr_notifications_draw_screen() {
-		uint32_t read_address = notifications_get_current_data();
+		uint16_t read_address = notifications_get_current_data();
     uint8_t notification_type = get_next_byte(&read_address);
 	
 		switch(notification_type) {
@@ -120,16 +113,25 @@ static void scr_notifications_draw_screen() {
 					
 						char* data_ptr = (char*)(0x80000000 + read_address);
 						mlcd_draw_text(data_ptr, 3, 3,  MLCD_XRES - 6, MLCD_YRES - 6, font, HORIZONTAL_ALIGN_LEFT | MULTILINE);
+						if (get_settings(CONFIG_NOTIFICATION_LIGHT))
+								mlcd_backlight_short();
 				}
 						break;
 				case NOTIFICATIONS_CATEGORY_SUMMARY:
 				{
 						uint8_t notification_count = get_next_byte(&read_address);
-				
-						if (notification_count>9) {
-								notification_count = 9;
+
+						if (notification_count < 10) {
+								mlcd_draw_digit(notification_count, MARGIN_SUMMARY, MARGIN_SUMMARY, SIZE_SUMMARY1_X, SIZE_SUMMARY1_Y, 11);
+						} else {
+								if (notification_count > 99) {
+										notification_count = 99;
+								}
+								mlcd_draw_digit(notification_count / 10U, MARGIN_SUMMARY, SUMMARY2_Y, SIZE_SUMMARY2_X, SIZE_SUMMARY2_Y, 11);
+								mlcd_draw_digit(notification_count % 10U, (MLCD_XRES>>1)+MARGIN_SUMMARY, SUMMARY2_Y, SIZE_SUMMARY2_X, SIZE_SUMMARY2_Y, 11);
+								if (get_settings(CONFIG_NOTIFICATION_LIGHT))
+										mlcd_backlight_short();
 						}
-						mlcd_draw_digit(notification_count, 20, 20, MLCD_XRES-40, MLCD_YRES-40, 11);
 				}
 						break;
 		}
