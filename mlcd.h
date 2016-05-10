@@ -10,9 +10,16 @@
 #define MLCD_CM 0x20 //MLCD clear memory command
 #define MLCD_NO 0x00 //MLCD NOP command (used to switch VCOM)
 //LCD resolution
-#define MLCD_XRES 144 //pixels per horizontal line
-#define MLCD_YRES 168 //pixels per vertical line
-#define MLCD_LINE_BYTES (MLCD_XRES >> 3) //number of bytes in a line
+#ifndef MLCD_XRES
+	#define MLCD_XRES 144 //pixels per horizontal line
+#endif
+#ifndef MLCD_YRES
+	#define MLCD_YRES 168 //pixels per vertical line
+#endif
+#ifndef MLCD_BPP
+	#define MLCD_BPP 1 //bits per pixel
+#endif
+#define MLCD_LINE_BYTES ((MLCD_XRES * MLCD_BPP) >> 3) //number of bytes in a line
 
 //defines the VCOM bit in the command word that goes to the LCD
 #define VCOM_HI 0x40

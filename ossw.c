@@ -69,7 +69,7 @@ void ossw_init(void) {
 	
 	  mlcd_fb_flush();
     mlcd_display_on();
-		mcu_delay_ms(500);
+		mcu_delay_ms(1000);
 	
 		fs_init();
 		config_init();

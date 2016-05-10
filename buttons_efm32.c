@@ -44,15 +44,15 @@ static void button_pressed_callback(uint8_t pin)
 		bool pressed;
 		button_is_pushed(gpio_pin, &pressed);
 		if (pressed) {
-				if (gpio_pin == SCR_EVENT_PARAM_BUTTON_UP) {
+				if (gpio_pin == BUTTON_UP) {
 						bool another_pressed = false;
-						button_is_pushed(SCR_EVENT_PARAM_BUTTON_DOWN, &another_pressed);
+						button_is_pushed(BUTTON_DOWN, &another_pressed);
 						if (another_pressed) {
 								mcu_reset();
 						}
-				} else if (gpio_pin == SCR_EVENT_PARAM_BUTTON_DOWN) {
+				} else if (gpio_pin == BUTTON_DOWN) {
 						bool another_pressed = false;
-						button_is_pushed(SCR_EVENT_PARAM_BUTTON_UP, &another_pressed);
+						button_is_pushed(BUTTON_UP, &another_pressed);
 						if (another_pressed) {
 								mcu_reset();
 						}

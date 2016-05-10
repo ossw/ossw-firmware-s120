@@ -363,7 +363,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls>--c99</MiscControls>
-              <Define>EFM32GG330F512 TARGET_SMAQ_EFM32 BLE_STACK_SUPPORT_REQD S130 SOFTDEVICE_PRESENT</Define>
+              <Define>EFM32GG330F512 TARGET_SMAQ_EFM32 BLE_STACK_SUPPORT_REQD S130 SOFTDEVICE_PRESENT MLCD_XRES=128 MLCD_YRES=128 MLCD_BPP=3</Define>
               <Undefine></Undefine>
               <IncludePath>..\;..\..\..\CMSIS\Include;..\..\..\Device\EnergyMicro\EFM32GG\Include;..\..\..\emlib\inc;..\..\..\kits\common\drivers;..\..\..\kits\common\bsp;..\..\..\kits\EFM32GG_DK3750\config</IncludePath>
             </VariousControls>
@@ -534,14 +534,14 @@
               <FilePath>..\..\..\ext_ram_fake.c</FilePath>
             </File>
             <File>
-              <FileName>mlcd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\mlcd.c</FilePath>
-            </File>
-            <File>
               <FileName>command_rx_buffer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\command_rx_buffer.c</FilePath>
+            </File>
+            <File>
+              <FileName>mlcd_sharp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mlcd_sharp.c</FilePath>
             </File>
           </Files>
         </Group>

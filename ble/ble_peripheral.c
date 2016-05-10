@@ -33,8 +33,8 @@
 
 #define DEVICE_NAME                      "OSSW"                                     /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                "OpenSource"                               /**< Manufacturer. Will be passed to Device Information Service. */
-#define APP_ADV_INTERVAL                40                                         /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
-#define APP_ADV_TIMEOUT_IN_SECONDS      180   
+#define APP_ADV_INTERVAL                40                                      /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
+#define APP_ADV_TIMEOUT_IN_SECONDS      BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED
 
 #define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(10000, APP_TIMER_PRESCALER) /**< Battery level measurement interval (ticks). */
 

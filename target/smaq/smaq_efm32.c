@@ -70,7 +70,7 @@ void smaq_gpio_init(void) {
 	GPIO_PinModeSet(gpioPortC, 4, gpioModePushPull, 0);
 	
 	//CS for ext flash
-	//GPIO_PinModeSet(gpioPortC, 5, gpioModePushPull, 1);
+	GPIO_PinModeSet(gpioPortC, 5, gpioModePushPull, 1);
 	
 	GPIO_PinModeSet(gpioPortC, 8, gpioModePushPull, 0);
 	GPIO_PinModeSet(gpioPortC, 9, gpioModeInputPullFilter, 0);
