@@ -9,7 +9,7 @@
 #include "vibration.h"
 #include "BLE\ble_peripheral.h"
 
-#define OCLOCK_PATTERN							 0x0860C000
+#define OCLOCK_PATTERN							 0x04408000
 
 static app_timer_id_t		m_rtc_timer_id;
 static uint32_t					current_time;
@@ -41,7 +41,7 @@ void rtc_tick_event(void * p_event_data, uint16_t event_size) {
 	if (rtc_get_current_seconds() == 0) {
 		alarm_clock_handle();
 		if (rtc_get_current_minutes() == 0 && get_settings(CONFIG_OCLOCK))
-			vibration_vibrate(OCLOCK_PATTERN, 0x0300, false);
+			vibration_vibrate(OCLOCK_PATTERN, 0x0100, false);
 		if (rtc_get_current_minutes()%10 == 0 && get_settings(CONFIG_BLUETOOTH_ON) && !get_settings(CONFIG_CENTRAL_MODE))
 			battery_level_update();
 	}

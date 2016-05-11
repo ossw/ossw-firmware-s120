@@ -71,6 +71,7 @@ static const I18N_MESSAGE messages_en[] = {
   /*   66 */{"Watch faces"},
   /*   67 */{"Silence"},
   /*   68 */{"O'clock"},
+  /*   69 */{"Steps"},
 };
 
 #endif

@@ -51,6 +51,7 @@
 #define MESSAGE_WATCH_FACES			66
 #define MESSAGE_SILENT_HOURS		67
 #define MESSAGE_OCLOCK					68
+#define MESSAGE_STEPS						69
 
 typedef struct
 {

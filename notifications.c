@@ -8,6 +8,8 @@
 #include "ext_ram.h"
 #include "nrf_soc.h"
 #include "board.h"
+#include "mlcd.h"
+#include "config.h"
 #include "screens/dialog_select.h"
 
 static app_timer_id_t      m_notifications_alert_timer_id;
@@ -118,6 +120,8 @@ void notifications_alert_notify(uint16_t notification_id, uint16_t address, uint
 
 		m_current_alert_notification_id = notification_id;
 	  scr_mngr_show_alert_notification(address);
+		if (get_settings(CONFIG_NOTIFICATION_LIGHT))
+				mlcd_backlight_short();
 		if (!update) {
 				vibration_vibrate(vibration_pattern, 60*1000, false);
 	  

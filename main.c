@@ -178,12 +178,11 @@ int main(void)
 	  spi_init();
 	  ext_ram_init();
 	  init_lcd_with_splash_screen();
-
-		accel_init();
 	
     // Initialize.
     timers_init();
 		rtc_timer_init();
+		accel_init();
 		buttons_init();
 	  battery_init();
 	

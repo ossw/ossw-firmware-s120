@@ -12,6 +12,7 @@
 #include "../alarm.h"
 #include "../ext_ram.h"
 #include "../config.h"
+#include "../accel.h"
 #include "../watchset.h"
 #include "../notifications.h"
 #include "dialog_select.h"
@@ -138,43 +139,53 @@ static void draw_disconnect_alert_switch(uint8_t x, uint8_t y) {
 static void draw_silent_hours(uint8_t x, uint8_t y) {
 	uint8_t h1 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS);
 	uint8_t h2 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1);
-		char txt[6];
-		txt[0] = '0' + h1/10;
-		txt[1] = '0' + h1%10;
-		txt[2] = '-';
-		txt[3] = '0' + h2/10;
-		txt[4] = '0' + h2%10;
-		txt[5] = '\0';
-		mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
+	char txt[6];
+	txt[0] = '0' + h1/10;
+	txt[1] = '0' + h1%10;
+	txt[2] = '-';
+	txt[3] = '0' + h2/10;
+	txt[4] = '0' + h2%10;
+	txt[5] = '\0';
+	mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
 }
 
 static void draw_dark_hours(uint8_t x, uint8_t y) {
 	uint8_t h1 = get_ext_ram_byte(EXT_RAM_DARK_HOURS);
 	uint8_t h2 = get_ext_ram_byte(EXT_RAM_DARK_HOURS + 1);
-		char txt[6];
-		txt[0] = '0' + h1/10;
-		txt[1] = '0' + h1%10;
-		txt[2] = '-';
-		txt[3] = '0' + h2/10;
-		txt[4] = '0' + h2%10;
-		txt[5] = '\0';
-		mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
+	char txt[6];
+	txt[0] = '0' + h1/10;
+	txt[1] = '0' + h1%10;
+	txt[2] = '-';
+	txt[3] = '0' + h2/10;
+	txt[4] = '0' + h2%10;
+	txt[5] = '\0';
+	mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
 }
 
 static void draw_light_delay(uint8_t x, uint8_t y) {
-		uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
-		char txt[3];
-		txt[0] = '0' + delay;
-		txt[1] = 's';
-		txt[2] = '\0';
-		mlcd_draw_text(txt, x, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+	uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
+	char txt[3];
+	txt[0] = '0' + delay;
+	txt[1] = 's';
+	txt[2] = '\0';
+	mlcd_draw_text(txt, x, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
 }
 
 static void draw_interval_summary(uint8_t x, uint8_t y) {
-		uint16_t text = MESSAGE_1_SECOND;
-		if (rtc_get_refresh_interval() == RTC_INTERVAL_MINUTE)
-				text = MESSAGE_1_MINUTE;
-		mlcd_draw_text(I18N_TRANSLATE(text), x, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+	uint16_t text = MESSAGE_1_SECOND;
+	if (rtc_get_refresh_interval() == RTC_INTERVAL_MINUTE)
+		text = MESSAGE_1_MINUTE;
+	mlcd_draw_text(I18N_TRANSLATE(text), x, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+}
+
+static void draw_steps(uint8_t x, uint8_t y) {
+	uint16_t s = get_steps();
+	char count[5] = "   0\0";
+	for (int i = 3; i >= 0 && s > 0; i--) {
+		count[i] = '0' + s % 10;
+		s /= 10;
+	}
+	mlcd_draw_text(count, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
 }
 
 static void rtc_refresh_toggle() {
@@ -237,6 +248,7 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_OCLOCK, oclock_toggle, oclock_toggle, draw_oclock_switch},
 		{MESSAGE_DISCONNECT_ALERT, disconnect_alert_toggle, disconnect_alert_toggle, draw_disconnect_alert_switch},
 		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
+		{MESSAGE_STEPS, reset_steps, reset_steps, draw_steps},
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
 		{MESSAGE_TIME, opt_handler_change_time, opt_handler_change_time, NULL},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},
