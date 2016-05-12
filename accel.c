@@ -1,8 +1,6 @@
 #include "accel.h"
 #include "nrf_drv_gpiote.h"
 #include "app_error.h"
-//#include "nrf_drv_twi.h"
-//#include "app_util_platform.h"
 #include "twi_master.h"
 #include "board.h"
 #include "mlcd.h"
@@ -17,6 +15,7 @@
 
 #define DEFAULT_I2C_ADDR 0x1D
 #define FIFO_SIZE 96
+//#define DEBUG
 
 uint16_t steps;
 uint8_t orientation;
@@ -34,17 +33,35 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 		uint8_t int_src;
 		uint8_t int_detail;
 		accel_read_register(0x0C, &int_src);
-//		const char hex_str[]= "0123456789ABCDEF";
-//		char value[5] = "0x00\0";
-//		value[2] = hex_str[int_src >> 4];
-//		value[3] = hex_str[int_src & 0xf];
-//		mlcd_draw_text(value, 15, 15, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-		
+#ifdef DEBUG
+		const char hex_str[]= "0123456789ABCDEF";
+		char value[5] = "0x00\0";
+		value[2] = hex_str[int_src >> 4];
+		value[3] = hex_str[int_src & 0xf];
+		mlcd_draw_text(value, 15, 15, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+#endif		
+	
 		if (int_src & 0x10) {
 			accel_read_register(0x10, &int_detail);
-//			value[2] = hex_str[int_detail >> 4];
-//			value[3] = hex_str[int_detail & 0xf];
-//			mlcd_draw_text(value, 15, 35, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+#ifdef DEBUG
+			value[2] = hex_str[int_detail >> 4];
+			value[3] = hex_str[int_detail & 0xf];
+			mlcd_draw_text(value, 15, 35, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+#endif
+			if (int_detail == 0x87 || int_detail == 0x85) {
+				if (swing == -1) {
+					steps++;					
+					vibration_vibrate(0x04408000, 0x0080, true);
+				}
+				swing = 1;
+			}	else if (int_detail == 0x81 || int_detail == 0x83) {
+				if (swing == 1) {
+					steps++;					
+//					vibration_vibrate(0x04408000, 0x0100, true);
+				}
+				swing = -1;
+			} else swing = 0;
+			
 			// tilt event
 			if (orientation == 0x87 && int_detail == 0x85) {
 				scr_mngr_handle_event(SCR_EVENT_WRIST_SHAKE, 0);
@@ -54,13 +71,15 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 				orientation = int_detail;
 		}
 
+		// pulse detection
 		if (int_src & 0x08) {
 			accel_read_register(0x22, &int_detail);
 //			value[2] = hex_str[int_detail >> 4];
 //			value[3] = hex_str[int_detail & 0xf];
 //			mlcd_draw_text(value, 15, 50, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+			// double tap
 			if (int_detail & 0xc8)
-				mlcd_backlight_blink(300, 2);
+				mlcd_backlight_blink(200, 2);
 		}
 
 		if (int_src & 0x04) {
@@ -135,48 +154,50 @@ static uint32_t accel_int_init(uint8_t pin_no) {
 }
 
 static void accel_fifo_init() {
-	//0x09 F_SETUP
+	// 0x09 F_SETUP
 	accel_write_register(0x09, 0x40);
 }
 
 static void accel_tilt_init() {
-	//0x11 PL_CFG
+	// 0x11 PL_CFG
 	accel_write_register(0x11, 0xC0);
-	//0x12 PL_COUNT
+	// 0x12 PL_COUNT
 	accel_write_register(0x12, 0x01);
-	//0x13 PL_BF_ZCOMP
+	// 0x13 PL_BF_ZCOMP
 	accel_write_register(0x13, 0xC4);
+	// 0x14 P_L_THS_REG
+	accel_write_register(0x14, 0x9A);
 }
 
 static void accel_motion_init() {
-	//0x15 FF_MT_CFG
+	// 0x15 FF_MT_CFG
 	accel_write_register(0x15, 0xB8);
-	//0x17 FF_MT_THS
+	// 0x17 FF_MT_THS
 	accel_write_register(0x17, 0x08);
-	//0x18 FF_MT_COUNT
-	accel_write_register(0x18, 0x08);
+	// 0x18 FF_MT_COUNT
+	accel_write_register(0x18, 0x04);
 }
 
 static void accel_transient_init() {
-	//0x1D TRANSIENT_CFG
+	// 0x1D TRANSIENT_CFG
 	accel_write_register(0x1D, 0x16);
-	//0x1F TRANSIENT_THS
+	// 0x1F TRANSIENT_THS
 	accel_write_register(0x1F, 0x0A);
 }
 	
 static void accel_pulse_init() {
-	//0x21 PULSE_CFG Pulse Configuration register
-	accel_write_register(0x21, 0x70);
-	//0x23–0x25 PULSE_THSX, Y, Z Pulse Threshold for X, Y and Z registers
+	// 0x21 PULSE_CFG Pulse Configuration register
+	accel_write_register(0x21, 0x60);
+	// 0x23–0x25 PULSE_THSX, Y, Z Pulse Threshold for X, Y and Z registers
 	//accel_write_register(0x23, 0x20);
 	//accel_write_register(0x24, 0x20);
-	accel_write_register(0x25, 0x60);
-	//0x26 PULSE_TMLT Pulse Time Window 1 register
-	accel_write_register(0x26, 0x04);
-	//0x27 PULSE_LTCY Pulse Latency Timer register
-	accel_write_register(0x27, 0x20);
-	//0x28 PULSE_WIND register (Read/Write)
-	accel_write_register(0x28, 0x0A);
+	accel_write_register(0x25, 0x0A);
+	// 0x26 PULSE_TMLT Pulse Time Window 1 register
+	accel_write_register(0x26, 0x08);
+	// 0x27 PULSE_LTCY Pulse Latency Timer register
+	accel_write_register(0x27, 0x03);
+	// 0x28 PULSE_WIND register (Read/Write)
+	accel_write_register(0x28, 0x12);
 }
 
 void accel_init(void) {
@@ -205,21 +226,24 @@ void accel_init(void) {
 
 		//0x2B: CTRL_REG2 System Control 2 register
 		//set Low Noise Low Power mode
-		//accel_write_register(0x2B, 0x09);
+		accel_write_register(0x2B, 0x09);
 		//set Low Power mode
-		accel_write_register(0x2B, 0x1B);
+		//accel_write_register(0x2B, 0x1B);
 
 		//0x2C: CTRL_REG3 Interrupt Control register
 		//accel_write_register(0x2C, 0x30);//0x40
 
 		//accel_fifo_init();
 		accel_tilt_init();
-		accel_motion_init();
-		accel_transient_init();
-		accel_pulse_init();
+		//accel_motion_init();
+		//accel_transient_init();
+		//accel_pulse_init();
 		
 		//0x2D: CTRL_REG4 Interrupt Enable register (Read/Write)
-		accel_write_register(0x2D, 0x3c);
+		// transient+orientation+pulse+freefall
+		//accel_write_register(0x2D, 0x3c);
+		// orientation
+		accel_write_register(0x2D, 0x10);
 
 		//0x0F: HP_FILTER_CUTOFF 
 		accel_write_register(0x0F, 0);
@@ -227,13 +251,12 @@ void accel_init(void) {
 		//0x29: ASLP_COUNT 
 		//accel_write_register(0x29, 0x1);
 
-		//0x2A: CTRL_REG1 System Control 1 register
-		//ASLP_RATE 01 - 12,5Hz
-		//DR 101 - 12,5Hz
-		//go to active mode
-		//accel_write_register(0x2A, 0x63);
-		// ASLP_RATE 00 - 50Hz
-		accel_write_register(0x2A, 0x23);
+		// go to active mode
+		// 0x2A: CTRL_REG1 System Control 1 register
+		// ASLP_RATE 01 = DR 101 = 12,5Hz
+		accel_write_register(0x2A, 0x6B);
+		// ASLP_RATE 00 = DR 100 = 50Hz
+		// accel_write_register(0x2A, 0x23);
 }
 
 void accel_write_register(uint8_t reg, uint8_t value) {
