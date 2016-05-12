@@ -51,7 +51,7 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 			if (int_detail == 0x87 || int_detail == 0x85) {
 				if (swing == -1) {
 					steps++;					
-					vibration_vibrate(0x04408000, 0x0080, true);
+//					vibration_vibrate(0x04408000, 0x0080, true);
 				}
 				swing = 1;
 			}	else if (int_detail == 0x81 || int_detail == 0x83) {
@@ -162,7 +162,7 @@ static void accel_tilt_init() {
 	// 0x11 PL_CFG
 	accel_write_register(0x11, 0xC0);
 	// 0x12 PL_COUNT
-	accel_write_register(0x12, 0x01);
+	accel_write_register(0x12, 0x02);
 	// 0x13 PL_BF_ZCOMP
 	accel_write_register(0x13, 0xC4);
 	// 0x14 P_L_THS_REG
