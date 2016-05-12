@@ -93,7 +93,7 @@ void mlcd_init(void)
 		put_ext_ram_byte(EXT_RAM_LIGHT_DURATION, 1);
 	uint8_t light_hour1 = get_ext_ram_byte(EXT_RAM_DARK_HOURS);
 	uint8_t light_hour2 = get_ext_ram_byte(EXT_RAM_DARK_HOURS + 1);
-	if (light_hour1 > 23 || light_hour2 > 23)
+	if (light_hour1 > 23 || light_hour2 > 24)
 		put_ext_ram_short(EXT_RAM_DARK_HOURS, 0);
 }
 
@@ -149,9 +149,7 @@ void mlcd_backlight_short(void) {
 	uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
 	uint8_t hour1 = get_ext_ram_byte(EXT_RAM_DARK_HOURS);
 	uint8_t hour2 = get_ext_ram_byte(EXT_RAM_DARK_HOURS + 1);
-	uint8_t curr = rtc_get_current_hour_24();
-	if (hour1 == hour2 || (hour1 <= curr && curr < hour2) || 
-		(hour2 < hour1 && (curr < hour2 || hour1 <= curr))) {
+	if (rtc_in_hour_interval(hour1, hour2)) {
 		app_timer_stop(mlcd_bl_timer_id);
 		bl_mode = MLCD_BL_SHORT;
 		nrf_gpio_pin_set(LCD_BACKLIGHT);

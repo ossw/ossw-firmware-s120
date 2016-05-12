@@ -68,16 +68,14 @@ void vibration_init(void) {
   APP_ERROR_CHECK(err_code);
 	uint8_t s_hour1 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS);
 	uint8_t s_hour2 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1);
-	if (s_hour1 > 23 || s_hour2 > 23)
+	if (s_hour1 > 23 || s_hour2 > 24)
 		put_ext_ram_short(EXT_RAM_SILENT_HOURS, 0);
 }
 
 void vibration_vibrate(uint32_t pattern, uint16_t timeout, bool force) {
 	uint8_t hour1 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS);
 	uint8_t hour2 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1);
-	uint8_t curr = rtc_get_current_hour_24();
-	if (!force && ((hour1 <= curr && curr < hour2) ||
-		(hour2 < hour1 && (curr < hour2 || hour1 <= curr))))
+	if (!force && rtc_in_hour_interval(hour1, hour2))
 		return;
 	
 	m_pattern = pattern;

@@ -181,3 +181,8 @@ _ARMABI time_t time(time_t * tp) {
     }
     return current_time; 
 }
+
+bool rtc_in_hour_interval(uint8_t h1, uint8_t h2) {
+	uint8_t curr = rtc_get_current_hour_24();
+	return ((h1 <= curr && curr < h2) || (h2 < h1 && (curr < h2 || h1 <= curr)));
+}
