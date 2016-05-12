@@ -17,6 +17,7 @@
 #include "screens/scr_setalarm.h"
 #include "screens/scr_timer.h"
 #include "screens/scr_dark_hours.h"
+#include "screens/scr_silent_hours.h"
 #include "screens/dialog_option_text.h"
 #include "screens/dialog_select.h"
 #include "mlcd.h"
