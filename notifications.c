@@ -146,6 +146,8 @@ void notifications_alert_extend(uint16_t notification_id, uint16_t timeout) {
 				err_code = app_timer_start(m_notifications_alert_timer_id, APP_TIMER_TICKS(timeout, APP_TIMER_PRESCALER), NULL);
 				APP_ERROR_CHECK(err_code);
 		}
+		if (get_settings(CONFIG_NOTIFICATION_LIGHT))
+				mlcd_backlight_short();
 }
 
 void notifications_alert_stop(uint16_t notification_id) {
