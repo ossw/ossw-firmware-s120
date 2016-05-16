@@ -166,7 +166,7 @@ static void accel_tilt_init() {
 	// 0x13 PL_BF_ZCOMP
 	accel_write_register(0x13, 0xC4);
 	// 0x14 P_L_THS_REG
-	accel_write_register(0x14, 0x9A);
+	accel_write_register(0x14, 0xA2);
 }
 
 static void accel_motion_init() {
