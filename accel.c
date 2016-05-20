@@ -11,10 +11,12 @@
 #include "app_timer.h"
 #include "mlcd.h"
 #include "scr_mngr.h"
+#include "notifications.h"
 #include "ble/ble_peripheral.h"
 
-#define DEFAULT_I2C_ADDR 0x1D
-#define FIFO_SIZE 96
+#define DEFAULT_I2C_ADDR	0x1D
+#define FIFO_LENGTH				3
+#define FIFO_SIZE					3*FIFO_LENGTH
 //#define DEBUG
 
 uint16_t steps;
@@ -33,9 +35,9 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 		uint8_t int_src;
 		uint8_t int_detail;
 		accel_read_register(0x0C, &int_src);
+//		const char hex_str[]= "0123456789ABCDEF";
+//		char value[5] = "0x00\0";
 #ifdef DEBUG
-		const char hex_str[]= "0123456789ABCDEF";
-		char value[5] = "0x00\0";
 		value[2] = hex_str[int_src >> 4];
 		value[3] = hex_str[int_src & 0xf];
 		mlcd_draw_text(value, 15, 15, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
@@ -74,9 +76,11 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 		// pulse detection
 		if (int_src & 0x08) {
 			accel_read_register(0x22, &int_detail);
-//			value[2] = hex_str[int_detail >> 4];
-//			value[3] = hex_str[int_detail & 0xf];
-//			mlcd_draw_text(value, 15, 50, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+#ifdef DEBUG
+			value[2] = hex_str[int_detail >> 4];
+			value[3] = hex_str[int_detail & 0xf];
+			mlcd_draw_text(value, 15, 50, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+#endif
 			// double tap
 			if (int_detail & 0xc8)
 				mlcd_backlight_blink(200, 2);
@@ -84,9 +88,11 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 
 		if (int_src & 0x04) {
 			accel_read_register(0x16, &int_detail);
-//			value[2] = hex_str[int_detail >> 4];
-//			value[3] = hex_str[int_detail & 0xf];
-//			mlcd_draw_text(value, 15, 65, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+#ifdef DEBUG
+			value[2] = hex_str[int_detail >> 4];
+			value[3] = hex_str[int_detail & 0xf];
+			mlcd_draw_text(value, 15, 65, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+#endif
 			if (int_detail & 0x8a) {
 				if (swing == 1) {
 					steps++;
@@ -106,6 +112,7 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 			}
 		}
 
+		// transient
 		if (int_src & 0x20) {
 			accel_read_register(0x1E, &int_detail);
 //			value[2] = hex_str[int_detail >> 4];
@@ -119,6 +126,28 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 				swing = 1;
 			}
 		}
+		
+		// FIFO
+		if (int_src & 0x40) {
+			// F_STATUS
+			accel_read_register(0x00, &int_detail);
+			if (int_detail & 0x40) {
+//				value[2] = hex_str[int_detail >> 4];
+//				value[3] = hex_str[int_detail & 0xf];
+//				mlcd_draw_text(value, 15, 100, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+				uint8_t data[FIFO_SIZE];
+				accel_read_multi_register(0x01, data, FIFO_SIZE);
+//				char acc[9] = "00,00,00\0";
+//				acc[0] = hex_str[data[0] >> 4];
+//				acc[1] = hex_str[data[0] & 0xf];
+//				acc[3] = hex_str[data[1] >> 4];
+//				acc[4] = hex_str[data[1] & 0xf];
+//				acc[6] = hex_str[data[2] >> 4];
+//				acc[7] = hex_str[data[2] & 0xf];
+//				mlcd_draw_text(acc, 15, 115, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+				ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_ACCELEROMETER, data, FIFO_SIZE);
+			}
+		}
 }
 
 static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
@@ -126,13 +155,13 @@ static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t 
 	APP_ERROR_CHECK(err_code);
 }
 
-void accel_get_values(int8_t * x, int8_t * y, int8_t * z) {
-	int8_t data[FIFO_SIZE];
-	accel_read_multi_register(0x01, (uint8_t*)data, FIFO_SIZE);
-	*x = data[0];
-	*y = data[1];
-	*z = data[2];
-}
+//void accel_get_values(int8_t * x, int8_t * y, int8_t * z) {
+//	int8_t data[3];
+//	accel_read_multi_register(0x01, (uint8_t*)data, 3);
+//	*x = data[0];
+//	*y = data[1];
+//	*z = data[2];
+//}
 
 static uint32_t accel_int_init(uint8_t pin_no) {
     uint32_t err_code;
@@ -155,7 +184,7 @@ static uint32_t accel_int_init(uint8_t pin_no) {
 
 static void accel_fifo_init() {
 	// 0x09 F_SETUP
-	accel_write_register(0x09, 0x40);
+	accel_write_register(0x09, 0x40 | FIFO_LENGTH);
 }
 
 static void accel_tilt_init() {
@@ -204,57 +233,59 @@ void accel_init(void) {
 		twi_master_init();
 	
     uint32_t err_code;
-		//err_code = accel_int_init(ACCEL_INT1);
-    //APP_ERROR_CHECK(err_code);
+		// err_code = accel_int_init(ACCEL_INT1);
+    // APP_ERROR_CHECK(err_code);
 		err_code = accel_int_init(ACCEL_INT2);
     APP_ERROR_CHECK(err_code);
 	
-		//0x2B: CTRL_REG2 System Control 2 register
-		//reset
+		// 0x2B: CTRL_REG2 System Control 2 register
+		// reset
 		accel_write_register(0x2B, 0x40);
 	
 		nrf_delay_ms(1);
 
-		//0x2A: CTRL_REG1 System Control 1 register
-		//go to standby mode
+		// 0x2A: CTRL_REG1 System Control 1 register
+		// go to standby mode
 		accel_write_register(0x2A, 0);
 
-		//0x0E: XYZ_DATA_CFG register
-		//HPF_OUT - disable high pass filter
-		//FS - 4g
-		//accel_write_register(0x0E, 0x1);
+		// 0x0E: XYZ_DATA_CFG register
+		// HPF_OUT - disable high pass filter
+		// FS - 2g
+		accel_write_register(0x0E, 0x00);
 
-		//0x2B: CTRL_REG2 System Control 2 register
-		//set Low Noise Low Power mode
+		// 0x2B: CTRL_REG2 System Control 2 register
+		// set Low Noise Low Power mode
 		accel_write_register(0x2B, 0x09);
-		//set Low Power mode
+		// set Low Power mode
 		//accel_write_register(0x2B, 0x1B);
 
-		//0x2C: CTRL_REG3 Interrupt Control register
+		// 0x2C: CTRL_REG3 Interrupt Control register
 		//accel_write_register(0x2C, 0x30);//0x40
 
-		//accel_fifo_init();
+		accel_fifo_init();
 		accel_tilt_init();
 		//accel_motion_init();
 		//accel_transient_init();
 		//accel_pulse_init();
 		
-		//0x2D: CTRL_REG4 Interrupt Enable register (Read/Write)
+		// 0x2D: CTRL_REG4 Interrupt Enable register (Read/Write)
 		// transient+orientation+pulse+freefall
 		//accel_write_register(0x2D, 0x3c);
 		// orientation
-		accel_write_register(0x2D, 0x10);
+		accel_write_register(0x2D, 0x40 | 0x10);
 
-		//0x0F: HP_FILTER_CUTOFF 
+		// 0x0F: HP_FILTER_CUTOFF 
 		accel_write_register(0x0F, 0);
 		
-		//0x29: ASLP_COUNT 
+		// 0x29: ASLP_COUNT 
 		//accel_write_register(0x29, 0x1);
 
 		// go to active mode
 		// 0x2A: CTRL_REG1 System Control 1 register
 		// ASLP_RATE 01 = DR 101 = 12,5Hz
-		accel_write_register(0x2A, 0x6B);
+		//accel_write_register(0x2A, 0x6B);
+		// ASLP_RATE 10 = DR 110 = 6,25Hz
+		accel_write_register(0x2A, 0xB1);
 		// ASLP_RATE 00 = DR 100 = 50Hz
 		// accel_write_register(0x2A, 0x23);
 }

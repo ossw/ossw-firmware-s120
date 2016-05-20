@@ -23,6 +23,8 @@
 #define PHONE_FUNC_SEND_SMS							              0x41
 #define PHONE_FUNC_CALL_CONTACT					              0x42
 #define PHONE_FUNC_GTASKS								              0x43
+#define PHONE_FUNC_ACCELEROMETER				              0x45
+#define PHONE_FUNC_SLEEP_AS_ANDROID			              0x46
 
 #define NOTIFICATIONS_TYPE_ALERT 											1
 #define NOTIFICATIONS_TYPE_INFO												2
