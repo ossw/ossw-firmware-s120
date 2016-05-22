@@ -16,4 +16,6 @@ uint16_t get_steps(void);
 
 void reset_steps(void);
 
+void accel_interrupts_reset(void);
+
 #endif /* ACCEL_H */

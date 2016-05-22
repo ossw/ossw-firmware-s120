@@ -13,15 +13,26 @@
 #include "scr_mngr.h"
 #include "notifications.h"
 #include "ble/ble_peripheral.h"
+#include "config.h"
 
 #define DEFAULT_I2C_ADDR	0x1D
-#define FIFO_LENGTH				3
-#define FIFO_SIZE					3*FIFO_LENGTH
+#define FIFO_PACKETS			5
+#define FIFO_PACKET_LEN		6
+#define FIFO_BYTES				3
+#define FIFO_PACKET_SIZE	FIFO_PACKET_LEN*FIFO_BYTES
+#define FIFO_LENGTH				FIFO_PACKET_LEN*FIFO_PACKETS
+#define FIFO_SIZE					FIFO_BYTES*FIFO_LENGTH
+
+#define SLEEP_PACKET_LEN		62
 //#define DEBUG
 
 uint16_t steps;
 uint8_t orientation;
 int8_t swing;
+uint8_t sleep_min;
+uint8_t sleep_max;
+uint16_t sleep_sum;
+uint8_t sleep_count;
 
 uint16_t get_steps() {
 	return steps;
@@ -29,6 +40,23 @@ uint16_t get_steps() {
 
 void reset_steps() {
 	steps = 0;
+}
+
+void reset_sleep() {
+	sleep_min = 0xff;
+	sleep_max = 0;
+	sleep_sum = 0;
+	sleep_count = 0;
+}
+
+bool sleep_handle_value(uint16_t val) {
+	sleep_count++;
+	sleep_sum += val;
+	if (val < sleep_min)
+		sleep_min = val;
+	if (val > sleep_max)
+		sleep_max = val;
+	return sleep_count >= SLEEP_PACKET_LEN;
 }
 
 static void accel_int_handler(void * p_event_data, uint16_t event_size) {
@@ -41,8 +69,8 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 		value[2] = hex_str[int_src >> 4];
 		value[3] = hex_str[int_src & 0xf];
 		mlcd_draw_text(value, 15, 15, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-#endif		
-	
+#endif
+
 		if (int_src & 0x10) {
 			accel_read_register(0x10, &int_detail);
 #ifdef DEBUG
@@ -73,81 +101,89 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 				orientation = int_detail;
 		}
 
-		// pulse detection
-		if (int_src & 0x08) {
-			accel_read_register(0x22, &int_detail);
-#ifdef DEBUG
-			value[2] = hex_str[int_detail >> 4];
-			value[3] = hex_str[int_detail & 0xf];
-			mlcd_draw_text(value, 15, 50, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-#endif
-			// double tap
-			if (int_detail & 0xc8)
-				mlcd_backlight_blink(200, 2);
-		}
+//		// pulse detection
+//		if (int_src & 0x08) {
+//			accel_read_register(0x22, &int_detail);
+//#ifdef DEBUG
+//			value[2] = hex_str[int_detail >> 4];
+//			value[3] = hex_str[int_detail & 0xf];
+//			mlcd_draw_text(value, 15, 50, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+//#endif
+//			// double tap
+//			if (int_detail & 0xc8)
+//				mlcd_backlight_blink(200, 2);
+//		}
 
-		if (int_src & 0x04) {
-			accel_read_register(0x16, &int_detail);
-#ifdef DEBUG
-			value[2] = hex_str[int_detail >> 4];
-			value[3] = hex_str[int_detail & 0xf];
-			mlcd_draw_text(value, 15, 65, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-#endif
-			if (int_detail & 0x8a) {
-				if (swing == 1) {
-					steps++;
-//					vibration_vibrate(0x04408000, 0x0100, true);
-				}
-				swing = -1;
-//				char count[5] = "0000\0";
-//				uint16_t s = steps;
-//				count[3] = hex_str[s % 10];
-//				s /= 10;
-//				count[2] = hex_str[s % 10];
-//				s /= 10;
-//				count[1] = hex_str[s % 10];
-//				s /= 10;
-//				count[0] = hex_str[s];
-//				mlcd_draw_text(count, 15, 120, MLCD_XRES, NULL, FONT_OPTION_NORMAL, 0);
-			}
-		}
+//		// motion detection
+//		if (int_src & 0x04) {
+//			accel_read_register(0x16, &int_detail);
+//#ifdef DEBUG
+//			value[2] = hex_str[int_detail >> 4];
+//			value[3] = hex_str[int_detail & 0xf];
+//			mlcd_draw_text(value, 15, 65, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
+//#endif
+//			if (int_detail & 0x8a) {
+//				if (swing == 1) {
+//					steps++;
+////					vibration_vibrate(0x04408000, 0x0100, true);
+//				}
+//				swing = -1;
+//			}
+//		}
 
-		// transient
-		if (int_src & 0x20) {
-			accel_read_register(0x1E, &int_detail);
+//		// transient
+//		if (int_src & 0x20) {
+//			accel_read_register(0x1E, &int_detail);
+//#ifdef DEBUG
 //			value[2] = hex_str[int_detail >> 4];
 //			value[3] = hex_str[int_detail & 0xf];
 //			mlcd_draw_text(value, 15, 80, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-			if (int_detail & 0x4a) {
-				if (swing == -1) {
-					steps++;
-//					vibration_vibrate(0x0C40A000, 0x0100, true);
-				}
-				swing = 1;
-			}
-		}
+//#endif
+//			if (int_detail & 0x4a) {
+//				if (swing == -1) {
+//					steps++;
+////					vibration_vibrate(0x0C40A000, 0x0100, true);
+//				}
+//				swing = 1;
+//			}
+//		}
 		
-		// FIFO
-		if (int_src & 0x40) {
+	// FIFO
+	if (int_src & 0x40) {
+		accel_read_register(0x00, &int_detail);
 			// F_STATUS
-			accel_read_register(0x00, &int_detail);
-			if (int_detail & 0x40) {
-//				value[2] = hex_str[int_detail >> 4];
-//				value[3] = hex_str[int_detail & 0xf];
-//				mlcd_draw_text(value, 15, 100, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-				uint8_t data[FIFO_SIZE];
-				accel_read_multi_register(0x01, data, FIFO_SIZE);
-//				char acc[9] = "00,00,00\0";
-//				acc[0] = hex_str[data[0] >> 4];
-//				acc[1] = hex_str[data[0] & 0xf];
-//				acc[3] = hex_str[data[1] >> 4];
-//				acc[4] = hex_str[data[1] & 0xf];
-//				acc[6] = hex_str[data[2] >> 4];
-//				acc[7] = hex_str[data[2] & 0xf];
-//				mlcd_draw_text(acc, 15, 115, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-				ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_ACCELEROMETER, data, FIFO_SIZE);
+		if (int_detail & 0x40) {
+			int8_t data[2*FIFO_SIZE];
+			accel_read_multi_register(0x01, (uint8_t *)data, 2*FIFO_SIZE);
+			bool acc_sleep = get_settings(CONFIG_SLEEP_AS_ANDROID);
+			bool acc_all = get_settings(CONFIG_ACCELEROMETER);
+			if (acc_sleep || acc_all) {
+				for (int i = 1; i < FIFO_SIZE; i++)
+					data[i] = data[i << 1];
+				if (acc_sleep) {
+					for (int i = 1; i < FIFO_LENGTH; i++) {
+						int pos = FIFO_BYTES * i;
+						uint16_t delta = abs(data[pos]-data[pos-3])
+								+ abs(data[pos+1]-data[pos-2])
+								+ abs(data[pos+2]-data[pos-1]);
+						if (sleep_handle_value(delta)) {
+							uint8_t sleep_data[3];
+							sleep_data[0] = sleep_min;
+							sleep_data[1] = sleep_max;
+							sleep_data[2] = sleep_sum / sleep_count;
+							reset_sleep();
+							// TODO: bufferize values, see BATCH_SIZE
+							ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_SLEEP_AS_ANDROID, sleep_data, 3);
+						}
+					}
+				}
+				if (acc_all)
+					for (int p = 0; p < FIFO_PACKETS; p++)
+						ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_ACCELEROMETER,
+							(uint8_t *)&data[FIFO_PACKET_SIZE*p], FIFO_PACKET_SIZE);
 			}
 		}
+	}
 }
 
 static void accel_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
@@ -229,21 +265,7 @@ static void accel_pulse_init() {
 	accel_write_register(0x28, 0x12);
 }
 
-void accel_init(void) {
-		twi_master_init();
-	
-    uint32_t err_code;
-		// err_code = accel_int_init(ACCEL_INT1);
-    // APP_ERROR_CHECK(err_code);
-		err_code = accel_int_init(ACCEL_INT2);
-    APP_ERROR_CHECK(err_code);
-	
-		// 0x2B: CTRL_REG2 System Control 2 register
-		// reset
-		accel_write_register(0x2B, 0x40);
-	
-		nrf_delay_ms(1);
-
+void accel_interrupts_reset() {
 		// 0x2A: CTRL_REG1 System Control 1 register
 		// go to standby mode
 		accel_write_register(0x2A, 0);
@@ -262,8 +284,14 @@ void accel_init(void) {
 		// 0x2C: CTRL_REG3 Interrupt Control register
 		//accel_write_register(0x2C, 0x30);//0x40
 
-		accel_fifo_init();
+		uint8_t interrupt = 0;
+		if (get_settings(CONFIG_ACCELEROMETER) || get_settings(CONFIG_SLEEP_AS_ANDROID)) {
+			reset_sleep();
+			accel_fifo_init();
+			interrupt |= 0x40;
+		}
 		accel_tilt_init();
+		interrupt |= 0x10;
 		//accel_motion_init();
 		//accel_transient_init();
 		//accel_pulse_init();
@@ -271,8 +299,8 @@ void accel_init(void) {
 		// 0x2D: CTRL_REG4 Interrupt Enable register (Read/Write)
 		// transient+orientation+pulse+freefall
 		//accel_write_register(0x2D, 0x3c);
-		// orientation
-		accel_write_register(0x2D, 0x40 | 0x10);
+		// FIFO + orientation
+		accel_write_register(0x2D, interrupt);
 
 		// 0x0F: HP_FILTER_CUTOFF 
 		accel_write_register(0x0F, 0);
@@ -288,6 +316,22 @@ void accel_init(void) {
 		accel_write_register(0x2A, 0xB1);
 		// ASLP_RATE 00 = DR 100 = 50Hz
 		// accel_write_register(0x2A, 0x23);
+}
+
+void accel_init(void) {
+		twi_master_init();
+	
+    uint32_t err_code;
+		// err_code = accel_int_init(ACCEL_INT1);
+    // APP_ERROR_CHECK(err_code);
+		err_code = accel_int_init(ACCEL_INT2);
+    APP_ERROR_CHECK(err_code);
+	
+		// 0x2B: CTRL_REG2 System Control 2 register
+		// reset
+		accel_write_register(0x2B, 0x40);
+		nrf_delay_ms(1);
+		accel_interrupts_reset();
 }
 
 void accel_write_register(uint8_t reg, uint8_t value) {

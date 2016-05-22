@@ -136,6 +136,16 @@ static void draw_disconnect_alert_switch(uint8_t x, uint8_t y) {
 	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
+static void draw_accel_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_ACCELEROMETER);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
+static void draw_sleep_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_SLEEP_AS_ANDROID);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
 static void draw_silent_hours(uint8_t x, uint8_t y) {
 	uint8_t h1 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS);
 	uint8_t h2 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1);
@@ -209,6 +219,16 @@ static void oclock_toggle() {
 	settings_toggle(CONFIG_OCLOCK);
 }
 
+static void accelerometer_toggle() {
+	settings_toggle(CONFIG_ACCELEROMETER);
+	accel_interrupts_reset();
+}
+
+static void sleep_as_android_toggle() {
+	settings_toggle(CONFIG_SLEEP_AS_ANDROID);
+	accel_interrupts_reset();
+}
+
 static void shake_light_toggle() {
 		default_action* default_actions = config_get_default_global_actions();
 		if (default_actions[8].action_id == 0)
@@ -249,6 +269,8 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_DISCONNECT_ALERT, disconnect_alert_toggle, disconnect_alert_toggle, draw_disconnect_alert_switch},
 		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
 		{MESSAGE_STEPS, reset_steps, reset_steps, draw_steps},
+		{MESSAGE_ACCELEROMETER, accelerometer_toggle, accelerometer_toggle, draw_accel_switch},
+		{MESSAGE_SLEEP_AS_ANDROID, sleep_as_android_toggle, sleep_as_android_toggle, draw_sleep_switch},
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
 		{MESSAGE_TIME, opt_handler_change_time, opt_handler_change_time, NULL},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},

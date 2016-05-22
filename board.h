@@ -70,7 +70,7 @@ extern uint32_t * p_spi1_base_address;
 #define APP_TIMER_OP_QUEUE_SIZE          2                  /**< Size of timer operation queues. */
 
 #define SCHED_MAX_EVENT_DATA_SIZE sizeof(nrf_drv_gpiote_pin_t)
-#define SCHED_QUEUE_SIZE    			9
+#define SCHED_QUEUE_SIZE    						10
 
 #define ACCEL_INT1				 3u
 #define ACCEL_INT2				 2u

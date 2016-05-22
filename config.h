@@ -13,6 +13,8 @@
 #define CONFIG_BLUETOOTH_ON					0x20
 #define CONFIG_BUTTONS_LIGHT				0x40
 #define CONFIG_OCLOCK								0x80
+#define CONFIG_ACCELEROMETER				0x100
+#define CONFIG_SLEEP_AS_ANDROID			0x200
 
 typedef struct {
 		uint8_t action_id;

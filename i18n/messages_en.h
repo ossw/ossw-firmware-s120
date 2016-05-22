@@ -72,6 +72,8 @@ static const I18N_MESSAGE messages_en[] = {
   /*   67 */{"Silence"},
   /*   68 */{"O'clock"},
   /*   69 */{"Steps"},
+  /*   70 */{"Accel.data"},
+  /*   71 */{"Sleep"},
 };
 
 #endif
