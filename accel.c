@@ -16,23 +16,30 @@
 #include "config.h"
 
 #define DEFAULT_I2C_ADDR	0x1D
-#define FIFO_PACKETS			5
-#define FIFO_PACKET_LEN		6
-#define FIFO_BYTES				3
+#define FIFO_PACKET_LEN		6  // 6 vectors fit one 20 byte message
+#define FIFO_BYTES				3  // x+y+z
 #define FIFO_PACKET_SIZE	FIFO_PACKET_LEN*FIFO_BYTES
-#define FIFO_LENGTH				FIFO_PACKET_LEN*FIFO_PACKETS
+#define FIFO_LENGTH				30  // take FIFO length divisible by packet length
+#define FIFO_PACKETS			CEIL(FIFO_LENGTH,FIFO_PACKET_LEN)
 #define FIFO_SIZE					FIFO_BYTES*FIFO_LENGTH
 
-#define SLEEP_PACKET_LEN		62
+#define SLEEP_PACKET_COUNT		125  // number of stats samples for 10 seconds
+#define SLEEP_MAX_BATCH_SIZE	12
+#define PEDOMETER_THRESHOLD		26
 //#define DEBUG
 
 uint16_t steps;
-uint8_t orientation;
 int8_t swing;
+int8_t peak;
+uint8_t orientation;
+
 uint8_t sleep_min;
 uint8_t sleep_max;
 uint16_t sleep_sum;
 uint8_t sleep_count;
+uint8_t sleep_batch_size;
+uint8_t sleep_batch_count;
+uint8_t sleep_batch[3*SLEEP_MAX_BATCH_SIZE];
 
 uint16_t get_steps() {
 	return steps;
@@ -56,7 +63,11 @@ bool sleep_handle_value(uint16_t val) {
 		sleep_min = val;
 	if (val > sleep_max)
 		sleep_max = val;
-	return sleep_count >= SLEEP_PACKET_LEN;
+	return sleep_count >= SLEEP_PACKET_COUNT;
+}
+
+void sleep_set_batch_size(uint8_t size) {
+	sleep_batch_size = size;
 }
 
 static void accel_int_handler(void * p_event_data, uint16_t event_size) {
@@ -78,19 +89,19 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 			value[3] = hex_str[int_detail & 0xf];
 			mlcd_draw_text(value, 15, 35, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
 #endif
-			if (int_detail == 0x87 || int_detail == 0x85) {
-				if (swing == -1) {
-					steps++;					
-//					vibration_vibrate(0x04408000, 0x0080, true);
-				}
-				swing = 1;
-			}	else if (int_detail == 0x81 || int_detail == 0x83) {
-				if (swing == 1) {
-					steps++;					
-//					vibration_vibrate(0x04408000, 0x0100, true);
-				}
-				swing = -1;
-			} else swing = 0;
+//			if (int_detail == 0x87 || int_detail == 0x85) {
+//				if (swing == -1) {
+//					steps++;					
+////					vibration_vibrate(0x04408000, 0x0080, true);
+//				}
+//				swing = 1;
+//			}	else if (int_detail == 0x81 || int_detail == 0x83) {
+//				if (swing == 1) {
+//					steps++;					
+////					vibration_vibrate(0x04408000, 0x0100, true);
+//				}
+//				swing = -1;
+//			} else swing = 0;
 			
 			// tilt event
 			if (orientation == 0x87 && int_detail == 0x85) {
@@ -100,53 +111,6 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 			if ((int_detail & 0x40) == 0) // if not in z-lockout zone
 				orientation = int_detail;
 		}
-
-//		// pulse detection
-//		if (int_src & 0x08) {
-//			accel_read_register(0x22, &int_detail);
-//#ifdef DEBUG
-//			value[2] = hex_str[int_detail >> 4];
-//			value[3] = hex_str[int_detail & 0xf];
-//			mlcd_draw_text(value, 15, 50, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-//#endif
-//			// double tap
-//			if (int_detail & 0xc8)
-//				mlcd_backlight_blink(200, 2);
-//		}
-
-//		// motion detection
-//		if (int_src & 0x04) {
-//			accel_read_register(0x16, &int_detail);
-//#ifdef DEBUG
-//			value[2] = hex_str[int_detail >> 4];
-//			value[3] = hex_str[int_detail & 0xf];
-//			mlcd_draw_text(value, 15, 65, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-//#endif
-//			if (int_detail & 0x8a) {
-//				if (swing == 1) {
-//					steps++;
-////					vibration_vibrate(0x04408000, 0x0100, true);
-//				}
-//				swing = -1;
-//			}
-//		}
-
-//		// transient
-//		if (int_src & 0x20) {
-//			accel_read_register(0x1E, &int_detail);
-//#ifdef DEBUG
-//			value[2] = hex_str[int_detail >> 4];
-//			value[3] = hex_str[int_detail & 0xf];
-//			mlcd_draw_text(value, 15, 80, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-//#endif
-//			if (int_detail & 0x4a) {
-//				if (swing == -1) {
-//					steps++;
-////					vibration_vibrate(0x0C40A000, 0x0100, true);
-//				}
-//				swing = 1;
-//			}
-//		}
 		
 	// FIFO
 	if (int_src & 0x40) {
@@ -156,24 +120,40 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 			int8_t data[2*FIFO_SIZE];
 			accel_read_multi_register(0x01, (uint8_t *)data, 2*FIFO_SIZE);
 			bool acc_sleep = get_settings(CONFIG_SLEEP_AS_ANDROID);
+			bool acc_ped = get_settings(CONFIG_PEDOMETER);
 			bool acc_all = get_settings(CONFIG_ACCELEROMETER);
-			if (acc_sleep || acc_all) {
+			if (acc_sleep || acc_all || acc_ped) {
 				for (int i = 1; i < FIFO_SIZE; i++)
 					data[i] = data[i << 1];
-				if (acc_sleep) {
+				if (acc_sleep || acc_ped) {
 					for (int i = 1; i < FIFO_LENGTH; i++) {
 						int pos = FIFO_BYTES * i;
-						uint16_t delta = abs(data[pos]-data[pos-3])
-								+ abs(data[pos+1]-data[pos-2])
-								+ abs(data[pos+2]-data[pos-1]);
-						if (sleep_handle_value(delta)) {
-							uint8_t sleep_data[3];
-							sleep_data[0] = sleep_min;
-							sleep_data[1] = sleep_max;
-							sleep_data[2] = sleep_sum / sleep_count;
-							reset_sleep();
-							// TODO: bufferize values, see BATCH_SIZE
-							ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_SLEEP_AS_ANDROID, sleep_data, 3);
+						int dx = data[pos]-data[pos-3];
+						int dy = data[pos+1]-data[pos-2];
+						int dz = data[pos+2]-data[pos-1];
+						if (acc_ped) {
+							int direction = SIGN(dy);
+							if (direction != 0) {
+								if (swing != 0 && swing != direction) {
+									if (abs(peak-data[pos+1]) > PEDOMETER_THRESHOLD) {
+										steps++;
+										peak = data[pos+1];
+									}
+								}
+								swing = direction;
+							}
+						}
+						if (acc_sleep) {
+							uint16_t delta = abs(dx) + abs(dy) + abs(dz);
+							if (sleep_handle_value(delta)) {
+								uint8_t sleep_data[3];
+								sleep_data[0] = sleep_min;
+								sleep_data[1] = sleep_max;
+								sleep_data[2] = sleep_sum / sleep_count;
+								reset_sleep();
+								// TODO: bufferize values, see BATCH_SIZE
+								ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_SLEEP_AS_ANDROID, sleep_data, 3);
+							}
 						}
 					}
 				}
@@ -234,36 +214,36 @@ static void accel_tilt_init() {
 	accel_write_register(0x14, 0xA2);
 }
 
-static void accel_motion_init() {
-	// 0x15 FF_MT_CFG
-	accel_write_register(0x15, 0xB8);
-	// 0x17 FF_MT_THS
-	accel_write_register(0x17, 0x08);
-	// 0x18 FF_MT_COUNT
-	accel_write_register(0x18, 0x04);
-}
+//static void accel_motion_init() {
+//	// 0x15 FF_MT_CFG
+//	accel_write_register(0x15, 0xB8);
+//	// 0x17 FF_MT_THS
+//	accel_write_register(0x17, 0x08);
+//	// 0x18 FF_MT_COUNT
+//	accel_write_register(0x18, 0x04);
+//}
 
-static void accel_transient_init() {
-	// 0x1D TRANSIENT_CFG
-	accel_write_register(0x1D, 0x16);
-	// 0x1F TRANSIENT_THS
-	accel_write_register(0x1F, 0x0A);
-}
-	
-static void accel_pulse_init() {
-	// 0x21 PULSE_CFG Pulse Configuration register
-	accel_write_register(0x21, 0x60);
-	// 0x23–0x25 PULSE_THSX, Y, Z Pulse Threshold for X, Y and Z registers
-	//accel_write_register(0x23, 0x20);
-	//accel_write_register(0x24, 0x20);
-	accel_write_register(0x25, 0x0A);
-	// 0x26 PULSE_TMLT Pulse Time Window 1 register
-	accel_write_register(0x26, 0x08);
-	// 0x27 PULSE_LTCY Pulse Latency Timer register
-	accel_write_register(0x27, 0x03);
-	// 0x28 PULSE_WIND register (Read/Write)
-	accel_write_register(0x28, 0x12);
-}
+//static void accel_transient_init() {
+//	// 0x1D TRANSIENT_CFG
+//	accel_write_register(0x1D, 0x16);
+//	// 0x1F TRANSIENT_THS
+//	accel_write_register(0x1F, 0x0A);
+//}
+//	
+//static void accel_pulse_init() {
+//	// 0x21 PULSE_CFG Pulse Configuration register
+//	accel_write_register(0x21, 0x60);
+//	// 0x23–0x25 PULSE_THSX, Y, Z Pulse Threshold for X, Y and Z registers
+//	//accel_write_register(0x23, 0x20);
+//	//accel_write_register(0x24, 0x20);
+//	accel_write_register(0x25, 0x0A);
+//	// 0x26 PULSE_TMLT Pulse Time Window 1 register
+//	accel_write_register(0x26, 0x08);
+//	// 0x27 PULSE_LTCY Pulse Latency Timer register
+//	accel_write_register(0x27, 0x03);
+//	// 0x28 PULSE_WIND register (Read/Write)
+//	accel_write_register(0x28, 0x12);
+//}
 
 void accel_interrupts_reset() {
 		// 0x2A: CTRL_REG1 System Control 1 register
@@ -285,7 +265,7 @@ void accel_interrupts_reset() {
 		//accel_write_register(0x2C, 0x30);//0x40
 
 		uint8_t interrupt = 0;
-		if (get_settings(CONFIG_ACCELEROMETER) || get_settings(CONFIG_SLEEP_AS_ANDROID)) {
+		if (get_settings(CONFIG_ACCELEROMETER) || get_settings(CONFIG_SLEEP_AS_ANDROID || get_settings(CONFIG_PEDOMETER))) {
 			reset_sleep();
 			accel_fifo_init();
 			interrupt |= 0x40;
@@ -311,27 +291,28 @@ void accel_interrupts_reset() {
 		// go to active mode
 		// 0x2A: CTRL_REG1 System Control 1 register
 		// ASLP_RATE 01 = DR 101 = 12,5Hz
-		//accel_write_register(0x2A, 0x6B);
+		accel_write_register(0x2A, 0x69);
 		// ASLP_RATE 10 = DR 110 = 6,25Hz
-		accel_write_register(0x2A, 0xB1);
+		//accel_write_register(0x2A, 0xB1);
 		// ASLP_RATE 00 = DR 100 = 50Hz
 		// accel_write_register(0x2A, 0x23);
 }
 
 void accel_init(void) {
-		twi_master_init();
+	twi_master_init();
 	
-    uint32_t err_code;
-		// err_code = accel_int_init(ACCEL_INT1);
-    // APP_ERROR_CHECK(err_code);
-		err_code = accel_int_init(ACCEL_INT2);
-    APP_ERROR_CHECK(err_code);
-	
-		// 0x2B: CTRL_REG2 System Control 2 register
-		// reset
-		accel_write_register(0x2B, 0x40);
-		nrf_delay_ms(1);
-		accel_interrupts_reset();
+  uint32_t err_code;
+	// err_code = accel_int_init(ACCEL_INT1);
+  // APP_ERROR_CHECK(err_code);
+	err_code = accel_int_init(ACCEL_INT2);
+  APP_ERROR_CHECK(err_code);
+	// 0x2B: CTRL_REG2 System Control 2 register
+	// reset
+	accel_write_register(0x2B, 0x40);
+	nrf_delay_ms(1);
+	accel_interrupts_reset();
+	sleep_batch_size = 1;
+	settings_on(CONFIG_PEDOMETER);
 }
 
 void accel_write_register(uint8_t reg, uint8_t value) {

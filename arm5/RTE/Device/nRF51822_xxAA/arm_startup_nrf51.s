@@ -44,7 +44,7 @@ __initial_sp
                 IF :DEF: __HEAP_SIZE
 Heap_Size       EQU     __HEAP_SIZE
                 ELSE
-Heap_Size       EQU     648
+Heap_Size       EQU     624
                 ENDIF
 
                 AREA    HEAP, NOINIT, READWRITE, ALIGN=3

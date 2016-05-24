@@ -15,6 +15,7 @@
 #define CONFIG_OCLOCK								0x80
 #define CONFIG_ACCELEROMETER				0x100
 #define CONFIG_SLEEP_AS_ANDROID			0x200
+#define CONFIG_PEDOMETER						0x400
 
 typedef struct {
 		uint8_t action_id;

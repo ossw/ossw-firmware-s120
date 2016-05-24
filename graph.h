@@ -13,8 +13,6 @@
 #define DEG_TO_RAD(deg) deg * PI / 180.0
 #define CENTER_X (MLCD_XRES >> 1)
 #define CENTER_Y (MLCD_YRES >> 1)
-#define SWAP(a, b) {a ^= b; b ^= a; a ^= b;}
-#define SIGN(a) (a > 0 ? 1 : (a < 0 ? -1 : 0))
 
 void pixel(uint_fast8_t x_pos, uint_fast8_t y_pos, uint8_t mode);
 void vLine(uint_fast8_t x, uint_fast8_t y1, uint_fast8_t y2, uint8_t mode);
