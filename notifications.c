@@ -10,6 +10,7 @@
 #include "board.h"
 #include "mlcd.h"
 #include "config.h"
+#include "accel.h"
 #include "screens/dialog_select.h"
 
 static app_timer_id_t      m_notifications_alert_timer_id;
@@ -60,41 +61,50 @@ static void send_select_result(uint8_t token, uint8_t buttons, uint8_t item) {
 }
 
 void notifications_handle_data(uint16_t address, uint16_t size) {
-		uint8_t notification_type = get_next_byte(&address);
-	 	switch (notification_type) {
-				case NOTIFICATIONS_TYPE_ALERT:
-				{
-						uint16_t notification_id = get_next_short(&address);
-						uint32_t vibration_pattern = get_next_int(&address);
-						uint16_t timeout = get_next_short(&address);
-						notifications_alert_notify(notification_id, address, timeout, vibration_pattern);
-						}
-						break;
-				case NOTIFICATIONS_TYPE_INFO:
-				{	
-						uint32_t vibration_pattern = get_next_int(&address);
-						uint16_t time = get_next_short(&address);
-						copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 7);
-						notifications_info_notify(time, vibration_pattern);
-						}
-						break;
-				case NOTIFICATIONS_TYPE_UPDATE:
-						if (size == 1) {
-							  notifications_info_clear_all();
-						} else {
-								copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 1);
-							  notifications_info_update();
-						}
-						break;
-				case NOTIFICATIONS_TYPE_DIALOG_SELECT:
-						dialog_select_init(send_select_result);
-						copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 1);
-						set_modal_dialog(true);
-						scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS);
-						break;
-				case NOTIFICATIONS_TYPE_DIALOG_CLOSE:
-						set_modal_dialog(false);
-						break;
+	uint8_t notification_type = get_next_byte(&address);
+	switch (notification_type) {
+		case NOTIFICATIONS_TYPE_ALERT:
+		{
+			uint16_t notification_id = get_next_short(&address);
+			uint32_t vibration_pattern = get_next_int(&address);
+			uint16_t timeout = get_next_short(&address);
+			notifications_alert_notify(notification_id, address, timeout, vibration_pattern);
+		}
+		break;
+		case NOTIFICATIONS_TYPE_INFO:
+		{	
+			uint32_t vibration_pattern = get_next_int(&address);
+			uint16_t time = get_next_short(&address);
+			copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 7);
+			notifications_info_notify(time, vibration_pattern);
+		}
+		break;
+		case NOTIFICATIONS_TYPE_UPDATE:
+			if (size == 1) {
+			  notifications_info_clear_all();
+			} else {
+				copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 1);
+			  notifications_info_update();
+			}
+			break;
+		case NOTIFICATIONS_TYPE_DIALOG_SELECT:
+			dialog_select_init(send_select_result);
+			copy_notification_info_data(address, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS, size - 1);
+			set_modal_dialog(true);
+			scr_mngr_show_screen_with_param(SCR_DIALOG_SELECT, EXT_RAM_DATA_NOTIFICATION_INFO_ADDRESS);
+			break;
+		case NOTIFICATIONS_TYPE_SLEEP_START:
+			settings_on(CONFIG_SLEEP_AS_ANDROID);
+			break;
+		case NOTIFICATIONS_TYPE_SLEEP_STOP:
+			settings_off(CONFIG_SLEEP_AS_ANDROID);
+			break;
+		case NOTIFICATIONS_TYPE_SLEEP_BATCH_SIZE:
+			sleep_set_batch_size(get_next_byte(&address));
+			break;
+		case NOTIFICATIONS_TYPE_DIALOG_CLOSE:
+			set_modal_dialog(false);
+			break;
 		}
 }
 
