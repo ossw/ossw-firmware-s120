@@ -18,4 +18,6 @@ void reset_steps(void);
 
 void accel_interrupts_reset(void);
 
+void sleep_set_batch_size(uint8_t);
+
 #endif /* ACCEL_H */

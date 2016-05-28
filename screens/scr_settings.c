@@ -190,12 +190,14 @@ static void draw_interval_summary(uint8_t x, uint8_t y) {
 
 static void draw_steps(uint8_t x, uint8_t y) {
 	uint16_t s = get_steps();
-	char count[5] = "   0\0";
-	for (int i = 3; i >= 0 && s > 0; i--) {
+	char count[6] = "    0\0";
+	for (int i = 4; i >= 0 && s > 0; i--) {
 		count[i] = '0' + s % 10;
 		s /= 10;
 	}
-	mlcd_draw_text(count, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+	mlcd_draw_text(count, x-42, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+	bool on = get_settings(CONFIG_PEDOMETER);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
 static void rtc_refresh_toggle() {
@@ -222,6 +224,10 @@ static void oclock_toggle() {
 static void accelerometer_toggle() {
 	settings_toggle(CONFIG_ACCELEROMETER);
 	accel_interrupts_reset();
+}
+
+static void pedometer_toggle() {
+	settings_toggle(CONFIG_PEDOMETER);
 }
 
 static void sleep_as_android_toggle() {
@@ -268,7 +274,7 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_OCLOCK, oclock_toggle, oclock_toggle, draw_oclock_switch},
 		{MESSAGE_DISCONNECT_ALERT, disconnect_alert_toggle, disconnect_alert_toggle, draw_disconnect_alert_switch},
 		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
-		{MESSAGE_STEPS, reset_steps, reset_steps, draw_steps},
+		{MESSAGE_STEPS, pedometer_toggle, reset_steps, draw_steps},
 		{MESSAGE_ACCELEROMETER, accelerometer_toggle, accelerometer_toggle, draw_accel_switch},
 		{MESSAGE_SLEEP_AS_ANDROID, sleep_as_android_toggle, sleep_as_android_toggle, draw_sleep_switch},
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},

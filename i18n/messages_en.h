@@ -52,7 +52,7 @@ static const I18N_MESSAGE messages_en[] = {
   /*   47 */{"Refresh"},
   /*   48 */{"1s"},
   /*   49 */{"1min"},
-  /*   50 */{"Shake light"},
+  /*   50 */{"Tilt light"},
   /*   51 */{"Notif light"},
   /*   52 */{"Timer"},
   /*   53 */{"Hours"},

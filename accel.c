@@ -1,5 +1,6 @@
 #include "accel.h"
 #include "nrf_drv_gpiote.h"
+//#include "nordic_common.h"
 #include "app_error.h"
 #include "twi_master.h"
 #include "board.h"
@@ -23,14 +24,31 @@
 #define FIFO_PACKETS			CEIL(FIFO_LENGTH,FIFO_PACKET_LEN)
 #define FIFO_SIZE					FIFO_BYTES*FIFO_LENGTH
 
-#define SLEEP_PACKET_COUNT		125  // number of stats samples for 10 seconds
+#define SLEEP_SAMPLE_COUNT		125  // number of stats samples for 10 seconds
 #define SLEEP_MAX_BATCH_SIZE	12
-#define PEDOMETER_THRESHOLD		26
+#define SLEEP_BYTES				3  // min+max+avg
+
+#define PED_AMP_MIN			30
+#define PED_AMP_MAX			120
+#define PED_DELAY_MIN		10
+#define PED_DELAY_MAX		20
+
 //#define DEBUG
 
 uint16_t steps;
-int8_t swing;
-int8_t peak;
+int8_t old_dir;
+int8_t peak_max;
+int8_t peak_max_count;
+int8_t peak_min;
+int8_t peak_min_count;
+int8_t next_max;
+int8_t next_max_count;
+int8_t next_min;
+int8_t next_min_count;
+bool check_max;
+int8_t sx;
+int8_t sy;
+int8_t sz;
 uint8_t orientation;
 
 uint8_t sleep_min;
@@ -49,25 +67,47 @@ void reset_steps() {
 	steps = 0;
 }
 
-void reset_sleep() {
+static void reset_sleep() {
 	sleep_min = 0xff;
 	sleep_max = 0;
 	sleep_sum = 0;
 	sleep_count = 0;
 }
 
-bool sleep_handle_value(uint16_t val) {
+static void sleep_check_batch_queue() {
+	if (++sleep_batch_count >= sleep_batch_size) {
+		uint8_t packets = CEIL(sleep_batch_count, FIFO_PACKET_LEN);
+		int shift = 0;
+		uint8_t pos = SLEEP_BYTES*sleep_batch_count;;
+		for (int p = 0; p < packets; p++) {
+			ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_SLEEP_AS_ANDROID,
+				sleep_batch+shift, MIN(pos-shift, FIFO_PACKET_SIZE));
+			shift += FIFO_PACKET_SIZE;
+		}
+		sleep_batch_count = 0;
+	}
+}
+
+static void sleep_handle_value(uint16_t val) {
 	sleep_count++;
 	sleep_sum += val;
 	if (val < sleep_min)
 		sleep_min = val;
 	if (val > sleep_max)
 		sleep_max = val;
-	return sleep_count >= SLEEP_PACKET_COUNT;
+	if (sleep_count >= SLEEP_SAMPLE_COUNT) { // calculate statistics and store
+		uint8_t pos = SLEEP_BYTES*sleep_batch_count;
+		sleep_batch[pos] = sleep_min;
+		sleep_batch[pos+1] = sleep_max;
+		sleep_batch[pos+2] = sleep_sum / sleep_count;
+		reset_sleep();
+		sleep_check_batch_queue();
+	}
 }
 
 void sleep_set_batch_size(uint8_t size) {
 	sleep_batch_size = size;
+	sleep_check_batch_queue();
 }
 
 static void accel_int_handler(void * p_event_data, uint16_t event_size) {
@@ -89,20 +129,6 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 			value[3] = hex_str[int_detail & 0xf];
 			mlcd_draw_text(value, 15, 35, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
 #endif
-//			if (int_detail == 0x87 || int_detail == 0x85) {
-//				if (swing == -1) {
-//					steps++;					
-////					vibration_vibrate(0x04408000, 0x0080, true);
-//				}
-//				swing = 1;
-//			}	else if (int_detail == 0x81 || int_detail == 0x83) {
-//				if (swing == 1) {
-//					steps++;					
-////					vibration_vibrate(0x04408000, 0x0100, true);
-//				}
-//				swing = -1;
-//			} else swing = 0;
-			
 			// tilt event
 			if (orientation == 0x87 && int_detail == 0x85) {
 				scr_mngr_handle_event(SCR_EVENT_WRIST_SHAKE, 0);
@@ -123,40 +149,104 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 			bool acc_ped = get_settings(CONFIG_PEDOMETER);
 			bool acc_all = get_settings(CONFIG_ACCELEROMETER);
 			if (acc_sleep || acc_all || acc_ped) {
-				for (int i = 1; i < FIFO_SIZE; i++)
+				for (int i = 0; i < FIFO_SIZE; i++)
 					data[i] = data[i << 1];
+				
 				if (acc_sleep || acc_ped) {
-					for (int i = 1; i < FIFO_LENGTH; i++) {
+					int dx, dy, dz, acc;
+					for (int i = 0; i < FIFO_LENGTH; i++) {
 						int pos = FIFO_BYTES * i;
-						int dx = data[pos]-data[pos-3];
-						int dy = data[pos+1]-data[pos-2];
-						int dz = data[pos+2]-data[pos-1];
+						if (i == 0) {
+							dx = data[pos]-sx;
+							dy = data[pos+1]-sy;
+							dz = data[pos+2]-sz;
+							acc = sy;
+						} else {
+							dx = data[pos]-data[pos-3];
+							dy = data[pos+1]-data[pos-2];
+							dz = data[pos+2]-data[pos-1];
+							acc = data[pos-2];
+						}
+						
 						if (acc_ped) {
 							int direction = SIGN(dy);
-							if (direction != 0) {
-								if (swing != 0 && swing != direction) {
-									if (abs(peak-data[pos+1]) > PEDOMETER_THRESHOLD) {
-										steps++;
-										peak = data[pos+1];
+							peak_min_count++;
+							peak_max_count++;
+							next_max_count++;
+							next_min_count++;
+							// up peak
+							if (old_dir >= 0 && direction < 0) {
+								if (peak_max_count < PED_DELAY_MIN) {
+									// restart searching if better peak found
+									if (acc > peak_max) {
+										peak_max = acc;
+										peak_max_count = 0;
+										next_max = -128;
 									}
+								} else if (peak_max_count <= PED_DELAY_MAX && acc > next_max) {
+									// choose the max in the window
+									next_max = acc;
+									next_max_count = 0;
 								}
-								swing = direction;
+							}
+							// down peak
+							if (old_dir <= 0 && direction > 0) {
+								if (peak_min_count < PED_DELAY_MIN) {
+									// restart searching if better peak found
+									if (acc < peak_min) {
+										peak_min = acc;
+										peak_min_count = 0;
+										next_min = 127;
+									}
+								} else if (peak_min_count <= PED_DELAY_MAX && acc < next_min) {
+									// choose the min in the window
+									next_min = acc;
+									next_min_count = 0;
+								}	
+							}
+								
+							// out of max window
+							if (peak_max_count > PED_DELAY_MAX)  {
+								if (check_max && next_max - peak_min > PED_AMP_MIN) {
+									steps++;
+									check_max = false;
+								}
+								peak_max = next_max;
+								peak_max_count = next_max_count;
+								next_max = -128;
+							}
+							// out of min window
+							if (peak_min_count > PED_DELAY_MAX) {
+								if (!check_max && peak_max - next_min > PED_AMP_MIN) {
+									steps++;
+									check_max = true;
+								}
+								peak_min = next_min;
+								peak_min_count = next_min_count;
+								next_min = 127;
+							}
+							
+							old_dir = direction;
+							// debug: replace x,z acceleration by peak value
+							if (i > 0) {
+								data[pos-3] = peak_max;
+								data[pos-1] = peak_min;
 							}
 						}
+
 						if (acc_sleep) {
 							uint16_t delta = abs(dx) + abs(dy) + abs(dz);
-							if (sleep_handle_value(delta)) {
-								uint8_t sleep_data[3];
-								sleep_data[0] = sleep_min;
-								sleep_data[1] = sleep_max;
-								sleep_data[2] = sleep_sum / sleep_count;
-								reset_sleep();
-								// TODO: bufferize values, see BATCH_SIZE
-								ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_SLEEP_AS_ANDROID, sleep_data, 3);
-							}
+							sleep_handle_value(delta);
 						}
 					}
+					sx = data[FIFO_SIZE-3];
+					sy = data[FIFO_SIZE-2];
+					sz = data[FIFO_SIZE-1];
+					// debug: replace x,z acceleration by peak value
+					data[FIFO_SIZE-3] = peak_max;
+					data[FIFO_SIZE-1] = peak_min;
 				}
+
 				if (acc_all)
 					for (int p = 0; p < FIFO_PACKETS; p++)
 						ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_ACCELEROMETER,
@@ -312,7 +402,8 @@ void accel_init(void) {
 	nrf_delay_ms(1);
 	accel_interrupts_reset();
 	sleep_batch_size = 1;
-	settings_on(CONFIG_PEDOMETER);
+	next_min = 127;
+	next_max = -128;
 }
 
 void accel_write_register(uint8_t reg, uint8_t value) {
