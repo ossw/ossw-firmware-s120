@@ -1,6 +1,6 @@
 #include "buttons.h"
 #include "scr_mngr.h"
-#include "app_button.h"
+#include "button_lib.h"
 #include "app_scheduler.h"
 #include "board.h"
 
