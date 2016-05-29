@@ -1,6 +1,6 @@
 #include "accel.h"
 #include "nrf_drv_gpiote.h"
-//#include "nordic_common.h"
+#include "nordic_common.h"
 #include "app_error.h"
 #include "twi_master.h"
 #include "board.h"

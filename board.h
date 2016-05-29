@@ -82,8 +82,6 @@ extern uint32_t * p_spi1_base_address;
 #define RX_PIN_NUMBER  15
 #define TX_PIN_NUMBER  16
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) < (b) ? (b) : (a))
 #define CEIL(x, y) ((x % y) ? x / y + 1 : x / y)
 #define SWAP_NUMBERS(a, b) {a ^= b; b ^= a; a ^= b;}
 #define SIGN(a) (a > 0 ? 1 : (a < 0 ? -1 : 0))
