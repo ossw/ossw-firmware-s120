@@ -24,18 +24,22 @@
 #define FIFO_PACKETS			CEIL(FIFO_LENGTH,FIFO_PACKET_LEN)
 #define FIFO_SIZE					FIFO_BYTES*FIFO_LENGTH
 
-#define SLEEP_SAMPLE_COUNT		125  // number of stats samples for 10 seconds
-#define SLEEP_MAX_BATCH_SIZE	12
-#define SLEEP_BYTES				3  // min+max+avg
+#define SLEEP_SAMPLE_COUNT				125  // number of stats samples for 10 seconds
+#define SLEEP_MAX_BATCH_SIZE			12
+#define SLEEP_BYTES								3  // min+max+avg
 
-#define PED_AMP_MIN			30
-#define PED_AMP_MAX			120
-#define PED_DELAY_MIN		10
-#define PED_DELAY_MAX		20
+#define PED_AMP_MIN								30
+#define PED_AMP_MAX								120
+#define PED_DELAY_MIN							10
+#define PED_DELAY_MAX							20
+#define PED_DEBOUNCE_THRESHOLD		20
+#define PED_WAIT_MAX							0x01
+#define PED_WALKING								0x02
 
 //#define DEBUG
 
 uint16_t steps;
+uint8_t steps_debounce;
 int8_t old_dir;
 int8_t peak_max;
 int8_t peak_max_count;
@@ -45,7 +49,7 @@ int8_t next_max;
 int8_t next_max_count;
 int8_t next_min;
 int8_t next_min_count;
-bool check_max;
+uint8_t ped_mode;
 int8_t sx;
 int8_t sy;
 int8_t sz;
@@ -110,6 +114,27 @@ void sleep_set_batch_size(uint8_t size) {
 	sleep_check_batch_queue();
 }
 
+static void accel_process_step(bool count) {
+	if (count) {
+		if (ped_mode & PED_WALKING) {
+			steps++;
+			steps_debounce = PED_DEBOUNCE_THRESHOLD;
+		} else {
+			steps_debounce++;
+			if (steps_debounce >= PED_DEBOUNCE_THRESHOLD) {
+				ped_mode |= PED_WALKING;
+				steps += steps_debounce;
+			}
+		}
+		ped_mode ^= PED_WAIT_MAX;
+	} else {
+		steps_debounce--;
+		if (steps_debounce == 0) {
+			ped_mode &= ~PED_WALKING;
+		}
+	}
+}
+
 static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 		uint8_t int_src;
 		uint8_t int_detail;
@@ -141,7 +166,7 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 	// FIFO
 	if (int_src & 0x40) {
 		accel_read_register(0x00, &int_detail);
-			// F_STATUS
+		// F_STATUS
 		if (int_detail & 0x40) {
 			int8_t data[2*FIFO_SIZE];
 			accel_read_multi_register(0x01, (uint8_t *)data, 2*FIFO_SIZE);
@@ -170,18 +195,31 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 						
 						if (acc_ped) {
 							int direction = SIGN(dy);
-							peak_min_count++;
-							peak_max_count++;
-							next_max_count++;
-							next_min_count++;
+							if ((ped_mode & PED_WALKING) || steps_debounce > 0) {
+								peak_min_count++;
+								peak_max_count++;
+								next_max_count++;
+								next_min_count++;
+							}
 							// up peak
 							if (old_dir >= 0 && direction < 0) {
-								if (peak_max_count < PED_DELAY_MIN) {
+								// if not in walking mode start at any peak
+								if ((ped_mode & PED_WALKING) == 0 && steps_debounce == 0) {
+//									if (acc - peak_min > PED_AMP_MIN) {
+										steps_debounce++;
+										ped_mode &= ~PED_WAIT_MAX;
+										peak_max = acc;
+										peak_max_count = 0;
+										next_max = -128;
+										next_max_count = 0;
+//									}
+								} else if (peak_max_count < PED_DELAY_MIN) {
 									// restart searching if better peak found
 									if (acc > peak_max) {
 										peak_max = acc;
 										peak_max_count = 0;
 										next_max = -128;
+										next_max_count = 0;
 									}
 								} else if (peak_max_count <= PED_DELAY_MAX && acc > next_max) {
 									// choose the max in the window
@@ -191,12 +229,23 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 							}
 							// down peak
 							if (old_dir <= 0 && direction > 0) {
-								if (peak_min_count < PED_DELAY_MIN) {
+								// if not in walking mode start at any peak
+								if ((ped_mode & PED_WALKING) == 0 && steps_debounce == 0) {
+//									if (peak_max - acc > PED_AMP_MIN) {
+										steps_debounce++;
+										ped_mode |= PED_WAIT_MAX;
+										peak_min = acc;
+										peak_min_count = 0;
+										next_min = 127;
+										next_min_count = 0;
+//									}
+								} else if (peak_min_count < PED_DELAY_MIN) {
 									// restart searching if better peak found
 									if (acc < peak_min) {
 										peak_min = acc;
 										peak_min_count = 0;
 										next_min = 127;
+										next_min_count = 0;
 									}
 								} else if (peak_min_count <= PED_DELAY_MAX && acc < next_min) {
 									// choose the min in the window
@@ -204,26 +253,24 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 									next_min_count = 0;
 								}	
 							}
-								
+							
+							if ((ped_mode & PED_WALKING) || steps_debounce > 0) {							
 							// out of max window
-							if (peak_max_count > PED_DELAY_MAX)  {
-								if (check_max && next_max - peak_min > PED_AMP_MIN) {
-									steps++;
-									check_max = false;
-								}
+							if (peak_max_count > PED_DELAY_MAX) {
+								accel_process_step(ped_mode & PED_WAIT_MAX && next_max - peak_min > PED_AMP_MIN);
 								peak_max = next_max;
 								peak_max_count = next_max_count;
 								next_max = -128;
+								next_max_count = 0;
 							}
 							// out of min window
 							if (peak_min_count > PED_DELAY_MAX) {
-								if (!check_max && peak_max - next_min > PED_AMP_MIN) {
-									steps++;
-									check_max = true;
-								}
+								accel_process_step((ped_mode & PED_WAIT_MAX) == 0 && peak_max - next_min > PED_AMP_MIN);
 								peak_min = next_min;
 								peak_min_count = next_min_count;
 								next_min = 127;
+								next_min_count = 0;
+							}
 							}
 							
 							old_dir = direction;
@@ -386,6 +433,10 @@ void accel_interrupts_reset() {
 		//accel_write_register(0x2A, 0xB1);
 		// ASLP_RATE 00 = DR 100 = 50Hz
 		// accel_write_register(0x2A, 0x23);
+	next_min = 127;
+	next_max = -128;
+	ped_mode = 0;
+	steps_debounce = 0;
 }
 
 void accel_init(void) {
@@ -402,8 +453,6 @@ void accel_init(void) {
 	nrf_delay_ms(1);
 	accel_interrupts_reset();
 	sleep_batch_size = 1;
-	next_min = 127;
-	next_max = -128;
 }
 
 void accel_write_register(uint8_t reg, uint8_t value) {
