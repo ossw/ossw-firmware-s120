@@ -32,7 +32,7 @@
 #define PED_AMP_MAX								120
 #define PED_DELAY_MIN							10
 #define PED_DELAY_MAX							20
-#define PED_DEBOUNCE_THRESHOLD		5
+#define PED_DEBOUNCE_THRESHOLD		10
 #define PED_WAIT_MAX							0x01
 #define PED_WALKING								0x02
 
@@ -78,11 +78,11 @@ static void reset_sleep() {
 	sleep_count = 0;
 }
 
-static void sleep_check_batch_queue() {
+static inline void sleep_check_batch_queue() {
 	if (++sleep_batch_count >= sleep_batch_size) {
 		uint8_t packets = CEIL(sleep_batch_count, FIFO_PACKET_LEN);
 		int shift = 0;
-		uint8_t pos = SLEEP_BYTES*sleep_batch_count;;
+		uint8_t pos = SLEEP_BYTES * sleep_batch_count;
 		for (int p = 0; p < packets; p++) {
 			ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_SLEEP_AS_ANDROID,
 				sleep_batch+shift, MIN(pos-shift, FIFO_PACKET_SIZE));
@@ -100,7 +100,7 @@ static void sleep_handle_value(uint16_t val) {
 	if (val > sleep_max)
 		sleep_max = val;
 	if (sleep_count >= SLEEP_SAMPLE_COUNT) { // calculate statistics and store
-		uint8_t pos = SLEEP_BYTES*sleep_batch_count;
+		uint8_t pos = SLEEP_BYTES * sleep_batch_count;
 		sleep_batch[pos] = sleep_min;
 		sleep_batch[pos+1] = sleep_max;
 		sleep_batch[pos+2] = sleep_sum / sleep_count;
@@ -135,7 +135,85 @@ static inline void accel_process_step(bool count) {
 	}
 }
 
-static void accel_int_handler(void * p_event_data, uint16_t event_size) {
+static inline void accel_pedometer_handle(int8_t acc, int8_t direction) {
+	if (steps_debounce > 0) {
+		peak_min_count++;
+		peak_max_count++;
+		next_max_count++;
+		next_min_count++;
+		// up peak
+		if (old_dir >= 0 && direction < 0) {
+			// if not in walking mode start at any peak
+			if (peak_max_count < PED_DELAY_MIN) {
+				// restart searching if better peak found
+				if (acc > peak_max) {
+					peak_max = acc;
+					peak_max_count = 0;
+					next_max = -128;
+					next_max_count = 0;
+				}
+			} else if (peak_max_count <= PED_DELAY_MAX && acc > next_max) {
+				// choose the max in the window
+				next_max = acc;
+				next_max_count = 0;
+			}
+		}
+		// down peak
+		if (old_dir <= 0 && direction > 0) {
+			// if not in walking mode start at any peak
+			if (peak_min_count < PED_DELAY_MIN) {
+				// restart searching if better peak found
+				if (acc < peak_min) {
+					peak_min = acc;
+					peak_min_count = 0;
+					next_min = 127;
+					next_min_count = 0;
+				}
+			} else if (peak_min_count <= PED_DELAY_MAX && acc < next_min) {
+				// choose the min in the window
+				next_min = acc;
+				next_min_count = 0;
+			}	
+		}
+		
+		// out of max window
+		if (peak_max_count > PED_DELAY_MAX) {
+			accel_process_step(ped_mode & PED_WAIT_MAX && next_max - peak_min > PED_AMP_MIN);
+			peak_max = next_max;
+			peak_max_count = next_max_count;
+			next_max = -128;
+			next_max_count = 0;
+		}
+		// out of min window
+		if (peak_min_count > PED_DELAY_MAX) {
+			accel_process_step((ped_mode & PED_WAIT_MAX) == 0 && peak_max - next_min > PED_AMP_MIN);
+			peak_min = next_min;
+			peak_min_count = next_min_count;
+			next_min = 127;
+			next_min_count = 0;
+		}
+	} else { // debounce counter == 0
+		if (old_dir >= 0 && direction < 0) {
+			steps_debounce++;
+			ped_mode &= ~PED_WAIT_MAX;
+			peak_max = acc;
+			peak_max_count = 0;
+			next_max = -128;
+			next_max_count = 0;
+		}
+		if (old_dir <= 0 && direction > 0) {
+			steps_debounce++;
+			ped_mode |= PED_WAIT_MAX;
+			peak_min = acc;
+			peak_min_count = 0;
+			next_min = 127;
+			next_min_count = 0;
+		}
+	}
+	old_dir = direction;
+}
+
+static void accel_int_handler(void *p_event_data, uint16_t event_size) {
 	uint8_t int_src;
 	uint8_t int_detail;
 	accel_read_register(0x0C, &int_src);
@@ -163,8 +241,8 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 		accel_read_register(0x00, &int_detail);
 		// F_STATUS
 		if (int_detail & 0x40) {
-			int8_t data[2*FIFO_SIZE];
-			accel_read_multi_register(0x01, (uint8_t *)data, 2*FIFO_SIZE);
+			int8_t data[2 * FIFO_SIZE];
+			accel_read_multi_register(0x01, (uint8_t *)data, 2 * FIFO_SIZE);
 			bool acc_sleep = get_settings(CONFIG_SLEEP_AS_ANDROID);
 			bool acc_ped = get_settings(CONFIG_PEDOMETER);
 			bool acc_all = get_settings(CONFIG_ACCELEROMETER);
@@ -174,129 +252,36 @@ static void accel_int_handler(void * p_event_data, uint16_t event_size) {
 				
 				if (acc_sleep || acc_ped) {
 					int dx, dy, dz, acc;
+					int pos = 0;
 					for (int i = 0; i < FIFO_LENGTH; i++) {
-						int pos = FIFO_BYTES * i;
-						if (i == 0) {
-							dx = data[pos]-sx;
-							dy = data[pos+1]-sy;
-							dz = data[pos+2]-sz;
-							acc = sy;
-						} else {
-							dx = data[pos]-data[pos-3];
-							dy = data[pos+1]-data[pos-2];
-							dz = data[pos+2]-data[pos-1];
-							acc = data[pos-2];
-						}
+						dx = data[pos]-sx;
+						dy = data[pos+1]-sy;
+						dz = data[pos+2]-sz;
+						acc = sy;
 						
 						if (acc_ped) {
-							int direction = SIGN(dy);
-							if (steps_debounce > 0) {
-								peak_min_count++;
-								peak_max_count++;
-								next_max_count++;
-								next_min_count++;
-								// up peak
-								if (old_dir >= 0 && direction < 0) {
-									// if not in walking mode start at any peak
-									if (peak_max_count < PED_DELAY_MIN) {
-										// restart searching if better peak found
-										if (acc > peak_max) {
-											peak_max = acc;
-											peak_max_count = 0;
-											next_max = -128;
-											next_max_count = 0;
-										}
-									} else if (peak_max_count <= PED_DELAY_MAX && acc > next_max) {
-										// choose the max in the window
-										next_max = acc;
-										next_max_count = 0;
-									}
-								}
-								// down peak
-								if (old_dir <= 0 && direction > 0) {
-									// if not in walking mode start at any peak
-									if (peak_min_count < PED_DELAY_MIN) {
-										// restart searching if better peak found
-										if (acc < peak_min) {
-											peak_min = acc;
-											peak_min_count = 0;
-											next_min = 127;
-											next_min_count = 0;
-										}
-									} else if (peak_min_count <= PED_DELAY_MAX && acc < next_min) {
-										// choose the min in the window
-										next_min = acc;
-										next_min_count = 0;
-									}	
-								}
-								
-								// out of max window
-								if (peak_max_count > PED_DELAY_MAX) {
-									accel_process_step(ped_mode & PED_WAIT_MAX && next_max - peak_min > PED_AMP_MIN);
-									peak_max = next_max;
-									peak_max_count = next_max_count;
-									next_max = -128;
-									next_max_count = 0;
-								}
-								// out of min window
-								if (peak_min_count > PED_DELAY_MAX) {
-									accel_process_step((ped_mode & PED_WAIT_MAX) == 0 && peak_max - next_min > PED_AMP_MIN);
-									peak_min = next_min;
-									peak_min_count = next_min_count;
-									next_min = 127;
-									next_min_count = 0;
-								}
-							} else { // debounce counter == 0
-								if (old_dir >= 0 && direction < 0) {
-									steps_debounce++;
-									ped_mode &= ~PED_WAIT_MAX;
-									peak_max = acc;
-									peak_max_count = 0;
-									next_max = -128;
-									next_max_count = 0;
-								}
-								if (old_dir <= 0 && direction > 0) {
-									steps_debounce++;
-									ped_mode |= PED_WAIT_MAX;
-									peak_min = acc;
-									peak_min_count = 0;
-									next_min = 127;
-									next_min_count = 0;
-								}
-							}
-							
-							old_dir = direction;
-							// debug: replace x,z acceleration by peak value
-							if (i > 0) {
-								data[pos-3] = peak_max;
-								data[pos-1] = peak_min;
-							}
-//		value[2] = hex_str[steps_debounce >> 4];
-//		value[3] = hex_str[steps_debounce & 0xf];
-//		mlcd_draw_text(value, 50, 0, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-//		value[2] = hex_str[ped_mode >> 4];
-//		value[3] = hex_str[ped_mode & 0xf];
-//		mlcd_draw_text(value, 50, 20, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-//		mlcd_fb_flush();
+							accel_pedometer_handle(acc, SIGN(dy));
 						}
 
 						if (acc_sleep) {
 							uint16_t delta = abs(dx) + abs(dy) + abs(dz);
 							sleep_handle_value(delta);
 						}
+						
+						sx = data[pos];
+						sy = data[pos+1];
+						sz = data[pos+2];
+						pos += FIFO_BYTES;
 					}
 					sx = data[FIFO_SIZE-3];
 					sy = data[FIFO_SIZE-2];
 					sz = data[FIFO_SIZE-1];
-					// debug: replace x,z acceleration by peak value
-					data[FIFO_SIZE-3] = peak_max;
-					data[FIFO_SIZE-1] = peak_min;
 				}
 
 				if (acc_all)
 					for (int p = 0; p < FIFO_PACKETS; p++)
 						ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_ACCELEROMETER,
-							(uint8_t *)&data[FIFO_PACKET_SIZE*p], FIFO_PACKET_SIZE);
+							(uint8_t *)&data[FIFO_PACKET_SIZE * p], FIFO_PACKET_SIZE);
 			}
 		}
 	}

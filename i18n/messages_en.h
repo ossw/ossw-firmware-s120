@@ -1,6 +1,8 @@
 #ifndef MESSAGES_EN_H
 #define MESSAGES_EN_H
 
+#include "i18n.h"
+
 static const I18N_MESSAGE messages_en[] = {
 	/*   0 */{""},
   /*   1 */{"Date"},
@@ -72,8 +74,8 @@ static const I18N_MESSAGE messages_en[] = {
   /*   67 */{"Silence"},
   /*   68 */{"O'clock"},
   /*   69 */{"Steps"},
-  /*   70 */{"Send accel"},
-  /*   71 */{"Sleep track"},
+  /*   70 */{"Sleep track"},
+  /*   71 */{"Acc2phone"},
 };
 
 #endif
