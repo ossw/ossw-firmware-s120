@@ -25,6 +25,7 @@
 #define PHONE_FUNC_GTASKS								              0x43
 #define PHONE_FUNC_ACCELEROMETER				              0x45
 #define PHONE_FUNC_SLEEP_AS_ANDROID			              0x46
+#define PHONE_FUNC_PED_DELTA													0x47
 
 #define NOTIFICATIONS_TYPE_ALERT 											1
 #define NOTIFICATIONS_TYPE_INFO												2
