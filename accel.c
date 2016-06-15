@@ -222,13 +222,6 @@ static void accel_int_handler(void *p_event_data, uint16_t event_size) {
 	uint8_t int_src;
 	uint8_t int_detail;
 	accel_read_register(0x0C, &int_src);
-#ifdef DEBUG
-	const char hex_str[]= "0123456789ABCDEF";
-	char value[5] = "0x00\0";
-	value[2] = hex_str[int_src >> 4];
-	value[3] = hex_str[int_src & 0xf];
-	mlcd_draw_text(value, 15, 15, MLCD_XRES, NULL, FONT_NORMAL_BOLD, 0);
-#endif
 
 	if (int_src & 0x10) {
 		accel_read_register(0x10, &int_detail);
@@ -250,8 +243,8 @@ static void accel_int_handler(void *p_event_data, uint16_t event_size) {
 			accel_read_multi_register(0x01, (uint8_t *)data, 2 * FIFO_SIZE);
 			bool acc_sleep = get_settings(CONFIG_SLEEP_AS_ANDROID);
 			bool acc_ped = get_settings(CONFIG_PEDOMETER);
-			bool acc_all = get_settings(CONFIG_ACCELEROMETER);
-			if (acc_sleep || acc_all || acc_ped) {
+			bool acc_raw = get_settings(CONFIG_ACCELEROMETER);
+			if (acc_sleep || acc_raw || acc_ped) {
 				fifo_count++;
 				for (int i = 0; i < FIFO_SIZE; i++)
 					data[i] = data[i << 1];
@@ -266,14 +259,7 @@ static void accel_int_handler(void *p_event_data, uint16_t event_size) {
 						acc = sy;
 						
 						if (acc_ped) {
-//							data[pos] = 127;
-//							data[pos+2] = -128;
-							if (accel_pedometer_handle(acc, SIGN(dy))) {
-//								if (ped_mode & PED_WAIT_MAX)
-//									data[pos] = peak_max;
-//								else
-//									data[pos+2] = peak_min;
-							}
+							accel_pedometer_handle(acc, SIGN(dy));
 						}
 
 						if (acc_sleep) {
@@ -291,12 +277,12 @@ static void accel_int_handler(void *p_event_data, uint16_t event_size) {
 					sz = data[FIFO_SIZE-1];
 				}
 
-				if (acc_all)
+				if (acc_raw)
 					for (int p = 0; p < FIFO_PACKETS; p++)
 						ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_ACCELEROMETER,
 							(uint8_t *)&data[FIFO_PACKET_SIZE * p], FIFO_PACKET_SIZE);
 
-				if (acc_ped && (fifo_count & PED_DELTA_PERIOD) == 0) {
+				if (acc_ped && steps_delta > 0 && (fifo_count & PED_DELTA_PERIOD) == 0) {
 					ble_peripheral_invoke_notification_function_with_data(PHONE_FUNC_PED_DELTA, (uint8_t *)&steps_delta, 2);
 					steps_delta = 0;
 				}
@@ -396,13 +382,18 @@ void accel_interrupts_reset() {
 	//accel_write_register(0x2C, 0x30);//0x40
 
 	uint8_t interrupt = 0;
-	if (get_settings(CONFIG_ACCELEROMETER) || get_settings(CONFIG_SLEEP_AS_ANDROID || get_settings(CONFIG_PEDOMETER))) {
+	bool acc_sleep = get_settings(CONFIG_SLEEP_AS_ANDROID);
+	bool acc_ped = get_settings(CONFIG_PEDOMETER);
+	bool acc_raw = get_settings(CONFIG_ACCELEROMETER);
+	if (acc_raw || acc_sleep || acc_ped) {
 		reset_sleep();
 		accel_fifo_init();
 		interrupt |= 0x40;
 	}
 	accel_tilt_init();
-	interrupt |= 0x10;
+	default_action* default_actions = config_get_default_global_actions();
+	if (default_actions[8].action_id)
+		interrupt |= 0x10;
 	//accel_motion_init();
 	//accel_transient_init();
 	//accel_pulse_init();
@@ -422,7 +413,8 @@ void accel_interrupts_reset() {
 	// go to active mode
 	// 0x2A: CTRL_REG1 System Control 1 register
 	// ASLP_RATE 01 = DR 101 = 12,5Hz
-	accel_write_register(0x2A, 0x69);
+	if (interrupt > 0)
+		accel_write_register(0x2A, 0x69);
 	// ASLP_RATE 10 = DR 110 = 6,25Hz
 	//accel_write_register(0x2A, 0xB1);
 	// ASLP_RATE 00 = DR 100 = 50Hz

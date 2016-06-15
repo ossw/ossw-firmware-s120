@@ -221,17 +221,18 @@ static void oclock_toggle() {
 	settings_toggle(CONFIG_OCLOCK);
 }
 
-static void accelerometer_toggle() {
-	settings_toggle(CONFIG_ACCELEROMETER);
-	accel_interrupts_reset();
-}
-
 static void pedometer_toggle() {
 	settings_toggle(CONFIG_PEDOMETER);
+	accel_interrupts_reset();
 }
 
 static void sleep_as_android_toggle() {
 	settings_toggle(CONFIG_SLEEP_AS_ANDROID);
+	accel_interrupts_reset();
+}
+
+static void accelerometer_toggle() {
+	settings_toggle(CONFIG_ACCELEROMETER);
 	accel_interrupts_reset();
 }
 
