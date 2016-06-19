@@ -54,6 +54,9 @@
 #define MESSAGE_STEPS							69
 #define MESSAGE_SLEEP_AS_ANDROID	70
 #define MESSAGE_ACCELEROMETER			71
+#define MESSAGE_BLUETOOTH					72
+#define MESSAGE_BT_SLEEP					73
+#define MESSAGE_CENTRAL_MODE			74
 
 typedef struct
 {

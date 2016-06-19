@@ -146,6 +146,21 @@ static void draw_sleep_switch(uint8_t x, uint8_t y) {
 	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
+static void draw_bluetooth_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_BLUETOOTH);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
+static void draw_bt_sleep_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_BT_SLEEP);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
+static void draw_central_mode_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_CENTRAL_MODE);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
 static void draw_silent_hours(uint8_t x, uint8_t y) {
 	uint8_t h1 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS);
 	uint8_t h2 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1);
@@ -236,6 +251,20 @@ static void accelerometer_toggle() {
 	accel_interrupts_reset();
 }
 
+static void bluetooth_toggle() {
+	settings_toggle(CONFIG_BLUETOOTH);
+	NVIC_SystemReset();
+}
+
+static void bt_sleep_toggle() {
+	settings_toggle(CONFIG_BT_SLEEP);
+}
+
+static void central_mode_toggle() {
+	settings_toggle(CONFIG_CENTRAL_MODE);
+	NVIC_SystemReset();
+}
+
 static void shake_light_toggle() {
 		default_action* default_actions = config_get_default_global_actions();
 		if (default_actions[8].action_id == 0)
@@ -278,6 +307,9 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_STEPS, pedometer_toggle, reset_steps, draw_steps},
 		{MESSAGE_SLEEP_AS_ANDROID, sleep_as_android_toggle, sleep_as_android_toggle, draw_sleep_switch},
 		{MESSAGE_ACCELEROMETER, accelerometer_toggle, accelerometer_toggle, draw_accel_switch},
+		{MESSAGE_BLUETOOTH, bluetooth_toggle, bluetooth_toggle, draw_bluetooth_switch},
+		{MESSAGE_BT_SLEEP, bt_sleep_toggle, bt_sleep_toggle, draw_bt_sleep_switch},
+		{MESSAGE_CENTRAL_MODE, central_mode_toggle, central_mode_toggle, draw_central_mode_switch},
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
 		{MESSAGE_TIME, opt_handler_change_time, opt_handler_change_time, NULL},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},
