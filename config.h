@@ -5,18 +5,18 @@
 #include <stdint.h>
 #include "fs.h"
 
-#define CONFIG_DISCONNECT_ALERT			0x01
-#define CONFIG_NOTIFICATION_LIGHT		0x02
-#define CONFIG_DISPLAY_INVERT				0x04
-#define CONFIG_SLOW_REFRESH					0x08
-#define CONFIG_BLUETOOTH						0x10
-#define CONFIG_BT_SLEEP							0x20
-#define CONFIG_BUTTONS_LIGHT				0x40
-#define CONFIG_OCLOCK								0x80
-#define CONFIG_ACCELEROMETER				0x100
-#define CONFIG_SLEEP_AS_ANDROID			0x200
-#define CONFIG_PEDOMETER						0x400
-#define CONFIG_CENTRAL_MODE					0x800
+#define CONFIG_DISCONNECT_ALERT			0x0001
+#define CONFIG_NOTIFICATION_LIGHT		0x0002
+#define CONFIG_DISPLAY_INVERT				0x0004
+#define CONFIG_SLOW_REFRESH					0x0008
+#define CONFIG_BLUETOOTH						0x0010
+#define CONFIG_BT_SLEEP							0x0020
+#define CONFIG_BUTTONS_LIGHT				0x0040
+#define CONFIG_OCLOCK								0x0080
+#define CONFIG_ACCELEROMETER				0x0100
+#define CONFIG_SLEEP_AS_ANDROID			0x0200
+#define CONFIG_PEDOMETER						0x0400
+#define CONFIG_CENTRAL_MODE					0x0800
 
 typedef struct {
 		uint8_t action_id;
@@ -50,5 +50,9 @@ void settings_toggle(uint32_t mask);
 void settings_on(uint32_t mask);
 
 void settings_off(uint32_t mask);
+
+void reboot(void);
+
+void bluetooth_toggle(void);
 
 #endif /* CONFIGURATION_H */

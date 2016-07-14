@@ -2,7 +2,6 @@
 #include "scr_controls.h"
 #include "rtc.h"
 #include "battery.h"
-#include "screens/scr_choosemode.h"
 #include "screens/scr_watchface.h"
 #include "screens/scr_changetime.h"
 #include "screens/scr_changedate.h"
@@ -124,7 +123,7 @@ static const SCR_CONTROLS_DEFINITION notification_bar_controls_definition = {
 };
 
 void scr_mngr_init(void) {
-	  scr_mngr_show_screen(SCR_CHOOSE_MODE);
+	  scr_mngr_show_screen(SCR_WATCHFACE);
 }
 
 bool scr_mngr_default_handle_event(uint32_t event_type, uint32_t event_param) {
@@ -149,7 +148,7 @@ void static scr_mngr_handle_event_internal(uint16_t screen_id, uint32_t event_ty
 		bool handled = false;
 	  switch (screen_id) {
 			  case SCR_CHOOSE_MODE:
-				    handled = scr_choosemode_handle_event(event_type, event_param);
+//				    handled = scr_choosemode_handle_event(event_type, event_param);
 				    break;
 			  case SCR_WATCHFACE:
 				    handled = scr_watchface_handle_event(event_type, event_param);

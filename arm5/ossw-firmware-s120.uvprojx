@@ -587,11 +587,6 @@
               <FilePath>..\screens\scr_changetime.c</FilePath>
             </File>
             <File>
-              <FileName>scr_choosemode.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\screens\scr_choosemode.c</FilePath>
-            </File>
-            <File>
               <FileName>scr_notifications.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_notifications.c</FilePath>
@@ -1387,11 +1382,6 @@
               <FileName>scr_changetime.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_changetime.c</FilePath>
-            </File>
-            <File>
-              <FileName>scr_choosemode.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\screens\scr_choosemode.c</FilePath>
             </File>
             <File>
               <FileName>scr_notifications.c</FileName>

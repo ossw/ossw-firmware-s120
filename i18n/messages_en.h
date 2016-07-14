@@ -76,6 +76,9 @@ static const I18N_MESSAGE messages_en[] = {
   /*   69 */{"Steps"},
   /*   70 */{"Sleep track"},
   /*   71 */{"Acc2phone"},
+  /*   72 */{"Bluetooth"},
+  /*   73 */{"BT sleep"},
+  /*   74 */{"Central md"},
 };
 
 #endif

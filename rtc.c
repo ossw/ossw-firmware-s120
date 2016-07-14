@@ -40,10 +40,21 @@ void rtc_tick_event(void * p_event_data, uint16_t event_size) {
 	}
 	if (rtc_get_current_seconds() == 0) {
 		alarm_clock_handle();
-		if (rtc_get_current_minutes() == 0 && get_settings(CONFIG_OCLOCK))
-			vibration_vibrate(OCLOCK_PATTERN, 0x0100, false);
-		if (rtc_get_current_minutes()%10 == 0 && get_settings(CONFIG_BLUETOOTH_ON) && !get_settings(CONFIG_CENTRAL_MODE))
-			battery_level_update();
+		if (rtc_get_current_minutes() == 0) {
+			if (get_settings(CONFIG_OCLOCK))
+				vibration_vibrate(OCLOCK_PATTERN, 0x0100, false);
+			if (rtc_get_current_minutes()%10 == 0 && get_settings(CONFIG_BLUETOOTH) && !get_settings(CONFIG_CENTRAL_MODE))
+				battery_level_update();
+			if (get_settings(CONFIG_BT_SLEEP)) {
+				uint8_t hour = rtc_get_current_hour_24();
+				uint8_t hour1 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS);
+				if (get_settings(CONFIG_BLUETOOTH) && hour == hour1)
+					bluetooth_toggle();
+				uint8_t hour2 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1);
+				if (!get_settings(CONFIG_BLUETOOTH) && hour == hour2)
+					bluetooth_toggle();
+			}
+		}
 	}
 }
 
@@ -66,7 +77,6 @@ void rtc_toggle_refresh_interval() {
 }
 
 void rtc_timer_init(void) {
-		settings_off(CONFIG_BLUETOOTH_ON);
 	  current_time = rtc_load_time();
 		if (current_time == 0) {
 			  // set initial time

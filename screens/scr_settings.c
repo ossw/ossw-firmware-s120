@@ -251,27 +251,23 @@ static void accelerometer_toggle() {
 	accel_interrupts_reset();
 }
 
-static void bluetooth_toggle() {
-	settings_toggle(CONFIG_BLUETOOTH);
-	NVIC_SystemReset();
-}
-
 static void bt_sleep_toggle() {
 	settings_toggle(CONFIG_BT_SLEEP);
 }
 
 static void central_mode_toggle() {
 	settings_toggle(CONFIG_CENTRAL_MODE);
-	NVIC_SystemReset();
+	reboot();
 }
 
 static void shake_light_toggle() {
-		default_action* default_actions = config_get_default_global_actions();
-		if (default_actions[8].action_id == 0)
-				default_actions[8].action_id = WATCH_SET_FUNC_TEMPORARY_BACKLIGHT;
-		else
-				default_actions[8].action_id = 0;
-		config_set_default_global_actions(default_actions);
+	default_action* default_actions = config_get_default_global_actions();
+	if (default_actions[8].action_id == 0)
+		default_actions[8].action_id = WATCH_SET_FUNC_TEMPORARY_BACKLIGHT;
+	else
+		default_actions[8].action_id = 0;
+	config_set_default_global_actions(default_actions);
+	accel_interrupts_reset();
 }
 
 // TEST DIALOG
@@ -313,7 +309,7 @@ static const MENU_OPTION settings_menu[] = {
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
 		{MESSAGE_TIME, opt_handler_change_time, opt_handler_change_time, NULL},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},
-		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL},
+		{MESSAGE_RESTART, reboot, reboot, NULL},
 //		{MESSAGE_ABOUT, test_handler, test_handler, NULL}
 };
 

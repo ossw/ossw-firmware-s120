@@ -35,6 +35,8 @@
 #include "alarm.h"
 #include "app_scheduler.h"
 #include "screens\scr_timer.h"
+#include "ble/ble_central.h"
+#include "ble/ble_peripheral.h"
 
 #ifdef OSSW_DEBUG
 		#include "app_uart.h"
@@ -166,15 +168,23 @@ static void init_lcd_with_splash_screen() {
     mlcd_display_on();
 }
 
+static void init_ble_mode() {
+	if (get_settings(CONFIG_BLUETOOTH)) {
+		if (get_settings(CONFIG_CENTRAL_MODE)) {
+			ble_central_mode_init();
+		} else {
+			ble_peripheral_mode_init();
+		}
+	}
+}
+
 /**@brief Function for application main entry.
  */
 int main(void)
 {
-	
 #ifdef OSSW_DEBUG
 		init_uart();
 #endif
-	
 	  spi_init();
 	  ext_ram_init();
 	  init_lcd_with_splash_screen();
@@ -182,7 +192,6 @@ int main(void)
     // Initialize.
     timers_init();
 		rtc_timer_init();
-		accel_init();
 		buttons_init();
 	  battery_init();
 	
@@ -194,6 +203,7 @@ int main(void)
 	
 		fs_init();
 		config_init();
+		accel_init();
 		scr_mngr_init();
 		vibration_init();
 		notifications_init();
@@ -202,6 +212,7 @@ int main(void)
 		timer_feature_init();
 		
 		mlcd_timers_init();
+		init_ble_mode();
 		
     // Enter main loop.
     for (;;)
