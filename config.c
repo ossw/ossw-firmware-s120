@@ -174,3 +174,12 @@ void settings_off(uint32_t mask) {
 		settings &= ~mask;
 		put_ext_ram_int(EXT_RAM_SETTINGS, settings);
 }
+
+void reboot() {
+	NVIC_SystemReset();
+}
+
+void bluetooth_toggle() {
+	settings_toggle(CONFIG_BLUETOOTH);
+	reboot();
+}

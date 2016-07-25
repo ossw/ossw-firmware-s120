@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <math.h>
 #include "graph.h"
+#include "board.h"
 #include "mlcd.h"
 #include "mlcd_draw.h"
 #include "ext_ram.h"
@@ -44,7 +45,7 @@ void pixel(uint_fast8_t x, uint_fast8_t y, uint8_t mode) {
 
 void vLine(uint_fast8_t x, uint_fast8_t y1, uint_fast8_t y2, uint8_t mode) {
 	if (y1 > y2)
-		SWAP(y1, y2);
+		SWAP_NUMBERS(y1, y2);
 	for (uint8_t y = y1; y <= y2; y++)
 		pixel(x, y, mode);
 }
@@ -56,7 +57,7 @@ void hLine(uint_fast8_t y, uint_fast8_t x1, uint_fast8_t x2, uint8_t mode) {
 		x1 = MLCD_XRES - x1 - 1;
 		x2 = MLCD_XRES - x2 - 1;
 		if (x1 > x2)
-			SWAP(x1, x2);
+			SWAP_NUMBERS(x1, x2);
 		mlcd_set_line_changed(y);
 		uint_fast8_t leftByte = x1 >> 3;
 		uint_fast8_t rightByte = x2 >> 3;
@@ -155,8 +156,8 @@ void polygon(int_fast8_t size, uint_fast8_t x[], uint_fast8_t y[], uint8_t mode)
 
 static void fillBorder(uint8_t border[], uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2, bool right) {
 		if (x2 < x1) {
-				SWAP(x1, x2);
-				SWAP(y1, y2);
+				SWAP_NUMBERS(x1, x2);
+				SWAP_NUMBERS(y1, y2);
 		}
     int dy = y2 - y1;
     int dx = x2 - x1;

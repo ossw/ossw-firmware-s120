@@ -23,12 +23,18 @@
 #define PHONE_FUNC_SEND_SMS							              0x41
 #define PHONE_FUNC_CALL_CONTACT					              0x42
 #define PHONE_FUNC_GTASKS								              0x43
+#define PHONE_FUNC_ACCELEROMETER				              0x45
+#define PHONE_FUNC_SLEEP_AS_ANDROID			              0x46
+#define PHONE_FUNC_PED_DELTA													0x47
 
 #define NOTIFICATIONS_TYPE_ALERT 											1
 #define NOTIFICATIONS_TYPE_INFO												2
 #define NOTIFICATIONS_TYPE_UPDATE											3
 #define NOTIFICATIONS_TYPE_DIALOG_SELECT							4
 #define NOTIFICATIONS_TYPE_DIALOG_OPTIONS							5
+#define NOTIFICATIONS_TYPE_SLEEP_START								20
+#define NOTIFICATIONS_TYPE_SLEEP_STOP									21
+#define NOTIFICATIONS_TYPE_SLEEP_BATCH_SIZE						22
 #define NOTIFICATIONS_TYPE_DIALOG_CLOSE								255
 
 #define NOTIFICATIONS_CATEGORY_SUMMARY								0

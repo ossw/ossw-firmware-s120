@@ -12,6 +12,7 @@
 #include "../alarm.h"
 #include "../ext_ram.h"
 #include "../config.h"
+#include "../accel.h"
 #include "../watchset.h"
 #include "../notifications.h"
 #include "dialog_select.h"
@@ -135,46 +136,83 @@ static void draw_disconnect_alert_switch(uint8_t x, uint8_t y) {
 	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
+static void draw_accel_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_ACCELEROMETER);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
+static void draw_sleep_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_SLEEP_AS_ANDROID);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
+static void draw_bluetooth_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_BLUETOOTH);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
+static void draw_bt_sleep_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_BT_SLEEP);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
+static void draw_central_mode_switch(uint8_t x, uint8_t y) {
+	bool on = get_settings(CONFIG_CENTRAL_MODE);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
+}
+
 static void draw_silent_hours(uint8_t x, uint8_t y) {
 	uint8_t h1 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS);
 	uint8_t h2 = get_ext_ram_byte(EXT_RAM_SILENT_HOURS + 1);
-		char txt[6];
-		txt[0] = '0' + h1/10;
-		txt[1] = '0' + h1%10;
-		txt[2] = '-';
-		txt[3] = '0' + h2/10;
-		txt[4] = '0' + h2%10;
-		txt[5] = '\0';
-		mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
+	char txt[6];
+	txt[0] = '0' + h1/10;
+	txt[1] = '0' + h1%10;
+	txt[2] = '-';
+	txt[3] = '0' + h2/10;
+	txt[4] = '0' + h2%10;
+	txt[5] = '\0';
+	mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
 }
 
 static void draw_dark_hours(uint8_t x, uint8_t y) {
 	uint8_t h1 = get_ext_ram_byte(EXT_RAM_DARK_HOURS);
 	uint8_t h2 = get_ext_ram_byte(EXT_RAM_DARK_HOURS + 1);
-		char txt[6];
-		txt[0] = '0' + h1/10;
-		txt[1] = '0' + h1%10;
-		txt[2] = '-';
-		txt[3] = '0' + h2/10;
-		txt[4] = '0' + h2%10;
-		txt[5] = '\0';
-		mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
+	char txt[6];
+	txt[0] = '0' + h1/10;
+	txt[1] = '0' + h1%10;
+	txt[2] = '-';
+	txt[3] = '0' + h2/10;
+	txt[4] = '0' + h2%10;
+	txt[5] = '\0';
+	mlcd_draw_text(txt, x, y+2, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_NORMAL_REGULAR, HORIZONTAL_ALIGN_RIGHT);
 }
 
 static void draw_light_delay(uint8_t x, uint8_t y) {
-		uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
-		char txt[3];
-		txt[0] = '0' + delay;
-		txt[1] = 's';
-		txt[2] = '\0';
-		mlcd_draw_text(txt, x, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+	uint8_t delay = get_ext_ram_byte(EXT_RAM_LIGHT_DURATION);
+	char txt[3];
+	txt[0] = '0' + delay;
+	txt[1] = 's';
+	txt[2] = '\0';
+	mlcd_draw_text(txt, x, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
 }
 
 static void draw_interval_summary(uint8_t x, uint8_t y) {
-		uint16_t text = MESSAGE_1_SECOND;
-		if (rtc_get_refresh_interval() == RTC_INTERVAL_MINUTE)
-				text = MESSAGE_1_MINUTE;
-		mlcd_draw_text(I18N_TRANSLATE(text), x, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+	uint16_t text = MESSAGE_1_SECOND;
+	if (rtc_get_refresh_interval() == RTC_INTERVAL_MINUTE)
+		text = MESSAGE_1_MINUTE;
+	mlcd_draw_text(I18N_TRANSLATE(text), x, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+}
+
+static void draw_steps(uint8_t x, uint8_t y) {
+	uint16_t s = get_steps();
+	char count[6] = "    0\0";
+	for (int i = 4; i >= 0 && s > 0; i--) {
+		count[i] = '0' + s % 10;
+		s /= 10;
+	}
+	mlcd_draw_text(count, x-42, y, MLCD_XRES-SUMMARY_X-MARGIN_LEFT, NULL, FONT_OPTION_NORMAL, HORIZONTAL_ALIGN_RIGHT);
+	bool on = get_settings(CONFIG_PEDOMETER);
+	draw_switch(x+MENU_SWITCH_PADDING_X, y, on);
 }
 
 static void rtc_refresh_toggle() {
@@ -198,13 +236,38 @@ static void oclock_toggle() {
 	settings_toggle(CONFIG_OCLOCK);
 }
 
+static void pedometer_toggle() {
+	settings_toggle(CONFIG_PEDOMETER);
+	accel_interrupts_reset();
+}
+
+static void sleep_as_android_toggle() {
+	settings_toggle(CONFIG_SLEEP_AS_ANDROID);
+	accel_interrupts_reset();
+}
+
+static void accelerometer_toggle() {
+	settings_toggle(CONFIG_ACCELEROMETER);
+	accel_interrupts_reset();
+}
+
+static void bt_sleep_toggle() {
+	settings_toggle(CONFIG_BT_SLEEP);
+}
+
+static void central_mode_toggle() {
+	settings_toggle(CONFIG_CENTRAL_MODE);
+	reboot();
+}
+
 static void shake_light_toggle() {
-		default_action* default_actions = config_get_default_global_actions();
-		if (default_actions[8].action_id == 0)
-				default_actions[8].action_id = WATCH_SET_FUNC_TEMPORARY_BACKLIGHT;
-		else
-				default_actions[8].action_id = 0;
-		config_set_default_global_actions(default_actions);
+	default_action* default_actions = config_get_default_global_actions();
+	if (default_actions[8].action_id == 0)
+		default_actions[8].action_id = WATCH_SET_FUNC_TEMPORARY_BACKLIGHT;
+	else
+		default_actions[8].action_id = 0;
+	config_set_default_global_actions(default_actions);
+	accel_interrupts_reset();
 }
 
 // TEST DIALOG
@@ -237,10 +300,16 @@ static const MENU_OPTION settings_menu[] = {
 		{MESSAGE_OCLOCK, oclock_toggle, oclock_toggle, draw_oclock_switch},
 		{MESSAGE_DISCONNECT_ALERT, disconnect_alert_toggle, disconnect_alert_toggle, draw_disconnect_alert_switch},
 		{MESSAGE_RTC_REFRESH, rtc_refresh_toggle, rtc_refresh_toggle, draw_interval_summary},
+		{MESSAGE_STEPS, pedometer_toggle, reset_steps, draw_steps},
+		{MESSAGE_SLEEP_AS_ANDROID, sleep_as_android_toggle, sleep_as_android_toggle, draw_sleep_switch},
+		{MESSAGE_ACCELEROMETER, accelerometer_toggle, accelerometer_toggle, draw_accel_switch},
+		{MESSAGE_BLUETOOTH, bluetooth_toggle, bluetooth_toggle, draw_bluetooth_switch},
+		{MESSAGE_BT_SLEEP, bt_sleep_toggle, bt_sleep_toggle, draw_bt_sleep_switch},
+		{MESSAGE_CENTRAL_MODE, central_mode_toggle, central_mode_toggle, draw_central_mode_switch},
 	  {MESSAGE_DATE, opt_handler_change_date, opt_handler_change_date, NULL},
 		{MESSAGE_TIME, opt_handler_change_time, opt_handler_change_time, NULL},
 		{MESSAGE_FORMAT, reformat, reformat, NULL},
-		{MESSAGE_RESTART, NVIC_SystemReset, NVIC_SystemReset, NULL},
+		{MESSAGE_RESTART, reboot, reboot, NULL},
 //		{MESSAGE_ABOUT, test_handler, test_handler, NULL}
 };
 

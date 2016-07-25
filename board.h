@@ -70,7 +70,7 @@ extern uint32_t * p_spi1_base_address;
 #define APP_TIMER_OP_QUEUE_SIZE          2                  /**< Size of timer operation queues. */
 
 #define SCHED_MAX_EVENT_DATA_SIZE sizeof(nrf_drv_gpiote_pin_t)
-#define SCHED_QUEUE_SIZE    			8
+#define SCHED_QUEUE_SIZE    						14
 
 #define ACCEL_INT1				 3u
 #define ACCEL_INT2				 2u
@@ -83,5 +83,7 @@ extern uint32_t * p_spi1_base_address;
 #define TX_PIN_NUMBER  16
 
 #define CEIL(x, y) ((x % y) ? x / y + 1 : x / y)
+#define SWAP_NUMBERS(a, b) {a ^= b; b ^= a; a ^= b;}
+#define SIGN(a) (a > 0 ? 1 : (a < 0 ? -1 : 0))
 
 #endif // WATCH_BOARD_H

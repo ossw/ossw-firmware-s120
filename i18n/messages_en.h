@@ -1,6 +1,8 @@
 #ifndef MESSAGES_EN_H
 #define MESSAGES_EN_H
 
+#include "i18n.h"
+
 static const I18N_MESSAGE messages_en[] = {
 	/*   0 */{""},
   /*   1 */{"Date"},
@@ -52,7 +54,7 @@ static const I18N_MESSAGE messages_en[] = {
   /*   47 */{"Refresh"},
   /*   48 */{"1s"},
   /*   49 */{"1min"},
-  /*   50 */{"Shake light"},
+  /*   50 */{"Tilt light"},
   /*   51 */{"Notif light"},
   /*   52 */{"Timer"},
   /*   53 */{"Hours"},
@@ -71,6 +73,12 @@ static const I18N_MESSAGE messages_en[] = {
   /*   66 */{"Watch faces"},
   /*   67 */{"Silence"},
   /*   68 */{"O'clock"},
+  /*   69 */{"Steps"},
+  /*   70 */{"Sleep track"},
+  /*   71 */{"Acc2phone"},
+  /*   72 */{"Bluetooth"},
+  /*   73 */{"BT sleep"},
+  /*   74 */{"Central md"},
 };
 
 #endif

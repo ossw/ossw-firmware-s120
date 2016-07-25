@@ -48,7 +48,7 @@ static void scr_changetime_handle_button_up(void) {
 				}
 				scr_hours_draw_hour1();
 		}	else if (change_mode == MODE_HOUR2) {
-			  if (++light_hour2 > 23) {
+			  if (++light_hour2 > 24) {
 					  light_hour2 = 0;
 				}
 				scr_hours_draw_hour2();
@@ -64,7 +64,7 @@ static void scr_changetime_handle_button_down(void) {
 				scr_hours_draw_hour1();
 		}	else if (change_mode == MODE_HOUR2) {
 			  if(--light_hour2 < 0) {
-					  light_hour2 = 23;
+					  light_hour2 = 24;
 				}
 				scr_hours_draw_hour2();
 		}

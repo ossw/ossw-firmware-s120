@@ -447,6 +447,11 @@
               <FilePath>..\battery.c</FilePath>
             </File>
             <File>
+              <FileName>button_lib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\button_lib.c</FilePath>
+            </File>
+            <File>
               <FileName>buttons.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\buttons.c</FilePath>
@@ -582,11 +587,6 @@
               <FilePath>..\screens\scr_changetime.c</FilePath>
             </File>
             <File>
-              <FileName>scr_choosemode.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\screens\scr_choosemode.c</FilePath>
-            </File>
-            <File>
               <FileName>scr_notifications.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_notifications.c</FilePath>
@@ -632,9 +632,14 @@
               <FilePath>..\screens\scr_timer.c</FilePath>
             </File>
             <File>
-              <FileName>scr_light_hours.c</FileName>
+              <FileName>scr_dark_hours.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\screens\scr_light_hours.c</FilePath>
+              <FilePath>..\screens\scr_dark_hours.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_silent_hours.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_silent_hours.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1239,6 +1244,11 @@
               <FilePath>..\battery.c</FilePath>
             </File>
             <File>
+              <FileName>button_lib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\button_lib.c</FilePath>
+            </File>
+            <File>
               <FileName>buttons.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\buttons.c</FilePath>
@@ -1374,11 +1384,6 @@
               <FilePath>..\screens\scr_changetime.c</FilePath>
             </File>
             <File>
-              <FileName>scr_choosemode.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\screens\scr_choosemode.c</FilePath>
-            </File>
-            <File>
               <FileName>scr_notifications.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\screens\scr_notifications.c</FilePath>
@@ -1424,9 +1429,14 @@
               <FilePath>..\screens\scr_timer.c</FilePath>
             </File>
             <File>
-              <FileName>scr_light_hours.c</FileName>
+              <FileName>scr_dark_hours.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\screens\scr_light_hours.c</FilePath>
+              <FilePath>..\screens\scr_dark_hours.c</FilePath>
+            </File>
+            <File>
+              <FileName>scr_silent_hours.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\screens\scr_silent_hours.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1981,7 +1991,7 @@
       <filter>
         <targetInfos/>
       </filter>
-      <package name="CMSIS" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="ARM" version="4.2.0">
+      <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="4.5.0">
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
@@ -1991,7 +2001,7 @@
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
-      <package name="nRF_DeviceFamilyPack" schemaVersion="1.0" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="7.2.1">
+      <package license="License\license.txt" name="nRF_DeviceFamilyPack" schemaVersion="1.3" url="http://developer.nordicsemi.com/nRF5_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.5.0">
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
@@ -2008,7 +2018,7 @@
       </package>
       <package name="nRF_Libraries" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries" vendor="NordicSemiconductor" version="3.0.1">
         <targetInfos>
-          <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
+          <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
       </package>
       <package name="nRF_SoftDevice_Common" schemaVersion="1.2" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_SoftDevice_Common" vendor="NordicSemiconductor" version="1.1.4">
@@ -2031,8 +2041,8 @@
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
       </component>
-      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.3.2" condition="nRF51 Series CMSIS Device">
-        <package license="License\license.txt" name="nRF_DeviceFamilyPack" schemaVersion="1.3" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.3.2"/>
+      <component Cclass="Device" Cgroup="Startup" Cvendor="NordicSemiconductor" Cversion="8.5.0" condition="nRF51 Series CMSIS Device">
+        <package license="License\license.txt" name="nRF_DeviceFamilyPack" schemaVersion="1.3" url="http://developer.nordicsemi.com/nRF5_SDK/pieces/nRF_DeviceFamilyPack/" vendor="NordicSemiconductor" version="8.5.0"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
@@ -2185,12 +2195,6 @@
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
         <targetInfos>
           <targetInfo name="nrf51822_xxaa_s120" versionMatchMode="fixed"/>
-        </targetInfos>
-      </component>
-      <component Cclass="nRF_Libraries" Cgroup="app_button" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_button">
-        <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
-        <targetInfos>
-          <targetInfo name="nrf51822_xxaa_s120"/>
         </targetInfos>
       </component>
       <component Cclass="nRF_Libraries" Cgroup="app_error" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_error">
@@ -2444,20 +2448,16 @@
         <targetInfos/>
       </file>
       <file attr="config" category="source" name="button\app_button.c" version="3.0.1">
-        <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\app_button.c</instance>
+        <instance index="0" removed="1">RTE\nRF_Libraries\nRF51822_xxAA\app_button.c</instance>
         <component Cclass="nRF_Libraries" Cgroup="app_button" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_button"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
-        <targetInfos>
-          <targetInfo name="nrf51822_xxaa_s120"/>
-        </targetInfos>
+        <targetInfos/>
       </file>
       <file attr="config" category="header" name="button\app_button.h" version="3.0.1">
-        <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\app_button.h</instance>
+        <instance index="0" removed="1">RTE\nRF_Libraries\nRF51822_xxAA\app_button.h</instance>
         <component Cclass="nRF_Libraries" Cgroup="app_button" Cvendor="NordicSemiconductor" Cversion="3.0.1" condition="app_button"/>
         <package name="nRF_Libraries" schemaVersion="1.2" supportContact="http://www.nordicsemi.com/About-us/Contact-us" url="http://developer.nordicsemi.com/nRF51_SDK/pieces/nRF_Libraries/" vendor="NordicSemiconductor" version="3.0.1"/>
-        <targetInfos>
-          <targetInfo name="nrf51822_xxaa_s120"/>
-        </targetInfos>
+        <targetInfos/>
       </file>
       <file attr="config" category="source" name="util\app_error.c" version="3.0.1">
         <instance index="0">RTE\nRF_Libraries\nRF51822_xxAA\app_error.c</instance>

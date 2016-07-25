@@ -12,4 +12,12 @@ void accel_read_register(uint8_t reg, uint8_t* value);
 
 void accel_read_multi_register(uint8_t reg, uint8_t* value, uint8_t legth);
 
+uint16_t get_steps(void);
+
+void reset_steps(void);
+
+void accel_interrupts_reset(void);
+
+void sleep_set_batch_size(uint8_t);
+
 #endif /* ACCEL_H */
