@@ -1,7 +1,6 @@
 #include "command.h"
 #include "nordic_common.h"
 #include "ble/ble_peripheral.h"
-#include "spiffs/spiffs.h"
 #include "scr_mngr.h"
 #include "notifications.h"
 #include "screens/scr_watchset.h"
@@ -9,19 +8,21 @@
 #include "nrf_soc.h"
 #include "config.h"
 #include "fs.h"
+#include "filemanager.h"
 
 #define COMMAND_SET_DEFAULT_GLOBAL_ACTIONS 0x10
 #define COMMAND_SET_DEFAULT_WATCH_FACE_ACTIONS 0x11
 #define COMMAND_OPEN_FILE_STREAM 0x20
 #define COMMAND_APPEND_DATA_TO_FILE_STREAM 0x21
 #define COMMAND_CLOSE_FILE_STREAM 0x22
+#define COMMAND_LIST_FILES 0x23
 #define COMMAND_SET_EXT_PROPERTY_VALUE 0x30
 
 static uint32_t data_ptr = 0;
 static uint8_t data_buf[256];
 static bool handle_data = false;
 
-static spiffs_file data_upload_fd;
+
 
 static uint32_t notification_upload_ptr;
 static uint16_t notification_upload_size;
@@ -92,24 +93,19 @@ void command_process(void) {
 					}
 				
 					void* name_ptr = data_ptr > 1 ? &data_buf[4] : "watchset";
-					data_upload_fd = SPIFFS_open(&fs, name_ptr, SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
-					if (data_upload_fd < 0) {
-							// file open error
-							respCode = (SPIFFS_errno(&fs)*-1)-9999;
-					}
+					respCode =  create_file(name_ptr);
+					
 			}
 				break;
 			case COMMAND_APPEND_DATA_TO_FILE_STREAM:
-					if (SPIFFS_write(&fs, data_upload_fd, data_buf+1, data_ptr-1) < 0 ) {
-							//file write error
-							respCode = (SPIFFS_errno(&fs)*-1)-9999;
-					}
+					respCode = append_file(data_buf+1,data_ptr-1);
 					break;
 			case COMMAND_CLOSE_FILE_STREAM:
-					if (SPIFFS_close(&fs, data_upload_fd) < 0) {
-							// file close error
-							respCode = (SPIFFS_errno(&fs)*-1)-9999;
-					}
+					respCode = close_file();
+					break;
+			case COMMAND_LIST_FILES:
+					//get file list
+					//send via bluetooth
 					break;
 			case COMMAND_SET_DEFAULT_GLOBAL_ACTIONS:
 					config_set_default_global_actions((default_action*)&data_buf[1]);
